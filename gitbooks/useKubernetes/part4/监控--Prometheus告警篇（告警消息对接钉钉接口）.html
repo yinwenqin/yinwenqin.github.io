@@ -1,0 +1,1613 @@
+
+<!DOCTYPE HTML>
+<html lang="zh-hans" >
+    <head>
+        <meta charset="UTF-8">
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <title>4.3. Prometheus告警篇 · Kubernetes生态圈使用</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="description" content="">
+        <meta name="generator" content="GitBook 3.2.3">
+        <meta name="author" content="ywq">
+        
+        
+    
+    <link rel="stylesheet" href="../gitbook/style.css">
+
+    
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-anchors/plugin.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-expandable-chapters/expandable-chapters.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-splitter/splitter.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-back-to-top-button/plugin.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-highlight/website.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-search/search.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-fontsettings/website.css">
+                
+            
+        
+
+    
+
+    
+        
+    
+
+        
+    
+    
+    <meta name="HandheldFriendly" content="true"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="../gitbook/images/apple-touch-icon-precomposed-152.png">
+    <link rel="shortcut icon" href="../gitbook/images/favicon.ico" type="image/x-icon">
+
+    
+    <link rel="next" href="../part5/" />
+    
+    
+    <link rel="prev" href="监控--Prometheus扩展篇（mysqld-exporter、服务发现、监控项、联邦、relabel）.html" />
+    
+
+    </head>
+    <body>
+        
+<div class="book">
+    <div class="book-summary">
+        
+            
+<div id="book-search-input" role="search">
+    <input type="text" placeholder="输入并搜索" />
+</div>
+
+            
+                <nav role="navigation">
+                
+
+
+<ul class="summary">
+    
+    
+
+    
+
+    
+        
+        <li class="header">Part 1-写在前面</li>
+        
+        
+    
+        <li class="chapter " data-level="1.1" data-path="../">
+            
+                <a href="../">
+            
+                    
+                    1. 总览篇
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Part 2-集群相关</li>
+        
+        
+    
+        <li class="chapter " data-level="2.1" data-path="../part2/">
+            
+                <a href="../part2/">
+            
+                    
+                    2. 集群相关
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="2.1.1" data-path="../part2/v1.9.0高可用集群本地离线部署记录.html">
+            
+                <a href="../part2/v1.9.0高可用集群本地离线部署记录.html">
+            
+                    
+                    2.1. v1.9.0高可用集群部署
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.1.2" data-path="../part2/v1.14多master集群部署.html">
+            
+                <a href="../part2/v1.14多master集群部署.html">
+            
+                    
+                    2.2. v1.14.3高可用集群部署
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.1.3" data-path="../part2/Kubernetes中的Pause容器.html">
+            
+                <a href="../part2/Kubernetes中的Pause容器.html">
+            
+                    
+                    2.3. Kubernetes中的Pause容器
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.1.4" data-path="../part2/RBAC权限控制.html">
+            
+                <a href="../part2/RBAC权限控制.html">
+            
+                    
+                    2.4. RBAC权限控制
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.1.5" data-path="../part2/docker-k8s常用命令速查及rest-api.html">
+            
+                <a href="../part2/docker-k8s常用命令速查及rest-api.html">
+            
+                    
+                    2.5. 常用命令与rest-api速查
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.1.6" data-path="../part2/Kubernetes各组件参数配置优化建议.html">
+            
+                <a href="../part2/Kubernetes各组件参数配置优化建议.html">
+            
+                    
+                    2.6. Kubernetes各组件参数配置优化建议
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Part 3-网络与服务</li>
+        
+        
+    
+        <li class="chapter " data-level="3.1" data-path="../part3/">
+            
+                <a href="../part3/">
+            
+                    
+                    3. 网络与服务
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="3.1.1" data-path="../part3/Traefik提供ingress-http服务.html">
+            
+                <a href="../part3/Traefik提供ingress-http服务.html">
+            
+                    
+                    3.1. Traefik 提供ingress http服务
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.1.2" data-path="../part3/kube-router提供BGP全直通网络.html">
+            
+                <a href="../part3/kube-router提供BGP全直通网络.html">
+            
+                    
+                    3.2. Kube-router BGP全直通网络
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.1.3" data-path="../part3/kube-router工作模式抓包分析.html">
+            
+                <a href="../part3/kube-router工作模式抓包分析.html">
+            
+                    
+                    3.3. Kube-router ipvs Service模式抓包分析
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.1.4" data-path="../part3/VXLAN和Flannel.html">
+            
+                <a href="../part3/VXLAN和Flannel.html">
+            
+                    
+                    3.4. VXLAN和Flannel
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Part 4-监控</li>
+        
+        
+    
+        <li class="chapter " data-level="4.1" data-path="./">
+            
+                <a href="./">
+            
+                    
+                    4. Prometheus监控
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="4.1.1" data-path="监控--Prometheus部署篇.html">
+            
+                <a href="监控--Prometheus部署篇.html">
+            
+                    
+                    4.1. Prometheus部署篇
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="4.1.2" data-path="监控--Prometheus扩展篇（mysqld-exporter、服务发现、监控项、联邦、relabel）.html">
+            
+                <a href="监控--Prometheus扩展篇（mysqld-exporter、服务发现、监控项、联邦、relabel）.html">
+            
+                    
+                    4.2. Prometheus扩展篇
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter active" data-level="4.1.3" data-path="监控--Prometheus告警篇（告警消息对接钉钉接口）.html">
+            
+                <a href="监控--Prometheus告警篇（告警消息对接钉钉接口）.html">
+            
+                    
+                    4.3. Prometheus告警篇
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Part 5-分布式存储Ceph</li>
+        
+        
+    
+        <li class="chapter " data-level="5.1" data-path="../part5/">
+            
+                <a href="../part5/">
+            
+                    
+                    5. Ceph存储
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="5.1.1" data-path="../part5/Ceph集群生产环境安装部署.html">
+            
+                <a href="../part5/Ceph集群生产环境安装部署.html">
+            
+                    
+                    5.1. Ceph部署篇
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.1.2" data-path="../part5/cephfs调优-性能测试-监控-常用命令.html">
+            
+                <a href="../part5/cephfs调优-性能测试-监控-常用命令.html">
+            
+                    
+                    5.2. Ceph性能调优
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.1.3" data-path="../part5/分布式存储Cephfs使用.html">
+            
+                <a href="../part5/分布式存储Cephfs使用.html">
+            
+                    
+                    5.3. Cephfs在k8s中使用
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.1.4" data-path="../part5/分布式存储Ceph-RBD使用.html">
+            
+                <a href="../part5/分布式存储Ceph-RBD使用.html">
+            
+                    
+                    5.4. Ceph RBD在k8s中使用
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.1.5" data-path="../part5/Cephfs-CephRBD在k8s中的适用场景讨论及数据库性能压测.html">
+            
+                <a href="../part5/Cephfs-CephRBD在k8s中的适用场景讨论及数据库性能压测.html">
+            
+                    
+                    5.5. Ceph在k8s中的综合场景应用及数据库OLTP性能压测
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Part 6-微服务框架Istio</li>
+        
+        
+    
+        <li class="chapter " data-level="6.1" data-path="../part6/">
+            
+                <a href="../part6/">
+            
+                    
+                    6. Istio微服务框架
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="6.1.1" data-path="../part6/微服务框架istio安装测试.html">
+            
+                <a href="../part6/微服务框架istio安装测试.html">
+            
+                    
+                    6.1. istio安装测试
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="6.1.2" data-path="../part6/微服务框架istio流量策略控制.html">
+            
+                <a href="../part6/微服务框架istio流量策略控制.html">
+            
+                    
+                    6.2. istio流量策略控制
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="6.1.3" data-path="../part6/微服务框架istio服务可视化与监控.html">
+            
+                <a href="../part6/微服务框架istio服务可视化与监控.html">
+            
+                    
+                    6.3. istio服务可视化与监控
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="6.1.4" data-path="../part6/微服务--istio1.0抢鲜测试.html">
+            
+                <a href="../part6/微服务--istio1.0抢鲜测试.html">
+            
+                    
+                    6.4. istio v1.0 抢鲜测试
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Part 7-周边生态</li>
+        
+        
+    
+        <li class="chapter " data-level="7.1" data-path="../part7/">
+            
+                <a href="../part7/">
+            
+                    
+                    7. 周边生态
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="7.1.1" data-path="../part7/Docker-registry仓库历史镜像批量清理.html">
+            
+                <a href="../part7/Docker-registry仓库历史镜像批量清理.html">
+            
+                    
+                    7.1. Docker-registry历史镜像批量清理.md
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="7.1.2" data-path="../part7/企业级docker仓库Harbor在kubernetes上搭建使用.html">
+            
+                <a href="../part7/企业级docker仓库Harbor在kubernetes上搭建使用.html">
+            
+                    
+                    7.2. Harbor部署使用
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Part 8-问题记录</li>
+        
+        
+    
+        <li class="chapter " data-level="8.1" data-path="../part8/">
+            
+                <a href="../part8/">
+            
+                    
+                    8. 问题记录
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="8.1.1" data-path="../part8/Kubernetes部署问题记录.html">
+            
+                <a href="../part8/Kubernetes部署问题记录.html">
+            
+                    
+                    8.1. 集群部署问题记录
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="8.1.2" data-path="../part8/Service-ipvs模式间断性TCP连接故障排查.html">
+            
+                <a href="../part8/Service-ipvs模式间断性TCP连接故障排查.html">
+            
+                    
+                    8.2. Service ipvs模式间断性TCP连接故障排查
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="8.1.3" data-path="../part8/kubeadm证书-etcd证书过期紧急处理.html">
+            
+                <a href="../part8/kubeadm证书-etcd证书过期紧急处理.html">
+            
+                    
+                    8.3. kubeadm证书-etcd证书过期紧急处理
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="8.1.4" data-path="../part8/Kubernetes-Pod无法终结问题排查.html">
+            
+                <a href="../part8/Kubernetes-Pod无法终结问题排查.html">
+            
+                    
+                    8.4. Kubernetes-Pod无法终结问题排查
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+
+    <li class="divider"></li>
+
+    <li>
+        <a href="https://www.gitbook.com" target="blank" class="gitbook-link">
+            本书使用 GitBook 发布
+        </a>
+    </li>
+</ul>
+
+
+                </nav>
+            
+        
+    </div>
+
+    <div class="book-body">
+        
+            <div class="body-inner">
+                
+                    
+
+<div class="book-header" role="navigation">
+    
+
+    <!-- Title -->
+    <h1>
+        <i class="fa fa-circle-o-notch fa-spin"></i>
+        <a href=".." >4.3. Prometheus告警篇</a>
+    </h1>
+</div>
+
+
+
+
+                    <div class="page-wrapper" tabindex="-1" role="main">
+                        <div class="page-inner">
+                            
+<div id="book-search-results">
+    <div class="search-noresults">
+    
+                                <section class="normal markdown-section">
+                                
+                                <h2 id=""><a name="" class="plugin-anchor" href="#"><i class="fa fa-link" aria-hidden="true"></i></a> </h2>
+<h2 id="&#x524D;&#x8A00;"><a name="&#x524D;&#x8A00;" class="plugin-anchor" href="#&#x524D;&#x8A00;"><i class="fa fa-link" aria-hidden="true"></i></a>&#x524D;&#x8A00;</h2>
+<p>&#x627F;&#x63A5;&#x4E0A;&#x7AE0;<a href="https://blog.csdn.net/ywq935/article/details/80818390" target="_blank">k8s(&#x4E03;)&#x3001;Prometheus&#x90E8;&#x7F72;&#x7BC7;</a>&#xFF0C;&#x5728;&#x4E0A;&#x7AE0;&#x7684;&#x57FA;&#x7840;&#x4E0A;&#xFF0C;&#x672C;&#x7AE0;&#x4ECB;&#x7ECD;Prometheus&#x544A;&#x8B66;&#x76F8;&#x5173;&#x914D;&#x7F6E;&#x3002;</p>
+<h2 id="&#x4E00;&#x3001;querying-expr--promql"><a name="&#x4E00;&#x3001;querying-expr--promql" class="plugin-anchor" href="#&#x4E00;&#x3001;querying-expr--promql"><i class="fa fa-link" aria-hidden="true"></i></a>&#x4E00;&#x3001;Querying expr &amp; PromQL</h2>
+<p>&#x5728;&#x4E86;&#x89E3;&#x544A;&#x8B66;&#x89C4;&#x5219;&#x4E4B;&#x524D;&#xFF0C;&#x9996;&#x5148;&#x5F97;&#x4E86;&#x89E3;Prometheus&#x7684;&#x6570;&#x636E;&#x67E5;&#x8BE2;&#x8868;&#x8FBE;&#x5F0F;&#xFF0C;&#x6765;&#x83B7;&#x53D6;metric&#x6570;&#x636E;&#x662F;&#x5426;&#x5230;&#x8FBE;&#x544A;&#x8B66;&#x9608;(ps:&#x8FD9;&#x4E2A;&#x5B57;&#x513F;&#x5FF5;yu&#xFF0C;&#x7B2C;&#x56DB;&#x58F0;&#xFF0C;&#x4E0D;&#x5FF5;&#x7B2C;&#x4E8C;&#x58F0;&#x7684;fa)&#x503C;&#x3002;</p>
+<p><strong>Overview</strong>
+Prometheus&#x63D0;&#x4F9B;&#x4E86;&#x4E00;&#x79CD;&#x529F;&#x80FD;&#x6027;&#x8868;&#x8FBE;&#x5F0F;&#x8BED;&#x8A00;&#xFF0C;&#x80FD;&#x591F;&#x8BA9;&#x7528;&#x6237;&#x5B9E;&#x65F6;&#x7684;&#x9009;&#x62E9;&#x548C;&#x805A;&#x5408;&#x65F6;&#x95F4;&#x5E8F;&#x5217;&#x7684;&#x6570;&#x636E;&#x3002;&#x8868;&#x8FBE;&#x5F0F;&#x8FD4;&#x56DE;&#x7684;&#x7ED3;&#x679C;&#x53EF;&#x4EE5;&#x88AB;&#x663E;&#x793A;&#x4E3A;&#x66F2;&#x7EBF;&#x56FE;&#xFF0C;&#x4E5F;&#x53EF;&#x4EE5;&#x5728;prometheus&#x6D4F;&#x89C8;&#x5668;&#x4E2D;&#x663E;&#x793A;&#x4E3A;&#x8868;&#x683C;&#xFF0C;&#x6216;&#x8005;&#x901A;&#x8FC7;HTTP API&#x7ECF;&#x7531;&#x5916;&#x90E8;&#x7CFB;&#x7EDF;&#x5904;&#x7406;&#x3002;</p>
+<p><strong>&#x8868;&#x8FBE;&#x5F0F;&#x8BED;&#x8A00;&#x7C7B;&#x578B;</strong>
+Prometheus&#x8868;&#x8FBE;&#x5F0F;&#x6216;&#x5B50;&#x8868;&#x8FBE;&#x5F0F;&#x53EF;&#x4EE5;&#x8BC4;&#x4F30;&#x4E3A;&#x4E00;&#x4E0B;&#x56DB;&#x79CD;&#x7C7B;&#x578B;&#x4E4B;&#x4E00;&#xFF1A;
+&#x5373;&#x65F6;&#x5411;&#x91CF;&#xFF08;Instant vector&#xFF09; - &#x5305;&#x542B;&#x6BCF;&#x4E2A;&#x65F6;&#x95F4;&#x5E8F;&#x5217;&#x5355;&#x4E2A;&#x6837;&#x54C1;&#x7684;&#x4E00;&#x7EC4;&#x65F6;&#x95F4;&#x5E8F;&#x5217;&#xFF0C;&#x5171;&#x4EAB;&#x76F8;&#x540C;&#x7684;&#x65F6;&#x95F4;&#x6233;
+&#x8303;&#x56F4;&#x5411;&#x91CF;&#xFF08;Range vector&#xFF09; - &#x5305;&#x542B;&#x4E00;&#x4E2A;&#x8303;&#x56F4;&#x5185;&#x6570;&#x636E;&#x70B9;&#x7684;&#x4E00;&#x7EC4;&#x65F6;&#x95F4;&#x5E8F;&#x5217;
+&#x6807;&#x91CF;&#xFF08;Scalar&#xFF09; - &#x4E00;&#x4E2A;&#x7B80;&#x5355;&#x7684;&#x6570;&#x5B57;&#x6D6E;&#x70B9;&#x503C;
+&#x5B57;&#x7B26;&#x4E32;&#xFF08;String&#xFF09; - &#x4E00;&#x4E2A;&#x7B80;&#x5355;&#x7684;&#x5B57;&#x7B26;&#x4E32;&#x503C;&#xFF1B;&#x5F53;&#x524D;&#x672A;&#x4F7F;&#x7528;
+&#x6839;&#x636E;&#x4F7F;&#x7528;&#x60C5;&#x51B5;&#xFF08;&#x4F8B;&#x5982;&#x753B;&#x56FE;&#x6216;&#x8005;&#x663E;&#x793A;&#x8868;&#x8FBE;&#x5F0F;&#x7684;&#x8F93;&#x51FA;&#xFF09;&#xFF0C;&#x53EA;&#x6709;&#x67D0;&#x4E9B;&#x7C7B;&#x578B;&#x662F;&#x5408;&#x6CD5;&#x7684;&#xFF0C;&#x4F8B;&#x5982;&#xFF0C;&#x5373;&#x65F6;&#x5411;&#x91CF;&#x8868;&#x8FBE;&#x5F0F;&#x662F;&#x53EF;&#x4EE5;&#x753B;&#x56FE;&#x7684;&#x552F;&#x4E00;&#x7C7B;&#x578B;&#x3002;</p>
+<p><strong>&#x65F6;&#x95F4;&#x5E8F;&#x5217;&#x9009;&#x62E9;&#x5668;</strong></p>
+<p><strong>&#x5373;&#x65F6;&#x5411;&#x91CF;&#x9009;&#x62E9;</strong>
+&#x5373;&#x65F6;&#x5411;&#x91CF;&#x9009;&#x62E9;&#x5668;&#x5141;&#x8BB8;&#x9009;&#x62E9;&#x4E00;&#x7EC4;&#x65F6;&#x95F4;&#x5E8F;&#x5217;&#xFF0C;&#x6216;&#x8005;&#x67D0;&#x4E2A;&#x7ED9;&#x5B9A;&#x7684;&#x65F6;&#x95F4;&#x6233;&#x7684;&#x6837;&#x672C;&#x6570;&#x636E;&#x3002;&#x4E0B;&#x9762;&#x8FD9;&#x4E2A;&#x4F8B;&#x5B50;&#x9009;&#x62E9;&#x4E86;&#x5177;&#x6709;&#x65F6;&#x95F4;&#x5E8F;&#x5217;&#x7684;http_requests_total metric&#x5BF9;&#x8C61;&#xFF1A;</p>
+<pre><code>http_requests_total
+</code></pre><p>&#x4F60;&#x53EF;&#x4EE5;&#x901A;&#x8FC7;&#x9644;&#x52A0;&#x4E00;&#x7EC4;&#x6807;&#x7B7E;&#xFF0C;&#x5E76;&#x7528;{}&#x62EC;&#x8D77;&#x6765;&#xFF0C;&#x6765;&#x8FDB;&#x4E00;&#x6B65;&#x7B5B;&#x9009;&#x8FD9;&#x4E9B;&#x65F6;&#x95F4;&#x5E8F;&#x5217;&#x3002;&#x4E0B;&#x9762;&#x8FD9;&#x4E2A;&#x4F8B;&#x5B50;&#x53EA;&#x9009;&#x62E9;&#x6709;http_requests_total&#x540D;&#x79F0;&#x7684;&#x3001;&#x6709;prometheus&#x5DE5;&#x4F5C;&#x6807;&#x7B7E;&#x7684;&#x3001;&#x6709;canary&#x7EC4;&#x6807;&#x7B7E;&#x7684;&#x65F6;&#x95F4;&#x5E8F;&#x5217;&#xFF1A;</p>
+<pre><code>http_requests_total{job=&quot;prometheus&quot;,group=&quot;canary&quot;}
+</code></pre><p>&#x53E6;&#x5916;&#xFF0C;&#x4E5F;&#x53EF;&#x4EE5;&#x4E5F;&#x53EF;&#x4EE5;&#x5C06;&#x6807;&#x7B7E;&#x503C;&#x53CD;&#x5411;&#x5339;&#x914D;&#xFF0C;&#x6216;&#x8005;&#x5BF9;&#x6B63;&#x5219;&#x8868;&#x8FBE;&#x5F0F;&#x5339;&#x914D;&#x6807;&#x7B7E;&#x503C;&#x3002;&#x4E0B;&#x9762;&#x5217;&#x4E3E;&#x5339;&#x914D;&#x64CD;&#x4F5C;&#x7B26;&#xFF1A;</p>
+<p>=&#xFF1A;&#x9009;&#x62E9;&#x6B63;&#x597D;&#x76F8;&#x7B49;&#x7684;&#x5B57;&#x7B26;&#x4E32;&#x6807;&#x7B7E;
+!=&#xFF1A;&#x9009;&#x62E9;&#x4E0D;&#x76F8;&#x7B49;&#x7684;&#x5B57;&#x7B26;&#x4E32;&#x6807;&#x7B7E;
+=~&#xFF1A;&#x9009;&#x62E9;&#x5339;&#x914D;&#x6B63;&#x5219;&#x8868;&#x8FBE;&#x5F0F;&#x7684;&#x6807;&#x7B7E;&#xFF08;&#x6216;&#x5B50;&#x6807;&#x7B7E;&#xFF09;
+!=&#xFF1A;&#x9009;&#x62E9;&#x4E0D;&#x5339;&#x914D;&#x6B63;&#x5219;&#x8868;&#x8FBE;&#x5F0F;&#x7684;&#x6807;&#x7B7E;&#xFF08;&#x6216;&#x5B50;&#x6807;&#x7B7E;&#xFF09;
+&#x4F8B;&#x5982;&#xFF0C;&#x9009;&#x62E9;staging&#x3001;testing&#x3001;development&#x73AF;&#x5883;&#x4E0B;&#x7684;&#xFF0C;GET&#x4E4B;&#x5916;&#x7684;HTTP&#x65B9;&#x6CD5;&#x7684;http_requests_total&#x7684;&#x65F6;&#x95F4;&#x5E8F;&#x5217;&#xFF1A;</p>
+<pre><code>http_requests_total{environment=~&quot;staging|testing|development&quot;,method!=&quot;GET&quot;}
+</code></pre><p><strong>&#x8303;&#x56F4;&#x5411;&#x91CF;&#x9009;&#x62E9;</strong>
+&#x8303;&#x56F4;&#x5411;&#x91CF;&#x8868;&#x8FBE;&#x5F0F;&#x6B63;&#x5982;&#x5373;&#x65F6;&#x5411;&#x91CF;&#x8868;&#x8FBE;&#x5F0F;&#x4E00;&#x6837;&#x8FD0;&#x884C;&#xFF0C;&#x4F46;&#x662F;&#x524D;&#x8005;&#x8FD4;&#x56DE;&#x4ECE;&#x5F53;&#x524D;&#x65F6;&#x523B;&#x5F00;&#x59CB;&#x7684;&#x4E00;&#x5B9A;&#x65F6;&#x95F4;&#x8303;&#x56F4;&#x7684;&#x65F6;&#x95F4;&#x5E8F;&#x5217;&#x96C6;&#x5408;&#x56DE;&#x6765;&#x3002;&#x8BED;&#x6CD5;&#x662F;&#xFF0C;&#x5728;&#x4E00;&#x4E2A;&#x5411;&#x91CF;&#x8868;&#x8FBE;&#x5F0F;&#x4E4B;&#x540E;&#x6DFB;&#x52A0;[]&#x6765;&#x8868;&#x793A;&#x65F6;&#x95F4;&#x8303;&#x56F4;&#xFF0C;&#x6301;&#x7EED;&#x65F6;&#x95F4;&#x7528;&#x6570;&#x5B57;&#x8868;&#x793A;&#xFF0C;&#x540E;&#x63A5;&#x4E0B;&#x9762;&#x5355;&#x5143;&#x4E4B;&#x4E00;&#xFF1A;</p>
+<p>s&#xFF1A;seconds
+m&#xFF1A;minutes
+h&#xFF1A;hours
+d&#xFF1A;days
+w&#xFF1A;weeks
+y&#xFF1A;years
+&#x5728;&#x4E0B;&#x9762;&#x8FD9;&#x4E2A;&#x4F8B;&#x5B50;&#x4E2D;&#xFF0C;&#x6211;&#x4EEC;&#x9009;&#x62E9;&#x6700;&#x540E;5&#x5206;&#x949F;&#x7684;&#x8BB0;&#x5F55;&#xFF0C;metric&#x540D;&#x79F0;&#x4E3A;http_requests_total&#x3001;&#x4F5C;&#x4E1A;&#x6807;&#x7B7E;&#x4E3A;prometheus&#x7684;&#x65F6;&#x95F4;&#x5E8F;&#x5217;&#x7684;&#x6240;&#x6709;&#x503C;&#xFF1A;</p>
+<pre><code>http_requests_total{job=&quot;prometheus&quot;}[5m]
+</code></pre><p><strong>&#x64CD;&#x4F5C;&#x7B26;</strong>
+Prometheus&#x652F;&#x6301;&#x591A;&#x79CD;&#x4E8C;&#x5143;&#x548C;&#x805A;&#x5408;&#x7684;&#x64CD;&#x4F5C;&#x7B26;&#x3002;</p>
+<pre><code>+ (addition)
+- (subtraction)
+* (multiplication)
+/ (division)
+% (modulo)
+^ (power/exponentiation)
+
+== (equal)
+!= (not-equal)
+&gt; (greater-than)
+&lt; (less-than)
+&gt;= (greater-or-equal)
+&lt;= (less-or-equal)
+
+and (intersection)
+or (union)
+unless (complement)
+</code></pre><p><strong>&#x51FD;&#x6570;</strong>
+Prometheus&#x652F;&#x6301;&#x591A;&#x79CD;&#x51FD;&#x6570;&#xFF0C;&#x6765;&#x5BF9;&#x6570;&#x636E;&#x8FDB;&#x884C;&#x64CD;&#x4F5C;&#xFF0C;&#x53C2;&#x8003;&#x5B98;&#x7F51;&#xFF1A;<a href="https://prometheus.io/docs/prometheus/latest/querying/functions/" target="_blank">https://prometheus.io/docs/prometheus/latest/querying/functions/</a></p>
+<p>&#x4E86;&#x89E3;&#x4E86;metric&#x67E5;&#x8BE2;&#x8868;&#x8FBE;&#x5F0F;&#x7684;&#x57FA;&#x7840;&#x4E0A;&#xFF0C;&#x4E0B;&#x9762;&#x5F00;&#x59CB;&#x90E8;&#x7F72;&#x544A;&#x8B66;&#x5668;&#x7EC4;&#x4EF6;&#x3002;</p>
+<h2 id="&#x4E8C;&#x3001;&#x544A;&#x8B66;&#x5A92;&#x4ECB;"><a name="&#x4E8C;&#x3001;&#x544A;&#x8B66;&#x5A92;&#x4ECB;" class="plugin-anchor" href="#&#x4E8C;&#x3001;&#x544A;&#x8B66;&#x5A92;&#x4ECB;"><i class="fa fa-link" aria-hidden="true"></i></a>&#x4E8C;&#x3001;&#x544A;&#x8B66;&#x5A92;&#x4ECB;</h2>
+<p>prometheus&#x652F;&#x6301;&#x591A;&#x79CD;&#x7C7B;&#x578B;&#x7684;&#x544A;&#x8B66;&#x5A92;&#x4ECB;&#xFF0C;&#x56FD;&#x5185;&#x53EF;&#x4EE5;&#x7528;&#x7684;&#x4F8B;&#x5982;mail/webchat&#xFF0C;&#x4E5F;&#x53EF;&#x4EE5;&#x4F7F;&#x7528;webhook&#x81EA;&#x5B9A;&#x4E49;&#x63A5;&#x53E3;&#xFF0C;&#x516C;&#x53F8;&#x4E00;&#x822C;&#x4F7F;&#x7528;&#x7684;&#x9489;&#x9489;&#xFF0C;prometheus&#x6CA1;&#x6709;&#x5B9A;&#x5236;&#x7684;&#x9489;&#x9489;&#x63A5;&#x53E3;&#xFF0C;&#x56E0;&#x6B64;&#x5728;&#x8FD9;&#x91CC;&#x4F7F;&#x7528;&#x81EA;&#x5B9A;&#x4E49;&#x7684;&#x63A5;&#x53E3;&#x6765;&#x4E2D;&#x8F6C;&#xFF0C;&#x5C06;&#x6D88;&#x606F;&#x53D1;&#x9001;&#x81F3;&#x9489;&#x9489;&#x63A5;&#x53E3;&#xFF0C;&#x63A5;&#x6536;&#x9489;&#x9489;&#x544A;&#x8B66;&#x6D88;&#x606F;&#x3002;
+&#x9996;&#x5148;&#x770B;&#x4E0B;&#x544A;&#x8B66;&#x914D;&#x7F6E;&#xFF0C;&#x5404;&#x9879;&#x53C2;&#x6570;&#x5DF2;&#x6DFB;&#x52A0;&#x4E2D;&#x6587;&#x6CE8;&#x91CA;&#xFF0C;&#x76F4;&#x63A5;&#x770B;&#x6CE8;&#x91CA;&#xFF1A;
+alertmanager-config.yaml:</p>
+<pre><code>kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: alertmanager
+  namespace: kube-system
+data:
+  config.yml: |-
+    global:
+      resolve_timeout: 5m
+    templates:
+    - &apos;/etc/alertmanager-templates/*.tmpl&apos;
+    route:
+      group_by: [&apos;alertname&apos;, &apos;cluster&apos;, &apos;service&apos;]
+      #&#x6839;&#x636E;[&apos;alertname&apos;, &apos;cluster&apos;, &apos;service&apos;]&#xFF0C;&#x5728;&#x521D;&#x59CB;&#x544A;&#x8B66;&#x53D1;&#x9001;&#x524D;&#xFF0C;&#x7B49;&#x5F85;30&#x79D2;&#xFF0C;&#x5C06;&#x8FD9;&#x6BB5;&#x65F6;&#x95F4;&#x7684;&#x591A;&#x4E2A;&#x544A;&#x8B66;&#x8FDB;&#x884C;&#x5206;&#x7EC4;
+      # When a new group of alerts is created by an incoming alert, wait at
+      # least &apos;group_wait&apos; to send the initial notification.
+      # This way ensures that you get multiple alerts for the same group that start
+      # firing shortly after another are batched together on the first
+      # notification.
+
+      group_wait: 30s
+
+      # When the first notification was sent, wait &apos;group_interval&apos; to send a batch
+      # of new alerts that started firing for that group.
+      #&#x6309;&#x4E0A;&#x9762;&#x5206;&#x7EC4;&#x7684;&#x6D88;&#x606F;&#xFF0C;&#x540C;&#x4E00;&#x7EC4;&#x6D88;&#x606F;&#xFF0C;&#x95F4;&#x9694;5m&#x624D;&#x53D1;&#x9001;&#x4E0B;&#x4E00;&#x4E2A;&#x3002;&#x8FD9;&#x4E2A;&#x662F;&#x4E3A;&#x4E86;&#x5C3D;&#x91CF;&#x907F;&#x514D;&#x7531;&#x4E00;&#x4E2A;&#x95EE;&#x9898;&#x5E26;&#x6765;&#x7684;&#x6279;&#x91CF;&#x544A;&#x8B66;&#x91CD;&#x590D;&#x53D1;&#x9001;&#x3002;
+      group_interval: 5m
+
+      # If an alert has successfully been sent, wait &apos;repeat_interval&apos; to
+      # resend them.
+      #&#x5B8C;&#x5168;&#x76F8;&#x540C;&#x7684;&#x4E00;&#x4E2A;&#x544A;&#x8B66;&#x6D88;&#x606F;&#xFF0C;&#x95F4;&#x9694;repeat_interval&#x65F6;&#x95F4;&#x624D;&#x4E0B;&#x4E00;&#x6B21;&#x53D1;&#x9001;&#xFF0C;&#x8FD9;&#x91CC;&#x4E3A;&#x4E86;&#x6D4B;&#x8BD5;&#x6548;&#x679C;&#x8BBE;&#x7F6E;1m&#xFF0C;&#x4E00;&#x822C;&#x8FD9;&#x4E2A;&#x503C;&#x8BBE;&#x7F6E;&#x65F6;&#x95F4;&#x90FD;&#x8F83;&#x957F;
+      #repeat_interval: 1m
+      repeat_interval: 1m
+
+      # A default receiver
+
+      # If an alert isn&apos;t caught by a route, send it to default.
+      #&#x9ED8;&#x8BA4;&#x63A5;&#x6536;&#x5668;&#x4E3A;webhook_alert 
+      receiver: webhook_alert 
+
+      # All the above attributes are inherited by all child routes and can
+      # overwritten on each.
+
+      # The child route trees.
+      routes:
+      #&#x7ED9;webhook_alert&#x63A5;&#x6536;&#x5668;&#x5B9A;&#x4E49;&#x5339;&#x914D;&#x6807;&#x7B7E;&#x89C4;&#x5219;
+      # Send severity=slack alerts to slack.
+      - match:
+          severity: info
+        receiver: webhook_alert
+      - match:
+          severity: warning
+        receiver: webhook_alert
+
+    # &#x63A5;&#x6536;&#x5668;&#x5B9A;&#x4E49;&#xFF0C;&#x8FD9;&#x91CC;&#x662F;webhook&#x7C7B;&#x578B;&#xFF0C;webhook_configs&#x5199;&#x4E0A;&#x81EA;&#x5B9A;&#x4E49;api&#x63A5;&#x53E3;&#x7684;url&#x3002;
+    # &#x6CE8;&#x610F;&#xFF0C;&#x8FD9;&#x91CC;&#x7684;webhook&#x94A9;&#x5B50;&#x63A5;&#x53E3;&#x662F;&#x6211;&#x81EA;&#x5DF1;&#x5199;&#x7684;&#x63A5;&#x6536;prometheus&#x544A;&#x8B66;&#x7684;&#x63A5;&#x53E3;&#xFF0C;api&#x63A5;&#x6536;&#x5230;prometheus&#x7684;&#x6D88;&#x606F;&#x540E;&#x4F1A;&#x63D0;&#x53D6;&#x4FE1;&#x606F;&#xFF0C;&#x901A;&#x8FC7;&#x9489;&#x9489;&#x7684;&#x63A5;&#x53E3;&#x53D1;&#x7ED9;&#x76F8;&#x5E94;&#x7684;&#x4EBA;&#x5458;&#x3002;
+    # &#x4E5F;&#x53EF;&#x4EE5;&#x4F7F;&#x7528;wechat/mail&#x7684;&#x63A5;&#x53E3;&#xFF0C;&#x914D;&#x7F6E;&#x65B9;&#x5F0F;&#x53C2;&#x8003;&#x5B98;&#x7F51;&#xFF1A;https://prometheus.io/docs/alerting/configuration/
+    receivers:
+    - name: webhook_alert
+      webhook_configs:
+      - url: &apos;http://192.168.88.26:8080/api/1.0/utils/alert/?token=ADW82115yn7YEWXCEW88WEW6&apos;
+        send_resolved: true
+</code></pre><p><strong>prometheus&#x901A;&#x8FC7;webhook&#x53D1;&#x9001;&#x7684;&#x544A;&#x8B66;&#x6D88;&#x606F;&#x6837;&#x4F8B;&#xFF1A;</strong></p>
+<pre><code>{
+    &quot;receiver&quot;:&quot;webhook_alert&quot;,
+    &quot;status&quot;:&quot;firing&quot;,
+    &quot;alerts&quot;:[{
+        &quot;status&quot;:&quot;firing&quot;,
+        &quot;labels&quot;:{
+            &quot;DEVDB&quot;:&quot;&quot;,&quot;alertname&quot;:&quot;NodeMemoryUsage-low&quot;,
+            &quot;beta_kubernetes_io_arch&quot;:&quot;amd64&quot;,
+            &quot;beta_kubernetes_io_os&quot;:&quot;linux&quot;,
+            &quot;instance&quot;:&quot;hv001238&quot;,
+            &quot;job&quot;:&quot;kubernetes-node-exporter&quot;,&quot;kubernetes_io_hostname&quot;:&quot;hv001238&quot;,&quot;node_role_kubernetes_io_master&quot;:&quot;&quot;,&quot;severity&quot;:&quot;info&quot;,&quot;team&quot;:&quot;node&quot;
+        },
+        &quot;annotations&quot;:{
+            &quot;description&quot;:&quot;hv001238: Memory usage is above 80% (current value is: 52.18385396227273&quot;,
+            &quot;summary&quot;:&quot;hv001238: High Memory usage detected&quot;
+        },
+        &quot;startsAt&quot;:&quot;2018-06-23T03:47:10.408935848Z&quot;,
+        &quot;endsAt&quot;:&quot;0001-01-01T00:00:00Z&quot;,
+        &quot;generatorURL&quot;:&quot;http://prometheus-785fc5bbf4-ztlrd:9090/graph?g0.expr=%28node_memory_MemTotal_bytes+-+%28node_memory_MemFree_bytes+%2B+node_memory_Buffers_bytes+%2B+node_memory_Cached_bytes%29%29+%2F+node_memory_MemTotal_bytes+%2A+100+%3E+1\\u0026g0.tab=1&quot;
+    },],
+
+    &quot;groupLabels&quot;:{&quot;alertname&quot;:&quot;NodeMemoryUsage-low&quot;},
+    &quot;commonLabels&quot;:{
+        &quot;DEVDB&quot;:&quot;&quot;,
+        &quot;alertname&quot;:&quot;NodeMemoryUsage-low&quot;,
+        &quot;beta_kubernetes_io_arch&quot;:&quot;amd64&quot;,
+        &quot;beta_kubernetes_io_os&quot;:&quot;linux&quot;,
+        &quot;job&quot;:&quot;kubernetes-node-exporter&quot;,
+        &quot;node_role_kubernetes_io_master&quot;:&quot;&quot;,
+        &quot;severity&quot;:&quot;info&quot;,&quot;team&quot;:&quot;node&quot;},
+        &quot;commonAnnotations&quot;:{},
+        &quot;externalURL&quot;:&quot;http://alertmanager-7cffc68878-xb2m6:9093&quot;,
+        &quot;version&quot;:&quot;4&quot;,
+        &quot;groupKey&quot;:&quot;{}/{severity=\\&quot;info\\&quot;}:{alertname=\\&quot;NodeMemoryUsage-low\\&quot;}&quot;
+}
+</code></pre><p>&#x6D88;&#x606F;&#x592A;&#x591A;&#xFF0C;&#x4E0D;&#x591F;&#x7CBE;&#x7B80;&#xFF0C;&#x6211;webhook&#x7AEF;&#x5728;&#x63A5;&#x6536;&#x4E4B;&#x540E;&#x5C06;&#x5B83;&#x7CBE;&#x7B80;&#x63D0;&#x53D6;&#x4E3A;&#x4E86;&#x5982;&#x4E0B;&#x683C;&#x5F0F;&#xFF1A;</p>
+<pre><code>{
+    &apos;description&apos;: &apos;hv001238: Memory usage is above 80% (current value is: 39.42384016274741&apos;, 
+    &apos;title&apos;: &apos;hv001238: High Memory usage detected&apos;, 
+    &apos;notice_user&apos;: [&apos;xxx&apos;, &apos;xxx&apos;, &apos;xxx&apos;], 
+    &apos;start_time&apos;: &apos;2018-06-23T03:47:10.408935848Z&apos;,
+    &apos;end_time&apos;: &apos;0001-01-01T00:00:00Z&apos;, 
+    &apos;status&apos;: &apos;firing&apos;, 
+    &apos;graph_link&apos;: &apos;http://http://prometheusv19.xxx.com/graph?g0.expr=%28node_memory_MemTotal_bytes+-+%28node_memory_MemFree_bytes+%2B+node_memory_Buffers_bytes+%2B+node_memory_Cached_bytes%29%29+%2F+node_memory_MemTotal_bytes+%2A+100+%3E+1&amp;g0.tab=1&apos;
+}
+</code></pre><p>&#x4E2D;&#x8F6C;api&#x63A5;&#x53E3;python(django + rest-framework&#x6846;&#x67B6;)&#x4EE3;&#x7801;&#x6837;&#x4F8B;&#x5982;&#x4E0B;&#xFF0C;&#x9489;&#x9489;&#x6D88;&#x606F;&#x7684;&#x63A5;&#x53E3;&#x53EF;&#x4EE5;&#x81EA;&#x5DF1;&#x53BB;&#x5B98;&#x7F51;&#x67E5;&#xFF1A;<a href="https://open-doc.dingtalk.com/docs/doc.htm?spm=a219a.7629140.0.0.HyEbQ7&amp;treeId=367&amp;articleId=107549&amp;docType=1" target="_blank">&#x9489;&#x9489;&#x5B98;&#x7F51;</a></p>
+<pre><code>from rest_framework.views import APIView
+from rest_framework.response import Response
+import collections
+
+from account.tasks.message import send_dingding_message
+
+class AlertView(APIView):
+
+    def post(self,request):
+        token = request.GET.get(&apos;token&apos;)
+        message = collections.OrderedDict()
+
+        if token == &apos;ADW82115yn7YEWXCEW88WEW6xxwetrcX&apos;:
+            # ops = [&apos;xxx&apos;, &apos;xxx&apos;, &apos;xxx&apos;]
+            ops = [&apos;xxx&apos;]
+            content = request.data
+            message[&apos;title&apos;] = content[&apos;alerts&apos;][0][&apos;annotations&apos;][&apos;summary&apos;]
+            message[&apos;status&apos;] = content[&apos;status&apos;]
+            message[&apos;description&apos;] = content[&apos;alerts&apos;][0][&apos;annotations&apos;][&apos;description&apos;]
+            message[&apos;start_time&apos;] = content[&apos;alerts&apos;][0][&apos;startsAt&apos;]
+            message[&apos;end_time&apos;] = content[&apos;alerts&apos;][0][&apos;endsAt&apos;]
+            #&#x622A;&#x56FE;&#x6709;&#x6548;&#x7684;url&#x6BB5;&#xFF0C;&#x5E76;&#x5C06;hostname&#x4ECE;podname&#x66FF;&#x6362;&#x6210;&#x81EA;&#x5DF1;&#x771F;&#x5B9E;&#x73AF;&#x5883;&#x7684;&#x57DF;&#x540D;&#xFF0C;&#x8FD9;&#x6837;&#x63A5;&#x6536;&#x5230;&#x7684;&#x6D88;&#x606F;&#x70B9;&#x51FB;&#x94FE;&#x63A5;&#x53EF;&#x4EE5;&#x76F4;&#x63A5;&#x67E5;&#x770B;&#x544A;&#x8B66;&#x6570;&#x636E;&#x53CA;&#x56FE;&#x5F62;
+            valid_link = content[&apos;alerts&apos;][0][&apos;generatorURL&apos;].split(&quot;\\&quot;)[0]
+            uri = valid_link.split(&apos;:9090&apos;)[1]
+            host = &quot;http://prometheus.xxx.com&quot;
+            message[&apos;graph_link&apos;] = host + uri
+
+            messages = &quot;&quot;
+            for k,v in message.items():
+                messages = messages + &apos;[&apos; + k + &apos;]:&apos; + v + &quot;\n&quot;
+
+            print(messages)
+            res = send_dingding_message(user=ops,message=messages)
+
+            return Response(res)
+
+def send_dingding_message(user,message)
+    #&#x81EA;&#x5DF1;&#x53BB;&#x83B7;&#x53D6;&#x9489;&#x9489;&#x7684;api&#x63A5;&#x53E3;&#xFF0C;&#x8C03;&#x7528;&#x63A5;&#x53E3;
+    return True
+</code></pre><h2 id="&#x4E09;&#x3001;alertmanager&#x90E8;&#x7F72;"><a name="&#x4E09;&#x3001;alertmanager&#x90E8;&#x7F72;" class="plugin-anchor" href="#&#x4E09;&#x3001;alertmanager&#x90E8;&#x7F72;"><i class="fa fa-link" aria-hidden="true"></i></a>&#x4E09;&#x3001;Alertmanager&#x90E8;&#x7F72;</h2>
+<p>Alertmanager&#x76F8;&#x5173;&#x90E8;&#x7F72;yaml&#x6587;&#x4EF6;&#xFF1A;</p>
+<pre><code>alertmanager-templates.yaml             #&#x5404;&#x7C7B;&#x5E38;&#x89C1;&#x544A;&#x8B66;&#x6A21;&#x677F;
+configmap.yaml                          #&#x914D;&#x7F6E;&#x6587;&#x4EF6;
+deployment.yaml                        #&#x90E8;&#x7F72;&#x6587;&#x4EF6;
+service.yaml                           #&#x670D;&#x52A1;&#x6587;&#x4EF6;
+</code></pre><p>alertmanager-templates.yaml&#xFF1A;</p>
+<pre><code>apiVersion: v1
+data:
+  default.tmpl: |
+    {{ define &quot;__alertmanager&quot; }}AlertManager{{ end }}
+    {{ define &quot;__alertmanagerURL&quot; }}{{ .ExternalURL }}/#/alerts?receiver={{ .Receiver }}{{ end }}
+
+    {{ define &quot;__subject&quot; }}[{{ .Status | toUpper }}{{ if eq .Status &quot;firing&quot; }}:{{ .Alerts.Firing | len }}{{ end }}] {{ .GroupLabels.SortedPairs.Values | join &quot; &quot; }} {{ if gt (len .CommonLabels) (len .GroupLabels) }}({{ with .CommonLabels.Remove .GroupLabels.Names }}{{ .Values | join &quot; &quot; }}{{ end }}){{ end }}{{ end }}
+    {{ define &quot;__description&quot; }}{{ end }}
+
+    {{ define &quot;__text_alert_list&quot; }}{{ range . }}Labels:
+    {{ range .Labels.SortedPairs }} - {{ .Name }} = {{ .Value }}
+    {{ end }}Annotations:
+    {{ range .Annotations.SortedPairs }} - {{ .Name }} = {{ .Value }}
+    {{ end }}Source: {{ .GeneratorURL }}
+    {{ end }}{{ end }}
+
+
+    {{ define &quot;slack.default.title&quot; }}{{ template &quot;__subject&quot; . }}{{ end }}
+    {{ define &quot;slack.default.username&quot; }}{{ template &quot;__alertmanager&quot; . }}{{ end }}
+    {{ define &quot;slack.default.fallback&quot; }}{{ template &quot;slack.default.title&quot; . }} | {{ template &quot;slack.default.titlelink&quot; . }}{{ end }}
+    {{ define &quot;slack.default.pretext&quot; }}{{ end }}
+    {{ define &quot;slack.default.titlelink&quot; }}{{ template &quot;__alertmanagerURL&quot; . }}{{ end }}
+    {{ define &quot;slack.default.iconemoji&quot; }}{{ end }}
+    {{ define &quot;slack.default.iconurl&quot; }}{{ end }}
+    {{ define &quot;slack.default.text&quot; }}{{ end }}
+
+
+    {{ define &quot;hipchat.default.from&quot; }}{{ template &quot;__alertmanager&quot; . }}{{ end }}
+    {{ define &quot;hipchat.default.message&quot; }}{{ template &quot;__subject&quot; . }}{{ end }}
+
+
+    {{ define &quot;pagerduty.default.description&quot; }}{{ template &quot;__subject&quot; . }}{{ end }}
+    {{ define &quot;pagerduty.default.client&quot; }}{{ template &quot;__alertmanager&quot; . }}{{ end }}
+    {{ define &quot;pagerduty.default.clientURL&quot; }}{{ template &quot;__alertmanagerURL&quot; . }}{{ end }}
+    {{ define &quot;pagerduty.default.instances&quot; }}{{ template &quot;__text_alert_list&quot; . }}{{ end }}
+
+
+    {{ define &quot;opsgenie.default.message&quot; }}{{ template &quot;__subject&quot; . }}{{ end }}
+    {{ define &quot;opsgenie.default.description&quot; }}{{ .CommonAnnotations.SortedPairs.Values | join &quot; &quot; }}
+    {{ if gt (len .Alerts.Firing) 0 -}}
+    Alerts Firing:
+    {{ template &quot;__text_alert_list&quot; .Alerts.Firing }}
+    {{- end }}
+    {{ if gt (len .Alerts.Resolved) 0 -}}
+    Alerts Resolved:
+    {{ template &quot;__text_alert_list&quot; .Alerts.Resolved }}
+    {{- end }}
+    {{- end }}
+    {{ define &quot;opsgenie.default.source&quot; }}{{ template &quot;__alertmanagerURL&quot; . }}{{ end }}
+
+
+    {{ define &quot;victorops.default.message&quot; }}{{ template &quot;__subject&quot; . }} | {{ template &quot;__alertmanagerURL&quot; . }}{{ end }}
+    {{ define &quot;victorops.default.from&quot; }}{{ template &quot;__alertmanager&quot; . }}{{ end }}
+
+
+    {{ define &quot;email.default.subject&quot; }}{{ template &quot;__subject&quot; . }}{{ end }}
+    {{ define &quot;email.default.html&quot; }}
+    &lt;!DOCTYPE html PUBLIC &quot;-//W3C//DTD XHTML 1.0 Transitional//EN&quot; &quot;http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd&quot;&gt;
+    &lt;!--
+    Style and HTML derived from https://github.com/mailgun/transactional-email-templates
+
+
+    The MIT License (MIT)
+
+    Copyright (c) 2014 Mailgun
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+    of this software and associated documentation files (the &quot;Software&quot;), to deal
+    in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included in all
+    copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+    SOFTWARE.
+    --&gt;
+    &lt;html xmlns=&quot;http://www.w3.org/1999/xhtml&quot; xmlns=&quot;http://www.w3.org/1999/xhtml&quot; style=&quot;font-family: &apos;Helvetica Neue&apos;, Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;&quot;&gt;
+    &lt;head style=&quot;font-family: &apos;Helvetica Neue&apos;, Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;&quot;&gt;
+    &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width&quot; style=&quot;font-family: &apos;Helvetica Neue&apos;, Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;&quot; /&gt;
+    &lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=UTF-8&quot; style=&quot;font-family: &apos;Helvetica Neue&apos;, Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;&quot; /&gt;
+    &lt;title style=&quot;font-family: &apos;Helvetica Neue&apos;, Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;&quot;&gt;{{ template &quot;__subject&quot; . }}&lt;/title&gt;
+
+    &lt;/head&gt;
+
+    &lt;body itemscope=&quot;&quot; itemtype=&quot;http://schema.org/EmailMessage&quot; style=&quot;font-family: &apos;Helvetica Neue&apos;, Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; -webkit-font-smoothing: antialiased; -webkit-text-size-adjust: none; height: 100%; line-height: 1.6em; width: 100% !important; background-color: #f6f6f6; margin: 0; padding: 0;&quot; bgcolor=&quot;#f6f6f6&quot;&gt;
+
+    &lt;table style=&quot;font-family: &apos;Helvetica Neue&apos;, Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; width: 100%; background-color: #f6f6f6; margin: 0;&quot; bgcolor=&quot;#f6f6f6&quot;&gt;
+      &lt;tr style=&quot;font-family: &apos;Helvetica Neue&apos;, Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;&quot;&gt;
+        &lt;td style=&quot;font-family: &apos;Helvetica Neue&apos;, Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0;&quot; valign=&quot;top&quot;&gt;&lt;/td&gt;
+        &lt;td width=&quot;600&quot; style=&quot;font-family: &apos;Helvetica Neue&apos;, Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; display: block !important; max-width: 600px !important; clear: both !important; width: 100% !important; margin: 0 auto; padding: 0;&quot; valign=&quot;top&quot;&gt;
+          &lt;div style=&quot;font-family: &apos;Helvetica Neue&apos;, Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; max-width: 600px; display: block; margin: 0 auto; padding: 0;&quot;&gt;
+            &lt;table width=&quot;100%&quot; cellpadding=&quot;0&quot; cellspacing=&quot;0&quot; style=&quot;font-family: &apos;Helvetica Neue&apos;, Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; border-radius: 3px; background-color: #fff; margin: 0; border: 1px solid #e9e9e9;&quot; bgcolor=&quot;#fff&quot;&gt;
+              &lt;tr style=&quot;font-family: &apos;Helvetica Neue&apos;, Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;&quot;&gt;
+                &lt;td style=&quot;font-family: &apos;Helvetica Neue&apos;, Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 16px; vertical-align: top; color: #fff; font-weight: 500; text-align: center; border-radius: 3px 3px 0 0; background-color: #E6522C; margin: 0; padding: 20px;&quot; align=&quot;center&quot; bgcolor=&quot;#E6522C&quot; valign=&quot;top&quot;&gt;
+                  {{ .Alerts | len }} alert{{ if gt (len .Alerts) 1 }}s{{ end }} for {{ range .GroupLabels.SortedPairs }}
+                    {{ .Name }}={{ .Value }}
+                  {{ end }}
+                &lt;/td&gt;
+              &lt;/tr&gt;
+              &lt;tr style=&quot;font-family: &apos;Helvetica Neue&apos;, Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;&quot;&gt;
+                &lt;td style=&quot;font-family: &apos;Helvetica Neue&apos;, Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0; padding: 10px;&quot; valign=&quot;top&quot;&gt;
+                  &lt;table width=&quot;100%&quot; cellpadding=&quot;0&quot; cellspacing=&quot;0&quot; style=&quot;font-family: &apos;Helvetica Neue&apos;, Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;&quot;&gt;
+                    &lt;tr style=&quot;font-family: &apos;Helvetica Neue&apos;, Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;&quot;&gt;
+                      &lt;td style=&quot;font-family: &apos;Helvetica Neue&apos;, Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0; padding: 0 0 20px;&quot; valign=&quot;top&quot;&gt;
+                        &lt;a href=&quot;{{ template &quot;__alertmanagerURL&quot; . }}&quot; style=&quot;font-family: &apos;Helvetica Neue&apos;, Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; color: #FFF; text-decoration: none; line-height: 2em; font-weight: bold; text-align: center; cursor: pointer; display: inline-block; border-radius: 5px; text-transform: capitalize; background-color: #348eda; margin: 0; border-color: #348eda; border-style: solid; border-width: 10px 20px;&quot;&gt;View in {{ template &quot;__alertmanager&quot; . }}&lt;/a&gt;
+                      &lt;/td&gt;
+                    &lt;/tr&gt;
+                    {{ if gt (len .Alerts.Firing) 0 }}
+                    &lt;tr style=&quot;font-family: &apos;Helvetica Neue&apos;, Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;&quot;&gt;
+                      &lt;td style=&quot;font-family: &apos;Helvetica Neue&apos;, Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0; padding: 0 0 20px;&quot; valign=&quot;top&quot;&gt;
+                        &lt;strong style=&quot;font-family: &apos;Helvetica Neue&apos;, Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;&quot;&gt;[{{ .Alerts.Firing | len }}] Firing&lt;/strong&gt;
+                      &lt;/td&gt;
+                    &lt;/tr&gt;
+                    {{ end }}
+                    {{ range .Alerts.Firing }}
+                    &lt;tr style=&quot;font-family: &apos;Helvetica Neue&apos;, Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;&quot;&gt;
+                      &lt;td style=&quot;font-family: &apos;Helvetica Neue&apos;, Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0; padding: 0 0 20px;&quot; valign=&quot;top&quot;&gt;
+                        &lt;strong style=&quot;font-family: &apos;Helvetica Neue&apos;, Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;&quot;&gt;Labels&lt;/strong&gt;&lt;br style=&quot;font-family: &apos;Helvetica Neue&apos;, Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;&quot; /&gt;
+                        {{ range .Labels.SortedPairs }}{{ .Name }} = {{ .Value }}&lt;br style=&quot;font-family: &apos;Helvetica Neue&apos;, Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;&quot; /&gt;{{ end }}
+                        {{ if gt (len .Annotations) 0 }}&lt;strong style=&quot;font-family: &apos;Helvetica Neue&apos;, Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;&quot;&gt;Annotations&lt;/strong&gt;&lt;br style=&quot;font-family: &apos;Helvetica Neue&apos;, Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;&quot; /&gt;{{ end }}
+                        {{ range .Annotations.SortedPairs }}{{ .Name }} = {{ .Value }}&lt;br style=&quot;font-family: &apos;Helvetica Neue&apos;, Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;&quot; /&gt;{{ end }}
+                        &lt;a href=&quot;{{ .GeneratorURL }}&quot; style=&quot;font-family: &apos;Helvetica Neue&apos;, Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; color: #348eda; text-decoration: underline; margin: 0;&quot;&gt;Source&lt;/a&gt;&lt;br style=&quot;font-family: &apos;Helvetica Neue&apos;, Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;&quot; /&gt;
+                      &lt;/td&gt;
+                    &lt;/tr&gt;
+                    {{ end }}
+
+                    {{ if gt (len .Alerts.Resolved) 0 }}
+                      {{ if gt (len .Alerts.Firing) 0 }}
+                    &lt;tr style=&quot;font-family: &apos;Helvetica Neue&apos;, Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;&quot;&gt;
+                      &lt;td style=&quot;font-family: &apos;Helvetica Neue&apos;, Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0; padding: 0 0 20px;&quot; valign=&quot;top&quot;&gt;
+                        &lt;br style=&quot;font-family: &apos;Helvetica Neue&apos;, Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;&quot; /&gt;
+                        &lt;hr style=&quot;font-family: &apos;Helvetica Neue&apos;, Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;&quot; /&gt;
+                        &lt;br style=&quot;font-family: &apos;Helvetica Neue&apos;, Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;&quot; /&gt;
+                      &lt;/td&gt;
+                    &lt;/tr&gt;
+                      {{ end }}
+                    &lt;tr style=&quot;font-family: &apos;Helvetica Neue&apos;, Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;&quot;&gt;
+                      &lt;td style=&quot;font-family: &apos;Helvetica Neue&apos;, Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0; padding: 0 0 20px;&quot; valign=&quot;top&quot;&gt;
+                        &lt;strong style=&quot;font-family: &apos;Helvetica Neue&apos;, Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;&quot;&gt;[{{ .Alerts.Resolved | len }}] Resolved&lt;/strong&gt;
+                      &lt;/td&gt;
+                    &lt;/tr&gt;
+                    {{ end }}
+                    {{ range .Alerts.Resolved }}
+                    &lt;tr style=&quot;font-family: &apos;Helvetica Neue&apos;, Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;&quot;&gt;
+                      &lt;td style=&quot;font-family: &apos;Helvetica Neue&apos;, Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0; padding: 0 0 20px;&quot; valign=&quot;top&quot;&gt;
+                        &lt;strong style=&quot;font-family: &apos;Helvetica Neue&apos;, Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;&quot;&gt;Labels&lt;/strong&gt;&lt;br style=&quot;font-family: &apos;Helvetica Neue&apos;, Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;&quot; /&gt;
+                        {{ range .Labels.SortedPairs }}{{ .Name }} = {{ .Value }}&lt;br style=&quot;font-family: &apos;Helvetica Neue&apos;, Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;&quot; /&gt;{{ end }}
+                        {{ if gt (len .Annotations) 0 }}&lt;strong style=&quot;font-family: &apos;Helvetica Neue&apos;, Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;&quot;&gt;Annotations&lt;/strong&gt;&lt;br style=&quot;font-family: &apos;Helvetica Neue&apos;, Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;&quot; /&gt;{{ end }}
+                        {{ range .Annotations.SortedPairs }}{{ .Name }} = {{ .Value }}&lt;br style=&quot;font-family: &apos;Helvetica Neue&apos;, Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;&quot; /&gt;{{ end }}
+                        &lt;a href=&quot;{{ .GeneratorURL }}&quot; style=&quot;font-family: &apos;Helvetica Neue&apos;, Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; color: #348eda; text-decoration: underline; margin: 0;&quot;&gt;Source&lt;/a&gt;&lt;br style=&quot;font-family: &apos;Helvetica Neue&apos;, Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;&quot; /&gt;
+                      &lt;/td&gt;
+                    &lt;/tr&gt;
+                    {{ end }}
+                  &lt;/table&gt;
+                &lt;/td&gt;
+              &lt;/tr&gt;
+            &lt;/table&gt;
+
+            &lt;div style=&quot;font-family: &apos;Helvetica Neue&apos;, Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; width: 100%; clear: both; color: #999; margin: 0; padding: 20px;&quot;&gt;
+              &lt;table width=&quot;100%&quot; style=&quot;font-family: &apos;Helvetica Neue&apos;, Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;&quot;&gt;
+                &lt;tr style=&quot;font-family: &apos;Helvetica Neue&apos;, Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;&quot;&gt;
+                  &lt;td style=&quot;font-family: &apos;Helvetica Neue&apos;, Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 12px; vertical-align: top; text-align: center; color: #999; margin: 0; padding: 0 0 20px;&quot; align=&quot;center&quot; valign=&quot;top&quot;&gt;&lt;a href=&quot;{{ .ExternalURL }}&quot; style=&quot;font-family: &apos;Helvetica Neue&apos;, Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 12px; color: #999; text-decoration: underline; margin: 0;&quot;&gt;Sent by {{ template &quot;__alertmanager&quot; . }}&lt;/a&gt;&lt;/td&gt;
+                &lt;/tr&gt;
+              &lt;/table&gt;
+            &lt;/div&gt;&lt;/div&gt;
+        &lt;/td&gt;
+        &lt;td style=&quot;font-family: &apos;Helvetica Neue&apos;, Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0;&quot; valign=&quot;top&quot;&gt;&lt;/td&gt;
+      &lt;/tr&gt;
+    &lt;/table&gt;
+
+    &lt;/body&gt;
+    &lt;/html&gt;
+
+    {{ end }}
+
+    {{ define &quot;pushover.default.title&quot; }}{{ template &quot;__subject&quot; . }}{{ end }}
+    {{ define &quot;pushover.default.message&quot; }}{{ .CommonAnnotations.SortedPairs.Values | join &quot; &quot; }}
+    {{ if gt (len .Alerts.Firing) 0 }}
+    Alerts Firing:
+    {{ template &quot;__text_alert_list&quot; .Alerts.Firing }}
+    {{ end }}
+    {{ if gt (len .Alerts.Resolved) 0 }}
+    Alerts Resolved:
+    {{ template &quot;__text_alert_list&quot; .Alerts.Resolved }}
+    {{ end }}
+    {{ end }}
+    {{ define &quot;pushover.default.url&quot; }}{{ template &quot;__alertmanagerURL&quot; . }}{{ end }}
+  slack.tmpl: |
+    {{ define &quot;slack.devops.text&quot; }}
+    {{range .Alerts}}{{.Annotations.DESCRIPTION}}
+    {{end}}
+    {{ end }}
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: alertmanager-templates
+  namespace: kube-system
+</code></pre><p>configmap.yaml&#xFF1A;</p>
+<pre><code>kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: alertmanager
+  namespace: kube-system
+data:
+  config.yml: |-
+    global:
+      # ResolveTimeout is the time after which an alert is declared resolved
+      # if it has not been updated.
+      resolve_timeout: 5m
+      # The smarthost and SMTP sender used for mail notifications.
+
+      # The API URL to use for Slack notifications.
+    # # The directory from which notification templates are read.
+    templates:
+    - &apos;/etc/alertmanager-templates/*.tmpl&apos;
+
+    # The root route on which each incoming alert enters.
+    route:
+
+      # The labels by which incoming alerts are grouped together. For example,
+      # multiple alerts coming in for cluster=A and alertname=LatencyHigh would
+      # be batched into a single group.
+
+      group_by: [&apos;alertname&apos;, &apos;cluster&apos;, &apos;service&apos;]
+
+      # When a new group of alerts is created by an incoming alert, wait at
+      # least &apos;group_wait&apos; to send the initial notification.
+      # This way ensures that you get multiple alerts for the same group that start
+      # firing shortly after another are batched together on the first
+      # notification.
+
+      group_wait: 30s
+
+      # When the first notification was sent, wait &apos;group_interval&apos; to send a batch
+      # of new alerts that started firing for that group.
+
+      group_interval: 5m
+
+      # If an alert has successfully been sent, wait &apos;repeat_interval&apos; to
+      # resend them.
+
+      #repeat_interval: 1m
+      repeat_interval: 1m
+
+      # A default receiver
+
+      # If an alert isn&apos;t caught by a route, send it to default.
+      receiver: webhook_alert 
+
+      # All the above attributes are inherited by all child routes and can
+      # overwritten on each.
+
+      # The child route trees.
+      routes:
+      # Send severity=slack alerts to slack.
+      - match:
+          severity: info
+        receiver: webhook_alert
+      - match:
+          severity: warning
+        receiver: webhook_alert
+
+    receivers:
+    - name: webhook_alert
+      webhook_configs:
+      - url: &apos;http://192.168.88.26:8080/api/1.0/utils/alert/?token=ADW82115yn7YEWXCEW88WEW6&apos;
+        send_resolved: true
+</code></pre><p>deployment.yaml:</p>
+<pre><code>apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: alertmanager
+  namespace: kube-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: alertmanager
+  template:
+    metadata:
+      name: alertmanager
+      labels:
+        app: alertmanager
+    spec:
+      containers:
+      - name: alertmanager
+        image: quay.io/prometheus/alertmanager:v0.15.0
+        args:
+          - &apos;--config.file=/etc/alertmanager/config.yml&apos;
+          - &apos;--storage.path=/alertmanager&apos;
+        ports:
+        - name: alertmanager
+          containerPort: 9093
+        volumeMounts:
+        - name: config-volume
+          mountPath: /etc/alertmanager
+        - name: templates-volume
+          mountPath: /etc/alertmanager-templates
+        - name: alertmanager
+          mountPath: /alertmanager
+      serviceAccountName: prometheus
+      volumes:
+      - name: config-volume
+        configMap:
+          name: alertmanager
+      - name: templates-volume
+        configMap:
+          name: alertmanager-templates
+      - name: alertmanager
+        emptyDir: {}
+</code></pre><p>service.yaml:</p>
+<pre><code>apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    prometheus.io/scrape: &apos;true&apos;
+    prometheus.io/path: &apos;/metrics&apos;
+  labels:
+    name: alertmanager
+  name: alertmanager
+  namespace: kube-system
+spec:
+  selector:
+    app: alertmanager
+  type: NodePort
+  ports:
+  - name: alertmanager
+    protocol: TCP
+    port: 9093
+    targetPort: 9093
+</code></pre><p>&#x4F9D;&#x6B21;&#x90E8;&#x7F72;&#x4E0A;&#x65B9;&#x51E0;&#x4E2A;yaml&#x6587;&#x4EF6;&#x3002;
+&#x5728;&#x914D;&#x7F6E;&#x5B8C;alertmanager&#x4E4B;&#x540E;&#xFF0C;&#x9700;&#x8981;&#x7ED9;prometheus&#x4E3B;&#x7A0B;&#x5E8F;&#x914D;&#x7F6E;&#x6587;&#x4EF6;&#x6DFB;&#x52A0;alertmanager&#x76F8;&#x5173;&#x7684;&#x914D;&#x7F6E;&#xFF0C;&#x5373;&#x4FEE;&#x6539;prometheus&#x7684;configmap&#xFF0C;&#x6DFB;&#x52A0;data.rules.yml&#xFF0C;&#x589E;&#x52A0;&#x4E00;&#x4E9B;&#x8FBE;&#x5230;&#x89E6;&#x53D1;&#x544A;&#x8B66;&#x9608;&#x503C;&#x7684;&#x89C4;&#x5219;&#x3002;</p>
+<pre><code>  rules.yml: |
+    groups:
+    - name: test-rule
+      rules:
+      - alert: NodeFilesystemUsage-high
+        expr: (node_filesystem_size{device=&quot;rootfs&quot;} - node_filesystem_free{device=&quot;rootfs&quot;}) / node_filesystem_size{device=&quot;rootfs&quot;} * 100 &gt; 80
+        for: 2m
+        labels:
+          team: node
+          severity: warning
+        annotations:
+          summary: &quot;{{$labels.instance}}: High Filesystem usage detected&quot;
+          description: &quot;{{$labels.instance}}: Filesystem usage is above 80% (current value is: {{ $value }}&quot;
+      - alert: NodeMemoryUsage
+        expr: (node_memory_MemTotal - (node_memory_MemFree+node_memory_Buffers+node_memory_Cached )) / node_memory_MemTotal * 100 &gt; 80
+        for: 2m
+        labels:
+          team: node
+        annotations:
+          summary: &quot;{{$labels.instance}}: High Memory usage detected&quot;
+          description: &quot;{{$labels.instance}}: Memory usage is above 80% (current value is: {{ $value }}&quot;
+      - alert: NodeMemoryUsage-low
+        expr: (node_memory_MemTotal_bytes - (node_memory_MemFree_bytes + node_memory_Buffers_bytes + node_memory_Cached_bytes)) / node_memory_MemTotal_bytes * 100 &gt; 1
+        for: 1m
+        labels:
+          team: node
+          severity: info
+        annotations:
+          summary: &quot;{{$labels.instance}}: High Memory usage detected&quot;
+          description: &quot;{{$labels.instance}}: Memory usage is above 80% (current value is: {{ $value }}&quot;
+      - alert: NodeCPUUsage
+        expr: (100 - (avg by (instance) (irate(node_cpu{job=&quot;kubernetes-node-exporter&quot;,mode=&quot;idle&quot;}[5m])) * 100)) &gt; 80
+        for: 2m
+        labels:
+          team: node
+        annotations:
+          summary: &quot;{{$labels.instance}}: High CPU usage detected&quot;
+          description: &quot;{{$labels.instance}}: CPU usage is above 80% (current value is: {{ $value }}&quot;
+      - alert: PodMemUsage
+        expr: container_memory_usage_bytes{pod_name!=&quot;&quot;,namespace=&quot;default&quot;}/container_spec_memory_limit_bytes{pod_name!=&quot;&quot;,namespace=&quot;default&quot;} *100 != +Inf &gt; 10
+        for: 2m
+        labels:
+          team: node
+        annotations:
+          summary: &quot;{{$labels.instance}}: Pod High Mem usage detected&quot;
+          description: &quot;{{$labels.instance}}: Pod CPU Mem is above 80% (current value is: {{ $value }}&quot;
+</code></pre><p>&#x66F4;&#x65B0;&#x4E4B;&#x540E;&#x7684;prometheus&#x7684;configmap&#x5B8C;&#x6574;yaml&#x6587;&#x4EF6;&#x5982;&#x4E0B;&#xFF1A;</p>
+<pre><code>kind: ConfigMap
+metadata:
+  name: prometheus-config
+  namespace: kube-system
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval:     15s
+      evaluation_interval: 15s
+    rule_files:
+    - /etc/prometheus/rules.yml
+    alerting:
+      alertmanagers:
+        - static_configs:
+          - targets: [&quot;alertmanager:9093&quot;]
+    scrape_configs:
+
+    - job_name: &apos;kubernetes-apiservers&apos;
+      kubernetes_sd_configs:
+      - role: endpoints
+      scheme: https
+      tls_config:
+        ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+      bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+      relabel_configs:
+      - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
+        action: keep
+        regex: default;kubernetes;https
+
+    - job_name: &apos;kubernetes-nodes&apos;
+      kubernetes_sd_configs:
+      - role: node
+      scheme: https
+      tls_config:
+        ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+      bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+      relabel_configs:
+      - action: labelmap
+        regex: __meta_kubernetes_node_label_(.+)
+      - target_label: __address__
+        replacement: kubernetes.default.svc:443
+      - source_labels: [__meta_kubernetes_node_name]
+        regex: (.+)
+        target_label: __metrics_path__
+        replacement: /api/v1/nodes/${1}/proxy/metrics
+
+    - job_name: &apos;kubernetes-cadvisor&apos;
+      kubernetes_sd_configs:
+      - role: node
+      scheme: https
+      tls_config:
+        ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+      bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+      relabel_configs:
+      - action: labelmap
+        regex: __meta_kubernetes_node_label_(.+)
+      - target_label: __address__
+        replacement: kubernetes.default.svc:443
+      - source_labels: [__meta_kubernetes_node_name]
+        regex: (.+)
+        target_label: __metrics_path__
+        replacement: /api/v1/nodes/${1}/proxy/metrics/cadvisor
+
+    - job_name: &apos;kubernetes-service-endpoints&apos;
+      kubernetes_sd_configs:
+      - role: endpoints
+      relabel_configs:
+      - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scrape]
+        action: keep
+        regex: true
+      - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scheme]
+        action: replace
+        target_label: __scheme__
+        regex: (https?)
+      - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_path]
+        action: replace
+        target_label: __metrics_path__
+        regex: (.+)
+      - source_labels: [__address__, __meta_kubernetes_service_annotation_prometheus_io_port]
+        action: replace
+        target_label: __address__
+        regex: ([^:]+)(?::\d+)?;(\d+)
+        replacement: $1:$2
+      - action: labelmap
+        regex: __meta_kubernetes_service_label_(.+)
+      - source_labels: [__meta_kubernetes_namespace]
+        action: replace
+        target_label: kubernetes_namespace
+      - source_labels: [__meta_kubernetes_service_name]
+        action: replace
+        target_label: kubernetes_name
+
+    - job_name: &apos;kubernetes-services&apos;
+      kubernetes_sd_configs:
+      - role: service
+      metrics_path: /probe
+      params:
+        module: [http_2xx]
+      relabel_configs:
+      - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_probe]
+        action: keep
+        regex: true
+      - source_labels: [__address__]
+        target_label: __param_target
+      - target_label: __address__
+        replacement: blackbox-exporter.example.com:9115
+      - source_labels: [__param_target]
+        target_label: instance
+      - action: labelmap
+        regex: __meta_kubernetes_service_label_(.+)
+      - source_labels: [__meta_kubernetes_namespace]
+        target_label: kubernetes_namespace
+      - source_labels: [__meta_kubernetes_service_name]
+        target_label: kubernetes_name
+
+    - job_name: &apos;kubernetes-ingresses&apos;
+      kubernetes_sd_configs:
+      - role: ingress
+      relabel_configs:
+      - source_labels: [__meta_kubernetes_ingress_annotation_prometheus_io_probe]
+        action: keep
+        regex: true
+        regex: (.+)
+      - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+        action: replace
+        regex: ([^:]+)(?::\d+)?;(\d+)
+        replacement: $1:$2
+        target_label: __address__
+      - action: labelmap
+        regex: __meta_kubernetes_pod_label_(.+)
+      - source_labels: [__meta_kubernetes_namespace]
+        action: replace
+        target_label: kubernetes_namespace
+      - source_labels: [__meta_kubernetes_pod_name]
+        action: replace
+        target_label: kubernetes_pod_name
+    - job_name: &apos;kubernetes-node-exporter&apos;
+      scheme: http
+      tls_config:
+        ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+      bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+      kubernetes_sd_configs:
+      - role: node
+      relabel_configs:
+      - action: labelmap
+        regex: __meta_kubernetes_node_label_(.+)
+      - source_labels: [__meta_kubernetes_role]
+        action: replace
+        target_label: kubernetes_role
+      - source_labels: [__address__]
+        regex: &apos;(.*):10250&apos;
+        replacement: &apos;${1}:31672&apos;
+        target_label: __address__
+  rules.yml: |
+    groups:
+    - name: test-rule
+      rules:
+      - alert: NodeFilesystemUsage-high
+        expr: (node_filesystem_size{device=&quot;rootfs&quot;} - node_filesystem_free{device=&quot;rootfs&quot;}) / node_filesystem_size{device=&quot;rootfs&quot;} * 100 &gt; 80
+        for: 2m
+        labels:
+          team: node
+          severity: warning
+        annotations:
+          summary: &quot;{{$labels.instance}}: High Filesystem usage detected&quot;
+          description: &quot;{{$labels.instance}}: Filesystem usage is above 80% (current value is: {{ $value }}&quot;
+      - alert: NodeMemoryUsage
+        expr: (node_memory_MemTotal - (node_memory_MemFree+node_memory_Buffers+node_memory_Cached )) / node_memory_MemTotal * 100 &gt; 80
+        for: 2m
+        labels:
+          team: node
+        annotations:
+          summary: &quot;{{$labels.instance}}: High Memory usage detected&quot;
+          description: &quot;{{$labels.instance}}: Memory usage is above 80% (current value is: {{ $value }}&quot;
+      - alert: NodeMemoryUsage-low
+        expr: (node_memory_MemTotal_bytes - (node_memory_MemFree_bytes + node_memory_Buffers_bytes + node_memory_Cached_bytes)) / node_memory_MemTotal_bytes * 100 &gt; 1
+        for: 1m
+        labels:
+          team: node
+          severity: info
+        annotations:
+          summary: &quot;{{$labels.instance}}: High Memory usage detected&quot;
+          description: &quot;{{$labels.instance}}: Memory usage is above 80% (current value is: {{ $value }}&quot;
+      - alert: NodeCPUUsage
+        expr: (100 - (avg by (instance) (irate(node_cpu{job=&quot;kubernetes-node-exporter&quot;,mode=&quot;idle&quot;}[5m])) * 100)) &gt; 80
+        for: 2m
+        labels:
+          team: node
+        annotations:
+          summary: &quot;{{$labels.instance}}: High CPU usage detected&quot;
+          description: &quot;{{$labels.instance}}: CPU usage is above 80% (current value is: {{ $value }}&quot;
+      - alert: PodMemUsage
+        expr: container_memory_usage_bytes{pod_name!=&quot;&quot;,namespace=&quot;default&quot;}/container_spec_memory_limit_bytes{pod_name!=&quot;&quot;,namespace=&quot;default&quot;} *100 != +Inf &gt; 80
+        for: 2m
+        labels:
+          team: node
+        annotations:
+          summary: &quot;{{$labels.instance}}: Pod High Mem usage detected&quot;
+          description: &quot;{{$labels.instance}}: Pod CPU Mem is above 80% (current value is: {{ $value }}&quot;
+</code></pre><p><strong>&#x4E3A;&#x4E86;&#x6D4B;&#x8BD5;&#x4F7F;&#x7528;&#xFF0C;&#x589E;&#x52A0;&#x4E86;&#x4E00;&#x9879;node&#x5185;&#x5B58;&#x4F7F;&#x7528;&#x7387;&#x8D85;&#x8FC7;1%&#x5219;&#x89E6;&#x53D1;&#x544A;&#x8B66;&#xFF0C;&#x8FD9;&#x4E2A;&#x5728;&#x4F7F;&#x7528;&#x65F6;&#x53EF;&#x4EE5;&#x5220;&#x6389;&#x3002;</strong></p>
+<p><strong>kubectl apply -f config.map&#x66F4;&#x65B0;prometheus&#x914D;&#x7F6E;&#x6587;&#x4EF6;&#xFF0C;&#x66F4;&#x65B0;&#x914D;&#x7F6E;&#x6587;&#x4EF6;&#x540E;&#xFF0C;prometheus&#x4E0D;&#x4F1A;&#x81EA;&#x52A8;&#x91CD;&#x8F7D;&#x914D;&#x7F6E;&#xFF0C;&#x9700;&#x91CD;&#x542F;pod&#xFF0C;&#x4E3A;&#x4E86;&#x4F18;&#x96C5;&#x5730;&#x91CD;&#x8F7D;&#xFF0C;&#x53EF;&#x4EE5;&#x91C7;&#x53D6;&#x66F4;&#x65B0;deployment&#x6CE8;&#x89E3;&#x7684;&#x65B9;&#x5F0F;&#x6765;&#x89E6;&#x53D1;&#x6EDA;&#x52A8;&#x5347;&#x7EA7;&#xFF0C;&#x4FDD;&#x8BC1;&#x670D;&#x52A1;&#x4E0D;&#x4E2D;&#x65AD;&#x3002;&#x4F7F;&#x7528;&#x5982;&#x4E0B;&#x547D;&#x4EE4;&#xFF1A;</strong></p>
+<pre><code>kubectl patch deployment prometheus --patch &apos;{&quot;spec&quot;: {&quot;template&quot;: {&quot;metadata&quot;: {&quot;annotations&quot;: {&quot;update-time&quot;: &quot;2018-06-25 17:50&quot; }}}}}&apos; -n kube-system
+</code></pre><h2 id="&#x56DB;&#x3001;&#x544A;&#x8B66;&#x6548;&#x679C;"><a name="&#x56DB;&#x3001;&#x544A;&#x8B66;&#x6548;&#x679C;" class="plugin-anchor" href="#&#x56DB;&#x3001;&#x544A;&#x8B66;&#x6548;&#x679C;"><i class="fa fa-link" aria-hidden="true"></i></a>&#x56DB;&#x3001;&#x544A;&#x8B66;&#x6548;&#x679C;</h2>
+<p>&#x67E5;&#x770B;prometheus&#x544A;&#x8B66;&#x6A21;&#x5757;&#xFF0C;&#x53EF;&#x4EE5;&#x770B;&#x5230;&#x6FC0;&#x6D3B;&#x7684;&#x544A;&#x8B66;&#x6D88;&#x606F;&#xFF1A;
+<img src="http://mycloudn.kokoerp.com/20180626193940302.jpg" alt="&#x8FD9;&#x91CC;&#x5199;&#x56FE;&#x7247;&#x63CF;&#x8FF0;"></p>
+<p>&#x9489;&#x9489;&#x6536;&#x5230;&#x544A;&#x8B66;&#x6D88;&#x606F;&#xFF1A;
+<img src="http://mycloudn.kokoerp.com/2018062619374775.jpg" alt="&#x8FD9;&#x91CC;&#x5199;&#x56FE;&#x7247;&#x63CF;&#x8FF0;">
+<img src="http://mycloudn.kokoerp.com/20180626195612177.jpg" alt="&#x8FD9;&#x91CC;&#x5199;&#x56FE;&#x7247;&#x63CF;&#x8FF0;"></p>
+<p>&#x544A;&#x8B66;&#x5904;&#x4E8E;firing&#x6FC0;&#x6D3B;&#x72B6;&#x6001;&#x65F6;&#xFF0C;&#x53EA;&#x6709;&#x6709;&#x6548;&#x7684;start_time&#xFF0C;endtime&#x4E3A;&#x65E0;&#x6548;&#x503C;&#xFF0C;&#x72B6;&#x6001;&#x4E3A;resolved&#x65F6;&#x4F1A;&#x6709;&#x51C6;&#x786E;&#x7684;end-time&#x3002;</p>
+<p>&#x70B9;&#x51FB;&#x544A;&#x8B66;&#x6D88;&#x606F;&#x4E2D;&#x7684;&#x94FE;&#x63A5;&#xFF0C;&#x67E5;&#x770B;&#x660E;&#x7EC6;&#x6570;&#x636E;&#xFF1A;
+<img src="http://mycloudn.kokoerp.com/201806261947575.jpg" alt="&#x8FD9;&#x91CC;&#x5199;&#x56FE;&#x7247;&#x63CF;&#x8FF0;">
+<img src="http://mycloudn.kokoerp.com/20180626194803513.jpg" alt="&#x8FD9;&#x91CC;&#x5199;&#x56FE;&#x7247;&#x63CF;&#x8FF0;"></p>
+<h2 id="&#x603B;&#x7ED3;"><a name="&#x603B;&#x7ED3;" class="plugin-anchor" href="#&#x603B;&#x7ED3;"><i class="fa fa-link" aria-hidden="true"></i></a>&#x603B;&#x7ED3;</h2>
+<p>&#x914D;&#x7F6E;&#x544A;&#x8B66;&#x6D88;&#x606F;&#x5E76;&#x4E0D;&#x96BE;&#xFF0C;&#x96BE;&#x70B9;&#x5728;&#x4E8E;&#x5404;&#x9879;&#x952E;&#x63A7;&#x503C;&#x7684;&#x5B9A;&#x4E49;&#xFF0C;metrics&#x7C7B;&#x578B;&#x6709;&#x5F88;&#x591A;&#xFF0C;&#x540C;&#x65F6;&#x652F;&#x6301;&#x7684;&#x5404;&#x7C7B;&#x5E94;&#x7528;&#x4E5F;&#x6709;&#x5F88;&#x591A;&#xFF0C;&#x8FD8;&#x6709;&#x5F88;&#x591A;&#x53EF;&#x6478;&#x7D22;&#x7684;&#x7A7A;&#x95F4;&#x3002;&#x540E;&#x671F;&#x8FD8;&#x8981;&#x4E0D;&#x65AD;&#x7684;&#x6269;&#x5145;&#x3001;&#x8C03;&#x6574;&#x76D1;&#x63A7;&#x7C7B;&#x578B;&#xFF0C;&#x8C03;&#x6574;&#x4F18;&#x5316;&#x901A;&#x77E5;&#x7B56;&#x7565;&#xFF0C;prometheus&#x975E;&#x5E38;&#x5730;&#x7075;&#x6D3B;&#xFF0C;&#x53EF;&#x4EE5;&#x57FA;&#x4E8E;&#x6B64;&#x4E0D;&#x65AD;&#x53D1;&#x6398;&#xFF0C;&#x6253;&#x9020;&#x6700;&#x9002;&#x5408;&#x81EA;&#x5DF1;&#x516C;&#x53F8;&#x73AF;&#x5883;&#x7684;&#x5BB9;&#x5668;&#x4E91;&#x76D1;&#x63A7;&#x4F53;&#x7CFB;&#x3002;</p>
+
+                                
+                                </section>
+                            
+    </div>
+    <div class="search-results">
+        <div class="has-results">
+            
+            <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+            <ul class="search-results-list"></ul>
+            
+        </div>
+        <div class="no-results">
+            
+            <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+            
+        </div>
+    </div>
+</div>
+
+                        </div>
+                    </div>
+                
+            </div>
+
+            
+                
+                <a href="监控--Prometheus扩展篇（mysqld-exporter、服务发现、监控项、联邦、relabel）.html" class="navigation navigation-prev " aria-label="Previous page: 4.2. Prometheus扩展篇">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+                
+                
+                <a href="../part5/" class="navigation navigation-next " aria-label="Next page: 5. Ceph存储">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+                
+            
+        
+    </div>
+
+    <script>
+        var gitbook = gitbook || [];
+        gitbook.push(function() {
+            gitbook.page.hasChanged({"page":{"title":"4.3. Prometheus告警篇","date":"2018/06/26 19:50:47","tags":["Kubernetes","Prometheus"],"level":"4.1.3","depth":2,"next":{"title":"5. Ceph存储","level":"5.1","depth":1,"path":"part5/README.md","ref":"./part5/README.md","articles":[{"title":"5.1. Ceph部署篇","level":"5.1.1","depth":2,"path":"part5/Ceph集群生产环境安装部署.md","ref":"./part5/Ceph集群生产环境安装部署.md","articles":[]},{"title":"5.2. Ceph性能调优","level":"5.1.2","depth":2,"path":"part5/cephfs调优-性能测试-监控-常用命令.md","ref":"./part5/cephfs调优-性能测试-监控-常用命令.md","articles":[]},{"title":"5.3. Cephfs在k8s中使用","level":"5.1.3","depth":2,"path":"part5/分布式存储Cephfs使用.md","ref":"./part5/分布式存储Cephfs使用.md","articles":[]},{"title":"5.4. Ceph RBD在k8s中使用","level":"5.1.4","depth":2,"path":"part5/分布式存储Ceph-RBD使用.md","ref":"./part5/分布式存储Ceph-RBD使用.md","articles":[]},{"title":"5.5. Ceph在k8s中的综合场景应用及数据库OLTP性能压测","level":"5.1.5","depth":2,"path":"part5/Cephfs-CephRBD在k8s中的适用场景讨论及数据库性能压测.md","ref":"./part5/Cephfs-CephRBD在k8s中的适用场景讨论及数据库性能压测.md","articles":[]}]},"previous":{"title":"4.2. Prometheus扩展篇","level":"4.1.2","depth":2,"path":"part4/监控--Prometheus扩展篇（mysqld-exporter、服务发现、监控项、联邦、relabel）.md","ref":"./part4/监控--Prometheus扩展篇（mysqld-exporter、服务发现、监控项、联邦、relabel）.md","articles":[]},"dir":"ltr"},"config":{"plugins":["-sharing","anchors","github","expandable-chapters","splitter","back-to-top-button"],"styles":{"website":"./styles/website.css"},"pluginsConfig":{"github":{"url":"https://github.com/yinwenqin/kubeSourceCodeNote"},"splitter":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"back-to-top-button":{},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false},"anchors":{},"expandable-chapters":{}},"theme":"default","author":"ywq","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"Kubernetes生态圈使用","language":"zh-hans","links":{},"gitbook":"3.2.3","description":""},"file":{"path":"part4/监控--Prometheus告警篇（告警消息对接钉钉接口）.md","mtime":"2019-11-21T07:58:03.010Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2019-11-21T08:49:48.491Z"},"basePath":"..","book":{"language":""}});
+        });
+    </script>
+</div>
+
+        
+    <script src="../gitbook/gitbook.js"></script>
+    <script src="../gitbook/theme.js"></script>
+    
+        
+        <script src="../gitbook/gitbook-plugin-github/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-expandable-chapters/expandable-chapters.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-splitter/splitter.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-back-to-top-button/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search/search-engine.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search/search.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-lunr/lunr.min.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-lunr/search-lunr.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-fontsettings/fontsettings.js"></script>
+        
+    
+
+    </body>
+</html>
+

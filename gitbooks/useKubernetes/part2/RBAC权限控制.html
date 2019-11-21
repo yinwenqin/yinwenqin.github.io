@@ -1,0 +1,1404 @@
+
+<!DOCTYPE HTML>
+<html lang="zh-hans" >
+    <head>
+        <meta charset="UTF-8">
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <title>2.4. RBAC权限控制 · Kubernetes生态圈使用</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="description" content="">
+        <meta name="generator" content="GitBook 3.2.3">
+        <meta name="author" content="ywq">
+        
+        
+    
+    <link rel="stylesheet" href="../gitbook/style.css">
+
+    
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-anchors/plugin.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-expandable-chapters/expandable-chapters.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-splitter/splitter.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-back-to-top-button/plugin.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-highlight/website.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-search/search.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-fontsettings/website.css">
+                
+            
+        
+
+    
+
+    
+        
+    
+
+        
+    
+    
+    <meta name="HandheldFriendly" content="true"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="../gitbook/images/apple-touch-icon-precomposed-152.png">
+    <link rel="shortcut icon" href="../gitbook/images/favicon.ico" type="image/x-icon">
+
+    
+    <link rel="next" href="docker-k8s常用命令速查及rest-api.html" />
+    
+    
+    <link rel="prev" href="Kubernetes中的Pause容器.html" />
+    
+
+    </head>
+    <body>
+        
+<div class="book">
+    <div class="book-summary">
+        
+            
+<div id="book-search-input" role="search">
+    <input type="text" placeholder="输入并搜索" />
+</div>
+
+            
+                <nav role="navigation">
+                
+
+
+<ul class="summary">
+    
+    
+
+    
+
+    
+        
+        <li class="header">Part 1-写在前面</li>
+        
+        
+    
+        <li class="chapter " data-level="1.1" data-path="../">
+            
+                <a href="../">
+            
+                    
+                    1. 总览篇
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Part 2-集群相关</li>
+        
+        
+    
+        <li class="chapter " data-level="2.1" data-path="./">
+            
+                <a href="./">
+            
+                    
+                    2. 集群相关
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="2.1.1" data-path="v1.9.0高可用集群本地离线部署记录.html">
+            
+                <a href="v1.9.0高可用集群本地离线部署记录.html">
+            
+                    
+                    2.1. v1.9.0高可用集群部署
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.1.2" data-path="v1.14多master集群部署.html">
+            
+                <a href="v1.14多master集群部署.html">
+            
+                    
+                    2.2. v1.14.3高可用集群部署
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.1.3" data-path="Kubernetes中的Pause容器.html">
+            
+                <a href="Kubernetes中的Pause容器.html">
+            
+                    
+                    2.3. Kubernetes中的Pause容器
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter active" data-level="2.1.4" data-path="RBAC权限控制.html">
+            
+                <a href="RBAC权限控制.html">
+            
+                    
+                    2.4. RBAC权限控制
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.1.5" data-path="docker-k8s常用命令速查及rest-api.html">
+            
+                <a href="docker-k8s常用命令速查及rest-api.html">
+            
+                    
+                    2.5. 常用命令与rest-api速查
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.1.6" data-path="Kubernetes各组件参数配置优化建议.html">
+            
+                <a href="Kubernetes各组件参数配置优化建议.html">
+            
+                    
+                    2.6. Kubernetes各组件参数配置优化建议
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Part 3-网络与服务</li>
+        
+        
+    
+        <li class="chapter " data-level="3.1" data-path="../part3/">
+            
+                <a href="../part3/">
+            
+                    
+                    3. 网络与服务
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="3.1.1" data-path="../part3/Traefik提供ingress-http服务.html">
+            
+                <a href="../part3/Traefik提供ingress-http服务.html">
+            
+                    
+                    3.1. Traefik 提供ingress http服务
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.1.2" data-path="../part3/kube-router提供BGP全直通网络.html">
+            
+                <a href="../part3/kube-router提供BGP全直通网络.html">
+            
+                    
+                    3.2. Kube-router BGP全直通网络
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.1.3" data-path="../part3/kube-router工作模式抓包分析.html">
+            
+                <a href="../part3/kube-router工作模式抓包分析.html">
+            
+                    
+                    3.3. Kube-router ipvs Service模式抓包分析
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.1.4" data-path="../part3/VXLAN和Flannel.html">
+            
+                <a href="../part3/VXLAN和Flannel.html">
+            
+                    
+                    3.4. VXLAN和Flannel
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Part 4-监控</li>
+        
+        
+    
+        <li class="chapter " data-level="4.1" data-path="../part4/">
+            
+                <a href="../part4/">
+            
+                    
+                    4. Prometheus监控
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="4.1.1" data-path="../part4/监控--Prometheus部署篇.html">
+            
+                <a href="../part4/监控--Prometheus部署篇.html">
+            
+                    
+                    4.1. Prometheus部署篇
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="4.1.2" data-path="../part4/监控--Prometheus扩展篇（mysqld-exporter、服务发现、监控项、联邦、relabel）.html">
+            
+                <a href="../part4/监控--Prometheus扩展篇（mysqld-exporter、服务发现、监控项、联邦、relabel）.html">
+            
+                    
+                    4.2. Prometheus扩展篇
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="4.1.3" data-path="../part4/监控--Prometheus告警篇（告警消息对接钉钉接口）.html">
+            
+                <a href="../part4/监控--Prometheus告警篇（告警消息对接钉钉接口）.html">
+            
+                    
+                    4.3. Prometheus告警篇
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Part 5-分布式存储Ceph</li>
+        
+        
+    
+        <li class="chapter " data-level="5.1" data-path="../part5/">
+            
+                <a href="../part5/">
+            
+                    
+                    5. Ceph存储
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="5.1.1" data-path="../part5/Ceph集群生产环境安装部署.html">
+            
+                <a href="../part5/Ceph集群生产环境安装部署.html">
+            
+                    
+                    5.1. Ceph部署篇
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.1.2" data-path="../part5/cephfs调优-性能测试-监控-常用命令.html">
+            
+                <a href="../part5/cephfs调优-性能测试-监控-常用命令.html">
+            
+                    
+                    5.2. Ceph性能调优
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.1.3" data-path="../part5/分布式存储Cephfs使用.html">
+            
+                <a href="../part5/分布式存储Cephfs使用.html">
+            
+                    
+                    5.3. Cephfs在k8s中使用
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.1.4" data-path="../part5/分布式存储Ceph-RBD使用.html">
+            
+                <a href="../part5/分布式存储Ceph-RBD使用.html">
+            
+                    
+                    5.4. Ceph RBD在k8s中使用
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.1.5" data-path="../part5/Cephfs-CephRBD在k8s中的适用场景讨论及数据库性能压测.html">
+            
+                <a href="../part5/Cephfs-CephRBD在k8s中的适用场景讨论及数据库性能压测.html">
+            
+                    
+                    5.5. Ceph在k8s中的综合场景应用及数据库OLTP性能压测
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Part 6-微服务框架Istio</li>
+        
+        
+    
+        <li class="chapter " data-level="6.1" data-path="../part6/">
+            
+                <a href="../part6/">
+            
+                    
+                    6. Istio微服务框架
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="6.1.1" data-path="../part6/微服务框架istio安装测试.html">
+            
+                <a href="../part6/微服务框架istio安装测试.html">
+            
+                    
+                    6.1. istio安装测试
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="6.1.2" data-path="../part6/微服务框架istio流量策略控制.html">
+            
+                <a href="../part6/微服务框架istio流量策略控制.html">
+            
+                    
+                    6.2. istio流量策略控制
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="6.1.3" data-path="../part6/微服务框架istio服务可视化与监控.html">
+            
+                <a href="../part6/微服务框架istio服务可视化与监控.html">
+            
+                    
+                    6.3. istio服务可视化与监控
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="6.1.4" data-path="../part6/微服务--istio1.0抢鲜测试.html">
+            
+                <a href="../part6/微服务--istio1.0抢鲜测试.html">
+            
+                    
+                    6.4. istio v1.0 抢鲜测试
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Part 7-周边生态</li>
+        
+        
+    
+        <li class="chapter " data-level="7.1" data-path="../part7/">
+            
+                <a href="../part7/">
+            
+                    
+                    7. 周边生态
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="7.1.1" data-path="../part7/Docker-registry仓库历史镜像批量清理.html">
+            
+                <a href="../part7/Docker-registry仓库历史镜像批量清理.html">
+            
+                    
+                    7.1. Docker-registry历史镜像批量清理.md
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="7.1.2" data-path="../part7/企业级docker仓库Harbor在kubernetes上搭建使用.html">
+            
+                <a href="../part7/企业级docker仓库Harbor在kubernetes上搭建使用.html">
+            
+                    
+                    7.2. Harbor部署使用
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Part 8-问题记录</li>
+        
+        
+    
+        <li class="chapter " data-level="8.1" data-path="../part8/">
+            
+                <a href="../part8/">
+            
+                    
+                    8. 问题记录
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="8.1.1" data-path="../part8/Kubernetes部署问题记录.html">
+            
+                <a href="../part8/Kubernetes部署问题记录.html">
+            
+                    
+                    8.1. 集群部署问题记录
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="8.1.2" data-path="../part8/Service-ipvs模式间断性TCP连接故障排查.html">
+            
+                <a href="../part8/Service-ipvs模式间断性TCP连接故障排查.html">
+            
+                    
+                    8.2. Service ipvs模式间断性TCP连接故障排查
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="8.1.3" data-path="../part8/kubeadm证书-etcd证书过期紧急处理.html">
+            
+                <a href="../part8/kubeadm证书-etcd证书过期紧急处理.html">
+            
+                    
+                    8.3. kubeadm证书-etcd证书过期紧急处理
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="8.1.4" data-path="../part8/Kubernetes-Pod无法终结问题排查.html">
+            
+                <a href="../part8/Kubernetes-Pod无法终结问题排查.html">
+            
+                    
+                    8.4. Kubernetes-Pod无法终结问题排查
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+
+    <li class="divider"></li>
+
+    <li>
+        <a href="https://www.gitbook.com" target="blank" class="gitbook-link">
+            本书使用 GitBook 发布
+        </a>
+    </li>
+</ul>
+
+
+                </nav>
+            
+        
+    </div>
+
+    <div class="book-body">
+        
+            <div class="body-inner">
+                
+                    
+
+<div class="book-header" role="navigation">
+    
+
+    <!-- Title -->
+    <h1>
+        <i class="fa fa-circle-o-notch fa-spin"></i>
+        <a href=".." >2.4. RBAC权限控制</a>
+    </h1>
+</div>
+
+
+
+
+                    <div class="page-wrapper" tabindex="-1" role="main">
+                        <div class="page-inner">
+                            
+<div id="book-search-results">
+    <div class="search-noresults">
+    
+                                <section class="normal markdown-section">
+                                
+                                <h2 id=""><a name="" class="plugin-anchor" href="#"><i class="fa fa-link" aria-hidden="true"></i></a> </h2>
+<h2 id="&#x524D;&#x8A00;"><a name="&#x524D;&#x8A00;" class="plugin-anchor" href="#&#x524D;&#x8A00;"><i class="fa fa-link" aria-hidden="true"></i></a>&#x524D;&#x8A00;</h2>
+<p>kubernetes &#x96C6;&#x7FA4;&#x76F8;&#x5173;&#x6240;&#x6709;&#x7684;&#x4EA4;&#x4E92;&#x90FD;&#x901A;&#x8FC7;apiserver&#x6765;&#x5B8C;&#x6210;&#xFF0C;&#x5BF9;&#x4E8E;&#x8FD9;&#x6837;&#x96C6;&#x4E2D;&#x5F0F;&#x7BA1;&#x7406;&#x7684;&#x7CFB;&#x7EDF;&#x6765;&#x8BF4;&#xFF0C;&#x6743;&#x9650;&#x7BA1;&#x7406;&#x5C24;&#x5176;&#x91CD;&#x8981;&#xFF0C;&#x5728;1.5&#x7248;&#x7684;&#x65F6;&#x5019;&#x5F15;&#x5165;&#x4E86;RBAC(Role Base Access Control)&#x7684;&#x6743;&#x9650;&#x63A7;&#x5236;&#x673A;&#x5236;.</p>
+<p>RBAC&#x4E5F;&#x662F;&#x521D;&#x63A5;&#x89E6;k8s&#x7684;&#x7528;&#x6237;&#x8F83;&#x96BE;&#x7406;&#x89E3;&#x7684;&#x4E00;&#x90E8;&#x5206;&#xFF0C;&#x540C;&#x65F6;RBAC&#x4F5C;&#x4E3A;&#x96C6;&#x7FA4;&#x7BA1;&#x7406;&#x7684;&#x57FA;&#x7840;&#x7EC4;&#x4EF6;&#x4E4B;&#x4E00;&#xFF0C;&#x672C;&#x8BE5;&#x653E;&#x5728;&#x6700;&#x524D;&#x9762;&#x51E0;&#x7BC7;&#xFF0C;&#x4F46;&#x662F;&#x6700;&#x8FD1;&#x624D;&#x60F3;&#x8D77;&#x6765;&#x8FD9;&#x4E2A;&#x65B9;&#x9762;&#x7684;&#x77E5;&#x8BC6;&#x70B9;&#xFF0C;&#x8D76;&#x7D27;&#x68B3;&#x7406;&#x603B;&#x7ED3;&#x8F93;&#x51FA;&#x4E86;&#x672C;&#x7BC7;</p>
+<h2 id="&#x5DE5;&#x4F5C;&#x6D41;&#x7A0B;"><a name="&#x5DE5;&#x4F5C;&#x6D41;&#x7A0B;" class="plugin-anchor" href="#&#x5DE5;&#x4F5C;&#x6D41;&#x7A0B;"><i class="fa fa-link" aria-hidden="true"></i></a>&#x5DE5;&#x4F5C;&#x6D41;&#x7A0B;</h2>
+<h5 id="&#x6D41;&#x7A0B;&#x56FE;"><a name="&#x6D41;&#x7A0B;&#x56FE;" class="plugin-anchor" href="#&#x6D41;&#x7A0B;&#x56FE;"><i class="fa fa-link" aria-hidden="true"></i></a>&#x6D41;&#x7A0B;&#x56FE;</h5>
+<p><img src="http://mycloudn.kokoerp.com/20181206193427845.png" alt="&#x5728;&#x8FD9;&#x91CC;&#x63D2;&#x5165;&#x56FE;&#x7247;&#x63CF;&#x8FF0;"></p>
+<h5 id="&#x6D41;&#x7A0B;&#x62C6;&#x89E3;"><a name="&#x6D41;&#x7A0B;&#x62C6;&#x89E3;" class="plugin-anchor" href="#&#x6D41;&#x7A0B;&#x62C6;&#x89E3;"><i class="fa fa-link" aria-hidden="true"></i></a>&#x6D41;&#x7A0B;&#x62C6;&#x89E3;</h5>
+<p>&#x4E00;&#x3001;&#x57FA;&#x4E8E;&#x8D44;&#x6E90;&#x7533;&#x660E;&#x548C;&#x7BA1;&#x7406;&#x65B9;&#x6CD5;&#x7533;&#x660E;&#x7EC4;&#x6210;rule&#x89C4;&#x5219;&#xFF0C;&#x548C;Role(&#x547D;&#x540D;&#x7A7A;&#x95F4;&#x8303;&#x56F4;))&#x6216;ClusterRole(&#x96C6;&#x7FA4;&#x8303;&#x56F4;)&#x5BF9;&#x8C61;&#x8FDB;&#x884C;&#x7ED1;&#x5B9A;&#xFF0C;Role&#x7C7B;&#x7684;&#x5BF9;&#x8C61;&#x5C06;&#x62E5;&#x6709;&#x6240;&#x7533;&#x660E;&#x8D44;&#x6E90;&#x53CA;&#x7684;&#x6307;&#x5B9A;&#x65B9;&#x6CD5;&#x7684;&#x6743;&#x9650;&#x3002;
+&#x4E8C;&#x3001;&#x5C06;Role&#x6743;&#x9650;&#x843D;&#x5230;&#x5B9E;&#x9645;&#x7528;&#x6237;&#x6216;&#x7A0B;&#x5E8F;&#x4E0A;&#xFF0C;&#x5373;RoleBinding(&#x547D;&#x540D;&#x7A7A;&#x95F4;&#x8303;&#x56F4;)&#x6216;CLusterRoleBinding(&#x96C6;&#x7FA4;&#x8303;&#x56F4;)</p>
+<p>&#x6709;&#x4E24;&#x79CD;&#x65B9;&#x5F0F;&#xFF1A;
+1.&#x7528;&#x6237;&#x4F7F;&#x7528;&#xFF1A;&#x5982;&#x679C;&#x662F;&#x7528;&#x6237;&#x9700;&#x6C42;&#x6743;&#x9650;&#xFF0C;&#x5219;&#x5C06;Role&#x4E0E;User(&#x6216;Group)&#x7ED1;&#x5B9A;(&#x8FD9;&#x9700;&#x8981;&#x521B;&#x5EFA;User/Group)&#xFF1B;
+2.&#x7A0B;&#x5E8F;&#x4F7F;&#x7528;&#xFF1A;&#x5982;&#x679C;&#x662F;&#x7A0B;&#x5E8F;&#x9700;&#x6C42;&#x6743;&#x9650;&#xFF0C;&#x5C06;Role&#x4E0E;ServiceAccount&#x6307;&#x5B9A;(&#x8FD9;&#x9700;&#x8981;&#x521B;&#x5EFA;ServiceAccount&#x5E76;&#x4E14;&#x5728;deployment&#x4E2D;&#x6307;&#x5B9A;ServiceAccount)&#x3002;
+<strong>&#x76F8;&#x5F53;&#x4E8E;Role&#x662F;&#x4E00;&#x4E2A;&#x7C7B;&#xFF0C;&#x7528;&#x4F5C;&#x6743;&#x9650;&#x7533;&#x660E;&#xFF0C;User/Group/ServiceAccount&#x5C06;&#x6210;&#x4E3A;&#x7C7B;&#x7684;&#x5B9E;&#x4F8B;</strong></p>
+<h2 id="&#x5B9E;&#x6218;"><a name="&#x5B9E;&#x6218;" class="plugin-anchor" href="#&#x5B9E;&#x6218;"><i class="fa fa-link" aria-hidden="true"></i></a>&#x5B9E;&#x6218;</h2>
+<h3 id="&#x4E00;&#x3001;&#x7528;&#x6237;&#x4F7F;&#x7528;"><a name="&#x4E00;&#x3001;&#x7528;&#x6237;&#x4F7F;&#x7528;" class="plugin-anchor" href="#&#x4E00;&#x3001;&#x7528;&#x6237;&#x4F7F;&#x7528;"><i class="fa fa-link" aria-hidden="true"></i></a>&#x4E00;&#x3001;&#x7528;&#x6237;&#x4F7F;&#x7528;</h3>
+<p>&#x5B89;&#x88C5;cfssl&#x5DE5;&#x5177;&#xFF0C;&#x751F;&#x6210;ca-config.json&#x6587;&#x4EF6;&#x3002;&#x8FD9;&#x4E00;&#x6B65;&#x9AA4;&#x5728;&#x5B89;&#x88C5;&#x96C6;&#x7FA4;&#x7684;&#x65F6;&#x5019;&#x5DF2;&#x7ECF;&#x505A;&#x8FC7;&#xFF0C;&#x8FD9;&#x91CC;&#x4E0D;&#x518D;&#x590D;&#x8FF0;&#xFF0C;&#x53C2;&#x8003;&#xFF1A;
+<a href="https://blog.csdn.net/ywq935/article/details/79856469" target="_blank">k8s&#xFF08;&#x4E00;&#xFF09;&#x3001; 1.9.0&#x9AD8;&#x53EF;&#x7528;&#x96C6;&#x7FA4;&#x672C;&#x5730;&#x79BB;&#x7EBF;&#x90E8;&#x7F72;&#x8BB0;&#x5F55;</a></p>
+<p>&#x51C6;&#x5907;ca&#x914D;&#x7F6E;json&#x6587;&#x4EF6;&#x5982;&#x4E0B;&#xFF1A;</p>
+<pre><code>cat &gt;  ca-config.json &lt;&lt;EOF
+{
+&quot;signing&quot;: {
+&quot;default&quot;: {
+  &quot;expiry&quot;: &quot;8760h&quot;
+},
+&quot;profiles&quot;: {
+  &quot;kubernetes&quot;: {
+    &quot;usages&quot;: [
+        &quot;signing&quot;,
+        &quot;key encipherment&quot;,
+        &quot;server auth&quot;,
+        &quot;client auth&quot;
+    ],
+    &quot;expiry&quot;: &quot;8760h&quot;
+  }
+}
+}
+}
+EOF
+</code></pre><p>&#x5B89;&#x88C5;&#x597D;&#x7684;k8s&#x96C6;&#x7FA4;&#xFF0C;&#x9ED8;&#x8BA4;&#x5728;ca&#x6587;&#x4EF6;&#x5728;&#x5982;&#x4E0B;&#x8DEF;&#x5F84;&#xFF1A;</p>
+<pre><code>&#xFF5E; /rbac-test# ls /etc/kubernetes/pki/ca*
+/etc/kubernetes/pki/ca.crt  /etc/kubernetes/pki/ca.key
+</code></pre><p><strong>&#x521B;&#x5EFA;&#x7528;&#x6237;&#x7684;&#x8BC1;&#x4E66;&#x7B7E;&#x7F72;&#x8BF7;&#x6C42;&#x914D;&#x7F6E;json&#x6587;&#x4EF6;&#xFF1A;</strong></p>
+<pre><code>~/rbac-test# cat opsuser-csr.json
+{
+  &quot;CN&quot;: &quot;opsuser&quot;,
+  &quot;hosts&quot;: [],
+  &quot;key&quot;: {
+    &quot;algo&quot;: &quot;rsa&quot;,
+    &quot;size&quot;: 2048
+  },
+  &quot;names&quot;: [
+    {
+      &quot;C&quot;: &quot;CN&quot;,
+      &quot;ST&quot;: &quot;BeiJing&quot;,
+      &quot;L&quot;: &quot;BeiJing&quot;,
+      &quot;O&quot;: &quot;k8s&quot;,
+      &quot;OU&quot;: &quot;System&quot;
+    }
+  ]
+}
+</code></pre><p>CN&#x5373;comman name&#xFF0C;&#x540E;&#x9762;&#x7528;&#x6237;&#x8BC1;&#x4E66;&#x8BA4;&#x8BC1;&#x65F6;&#x4F7F;&#x7528;&#x7684;&#x7528;&#x6237;&#x540D;</p>
+<p><strong>&#x751F;&#x6210;opsuser&#x7684;&#x8BC1;&#x4E66;&#xFF1A;</strong></p>
+<pre><code>cfssl gencert -ca=/etc/kubernetes/pki/ca.crt -ca-key=/etc/kubernetes/pki/ca.key -config=./ca-config.json -profile=kubernetes ./opsuser-csr.json | cfssljson -bare opsuser
+</code></pre><p>&#x4F1A;&#x751F;&#x6210;&#x4E0B;&#x9762;3&#x4E2A;&#x6587;&#x4EF6;&#xFF1A;</p>
+<pre><code>opsuser-key.pem  opsuser.pem  opsuser.csr
+</code></pre><p><strong>&#x751F;&#x6210;&#x7528;&#x6237;&#x7684;&#x4E13;&#x5C5E;&#x914D;&#x7F6E;&#x6587;&#x4EF6;</strong>
+&#x5B8C;&#x6574;&#x7684;&#x914D;&#x7F6E;&#x6587;&#x4EF6;&#x5305;&#x542B;3&#x5757;&#xFF0C;&#x5206;&#x522B;&#x662F;cluster/context/user&#x90E8;&#x5206;&#xFF0C;&#x5305;&#x542B;&#x76F8;&#x5E94;&#x7684;&#x5185;&#x5BB9;&#xFF0C;&#x5206;3&#x4E2A;&#x6B65;&#x9AA4;&#x751F;&#x6210;&#xFF0C;&#x540E;&#x65B9;&#x8BE6;&#x89E3;</p>
+<p>1.cluster&#x90E8;&#x5206;&#xFF1A;
+&#x751F;&#x6210;&#x6B64;&#x90E8;&#x5206;&#x9700;&#x8981;&#x6709;&#x96C6;&#x7FA4;&#x7684;ca.pem&#x6587;&#x4EF6;&#xFF0C;&#x6B64;&#x6587;&#x4EF6;&#x5728;/etc/kubernetes/pki&#x76EE;&#x5F55;&#x4E0B;&#x9ED8;&#x8BA4;&#x6CA1;&#x6709;&#xFF0C;&#x53EF;&#x4EE5;&#x4F7F;&#x7528;openssl&#x547D;&#x4EE4;&#x57FA;&#x4E8E;ca.key&#x6587;&#x4EF6;&#x53BB;&#x751F;&#x6210;ca.pem&#x6587;&#x4EF6;&#xFF1B;&#x4E5F;&#x53EF;&#x4EE5;&#x76F4;&#x63A5;&#x4F7F;&#x7528;&#x5DF2;&#x6709;&#x7684;/etc/kubernetes/admin.conf&#x6587;&#x4EF6;&#x4E2D;cluster&#x90E8;&#x5206;&#xFF1A;</p>
+<pre><code># &#x53EA;&#x53D6;cluster&#x7684;&#x4E0A;&#x4E0B;&#x6587;
+~/rbac-test# cat /etc/kubernetes/admin.conf 
+apiVersion: v1
+clusters:
+- cluster:
+    certificate-authority-data: [CERT DATA]
+    server: https://10.90.1.238:6443
+  name: kubernetes
+
+# &#x5C06;cluster&#x90E8;&#x5206;&#x5199;&#x5165;opsuser&#x7684;&#x914D;&#x7F6E;&#x6587;&#x4EF6;&#x5185;
+cat &gt;  opsuser.kubeconfig &lt;&lt;EOF
+apiVersion: v1
+clusters:
+- cluster:
+    certificate-authority-data: [CERT DATA]
+    server: https://10.90.1.238:6443
+  name: kubernetes
+EOF
+</code></pre><p>2.context&#x90E8;&#x5206;</p>
+<pre><code>kubectl config set-context kubernetes \
+--cluster=kubernetes \
+--user=opsuser \
+--namespace=default \
+--kubeconfig=opsuser.kubeconfig
+</code></pre><p>3.user&#x8BA4;&#x8BC1;&#x90E8;&#x5206;</p>
+<pre><code>kubectl config set-credentials opsuser \
+--client-certificate=./opsuser.pem \
+--client-key=./opsuser-key.pem \
+--embed-certs=true \
+--kubeconfig=opsuser.kubeconfig
+</code></pre><p>&#x67E5;&#x770B;&#x6700;&#x7EC8;&#x751F;&#x6210;&#x7684;&#x914D;&#x7F6E;&#x6587;&#x4EF6;&#xFF1A;</p>
+<pre><code># cat opsuser.kubeconfig 
+apiVersion: v1
+clusters:
+- cluster:
+    certificate-authority-data: [CRET DATA]
+    server: https://10.90.1.238:6443
+  name: kubernetes
+contexts:
+- context:
+    cluster: kubernetes
+    namespace: default
+    user: opsuser
+  name: kubernetes
+current-context: kubernetes
+kind: Config
+preferences: {}
+users:
+- name: opsuser
+  user:
+    as-user-extra: {}
+    client-certificate-data: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURZekNDQWt1Z0F3SUJBZ0lVV2ZKMlNLb1NJWWhBMHFJdzRaVUZERnlWY1pzd0RRWUpLb1pJaHZjTkFRRUwKQlFBd0ZURVRNQkVHQTFVRUF4TUthM1ZpWlhKdVpYUmxjekFlRncweE9ERXlNRFV3T0RNek1EQmFGdzB4T1RFeQpNRFV3T0RNek1EQmFNR0l4Q3pBSkJnTlZCQVlUQWtOT01SQXdEZ1lEVlFRSUV3ZENaV2xLYVc1bk1SQXdEZ1lEClZRUUhFd2RDWldsS2FXNW5NUXd3Q2dZRFZRUUtFd05yT0hNeER6QU5CZ05WQkFzVEJsTjVjM1JsYlRFUU1BNEcKQTFVRUF4TUhiM0J6ZFhObGNqQ0NBU0l3RFFZSktvWklodmNOQVFFQkJRQURnZ0VQQURDQ0FRb0NnZ0VCQU93Wgo4d1hpdFhrOGtKNk9PSkFvUHZGaWw2ZkdKUDFWT3VyYWFqTWMyZ2ROSkV0Q3o2Mzk2eTNIZGw1T2NXdlBNNURvCjJ3a0NGKzlJd09jVzljVHhTZFZMUEg3OVEvQVhHcm9Nd2ltZk9WRUNlYm9aVkswRUx3azk1K2piRUpVVHY4eTYKMForM2JvMGtwL2p2Q2pzdmwxWUR3RGtGeGtwckZ3SXliOGt0cVBLMVFkb2ZrOE16Z3NTMnNZYTR1MWFydHd0dQozSTZZbEViUFNIOXhGbmx1UUFvbjZnSmkrM0c1YTdVRGxvRm9MSHlqL00wMStPRi9YWVpEcWgwK3hoZTlVRWdHClZBZkNSQkYyZlg2WjdCaFkybnpsblZOejV5SXhmSlpJclNIYnFhUlAxZXY1Tk1ndVNRcnl3UGQ5OG5jM201RnkKMkVXa28xeEJmQ1FXSHJKd04vMENBd0VBQWFOZU1Gd3dEZ1lEVlIwUEFRSC9CQVFEQWdXZ01CMEdBMVVkSlFRVwpNQlFHQ0NzR0FRVUZCd01CQmdnckJnRUZCUWNEQWpBTUJnTlZIUk1CQWY4RUFqQUFNQjBHQTFVZERnUVdCQlFXCmpDR2NYVjRPOTRqZlV1Mk9Kd2hqTC9xMVZEQU5CZ2txaGtpRzl3MEJBUXNGQUFPQ0FRRUFBeXdlZk5uckNKU0MKdDdrT2tHL1RUSHA1NG1tT0QxS2FPZW82TnpycFRuNVQwa0h3VEdrYmNHcWxvcDIvM1lhQXJDUHo2Q1J4VDd0QQpaTUNiOXhRZkJ0cllpeHJUdGF0TTZ4YlJuQTBqaC96Y2tvRHVuYjFEYkhxbG1JQW5jLzdaTEthQklKSnA5L0IwCjB2NnJXTEd2N0F1YmZJT1ZZVTdBVTVnZmh1LzJoWC93MzFJWlgwaXZ0WEtDR0lJb1Bya2hsL3NvUTEwdVFhUmgKeFFBdzhUbTc0dTBJTDE3OFFsRlhSYm1JQXpuWk42Skh1YW5QZE82TVI1Z0dobVMzRDRaUDg2RE5DenZCOVZFcQpWa0w4R0E2bHJHNm1sem5MN0pxODlQajdOdElwZnRaeDBsdTBYRmsxTm9DWk9VMFl5Yk9peWlPS2N0NVNia3VKClVLUjVYMC9GTUE9PQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg==
+    client-key-data: LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlFcFFJQkFBS0NBUUVBN0JuekJlSzFlVHlRbm80NGtDZys4V0tYcDhZay9WVTY2dHBxTXh6YUIwMGtTMExQCnJmM3JMY2QyWGs1eGE4OHprT2piQ1FJWDcwakE1eGIxeFBGSjFVczhmdjFEOEJjYXVnekNLWjg1VVFKNXVobFUKclFRdkNUM242TnNRbFJPL3pMclJuN2R1alNTbitPOEtPeStYVmdQQU9RWEdTbXNYQWpKdnlTMm84clZCMmgrVAp3ek9DeExheGhyaTdWcXUzQzI3Y2pwaVVSczlJZjNFV2VXNUFDaWZxQW1MN2NibHJ0UU9XZ1dnc2ZLUDh6VFg0CjRYOWRoa09xSFQ3R0Y3MVFTQVpVQjhKRUVYWjlmcG5zR0ZqYWZPV2RVM1BuSWpGOGxraXRJZHVwcEUvVjYvazAKeUM1SkN2TEE5MzN5ZHplYmtYTFlSYVNqWEVGOEpCWWVzbkEzL1FJREFRQUJBb0lCQVFEQ0F6amUxME5FMHU0TQpQTlppTDVBNWowa01CeGtTUzkxVWJCTGsyWXFZZ1YyWHN0a3lJdndFN0dscWFZOXVoaC9icmwxL2M0YnpqSmRuCnprZzdoQU9tRUdNdi96SzZzbUcyRFJIb1hmMGRncWxBc2R3UktPVDE5VGNDOURFV0w5cG1oQVlKOXhRVFM5SDAKRDRvYXhLclpkYytaakJNN3gvQnFUOFBvVDJzTHRTN1FuTjhpNGNpTjVSeTl1TUsrOFZJcitPUVJqNWlVSHpDLwoyWXRBT0daYlJHekhZaXR1a2xtZG45RmhYV1NreGFBY0p0RkdWcGlMS2FWdjdoYVZsZm40SUJaSkZrdkJNQkxCClR4N2JCb25MYkF1K2Ezd0ZzYzlMd1NTNUJXK296eUZJYlJoWVV0SmhTdmZLUjZxTVJFMHRMV2IwUFJoRDVjZEUKenR5dWRoWEpBb0dCQVBYanVOYXA1TGNSSnUwaDhvVWxLTE9SZ1psYXFKSlpCUThrQ3A4ZTBJNXNpdFlxMEZlRwpOMnJibGdPV0RKSW5TR0pCc0I2VzFhOHI2S1F5L3dlcG9wTHJSQUE1VFo2YVMzMDBQeEgyY1paUE1aMHJpTmVXCnpLZGdIalczM0FORWtGQm5nVlA3Y3M2UENXSVlkajhyRElDUGowbWhkZEhWckd4elNycXNwWFczQW9HQkFQWFAKTWZjcEVQdVA1dGNvS0tnSXF5ZzVrNzRlZ0J0M2JUT2NHR05TellDeGV0bjJseHJWRW1nMktlOWNrMElGT0hFaAovUnFqNnJtY1VNV0JnRWExS0pNajlCRW56NWo4S2pGN3l2Z3o5ZDJPNHVkTlMyeG50R2MrZVJ1T0NpU0JNejRhCkFVZ2xSdGRJZXhkeWdoVWJsNVhMaitTeFRYVXRmWDgzZENMZEZCL3JBb0dCQUlsOU5LeHJRT1VRSlNqeEUyOVoKa01HZmVjenJBVmtiaDVXb3ZIdXV1a1Q0OGtUQW1kQm16dlBrSnFTSXNTekQ1RmgwakdyK1FpdDVyTktyWlNpKwp0SlhjRVNEaTZjRG1XNUY5dGtwdjk2RnBWTCtpU1JqclRESEdyLzJ2ZWNrbC9GL0pFR3FLTGU3TDBoNVV1VUdtCjY0MnpPQmFldm9kL0o3TllZQSt6VzYxUEFvR0JBUEFWQU01UTg5OWdlNnlsOHArOFo3K1FEUGRpUHVtVXlibmcKdWdrNHRMTC9wZWdCYXpDdjc1eU5Xb1FKUFdMOFNsWmxSaHFoQXY5cTU1RWduVE55ZVVETm12S3VtWnJvb0NWWQpyYk9pdkg4N3NlOE1sYUE1NGYvOUNyaVpFTnI2dmh2bnRseksyOWdsV09SYjJTWFluME9WWU9PVE1QNUVBaEVoCkRuT0d6c01sQW9HQUtrSXJ3Z2Y5dnVubnBTeGJCMU9UeCtUR2pkUEN3RThDUWNxWTBBeUhXZnk2eTBNaTNTSXMKTXBKZmpmbXN3NlRDSHZ1VFUvOXBkL3dYWEZ6ZU03OHBwWU5wcHZBVjQzVEVQNTdHRXZRV3VBSkNFQklvekZhdQpXZWVrRGd6bzBCc3NCMFFOUnRnUS9HdTBnaDRCWjFMdDB4QmJmWHhrMjRMTmJpSFBHTHRQL3pjPQotLS0tLUVORCBSU0EgUFJJVkFURSBLRVktLS0tLQo=
+</code></pre><p>&#x6700;&#x540E;&#xFF0C;&#x52A0;&#x8F7D;&#x542F;&#x7528;&#x6B64;&#x914D;&#x7F6E;&#x6587;&#x4EF6;</p>
+<pre><code>kubectl config use-context kubernetes --kubeconfig=opsuser.kubeconfig
+</code></pre><p>&#x6B64;&#x65F6;&#xFF0C;&#x7528;&#x6237;&#x5DF2;&#x7ECF;&#x521B;&#x5EFA;&#x5B8C;&#x6210;&#xFF0C;&#x4E0B;&#x9762;&#x5F00;&#x59CB;&#x8FDB;&#x884C;RoleBinding&#x6B65;&#x9AA4;&#x8D4B;&#x4E88;&#x6743;&#x9650;&#x3002;</p>
+<p><strong>RoleBinding&#x7ED1;&#x5B9A;</strong>
+&#x521B;&#x5EFA;Role&#xFF1A;</p>
+<pre><code>~/rbac-test# cat pod-reader.yaml 
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  namespace: kube-system
+  name: pod-reader
+rules:
+- apiGroups: [&quot;&quot;] # &quot;&quot;&#x4EE3;&#x8868;&#x6838;&#x5FC3;api&#x7EC4;
+  resources: [&quot;pods&quot;]
+  verbs: [&quot;get&quot;, &quot;list&quot;, &quot;watch&quot;, &quot;create&quot;, &quot;update&quot;, &quot;patch&quot;, &quot;delete&quot;]
+
+~/rbac-test# cat opsuser-role-bind.yaml
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: read-pods
+  namespace: kube-system
+subjects:
+- kind: User
+  name: opsuser   # &#x76EE;&#x6807;&#x7528;&#x6237;
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: Role
+  name: pod-reader  # &#x89D2;&#x8272;&#x4FE1;&#x606F;
+  apiGroup: rbac.authorization.k8s.io
+
+kubectl apply -f pod-reader.yaml
+kubectl apply -f opsuser-role-bind.yaml
+</code></pre><p>RoleBinding&#x6B65;&#x9AA4;&#x5DF2;&#x5B8C;&#x6210;
+<strong>&#x68C0;&#x9A8C;</strong></p>
+<pre><code># &#x5C06;&#x6B64;&#x914D;&#x7F6E;&#x6587;&#x4EF6;&#x4F5C;&#x4E3A;&#x5F53;&#x524D;kubectl&#x914D;&#x7F6E;&#x6587;&#x4EF6;&#x4F7F;&#x7528;
+~/rbac-test# mv /root/.kube/config /root/.kube/config.bak
+~/rbac-test# cp opsuser.kubeconfig /root/.kube/config
+
+# &#x67E5;&#x770B;&#x8D44;&#x6E90;
+:~/rbac-test# kubectl get pods 
+NAME                                     READY     STATUS             RESTARTS   AGE
+appdev-5c4b65bbbb-t4lvr                  1/1       Running            2          44d
+deptest13dev-fb79d9957-d55vb             0/1       Pending            0          35d
+deptest13test-8687769d58-lzm2r           0/1       Pending            0          41d
+deptest14dbtm-ffbd5c56c-ph68l            0/2       Pending            0          41d
+deptest14test-7cb7bf6cc-xnrxw            0/1       Pending            0          41d
+
+:~/rbac-test# kubectl get nodes
+Error from server (Forbidden): nodes is forbidden: User &quot;opsuser&quot; cannot list nodes at the cluster scope
+</code></pre><p>&#x53EF;&#x4EE5;&#x770B;&#x5230;&#xFF0C;&#x57FA;&#x4E8E;&#x751F;&#x6210;&#x7684;&#x7528;&#x6237;&#x914D;&#x7F6E;&#x6587;&#x4EF6;&#xFF0C;&#x5DF2;&#x7ECF;&#x53EF;&#x4EE5;&#x7BA1;&#x7406;&#x7533;&#x660E;&#x7684;pod&#x8D44;&#x6E90;&#xFF0C;&#x65E0;&#x6CD5;&#x7BA1;&#x7406;&#x7533;&#x660E;&#x4EE5;&#x5916;&#x7684;&#x8D44;&#x6E90;&#x7C7B;&#x578B;&#x3002;&#x6D4B;&#x8BD5;&#x6210;&#x529F;</p>
+<h3 id="&#x4E8C;&#x3001;&#x7A0B;&#x5E8F;&#x4F7F;&#x7528;"><a name="&#x4E8C;&#x3001;&#x7A0B;&#x5E8F;&#x4F7F;&#x7528;" class="plugin-anchor" href="#&#x4E8C;&#x3001;&#x7A0B;&#x5E8F;&#x4F7F;&#x7528;"><i class="fa fa-link" aria-hidden="true"></i></a>&#x4E8C;&#x3001;&#x7A0B;&#x5E8F;&#x4F7F;&#x7528;</h3>
+<p>&#x4E0E;&#x7528;&#x6237;&#x4F7F;&#x7528;User&#x4E0D;&#x540C;&#x7684;&#x662F;&#xFF0C;&#x7A0B;&#x5E8F;&#x7684;&#x6743;&#x9650;&#x8D4B;&#x4E88;&#x662F;&#x901A;&#x8FC7;ServiceAccount&#x6765;&#x4F5C;&#x4E3A;&#x6743;&#x9650;&#x8F7D;&#x4F53;&#x7684;&#xFF0C;&#x56E0;&#x6B64;&#xFF0C;&#x9996;&#x5148;&#x8981;&#x62E5;&#x6709;&#x7A0B;&#x5E8F;/deployment/ServiceAccount&#x7B49;&#x8D44;&#x6E90;&#xFF0C;&#x8FD9;&#x91CC;&#x4EE5;&#x524D;&#x9762;&#x6587;&#x7AE0;&#x91CC;&#x6CA1;&#x6709;&#x8BB2;&#x7684;kube dashboard&#x4E3A;&#x4F8B;&#x8FDB;&#x884C;&#x8BF4;&#x660E;&#x3002;</p>
+<p>&#x9996;&#x5148;&#x6211;&#x4EEC;&#x6765;&#x770B;&#x5B98;&#x65B9;&#x6700;&#x65B0;&#x7248;&#x672C;&#x7684;kube dashboard&#x7684;yaml&#x6587;&#x4EF6;(&#x670D;&#x52A1;&#x66B4;&#x9732;&#x65B9;&#x5F0F;&#x7A0D;&#x4F5C;&#x4FEE;&#x6539;&#x6210;&#x4E86;NodePort)&#xFF1A;</p>
+<pre><code>~/dashboard# cat kubernetes-dashboard.yaml
+# ------------------- Dashboard Secret ------------------- #
+
+apiVersion: v1
+kind: Secret
+metadata:
+  labels:
+    k8s-app: kubernetes-dashboard
+  name: kubernetes-dashboard-certs
+  namespace: kube-system
+type: Opaque
+
+---
+# ------------------- Dashboard Service Account ------------------- #
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    k8s-app: kubernetes-dashboard
+  name: kubernetes-dashboard
+  namespace: kube-system
+
+---
+# ------------------- Dashboard Role &amp; Role Binding ------------------- #
+
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: kubernetes-dashboard-minimal
+  namespace: kube-system
+rules:
+  # Allow Dashboard to create &apos;kubernetes-dashboard-key-holder&apos; secret.
+- apiGroups: [&quot;&quot;]
+  resources: [&quot;secrets&quot;]
+  verbs: [&quot;create&quot;]
+  # Allow Dashboard to create &apos;kubernetes-dashboard-settings&apos; config map.
+- apiGroups: [&quot;&quot;]
+  resources: [&quot;configmaps&quot;]
+  verbs: [&quot;create&quot;]
+  # Allow Dashboard to get, update and delete Dashboard exclusive secrets.
+- apiGroups: [&quot;&quot;]
+  resources: [&quot;secrets&quot;]
+  resourceNames: [&quot;kubernetes-dashboard-key-holder&quot;, &quot;kubernetes-dashboard-certs&quot;]
+  verbs: [&quot;get&quot;, &quot;update&quot;, &quot;delete&quot;]
+  # Allow Dashboard to get and update &apos;kubernetes-dashboard-settings&apos; config map.
+- apiGroups: [&quot;&quot;]
+  resources: [&quot;configmaps&quot;]
+  resourceNames: [&quot;kubernetes-dashboard-settings&quot;]
+  verbs: [&quot;get&quot;, &quot;update&quot;]
+  # Allow Dashboard to get metrics from heapster.
+- apiGroups: [&quot;&quot;]
+  resources: [&quot;services&quot;]
+  resourceNames: [&quot;heapster&quot;]
+  verbs: [&quot;proxy&quot;]
+- apiGroups: [&quot;&quot;]
+  resources: [&quot;services/proxy&quot;]
+  resourceNames: [&quot;heapster&quot;, &quot;http:heapster:&quot;, &quot;https:heapster:&quot;]
+  verbs: [&quot;get&quot;]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: kubernetes-dashboard-minimal
+  namespace: kube-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: kubernetes-dashboard-minimal
+subjects:
+- kind: ServiceAccount
+  name: kubernetes-dashboard
+  namespace: kube-system
+
+---
+# ------------------- Dashboard Deployment ------------------- #
+
+kind: Deployment
+apiVersion: apps/v1beta2
+metadata:
+  labels:
+    k8s-app: kubernetes-dashboard
+  name: kubernetes-dashboard
+  namespace: kube-system
+spec:
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      k8s-app: kubernetes-dashboard
+  template:
+    metadata:
+      labels:
+        k8s-app: kubernetes-dashboard
+    spec:
+      containers:
+      - name: kubernetes-dashboard
+        image: k8s.gcr.io/kubernetes-dashboard-amd64:v1.10.0
+        ports:
+        - containerPort: 8443
+          protocol: TCP
+        args:
+          - --auto-generate-certificates
+          # Uncomment the following line to manually specify Kubernetes API server Host
+          # If not specified, Dashboard will attempt to auto discover the API server and connect
+          # to it. Uncomment only if the default does not work.
+          # - --apiserver-host=http://my-address:port
+        volumeMounts:
+        - name: kubernetes-dashboard-certs
+          mountPath: /certs
+          # Create on-disk volume to store exec logs
+        - mountPath: /tmp
+          name: tmp-volume
+        livenessProbe:
+          httpGet:
+            scheme: HTTPS
+            path: /
+            port: 8443
+          initialDelaySeconds: 30
+          timeoutSeconds: 30
+      volumes:
+      - name: kubernetes-dashboard-certs
+        secret:
+          secretName: kubernetes-dashboard-certs
+      - name: tmp-volume
+        emptyDir: {}
+      serviceAccountName: kubernetes-dashboard
+      # Comment the following tolerations if Dashboard must not be deployed on master
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        effect: NoSchedule
+
+---
+# ------------------- Dashboard Service ------------------- #
+
+kind: Service
+apiVersion: v1
+metadata:
+  labels:
+    k8s-app: kubernetes-dashboard
+  name: kubernetes-dashboard
+  namespace: kube-system
+spec:
+  type: NodePort
+  ports:
+    - port: 443
+      targetPort: 8443
+      nodePort: 30001
+  selector:
+    k8s-app: kubernetes-dashboard
+:~/dashboard# ls
+admin-token.yaml  kubernetes-dashboard.yaml
+:~/dashboard# vim kubernetes-dashboard.yaml 
+:~/dashboard# cat kubernetes-dashboard.yaml 
+# Copyright 2017 The Kubernetes Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# ------------------- Dashboard Secret ------------------- #
+
+apiVersion: v1
+kind: Secret
+metadata:
+  labels:
+    k8s-app: kubernetes-dashboard
+  name: kubernetes-dashboard-certs
+  namespace: kube-system
+type: Opaque
+
+---
+# ------------------- Dashboard Service Account ------------------- #
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    k8s-app: kubernetes-dashboard
+  name: kubernetes-dashboard
+  namespace: kube-system
+
+---
+# ------------------- Dashboard Role &amp; Role Binding ------------------- #
+
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: kubernetes-dashboard-minimal
+  namespace: kube-system
+rules:
+  # Allow Dashboard to create &apos;kubernetes-dashboard-key-holder&apos; secret.
+- apiGroups: [&quot;&quot;]
+  resources: [&quot;secrets&quot;]
+  verbs: [&quot;create&quot;]
+  # Allow Dashboard to create &apos;kubernetes-dashboard-settings&apos; config map.
+- apiGroups: [&quot;&quot;]
+  resources: [&quot;configmaps&quot;]
+  verbs: [&quot;create&quot;]
+  # Allow Dashboard to get, update and delete Dashboard exclusive secrets.
+- apiGroups: [&quot;&quot;]
+  resources: [&quot;secrets&quot;]
+  resourceNames: [&quot;kubernetes-dashboard-key-holder&quot;, &quot;kubernetes-dashboard-certs&quot;]
+  verbs: [&quot;get&quot;, &quot;update&quot;, &quot;delete&quot;]
+  # Allow Dashboard to get and update &apos;kubernetes-dashboard-settings&apos; config map.
+- apiGroups: [&quot;&quot;]
+  resources: [&quot;configmaps&quot;]
+  resourceNames: [&quot;kubernetes-dashboard-settings&quot;]
+  verbs: [&quot;get&quot;, &quot;update&quot;]
+  # Allow Dashboard to get metrics from heapster.
+- apiGroups: [&quot;&quot;]
+  resources: [&quot;services&quot;]
+  resourceNames: [&quot;heapster&quot;]
+  verbs: [&quot;proxy&quot;]
+- apiGroups: [&quot;&quot;]
+  resources: [&quot;services/proxy&quot;]
+  resourceNames: [&quot;heapster&quot;, &quot;http:heapster:&quot;, &quot;https:heapster:&quot;]
+  verbs: [&quot;get&quot;]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: kubernetes-dashboard-minimal
+  namespace: kube-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: kubernetes-dashboard-minimal
+subjects:
+- kind: ServiceAccount
+  name: kubernetes-dashboard
+  namespace: kube-system
+
+---
+# ------------------- Dashboard Deployment ------------------- #
+
+kind: Deployment
+apiVersion: apps/v1beta2
+metadata:
+  labels:
+    k8s-app: kubernetes-dashboard
+  name: kubernetes-dashboard
+  namespace: kube-system
+spec:
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      k8s-app: kubernetes-dashboard
+  template:
+    metadata:
+      labels:
+        k8s-app: kubernetes-dashboard
+    spec:
+      containers:
+      - name: kubernetes-dashboard
+        image: k8s.gcr.io/kubernetes-dashboard-amd64:v1.10.0
+        ports:
+        - containerPort: 8443
+          protocol: TCP
+        args:
+          - --auto-generate-certificates
+          # Uncomment the following line to manually specify Kubernetes API server Host
+          # If not specified, Dashboard will attempt to auto discover the API server and connect
+          # to it. Uncomment only if the default does not work.
+          # - --apiserver-host=http://my-address:port
+        volumeMounts:
+        - name: kubernetes-dashboard-certs
+          mountPath: /certs
+          # Create on-disk volume to store exec logs
+        - mountPath: /tmp
+          name: tmp-volume
+        livenessProbe:
+          httpGet:
+            scheme: HTTPS
+            path: /
+            port: 8443
+          initialDelaySeconds: 30
+          timeoutSeconds: 30
+      volumes:
+      - name: kubernetes-dashboard-certs
+        secret:
+          secretName: kubernetes-dashboard-certs
+      - name: tmp-volume
+        emptyDir: {}
+      serviceAccountName: kubernetes-dashboard
+      # Comment the following tolerations if Dashboard must not be deployed on master
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        effect: NoSchedule
+
+---
+# ------------------- Dashboard Service ------------------- #
+
+kind: Service
+apiVersion: v1
+metadata:
+  labels:
+    k8s-app: kubernetes-dashboard
+  name: kubernetes-dashboard
+  namespace: kube-system
+spec:
+  type: NodePort
+  ports:
+    - port: 443
+      targetPort: 8443
+      nodePort: 30001
+  selector:
+    k8s-app: kubernetes-dashboard
+</code></pre><p>&#x90E8;&#x7F72;dashboard&#xFF1A;</p>
+<pre><code>kubectl apply -f kubernetes-dashboard.yaml
+</code></pre><p>&#x6D4F;&#x89C8;&#x5668;&#x8BBF;&#x95EE;dashboard&#x9700;&#x8981;token&#xFF0C;&#x6216;&#x8005;kube-config&#x6587;&#x4EF6;&#xFF0C;&#x8FD9;&#x91CC;&#x4F7F;&#x7528;token&#xFF0C;&#x5728;&#x521B;&#x5EFA;&#x597D;ServiceAccount&#x4E14;&#x548C;role&#x8FDB;&#x884C;bind&#x7ED1;&#x5B9A;&#x4E4B;&#x540E;&#xFF0C;&#x4F1A;&#x81EA;&#x52A8;&#x521B;&#x5EFA;&#x4E00;&#x4E2A;&#x540D;&#x4E3A;${ServiceAccountName}-token-xxx &#x7684;Secret&#xFF0C;&#x5176;&#x5185;&#x5305;&#x542B;token&#xFF0C;&#x4E3A;base64&#x7F16;&#x7801;&#xFF0C;&#x53EF;&#x4EE5;&#x4F7F;&#x7528;kubectl describe&#x76F4;&#x63A5;&#x67E5;&#x770B;&#xFF1A;</p>
+<pre><code>:~/dashboard# kubectl get secret -o wide -n kube-system | grep kubernetes-dashboard
+istio.kubernetes-dashboard                       istio.io/key-and-cert                 3         2d
+kubernetes-dashboard-certs                       Opaque                                0         2d
+kubernetes-dashboard-key-holder                  Opaque                                2         2d
+kubernetes-dashboard-token-t2mmr                 kubernetes.io/service-account-token   3         2d
+
+
+:~/dashboard# kubectl describe secret -n kube-system kubernetes-dashboard-token-t2mmr
+Name:         kubernetes-dashboard-token-t2mmr
+Namespace:    kube-system
+Labels:       &lt;none&gt;
+Annotations:  kubernetes.io/service-account.name=kubernetes-dashboard
+              kubernetes.io/service-account.uid=4f237c6c-f7ad-11e8-9859-0050569da8f2
+
+Type:  kubernetes.io/service-account-token
+
+Data
+====
+ca.crt:     1025 bytes
+namespace:  11 bytes
+token:      eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJrdWJlLXN5c3RlbSIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VjcmV0Lm5hbWUiOiJrdWJlcm5ldGVzLWRhc2hib2FyZC10b2tlbi10Mm1tciIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50Lm5hbWUiOiJrdWJlcm5ldGVzLWRhc2hib2FyZCIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50LnVpZCI6IjRmMjM3YzZjLWY3YWQtMTFlOC05ODU5LTAwNTA1NjlkYThmMiIsInN1YiI6InN5c3RlbTpzZXJ2aWNlYWNjb3VudDprdWJlLXN5c3RlbTprdWJlcm5ldGVzLWRhc2hib2FyZCJ9.UEJ0MBO9RhSF_fzZHPKezWqkZsWG3atFQQgoPGlyyIDXtQN-ZYlZPEScjunwp4FVgX5uRMpxHGyexJN5e8zYouMTRrGaDaIu7cGj5ICP80iabi8wyMCnJrR5_p0Tmy2PkNZDCyh0MbDCJE6lbOv7Lu7CldivEMtr4BAvxvMmBdmoT0CixQexfw2tioeeoYBwEKgxjL6mMBIGKE0spGZQova7bzTN8f2ZGpNn8jFI_EW9Y7Et5sitw3rCRwxxMSDwUwwCOv26NXPnPVA7cWJeuzPRTS0BHE0euRYojQN7F77NkfwCynx8iWGpM2MEuHIj6coCUcTuCyN5yMD1Zag2zg
+</code></pre><p>&#x4F7F;&#x7528;&#x6B64;token&#x767B;&#x5F55;dashboard&#xFF1A;
+<img src="http://mycloudn.kokoerp.com/20181206195424194.png" alt="&#x5728;&#x8FD9;&#x91CC;&#x63D2;&#x5165;&#x56FE;&#x7247;&#x63CF;&#x8FF0;"></p>
+<p><img src="http://mycloudn.kokoerp.com/20181206195531599.png" alt="&#x5728;&#x8FD9;&#x91CC;&#x63D2;&#x5165;&#x56FE;&#x7247;&#x63CF;&#x8FF0;"></p>
+<p>&#x7B2C;&#x4E8C;&#x5F20;&#x622A;&#x56FE;&#x53EF;&#x4EE5;&#x53D1;&#x73B0;&#xFF0C;dashboard&#x65E0;&#x591A;&#x79CD;&#x8D44;&#x6E90;&#x7C7B;&#x578B;&#x7684;list&#x6743;&#x9650;&#xFF0C;&#x8FD9;&#x662F;&#x56E0;&#x4E3A;&#x5728;&#x4E0A;&#x9762;&#x7684;yaml&#x6587;&#x4EF6;&#x4E2D;&#xFF0C;&#x5B9A;&#x4E49;&#x7684;role&#x6743;&#x9650;&#x662F;&#x9650;&#x5B9A;&#x7684;&#xFF1A;</p>
+<pre><code># ------------------- Dashboard Role &amp; Role Binding ------------------- #
+
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: kubernetes-dashboard-minimal
+  namespace: kube-system
+rules:
+  # Allow Dashboard to create &apos;kubernetes-dashboard-key-holder&apos; secret.
+- apiGroups: [&quot;&quot;]
+  resources: [&quot;secrets&quot;]
+  verbs: [&quot;create&quot;]
+  # Allow Dashboard to create &apos;kubernetes-dashboard-settings&apos; config map.
+- apiGroups: [&quot;&quot;]
+  resources: [&quot;configmaps&quot;]
+  verbs: [&quot;create&quot;]
+  # Allow Dashboard to get, update and delete Dashboard exclusive secrets.
+- apiGroups: [&quot;&quot;]
+  resources: [&quot;secrets&quot;]
+  resourceNames: [&quot;kubernetes-dashboard-key-holder&quot;, &quot;kubernetes-dashboard-certs&quot;]
+  verbs: [&quot;get&quot;, &quot;update&quot;, &quot;delete&quot;]
+  # Allow Dashboard to get and update &apos;kubernetes-dashboard-settings&apos; config map.
+- apiGroups: [&quot;&quot;]
+  resources: [&quot;configmaps&quot;]
+  resourceNames: [&quot;kubernetes-dashboard-settings&quot;]
+  verbs: [&quot;get&quot;, &quot;update&quot;]
+  # Allow Dashboard to get metrics from heapster.
+- apiGroups: [&quot;&quot;]
+  resources: [&quot;services&quot;]
+  resourceNames: [&quot;heapster&quot;]
+  verbs: [&quot;proxy&quot;]
+- apiGroups: [&quot;&quot;]
+  resources: [&quot;services/proxy&quot;]
+  resourceNames: [&quot;heapster&quot;, &quot;http:heapster:&quot;, &quot;https:heapster:&quot;]
+  verbs: [&quot;get&quot;]
+</code></pre><p>&#x53EF;&#x4EE5;&#x4FEE;&#x6539;&#x8FD9;&#x91CC;&#x7684;Role&#x5185;&#x90E8;&#x7684;&#x6743;&#x9650;&#xFF0C;&#x4E5F;&#x53EF;&#x4EE5;&#x81EA;&#x884C;&#x914D;&#x7F6E;&#x66F4;&#x9AD8;&#x7EA7;&#x7684;&#x6743;&#x9650;&#xFF0C;&#x6211;&#x8FD9;&#x91CC;&#x4E3A;&#x4E86;&#x65B9;&#x4FBF;&#xFF0C;&#x76F4;&#x63A5;&#x914D;&#x7F6E;&#x4E86;&#x4E00;&#x4E2A;admin&#x7684;ServiceAccount:</p>
+<pre><code>~/dashboard# cat admin-token.yaml
+
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: admin
+  annotations:
+    rbac.authorization.kubernetes.io/autoupdate: &quot;true&quot;
+roleRef:
+  kind: ClusterRole  # ClusterRole&#x62E5;&#x6709;&#x96C6;&#x7FA4;&#x7EA7;&#x522B;&#x6743;&#x9650;&#xFF0C;&#x4E8E;&#x6B64;&#x540C;&#x65F6;&#x7ED1;&#x5B9A;&#x65F6;&#x4E0D;&#x80FD;&#x518D;&#x4F7F;&#x7528;RoleBinding&#x800C;&#x5E94;&#x8BE5;&#x4F7F;&#x7528;ClusterRoleBinding
+  name: cluster-admin
+  apiGroup: rbac.authorization.k8s.io
+subjects:
+- kind: ServiceAccount
+  name: admin
+  namespace: kube-system
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: admin
+  namespace: kube-system
+  labels:
+    kubernetes.io/cluster-service: &quot;true&quot;
+    addonmanager.kubernetes.io/mode: Reconcile
+</code></pre><p>&#x521B;&#x5EFA;&#xFF1A;</p>
+<pre><code>~/dashboard# kubectl apply -f admin-token.yaml
+</code></pre><p>&#x67E5;&#x770B;token&#xFF1A;</p>
+<pre><code>:~/dashboard# kubectl get secret -n kube-system | grep admin
+admin-token-b9r26                                kubernetes.io/service-account-token   3         1d
+
+~/dashboard# kubectl describe secret -n kube-system admin-token-b9r26
+Name:         admin-token-b9r26
+Namespace:    kube-system
+Labels:       &lt;none&gt;
+Annotations:  kubernetes.io/service-account.name=admin
+              kubernetes.io/service-account.uid=d471a78c-f833-11e8-9859-0050569da8f2
+
+Type:  kubernetes.io/service-account-token
+
+Data
+====
+ca.crt:     1025 bytes
+namespace:  11 bytes
+token:      eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJrdWJlLXN5c3RlbSIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VjcmV0Lm5hbWUiOiJhZG1pbi10b2tlbi1iOXIyNiIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50Lm5hbWUiOiJhZG1pbiIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50LnVpZCI6ImQ0NzFhNzhjLWY4MzMtMTFlOC05ODU5LTAwNTA1NjlkYThmMiIsInN1YiI6InN5c3RlbTpzZXJ2aWNlYWNjb3VudDprdWJlLXN5c3RlbTphZG1pbiJ9.euwxJkmtt7mjbpzHdMzJWmxO0swuVRjYFGkEwzX1E6caXrUj1XXrSQO4J3mttJvMOVQaGEztInI-cKMiTDzLYHE_85VISHbZTUA8dcSFDIuGOt4SRI_XoA11pIlUAmH4b_4kxgaA3DA5TdUX6O2mo93QEvLOOngBkLO55Z9y980H_J5JiBgbndnycOGXVIW-gEgEjBewtiH1ZCiha-lwUlTvSNJkLrTPlm5Rjoao8lONn4vcD1sgzrSrW8VMxxclw8Cu3C79zyujHo0F_YuwHteIlBwOPSTaiokbuyQr-IS2UTpwUxlzf__wXgidc_SXqTC9vecM7hcRVhEi_d_hnw
+</code></pre><p>dashboard&#x9000;&#x51FA;&#x4E4B;&#x524D;&#x7684;&#x8D26;&#x53F7;&#xFF0C;&#x4F7F;&#x7528;admin-token&#x91CD;&#x65B0;&#x767B;&#x5F55;&#xFF0C;&#x53EF;&#x4EE5;&#x53D1;&#x73B0;&#x5DF2;&#x7ECF;&#x62E5;&#x6709;&#x5168;&#x90E8;&#x6743;&#x9650;&#xFF1A;
+<img src="http://mycloudn.kokoerp.com/20181206201141603.png" alt="&#x5728;&#x8FD9;&#x91CC;&#x63D2;&#x5165;&#x56FE;&#x7247;&#x63CF;&#x8FF0;"></p>
+<h2 id="&#x603B;&#x7ED3;"><a name="&#x603B;&#x7ED3;" class="plugin-anchor" href="#&#x603B;&#x7ED3;"><i class="fa fa-link" aria-hidden="true"></i></a>&#x603B;&#x7ED3;</h2>
+<p>k8s&#x89D2;&#x8272;&#x6388;&#x6743;&#x4F7F;&#x7528;&#x7684;&#x6D41;&#x7A0B;&#x6709;&#x591A;&#x4E2A;&#x73AF;&#x8282;&#x591A;&#x79CD;&#x8D44;&#x6E90;&#x7C7B;&#x578B;&#x642D;&#x914D;&#x5B8C;&#x6210;&#xFF0C;&#x6743;&#x9650;&#x7C92;&#x5EA6;&#x660E;&#x786E;&#x3001;&#x7528;&#x6237;&#x4E0E;&#x8FDB;&#x7A0B;&#x5206;&#x5DE5;&#x6709;&#x5E8F;&#xFF0C;&#x7406;&#x89E3;&#x4E86;&#x9876;&#x90E8;&#x7684;&#x6D41;&#x7A0B;&#x56FE;&#xFF0C;&#x76F8;&#x4FE1;&#x4F60;&#x5C06;&#x4E0D;&#x518D;&#x4E3A;RBAC&#x7591;&#x60D1;&#x3002;</p>
+
+                                
+                                </section>
+                            
+    </div>
+    <div class="search-results">
+        <div class="has-results">
+            
+            <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+            <ul class="search-results-list"></ul>
+            
+        </div>
+        <div class="no-results">
+            
+            <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+            
+        </div>
+    </div>
+</div>
+
+                        </div>
+                    </div>
+                
+            </div>
+
+            
+                
+                <a href="Kubernetes中的Pause容器.html" class="navigation navigation-prev " aria-label="Previous page: 2.3. Kubernetes中的Pause容器">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+                
+                
+                <a href="docker-k8s常用命令速查及rest-api.html" class="navigation navigation-next " aria-label="Next page: 2.5. 常用命令与rest-api速查">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+                
+            
+        
+    </div>
+
+    <script>
+        var gitbook = gitbook || [];
+        gitbook.push(function() {
+            gitbook.page.hasChanged({"page":{"title":"2.4. RBAC权限控制","date":"2018/12/06 20:16:10","tags":["Kubernetes"],"level":"2.1.4","depth":2,"next":{"title":"2.5. 常用命令与rest-api速查","level":"2.1.5","depth":2,"path":"part2/docker-k8s常用命令速查及rest-api.md","ref":"./part2/docker-k8s常用命令速查及rest-api.md","articles":[]},"previous":{"title":"2.3. Kubernetes中的Pause容器","level":"2.1.3","depth":2,"path":"part2/Kubernetes中的Pause容器.md","ref":"./part2/Kubernetes中的Pause容器.md","articles":[]},"dir":"ltr"},"config":{"plugins":["-sharing","anchors","github","expandable-chapters","splitter","back-to-top-button"],"styles":{"website":"./styles/website.css"},"pluginsConfig":{"github":{"url":"https://github.com/yinwenqin/kubeSourceCodeNote"},"splitter":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"back-to-top-button":{},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false},"anchors":{},"expandable-chapters":{}},"theme":"default","author":"ywq","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"Kubernetes生态圈使用","language":"zh-hans","links":{},"gitbook":"3.2.3","description":""},"file":{"path":"part2/RBAC权限控制.md","mtime":"2019-11-21T07:58:03.031Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2019-11-21T08:49:48.491Z"},"basePath":"..","book":{"language":""}});
+        });
+    </script>
+</div>
+
+        
+    <script src="../gitbook/gitbook.js"></script>
+    <script src="../gitbook/theme.js"></script>
+    
+        
+        <script src="../gitbook/gitbook-plugin-github/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-expandable-chapters/expandable-chapters.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-splitter/splitter.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-back-to-top-button/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search/search-engine.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search/search.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-lunr/lunr.min.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-lunr/search-lunr.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-fontsettings/fontsettings.js"></script>
+        
+    
+
+    </body>
+</html>
+

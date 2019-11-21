@@ -1,0 +1,1560 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-CN">
+
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link rel="stylesheet" href="/lib/pace/pace-theme-bounce.min.css?v=1.0.2">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link rel="stylesheet" href="/lib/fancybox/source/jquery.fancybox.css">
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+    
+      
+    
+
+    
+  
+
+  
+
+  
+
+  
+    
+      
+    
+
+    
+  
+
+  
+    
+    
+    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic|Roboto Slab:300,300italic,400,400italic,700,700italic|Roboto Mono:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext">
+  
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.1.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.1.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.1.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.1.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.1.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '7.1.1',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":true,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: true,
+    fancybox: true,
+    fastclick: true,
+    lazyload: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"shrinkIn","post_header":"slideLeftIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideDownIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <script>
+  (function(i,s,o,g,r,a,m){i["DaoVoiceObject"]=r;i[r]=i[r]||function(){(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;a.charset="utf-8";m.parentNode.insertBefore(a,m)})(window,document,"script",('https:' == document.location.protocol ? 'https:' : 'http:') + "//widget.daovoice.io/widget/0f81ff2f.js","daovoice")
+  daovoice('init', {
+      app_id: "bd399fce"
+    });
+  daovoice('update');
+  </script>
+
+  <meta name="description" content="##  调度器入口前言本篇介绍scheduler的初始化相关逻辑 入口之前入口函数是位于cmd/kube-scheduler/scheduler.go中的main()方法,调用的是app.NewSchedulerCommand()方法，跳转至此方法，可以看到函数上方的注释： 1234// NewSchedulerCommand creates a *cobra.Command object wit">
+<meta name="keywords" content="Kubernetes,Golang,读源码">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kubernetes源码学习-Scheduler-P1-调度器入口篇">
+<meta property="og:url" content="https://www.ipyker.com/2019/08/05/Kubernetes源码学习-Scheduler-P1-调度器入口篇.html">
+<meta property="og:site_name" content="随笔漫谈">
+<meta property="og:description" content="##  调度器入口前言本篇介绍scheduler的初始化相关逻辑 入口之前入口函数是位于cmd/kube-scheduler/scheduler.go中的main()方法,调用的是app.NewSchedulerCommand()方法，跳转至此方法，可以看到函数上方的注释： 1234// NewSchedulerCommand creates a *cobra.Command object wit">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://mycloudn.kokoerp.com/cobra1.jpg">
+<meta property="og:image" content="http://mycloudn.kokoerp.com/cobra2.jpg">
+<meta property="og:image" content="http://mycloudn.kokoerp.com/cobra3.jpg">
+<meta property="og:image" content="http://mycloudn.kokoerp.com/cobra4.jpg">
+<meta property="og:image" content="http://mycloudn.kokoerp.com/cobra5.jpg">
+<meta property="og:image" content="http://mycloudn.kokoerp.com/cobra6.jpg">
+<meta property="og:image" content="http://mycloudn.kokoerp.com/main1.jpg">
+<meta property="og:image" content="http://mycloudn.kokoerp.com/runCommand.jpg">
+<meta property="og:image" content="http://mycloudn.kokoerp.com/runCommand.jpg">
+<meta property="og:image" content="http://mycloudn.kokoerp.com/Run.jpg">
+<meta property="og:image" content="http://mycloudn.kokoerp.com/scheRun.jpg">
+<meta property="og:image" content="http://mycloudn.kokoerp.com/image-20190827163439895.png">
+<meta property="og:updated_time" content="2019-11-21T07:48:40.098Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Kubernetes源码学习-Scheduler-P1-调度器入口篇">
+<meta name="twitter:description" content="##  调度器入口前言本篇介绍scheduler的初始化相关逻辑 入口之前入口函数是位于cmd/kube-scheduler/scheduler.go中的main()方法,调用的是app.NewSchedulerCommand()方法，跳转至此方法，可以看到函数上方的注释： 1234// NewSchedulerCommand creates a *cobra.Command object wit">
+<meta name="twitter:image" content="http://mycloudn.kokoerp.com/cobra1.jpg">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="随笔漫谈" type="application/atom+xml">
+
+
+
+  
+  
+  <link rel="canonical" href="https://www.ipyker.com/2019/08/05/Kubernetes源码学习-Scheduler-P1-调度器入口篇">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Kubernetes源码学习-Scheduler-P1-调度器入口篇 | 随笔漫谈</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+ 
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">随笔漫谈</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-book">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/gitbooks/" rel="section"><i class="menu-item-icon fa fa-fw fa-book"></i> <br>book</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-互动">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/guestbook/" rel="section"><i class="menu-item-icon fa fa-fw fa-comments"></i> <br>互动</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.ipyker.com/2019/08/05/Kubernetes源码学习-Scheduler-P1-调度器入口篇.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="丨ywq丨">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随笔漫谈">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Kubernetes源码学习-Scheduler-P1-调度器入口篇
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-08-05 16:27:53" itemprop="dateCreated datePublished" datetime="2019-08-05T16:27:53+08:00">2019-08-05</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-11-21 15:48:40" itemprop="dateModified" datetime="2019-11-21T15:48:40+08:00">2019-11-21</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+            <div class="post-symbolscount">
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">本文字数：</span>
+                
+                <span title="本文字数">5.3k</span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">5 分钟</span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>## </p>
+<h1 id="调度器入口"><a href="#调度器入口" class="headerlink" title="调度器入口"></a>调度器入口</h1><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>本篇介绍scheduler的初始化相关逻辑</p>
+<h2 id="入口之前"><a href="#入口之前" class="headerlink" title="入口之前"></a>入口之前</h2><p>入口函数是位于<code>cmd/kube-scheduler/scheduler.go</code>中的main()方法,调用的是app.NewSchedulerCommand()方法，跳转至此方法，可以看到函数上方的注释：</p>
+<figure class="highlight autoit"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">// NewSchedulerCommand creates a *cobra.Command object <span class="keyword">with</span> <span class="keyword">default</span> parameters</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewSchedulerCommand</span><span class="params">()</span> *<span class="title">cobra</span>.<span class="title">Command</span> &#123;</span></span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>NewSchedulerCommand创建的是一个cobra.Command对象，后续的命令行处理相关功能都是借助cobra来实现的，那么继续往下之前，为了避免从入口开始就一脸懵，有必要了解一下cobra这个工具</p>
+<h2 id="cobra"><a href="#cobra" class="headerlink" title="cobra"></a>cobra</h2><h4 id="什么是cobra"><a href="#什么是cobra" class="headerlink" title="什么是cobra?"></a>什么是cobra?</h4><p>github主页: <a href="https://github.com/spf13/cobra" target="_blank" rel="noopener">https://github.com/spf13/cobra</a><br>主页的介绍是: Cobra是一个强大的用于创建现代化CLI命令行程序的库，用于生成应用程序和命令文件。众多高知名度的项目采用了它，例如我们熟悉的kubernetes和docker<br>cobra创建的程序CLI遵循的模式是: <code>APPNAME COMMAND ARG --FLAG</code>，与常见的其他命令行程序一样，例如git: <code>git clone URL --bare</code></p>
+<h4 id="安装："><a href="#安装：" class="headerlink" title="安装："></a>安装：</h4><figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">#最简单的安装方式，但毫无意外，事情并没有那么简单，我们的网络的问题，导致无法正常安装依赖，</span><br><span class="line"><span class="keyword">go</span> <span class="built_in">get</span> -<span class="keyword">u</span> github.<span class="keyword">com</span>/spf13/cobra/cobra</span><br><span class="line"></span><br><span class="line">#怎么办呢？先进入GOPATH中，手动安装报错缺失的两个依赖:</span><br><span class="line"><span class="keyword">cd</span> /Users/ywq/<span class="keyword">go</span>/</span><br><span class="line"><span class="built_in">mkdir</span> -<span class="keyword">p</span> src/golang.org/<span class="keyword">x</span></span><br><span class="line"><span class="keyword">cd</span> golang.org/<span class="keyword">x</span></span><br><span class="line">git clone http<span class="variable">s:</span>//github.<span class="keyword">com</span>/golang/text.git</span><br><span class="line">git clone http<span class="variable">s:</span>//github.<span class="keyword">com</span>/golang/sys.git</span><br><span class="line"></span><br><span class="line">#然后执行:</span><br><span class="line"><span class="keyword">go</span> install github.<span class="keyword">com</span>/spf13/cobra/cobra</span><br><span class="line">matebook-<span class="keyword">x</span>-<span class="keyword">pro</span>:<span class="keyword">x</span> ywq$ <span class="keyword">ls</span> /Users/ywq/<span class="keyword">go</span>/bin/cobra</span><br><span class="line">/Users/ywq/<span class="keyword">go</span>/bin/cobra</span><br><span class="line">#安装完毕,记得把GOBIN加入PATH环境变量哦,否则无法直接运行cobra命令</span><br></pre></td></tr></table></figure>
+<h4 id="简单试用cobra"><a href="#简单试用cobra" class="headerlink" title="简单试用cobra:"></a>简单试用cobra:</h4><figure class="highlight stata"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">matebook-x-<span class="keyword">pro</span>:<span class="keyword">local</span> ywq$ <span class="keyword">cd</span> /Users/ywq/go/src/<span class="keyword">local</span>/</span><br><span class="line">matebook-x-<span class="keyword">pro</span>:<span class="keyword">local</span> ywq$ cobra init testapp --pkg-name=<span class="keyword">local</span>/testapp</span><br><span class="line">matebook-x-<span class="keyword">pro</span>:<span class="keyword">local</span> ywq$ <span class="keyword">ls</span></span><br><span class="line">testapp</span><br><span class="line">matebook-x-<span class="keyword">pro</span>:<span class="keyword">local</span> ywq$ <span class="keyword">ls</span> testapp/</span><br><span class="line">LICENSE  cmd/     main.go</span><br><span class="line">matebook-x-<span class="keyword">pro</span>:<span class="keyword">local</span> ywq$ <span class="keyword">ls</span> testapp/cmd/</span><br><span class="line">root.go</span><br><span class="line">matebook-x-<span class="keyword">pro</span>:<span class="keyword">local</span> ywq$ <span class="keyword">cd</span> testapp</span><br><span class="line">matebook-x-<span class="keyword">pro</span>:<span class="keyword">local</span> ywq$ go <span class="keyword">run</span> main.go </span><br><span class="line"># 报错：subcommand is required，要求提供子命令</span><br><span class="line"># 因需要多次测试，这里所有的测试步骤就把build的步骤跳过，直接使用go <span class="keyword">run</span> main.go进行测试</span><br></pre></td></tr></table></figure>
+<p><strong>我们打开IDE来查看一下testapp的代码结构:</strong><br><img src="http://mycloudn.kokoerp.com/cobra1.jpg" alt="image"><br><img src="http://mycloudn.kokoerp.com/cobra2.jpg" alt="image"></p>
+<figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"># 现在还未创建子命令，那么来创建几个试试:</span><br><span class="line">matebook-<span class="keyword">x</span>-<span class="keyword">pro</span>:testapp ywq$ cobra <span class="built_in">add</span> <span class="built_in">get</span></span><br><span class="line"><span class="built_in">get</span> created at /Users/ywq/<span class="keyword">go</span>/src/local/testapp</span><br><span class="line">matebook-<span class="keyword">x</span>-<span class="keyword">pro</span>:testapp ywq$ cobra <span class="built_in">add</span> <span class="keyword">delete</span></span><br><span class="line"><span class="keyword">delete</span> created at /Users/ywq/<span class="keyword">go</span>/src/local/testapp</span><br><span class="line">matebook-<span class="keyword">x</span>-<span class="keyword">pro</span>:testapp ywq$ cobra <span class="built_in">add</span> <span class="built_in">add</span></span><br><span class="line"><span class="built_in">add</span> created at /Users/ywq/<span class="keyword">go</span>/src/local/testapp</span><br><span class="line">matebook-<span class="keyword">x</span>-<span class="keyword">pro</span>:testapp ywq$ cobra <span class="built_in">add</span> <span class="keyword">update</span></span><br><span class="line">matebook-<span class="keyword">x</span>-<span class="keyword">pro</span>:testapp ywq$ <span class="keyword">ls</span> cmd/</span><br><span class="line"><span class="built_in">add</span>.<span class="keyword">go</span>		<span class="keyword">delete</span>.<span class="keyword">go</span>	<span class="built_in">get</span>.<span class="keyword">go</span>		root.<span class="keyword">go</span>		<span class="keyword">update</span>.<span class="keyword">go</span></span><br><span class="line"></span><br><span class="line"># 查看<span class="keyword">help</span>，可以发现刚添加的子命令已经加入提示并可用了</span><br><span class="line">matebook-<span class="keyword">x</span>-<span class="keyword">pro</span>:testapp ywq$ <span class="keyword">go</span> run main.<span class="keyword">go</span> -h</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">Available Command<span class="variable">s:</span></span><br><span class="line">  <span class="built_in">add</span>         A brief description of your <span class="keyword">command</span></span><br><span class="line">  <span class="keyword">delete</span>      A brief description of your <span class="keyword">command</span></span><br><span class="line">  <span class="built_in">get</span>         A brief description of your <span class="keyword">command</span></span><br><span class="line">  <span class="keyword">help</span>        Help about any <span class="keyword">command</span></span><br><span class="line">  <span class="keyword">update</span>      A brief description of your <span class="keyword">command</span></span><br><span class="line"></span><br><span class="line"># 调用子命令试试:</span><br><span class="line">matebook-<span class="keyword">x</span>-<span class="keyword">pro</span>:testapp ywq$ <span class="keyword">go</span> run main.<span class="keyword">go</span> <span class="built_in">get</span></span><br><span class="line"><span class="built_in">get</span> called</span><br><span class="line">matebook-<span class="keyword">x</span>-<span class="keyword">pro</span>:testapp ywq$ <span class="keyword">go</span> run main.<span class="keyword">go</span> <span class="built_in">add</span></span><br><span class="line"><span class="built_in">add</span> called</span><br></pre></td></tr></table></figure>
+<p><strong>来看看新增的子命令是怎么运行的呢？</strong><br><img src="http://mycloudn.kokoerp.com/cobra3.jpg" alt="image"><br>截图圈中部分可以看出，子命令是在init()函数里为root级添加了一个子命令，先不去管底层实现，接着往下.</p>
+<p><strong>测试cobra的强大简洁的flag处理</strong><br>我们在<code>cmd/delete.go</code>的init()函数中，定义一个flag处理配置:<br><figure class="highlight cs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> obj <span class="keyword">string</span></span><br><span class="line">deleteCmd.PersistentFlags().StringVar(&amp;obj,<span class="string">"object"</span>, <span class="string">""</span>, <span class="string">"A function to delete an test object"</span>)</span><br></pre></td></tr></table></figure></p>
+<p>在<code>Run:func()</code>匿名函数中添加一行输出:<br><code>fmt.Println(&quot;delete obj:&quot;,cmd.Flag(&quot;object&quot;).Value)</code><br><img src="http://mycloudn.kokoerp.com/cobra4.jpg" alt="image"></p>
+<p>运行结果:</p>
+<figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">matebook-<span class="keyword">x</span>-<span class="keyword">pro</span>:testapp ywq$ <span class="keyword">go</span> run main.<span class="keyword">go</span> <span class="keyword">delete</span> --object obj1</span><br><span class="line"><span class="keyword">delete</span> called</span><br><span class="line"><span class="keyword">delete</span> obj: obj1</span><br></pre></td></tr></table></figure>
+<p>如果觉得<code>--</code>flag符号太麻烦，cobra同样支持短符号<code>-</code>flag缩写:<br><img src="http://mycloudn.kokoerp.com/cobra5.jpg" alt="image"></p>
+<p>运行结果:</p>
+<figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">matebook-<span class="keyword">x</span>-<span class="keyword">pro</span>:testapp ywq$ <span class="keyword">go</span> run main.<span class="keyword">go</span> <span class="keyword">delete</span> -<span class="keyword">o</span> obj1</span><br><span class="line"><span class="keyword">delete</span> called</span><br><span class="line"><span class="keyword">delete</span> obj: obj1</span><br></pre></td></tr></table></figure>
+<p>这里只是两级命令加flag,但我们常见的，例如(kubectl delete pod xxx)，是有3级命令 + args的，怎么再多添加一级子命令呢？cobra帮你一条命令实现</p>
+<figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">matebook-<span class="keyword">x</span>-<span class="keyword">pro</span>:testapp ywq$ cobra <span class="built_in">add</span> pods -<span class="keyword">p</span> deleteCmd  # -<span class="keyword">p</span>为父级命令，默认其名称格式为(parentCommandName)Cmd</span><br><span class="line">matebook-<span class="keyword">x</span>-<span class="keyword">pro</span>:testapp ywq$ <span class="keyword">ls</span> cmd</span><br><span class="line"><span class="built_in">add</span>.<span class="keyword">go</span>          <span class="keyword">delete</span>.<span class="keyword">go</span>       <span class="built_in">get</span>.<span class="keyword">go</span>          pods.<span class="keyword">go</span>         root.<span class="keyword">go</span>         <span class="keyword">update</span>.<span class="keyword">go</span></span><br></pre></td></tr></table></figure>
+<p>可以发现,cmd/目录下多了一个pods.go文件，我们来看看它是怎么关联上delete父级命令的,同时为它添加一行输出:<br><img src="http://mycloudn.kokoerp.com/cobra6.jpg" alt="image"><br>执行命令:</p>
+<figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">matebook-<span class="keyword">x</span>-<span class="keyword">pro</span>:testapp ywq$ <span class="keyword">go</span> run main.<span class="keyword">go</span> <span class="keyword">delete</span> pods pod1</span><br><span class="line">pods called</span><br><span class="line"><span class="keyword">delete</span> pod<span class="variable">s:</span> pod1</span><br></pre></td></tr></table></figure>
+<h4 id="看到这里，相信对cobra的强大简洁已经有了初步的认知，建议自行进入项目主页了解详情并进行安装测试"><a href="#看到这里，相信对cobra的强大简洁已经有了初步的认知，建议自行进入项目主页了解详情并进行安装测试" class="headerlink" title="看到这里，相信对cobra的强大简洁已经有了初步的认知，建议自行进入项目主页了解详情并进行安装测试"></a>看到这里，相信对cobra的强大简洁已经有了初步的认知，建议自行进入项目主页了解详情并进行安装测试</h4><h2 id="入口"><a href="#入口" class="headerlink" title="入口"></a>入口</h2><p>通过对上方cobra的基本了解，我们不难知道，<code>cmd/kube-scheduler/scheduler.go</code>内的main()方法内部实际调用的是<code>cobra.Command.Run</code>内的匿名函数，我们可以进入<code>NewSchedulerCommand()</code>内部确认:<br><img src="http://mycloudn.kokoerp.com/main1.jpg" alt="image"></p>
+<p>可以看到，调用了<code>Run</code>内部<code>runCommand</code>方法，再来看看Run方法内部需要重点关注的几个点：<br><img src="http://mycloudn.kokoerp.com/runCommand.jpg" alt="image"></p>
+<p>其中，上方是对命令行的参数、选项校验的步骤，跳过，重点关注两个变量:<code>cc和stopCh</code>，这两个变量会作为最后调用<code>Run()</code>方法的参数，其中<code>stopCh</code>作用是作为主程序退出的信号通知其他各协程进行相关的退出操作的，另外一个cc变量非常重要，可以点击<code>c.Complete()</code>方法，查看该方法的详情：<br><img src="http://mycloudn.kokoerp.com/runCommand.jpg" alt="image"><br><code>Complete()</code>方法本质上返回的是一个Config结构体，该结构体内部的元素非常丰富，篇幅有限就不一一点开截图了，大家可以自行深入查看这些元素的作用，这里简单概括一下其中几个:</p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// scheduler 本身相关的配置都集中于此，例如名称、调度算法、pod亲和性权重、leader选举机制、metric绑定地址，健康检查绑定地址，绑定超时时间等等</span></span><br><span class="line">ComponentConfig kubeschedulerconfig.KubeSchedulerConfiguration</span><br><span class="line"></span><br><span class="line"><span class="comment">// 这几个元素都是与apiserver认证授权相关的</span></span><br><span class="line">InsecureServing        *apiserver<span class="selector-class">.DeprecatedInsecureServingInfo</span> <span class="comment">// nil will disable serving on an insecure port</span></span><br><span class="line">InsecureMetricsServing *apiserver<span class="selector-class">.DeprecatedInsecureServingInfo</span> <span class="comment">// non-nil if metrics should be served independently</span></span><br><span class="line">Authentication         apiserver.AuthenticationInfo</span><br><span class="line">Authorization          apiserver.AuthorizationInfo</span><br><span class="line">SecureServing          *apiserver.SecureServingInfo</span><br><span class="line"></span><br><span class="line"><span class="comment">// Clientset.Interface内部封装了向apiServer所支持的所有apiVersion(apps/v1beta2,extensions/v1beta1...)之下的resource(pod/deployment/service...)发起查询请求的功能</span></span><br><span class="line">Client          clientset.Interface</span><br><span class="line"></span><br><span class="line"><span class="comment">// 这几个元素都是与Event资源相关的，实现rest api处理以及记录、通知等功能</span></span><br><span class="line">EventClient     v1core.EventsGetter</span><br><span class="line">Recorder        record.EventRecorder</span><br><span class="line">Broadcaster     record.EventBroadcaster</span><br></pre></td></tr></table></figure>
+<p>这里层级非常深，不便展示，Config这一个结构体非常重要，可以认真读一读代码。回到<code>cmd/kube-scheduler/app/server.go</code>.<code>runCommand</code>这里来,接着往下，进入其最后return调用的<code>Run()</code>函数中，函数中的前部分都是启动scheduler相关的组件，如event broadcaster、informers、healthz server、metric server等，重点看图中红框圈出的<code>sched.Run()</code>,这才是scheduler主程序的调用运行函数:<br><img src="http://mycloudn.kokoerp.com/Run.jpg" alt="image"></p>
+<p>进入<code>sched.Run()</code>:<br><img src="http://mycloudn.kokoerp.com/scheRun.jpg" alt="image"></p>
+<p><code>wait.Until</code>这个调用的逻辑是，直到收到stop信号才终止，在此之前循环运行<code>sched.scheduleOne</code>。代码走到这里，终于找到启动入口最内部的主体啦:<br><img src="http://mycloudn.kokoerp.com/image-20190827163439895.png" alt></p>
+<p><code>sched.scheduleOne</code>这个函数有代码点长，整体的功能可以概括为:</p>
+<p>1.获取需调度的pod</p>
+<p>2.使用调度算法寻找匹配node、发起绑定到node请求、绑定检查等一系列操作.</p>
+<p>3.若匹配node失败，则尝试根据pod的指定优先级来抢占资源</p>
+<h4 id="本篇入口篇到这里就先告一段落，下一篇开始阅读学习调度过程的逻辑！"><a href="#本篇入口篇到这里就先告一段落，下一篇开始阅读学习调度过程的逻辑！" class="headerlink" title="本篇入口篇到这里就先告一段落，下一篇开始阅读学习调度过程的逻辑！"></a>本篇入口篇到这里就先告一段落，下一篇开始阅读学习调度过程的逻辑！</h4>
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div id="reward-container">
+  <div>Thank you for your accept. mua！</div>
+  <button id="reward-button" disable="enable" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+
+    
+      
+      
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/reward/wechatpay.png" alt="丨ywq丨 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+      
+      
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/reward/alipay.png" alt="丨ywq丨 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        
+
+
+
+
+  
+
+
+
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>丨ywq丨</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    
+    <a href="https://www.ipyker.com/2019/08/05/Kubernetes源码学习-Scheduler-P1-调度器入口篇.html" title="Kubernetes源码学习-Scheduler-P1-调度器入口篇">https://www.ipyker.com/2019/08/05/Kubernetes源码学习-Scheduler-P1-调度器入口篇.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li>
+</ul>
+
+      </div>
+    
+    <div>
+      
+        <div>
+    
+        <div style="text-align:center;color: #ccc;font-size:16px;">-------------本文结束<i class="fa fa-heart"></i>感谢您的阅读-------------</div>
+    
+</div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Kubernetes/" rel="tag"><i class="fa fa-tag"></i> Kubernetes</a>
+          
+            <a href="/tags/Golang/" rel="tag"><i class="fa fa-tag"></i> Golang</a>
+          
+            <a href="/tags/读源码/" rel="tag"><i class="fa fa-tag"></i> 读源码</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/08/05/Kubernetes源码学习-Scheduler-总览篇.html" rel="next" title="Kubernetes源码学习-Scheduler-总览篇">
+                <i class="fa fa-chevron-left"></i> Kubernetes源码学习-Scheduler-总览篇
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/08/08/Kubernetes源码学习-总篇.html" rel="prev" title="Kubernetes源码学习-总篇">
+                Kubernetes源码学习-总篇 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC80NDM5Mi8yMDkyNA=="></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="丨ywq丨">
+            
+              <p class="site-author-name" itemprop="name">丨ywq丨</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives">
+                
+                    <span class="site-state-item-count">74</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                      <a href="/tags">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">15</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/yinwenqin" title="GitHub &rarr; https://github.com/yinwenqin" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://blog.csdn.net/ywq935" title="CSDN &rarr; https://blog.csdn.net/ywq935" rel="noopener" target="_blank"><i class="fa fa-fw fa-globe"></i>CSDN</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-book"></i>
+                推荐阅读
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.upweto.top/gitbooks/useKubernetes/" title="http://blog.upweto.top/gitbooks/useKubernetes/" rel="noopener" target="_blank">kubernetes使用指南</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.upweto.top/gitbooks/kubeSourceCodeNote/" title="http://blog.upweto.top/gitbooks/kubeSourceCodeNote/" rel="noopener" target="_blank">kubernetes源码笔记</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#调度器入口"><span class="nav-number">1.</span> <span class="nav-text">调度器入口</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#入口之前"><span class="nav-number">1.2.</span> <span class="nav-text">入口之前</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#cobra"><span class="nav-number">1.3.</span> <span class="nav-text">cobra</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#什么是cobra"><span class="nav-number">1.3.0.1.</span> <span class="nav-text">什么是cobra?</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#安装："><span class="nav-number">1.3.0.2.</span> <span class="nav-text">安装：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#简单试用cobra"><span class="nav-number">1.3.0.3.</span> <span class="nav-text">简单试用cobra:</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#看到这里，相信对cobra的强大简洁已经有了初步的认知，建议自行进入项目主页了解详情并进行安装测试"><span class="nav-number">1.3.0.4.</span> <span class="nav-text">看到这里，相信对cobra的强大简洁已经有了初步的认知，建议自行进入项目主页了解详情并进行安装测试</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#入口"><span class="nav-number">1.4.</span> <span class="nav-text">入口</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#本篇入口篇到这里就先告一段落，下一篇开始阅读学习调度过程的逻辑！"><span class="nav-number">1.4.0.1.</span> <span class="nav-text">本篇入口篇到这里就先告一段落，下一篇开始阅读学习调度过程的逻辑！</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" style=" text-align:center;">&copy; 2017 – <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ywq</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"> 站点字数合计:</i>
+    </span>
+    
+    <span title="站点总字数">583k</span>
+  
+  
+</div>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+<div class="run_time" style=" text-align:center;">
+  <span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
+  <script>
+    var now = new Date(); 
+    function createtime() { 
+        var grt= new Date("08/23/2018 10:00:00");//此处修改你的建站时间或者网站上线时间 
+        now.setTime(now.getTime()+250); 
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days); 
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours); 
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum); 
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;} 
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum); 
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;} 
+        document.getElementById("timeDate").innerHTML = "本站已安全运行 "+dnum+" 天 "; 
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒"; 
+    } 
+    setInterval("createtime()",250);
+  </script>
+</div>
+
+        
+<div class="busuanzi-count" style=" text-align:center;">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-user"></i>
+    </span>
+    <span class="site-uv" title="总访客量">
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span> 人
+    </span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+  
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-eye"></i>
+    </span>
+    <span class="site-pv" title="总访问量">
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span> 次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+  
+    
+    
+      
+    
+  
+  <script color="black" opacity="0.7" zindex="-1" count="140" src="//cdn.jsdelivr.net/gh/theme-next/theme-next-canvas-nest@1.0.0/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+  
+  
+  <script id="ribbon" size="300" alpha="0.1" zindex="-1" src="/lib/canvas-ribbon/canvas-ribbon.js"></script>
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/fancybox/source/jquery.fancybox.pack.js"></script>
+
+
+  
+
+
+  <script src="/js/utils.js?v=7.1.1"></script>
+
+  <script src="/js/motion.js?v=7.1.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/schemes/muse.js?v=7.1.1"></script>
+
+
+
+
+  
+  <script src="/js/scrollspy.js?v=7.1.1"></script>
+<script src="/js/post-details.js?v=7.1.1"></script>
+
+
+
+  
+
+
+  <script src="/js/next-boot.js?v=7.1.1"></script>
+
+
+  
+
+  
+
+  
+  
+  
+
+  
+
+  
+  
+  
+
+
+  
+
+
+  
+    <script>
+  window.livereOptions = {
+    refer: '2019/08/05/Kubernetes源码学习-Scheduler-P1-调度器入口篇.html'
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+</script>
+
+  
+
+
+  
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url).replace(/\/{2,}/g, '/');
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x"></i></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x"></i></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+  
+  <script src="/lib/bookmark/bookmark.min.js?v=1.0"></script>
+  <script>
+  
+    bookmark.scrollToMark('auto', "#更多");
+  
+  </script>
+
+
+  
+
+  
+
+  
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/koharu.model.json"},"display":{"position":"left","width":250,"height":500},"mobile":{"show":false},"react":{"opacity":0.7},"log":false});</script></body>
+</html>
+<!-- 页面点击小红心 -->
+<script type="text/javascript" src="/js/src/clicklove.js"></script>

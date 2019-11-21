@@ -1,0 +1,1221 @@
+
+<!DOCTYPE HTML>
+<html lang="zh-hans" >
+    <head>
+        <meta charset="UTF-8">
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <title>7.2. Harbor部署使用 · Kubernetes生态圈使用</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="description" content="">
+        <meta name="generator" content="GitBook 3.2.3">
+        <meta name="author" content="ywq">
+        
+        
+    
+    <link rel="stylesheet" href="../gitbook/style.css">
+
+    
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-anchors/plugin.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-expandable-chapters/expandable-chapters.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-splitter/splitter.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-back-to-top-button/plugin.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-highlight/website.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-search/search.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-fontsettings/website.css">
+                
+            
+        
+
+    
+
+    
+        
+    
+
+        
+    
+    
+    <meta name="HandheldFriendly" content="true"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="../gitbook/images/apple-touch-icon-precomposed-152.png">
+    <link rel="shortcut icon" href="../gitbook/images/favicon.ico" type="image/x-icon">
+
+    
+    <link rel="next" href="../part8/" />
+    
+    
+    <link rel="prev" href="Docker-registry仓库历史镜像批量清理.html" />
+    
+
+    </head>
+    <body>
+        
+<div class="book">
+    <div class="book-summary">
+        
+            
+<div id="book-search-input" role="search">
+    <input type="text" placeholder="输入并搜索" />
+</div>
+
+            
+                <nav role="navigation">
+                
+
+
+<ul class="summary">
+    
+    
+
+    
+
+    
+        
+        <li class="header">Part 1-写在前面</li>
+        
+        
+    
+        <li class="chapter " data-level="1.1" data-path="../">
+            
+                <a href="../">
+            
+                    
+                    1. 总览篇
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Part 2-集群相关</li>
+        
+        
+    
+        <li class="chapter " data-level="2.1" data-path="../part2/">
+            
+                <a href="../part2/">
+            
+                    
+                    2. 集群相关
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="2.1.1" data-path="../part2/v1.9.0高可用集群本地离线部署记录.html">
+            
+                <a href="../part2/v1.9.0高可用集群本地离线部署记录.html">
+            
+                    
+                    2.1. v1.9.0高可用集群部署
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.1.2" data-path="../part2/v1.14多master集群部署.html">
+            
+                <a href="../part2/v1.14多master集群部署.html">
+            
+                    
+                    2.2. v1.14.3高可用集群部署
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.1.3" data-path="../part2/Kubernetes中的Pause容器.html">
+            
+                <a href="../part2/Kubernetes中的Pause容器.html">
+            
+                    
+                    2.3. Kubernetes中的Pause容器
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.1.4" data-path="../part2/RBAC权限控制.html">
+            
+                <a href="../part2/RBAC权限控制.html">
+            
+                    
+                    2.4. RBAC权限控制
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.1.5" data-path="../part2/docker-k8s常用命令速查及rest-api.html">
+            
+                <a href="../part2/docker-k8s常用命令速查及rest-api.html">
+            
+                    
+                    2.5. 常用命令与rest-api速查
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.1.6" data-path="../part2/Kubernetes各组件参数配置优化建议.html">
+            
+                <a href="../part2/Kubernetes各组件参数配置优化建议.html">
+            
+                    
+                    2.6. Kubernetes各组件参数配置优化建议
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Part 3-网络与服务</li>
+        
+        
+    
+        <li class="chapter " data-level="3.1" data-path="../part3/">
+            
+                <a href="../part3/">
+            
+                    
+                    3. 网络与服务
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="3.1.1" data-path="../part3/Traefik提供ingress-http服务.html">
+            
+                <a href="../part3/Traefik提供ingress-http服务.html">
+            
+                    
+                    3.1. Traefik 提供ingress http服务
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.1.2" data-path="../part3/kube-router提供BGP全直通网络.html">
+            
+                <a href="../part3/kube-router提供BGP全直通网络.html">
+            
+                    
+                    3.2. Kube-router BGP全直通网络
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.1.3" data-path="../part3/kube-router工作模式抓包分析.html">
+            
+                <a href="../part3/kube-router工作模式抓包分析.html">
+            
+                    
+                    3.3. Kube-router ipvs Service模式抓包分析
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.1.4" data-path="../part3/VXLAN和Flannel.html">
+            
+                <a href="../part3/VXLAN和Flannel.html">
+            
+                    
+                    3.4. VXLAN和Flannel
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Part 4-监控</li>
+        
+        
+    
+        <li class="chapter " data-level="4.1" data-path="../part4/">
+            
+                <a href="../part4/">
+            
+                    
+                    4. Prometheus监控
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="4.1.1" data-path="../part4/监控--Prometheus部署篇.html">
+            
+                <a href="../part4/监控--Prometheus部署篇.html">
+            
+                    
+                    4.1. Prometheus部署篇
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="4.1.2" data-path="../part4/监控--Prometheus扩展篇（mysqld-exporter、服务发现、监控项、联邦、relabel）.html">
+            
+                <a href="../part4/监控--Prometheus扩展篇（mysqld-exporter、服务发现、监控项、联邦、relabel）.html">
+            
+                    
+                    4.2. Prometheus扩展篇
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="4.1.3" data-path="../part4/监控--Prometheus告警篇（告警消息对接钉钉接口）.html">
+            
+                <a href="../part4/监控--Prometheus告警篇（告警消息对接钉钉接口）.html">
+            
+                    
+                    4.3. Prometheus告警篇
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Part 5-分布式存储Ceph</li>
+        
+        
+    
+        <li class="chapter " data-level="5.1" data-path="../part5/">
+            
+                <a href="../part5/">
+            
+                    
+                    5. Ceph存储
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="5.1.1" data-path="../part5/Ceph集群生产环境安装部署.html">
+            
+                <a href="../part5/Ceph集群生产环境安装部署.html">
+            
+                    
+                    5.1. Ceph部署篇
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.1.2" data-path="../part5/cephfs调优-性能测试-监控-常用命令.html">
+            
+                <a href="../part5/cephfs调优-性能测试-监控-常用命令.html">
+            
+                    
+                    5.2. Ceph性能调优
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.1.3" data-path="../part5/分布式存储Cephfs使用.html">
+            
+                <a href="../part5/分布式存储Cephfs使用.html">
+            
+                    
+                    5.3. Cephfs在k8s中使用
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.1.4" data-path="../part5/分布式存储Ceph-RBD使用.html">
+            
+                <a href="../part5/分布式存储Ceph-RBD使用.html">
+            
+                    
+                    5.4. Ceph RBD在k8s中使用
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.1.5" data-path="../part5/Cephfs-CephRBD在k8s中的适用场景讨论及数据库性能压测.html">
+            
+                <a href="../part5/Cephfs-CephRBD在k8s中的适用场景讨论及数据库性能压测.html">
+            
+                    
+                    5.5. Ceph在k8s中的综合场景应用及数据库OLTP性能压测
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Part 6-微服务框架Istio</li>
+        
+        
+    
+        <li class="chapter " data-level="6.1" data-path="../part6/">
+            
+                <a href="../part6/">
+            
+                    
+                    6. Istio微服务框架
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="6.1.1" data-path="../part6/微服务框架istio安装测试.html">
+            
+                <a href="../part6/微服务框架istio安装测试.html">
+            
+                    
+                    6.1. istio安装测试
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="6.1.2" data-path="../part6/微服务框架istio流量策略控制.html">
+            
+                <a href="../part6/微服务框架istio流量策略控制.html">
+            
+                    
+                    6.2. istio流量策略控制
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="6.1.3" data-path="../part6/微服务框架istio服务可视化与监控.html">
+            
+                <a href="../part6/微服务框架istio服务可视化与监控.html">
+            
+                    
+                    6.3. istio服务可视化与监控
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="6.1.4" data-path="../part6/微服务--istio1.0抢鲜测试.html">
+            
+                <a href="../part6/微服务--istio1.0抢鲜测试.html">
+            
+                    
+                    6.4. istio v1.0 抢鲜测试
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Part 7-周边生态</li>
+        
+        
+    
+        <li class="chapter " data-level="7.1" data-path="./">
+            
+                <a href="./">
+            
+                    
+                    7. 周边生态
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="7.1.1" data-path="Docker-registry仓库历史镜像批量清理.html">
+            
+                <a href="Docker-registry仓库历史镜像批量清理.html">
+            
+                    
+                    7.1. Docker-registry历史镜像批量清理.md
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter active" data-level="7.1.2" data-path="企业级docker仓库Harbor在kubernetes上搭建使用.html">
+            
+                <a href="企业级docker仓库Harbor在kubernetes上搭建使用.html">
+            
+                    
+                    7.2. Harbor部署使用
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Part 8-问题记录</li>
+        
+        
+    
+        <li class="chapter " data-level="8.1" data-path="../part8/">
+            
+                <a href="../part8/">
+            
+                    
+                    8. 问题记录
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="8.1.1" data-path="../part8/Kubernetes部署问题记录.html">
+            
+                <a href="../part8/Kubernetes部署问题记录.html">
+            
+                    
+                    8.1. 集群部署问题记录
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="8.1.2" data-path="../part8/Service-ipvs模式间断性TCP连接故障排查.html">
+            
+                <a href="../part8/Service-ipvs模式间断性TCP连接故障排查.html">
+            
+                    
+                    8.2. Service ipvs模式间断性TCP连接故障排查
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="8.1.3" data-path="../part8/kubeadm证书-etcd证书过期紧急处理.html">
+            
+                <a href="../part8/kubeadm证书-etcd证书过期紧急处理.html">
+            
+                    
+                    8.3. kubeadm证书-etcd证书过期紧急处理
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="8.1.4" data-path="../part8/Kubernetes-Pod无法终结问题排查.html">
+            
+                <a href="../part8/Kubernetes-Pod无法终结问题排查.html">
+            
+                    
+                    8.4. Kubernetes-Pod无法终结问题排查
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+
+    <li class="divider"></li>
+
+    <li>
+        <a href="https://www.gitbook.com" target="blank" class="gitbook-link">
+            本书使用 GitBook 发布
+        </a>
+    </li>
+</ul>
+
+
+                </nav>
+            
+        
+    </div>
+
+    <div class="book-body">
+        
+            <div class="body-inner">
+                
+                    
+
+<div class="book-header" role="navigation">
+    
+
+    <!-- Title -->
+    <h1>
+        <i class="fa fa-circle-o-notch fa-spin"></i>
+        <a href=".." >7.2. Harbor部署使用</a>
+    </h1>
+</div>
+
+
+
+
+                    <div class="page-wrapper" tabindex="-1" role="main">
+                        <div class="page-inner">
+                            
+<div id="book-search-results">
+    <div class="search-noresults">
+    
+                                <section class="normal markdown-section">
+                                
+                                <h2 id=""><a name="" class="plugin-anchor" href="#"><i class="fa fa-link" aria-hidden="true"></i></a> </h2>
+<h2 id="&#x524D;&#x8A00;"><a name="&#x524D;&#x8A00;" class="plugin-anchor" href="#&#x524D;&#x8A00;"><i class="fa fa-link" aria-hidden="true"></i></a>&#x524D;&#x8A00;</h2>
+<p>Harbor&#x662F;Docker&#x955C;&#x50CF;&#x4ED3;&#x5E93;&#x7BA1;&#x7406;&#x7CFB;&#x7EDF;&#xFF0C;&#x7528;&#x4E8E;&#x4F01;&#x4E1A;&#x7EA7;&#x7BA1;&#x7406;&#x5BB9;&#x5668;&#x955C;&#x50CF;&#xFF0C;&#x652F;&#x6301;&#x5BF9;&#x63A5;ldap&#x8FDB;&#x884C;&#x6743;&#x9650;&#x7BA1;&#x7406;,&#x7531;VMVare&#x4E2D;&#x56FD;&#x56E2;&#x961F;&#x5F00;&#x53D1;&#x3002;
+<strong>&#x9879;&#x76EE;&#x5730;&#x5740;:</strong>
+<a href="https://github.com/goharbor/harbor/" target="_blank">https://github.com/goharbor/harbor/</a>
+<strong>&#x5B89;&#x88C5;&#x65B9;&#x5F0F;:</strong>
+1.Docker Compose&#x65B9;&#x5F0F;&#x90E8;&#x7F72;:
+<a href="https://github.com/goharbor/harbor/blob/master/docs/installation_guide.md" target="_blank">https://github.com/goharbor/harbor/blob/master/docs/installation_guide.md</a>
+2.&#x901A;&#x8FC7;kubernetes&#x76F4;&#x63A5;&#x90E8;&#x7F72;:
+&#x65B0;&#x7248;&#x672C;&#x5DF2;&#x5E9F;&#x5F03;
+3.&#x901A;&#x8FC7;helm/kubernetes&#x65B9;&#x5F0F;&#x90E8;&#x7F72;:
+<a href="https://github.com/goharbor/harbor-helm/blob/master/README.md" target="_blank">https://github.com/goharbor/harbor-helm/blob/master/README.md</a>
+&#x63A8;&#x8350;&#x4F7F;&#x7528;,&#x672C;&#x6587;&#x5C06;&#x91C7;&#x7528;&#x6B64;&#x65B9;&#x5F0F;</p>
+<h2 id="helm&#x5B89;&#x88C5;"><a name="helm&#x5B89;&#x88C5;" class="plugin-anchor" href="#helm&#x5B89;&#x88C5;"><i class="fa fa-link" aria-hidden="true"></i></a>Helm&#x5B89;&#x88C5;</h2>
+<h4 id="helm&#x7B80;&#x4ECB;"><a name="helm&#x7B80;&#x4ECB;" class="plugin-anchor" href="#helm&#x7B80;&#x4ECB;"><i class="fa fa-link" aria-hidden="true"></i></a>helm&#x7B80;&#x4ECB;</h4>
+<p>Helm&#x662F;&#x4E00;&#x4E2A;&#x7528;&#x4E8E;Kubernetes&#x7684;&#x5305;&#x7BA1;&#x7406;&#x5DE5;&#x5177;,&#x6BCF;&#x4E00;&#x4E2A;&#x5B89;&#x88C5;&#x5305;&#x6784;&#x6210;&#x4E00;&#x4E2A;chart&#x57FA;&#x672C;&#x5355;&#x4F4D;.&#x60F3;&#x8C61;&#x4E00;&#x4E0B;,&#x4E00;&#x4E2A;&#x5B8C;&#x6574;&#x7684;&#x90E8;&#x7F72;,&#x53EF;&#x80FD;&#x5305;&#x542B;&#x524D;&#x7AEF;\&#x540E;&#x7AEF;\&#x4E2D;&#x95F4;&#x4EF6;\DB&#x7684;&#x90E8;&#x7F72;&#x5B9E;&#x4F8B;,&#x4EE5;&#x53CA;k8s&#x7BA1;&#x7406;&#x5BF9;&#x5E94;&#x7684;secret/configmap/svc/ing/pv/pvc&#x7B49;&#x4F17;&#x591A;&#x8D44;&#x6E90;&#x7C7B;&#x578B;,&#x5728;&#x90E8;&#x7F72;&#x7BA1;&#x7406;&#x6216;&#x8005;&#x5378;&#x8F7D;&#x4E4B;&#x524D;,&#x5982;&#x679C;&#x9010;&#x4E00;&#x7F16;&#x8F91;&#x7BA1;&#x7406;&#x8FD9;&#x4E9B;&#x8D44;&#x6E90;&#x7684;yaml&#x6587;&#x4EF6;,&#x5DE5;&#x4F5C;&#x91CF;&#x6BD4;&#x8F83;&#x5E9E;&#x5927;&#x4E14;&#x5BB9;&#x6613;&#x758F;&#x6F0F;.helm&#x7684;&#x51FA;&#x73B0;&#x5F88;&#x597D;&#x7684;&#x89E3;&#x51B3;&#x4E86;&#x8FD9;&#x4E2A;&#x95EE;&#x9898;,&#x4F7F;&#x7528;&#x6A21;&#x677F;&#x4EE5;&#x53CA;&#x53D8;&#x91CF;&#x66FF;&#x6362;&#x7684;&#x65B9;&#x5F0F;,&#x6309;&#x9700;&#x751F;&#x6210;&#x90E8;&#x7F72;yaml&#x6587;&#x4EF6;&#x5305;,&#x5E76;&#x4E14;&#x5411;kubernetes api&#x53D1;&#x9001;&#x8C03;&#x5EA6;&#x8BF7;&#x6C42;,&#x867D;&#x7136;&#x989D;&#x5916;&#x5730;&#x5F15;&#x5165;&#x4E86;&#x4E00;&#x4E9B;&#x5B66;&#x4E60;&#x6210;&#x672C;,&#x4F46;&#x5BF9;&#x4E8E;&#x90E8;&#x7F72;&#x5305;&#x7684;&#x7BA1;&#x7406;&#x65E0;&#x7591;&#x662F;&#x5E26;&#x6765;&#x4E86;&#x5F88;&#x5927;&#x7684;&#x4FBF;&#x5229;&#x6027;&#x7684;.</p>
+<h4 id="helm&#x7EC4;&#x4EF6;"><a name="helm&#x7EC4;&#x4EF6;" class="plugin-anchor" href="#helm&#x7EC4;&#x4EF6;"><i class="fa fa-link" aria-hidden="true"></i></a>helm&#x7EC4;&#x4EF6;</h4>
+<p><strong>Helm</strong>
+Helm&#x662F;&#x4E00;&#x4E2A;cli&#x5BA2;&#x6237;&#x7AEF;&#xFF0C;&#x53EF;&#x4EE5;&#x5B8C;&#x6210;&#x5982;&#x4E0B;&#x5185;&#x5BB9;&#xFF1A;</p>
+<p>1.&#x521B;&#x5EFA;/&#x6253;&#x5305;/&#x8C03;&#x8BD5;Chart
+2.&#x521B;&#x5EFA;&#x672C;&#x5730;Chart&#x4ED3;&#x5E93;,&#x7BA1;&#x7406;&#x672C;&#x5730;&#x548C;&#x8FDC;&#x7A0B;Chart&#x4ED3;&#x5E93;
+3.&#x4E0E;Tiller&#x4EA4;&#x4E92;&#x5E76;&#x5B8C;&#x6210;Chart&#x7684;&#x5B89;&#x88C5;&#xFF0C;&#x5347;&#x7EA7;&#xFF0C;&#x5220;&#x9664;&#xFF0C;&#x56DE;&#x6EDA;&#xFF0C;&#x67E5;&#x770B;&#x7B49;&#x64CD;&#x4F5C;</p>
+<p><strong>Tiller</strong>
+1.&#x76D1;&#x542C;helm&#x5BA2;&#x6237;&#x7AEF;&#x7684;&#x8BF7;&#x6C42;,&#x6839;&#x636E;chart&#x751F;&#x6210;&#x76F8;&#x5E94;&#x7684;release
+2.&#x5C06;release&#x7684;&#x8D44;&#x6E90;&#x4FE1;&#x606F;&#x53D1;&#x9001;&#x7ED9;kubernetes api,&#x5B9E;&#x73B0;&#x8D44;&#x6E90;&#x589E;&#x5220;&#x6539;&#x67E5;.
+3.&#x8FFD;&#x8E2A;release&#x7684;&#x72B6;&#x6001;,&#x5B9E;&#x73B0;&#x8D44;&#x6E90;&#x7684;&#x66F4;&#x65B0;/&#x56DE;&#x6EDA;&#x64CD;&#x4F5C;</p>
+<p><strong>&#x5B89;&#x88C5;:</strong>
+&#x5B89;&#x88C5;&#x8F83;&#x4E3A;&#x7B80;&#x5355;,&#x53C2;&#x8003;&#x5B98;&#x65B9;&#x6587;&#x6863;,&#x4E0D;&#x505A;&#x590D;&#x8FF0;:
+<a href="https://docs.helm.sh/using_helm/#installing-helm" target="_blank">https://docs.helm.sh/using_helm/#installing-helm</a></p>
+<h2 id="harbor&#x5B89;&#x88C5;"><a name="harbor&#x5B89;&#x88C5;" class="plugin-anchor" href="#harbor&#x5B89;&#x88C5;"><i class="fa fa-link" aria-hidden="true"></i></a>Harbor&#x5B89;&#x88C5;</h2>
+<p>&#x8FD9;&#x91CC;&#x91C7;&#x7528;&#x6B21;&#x65B0;&#x7248;&#x672C;&#x7684;v1.5.3&#x7248;&#x672C;</p>
+<pre><code>root@h1:# wget https://github.com/goharbor/harbor/archive/v1.5.3.tar.gz
+root@h1:# tar -xf https://github.com/goharbor/harbor/archive/v1.5.3.tar.gz 
+root@h1:# cd harbor-1.5.3/contrib/helm/harbor/
+</code></pre><p>helm&#x65B9;&#x5F0F;&#x5B89;&#x88C5;&#x7684;harbor&#x9ED8;&#x8BA4;&#x662F;https&#x7684;,&#x56E0;&#x6B64;&#x9700;&#x8981;k8s&#x96C6;&#x7FA4;ingress&#x7F51;&#x5173;&#x5F00;&#x542F;https&#x534F;&#x8BAE;,traefik&#x5F00;&#x542F;https&#x53C2;&#x8003;&#x6B64;&#x524D;&#x6587;&#x7AE0;:
+<a href="https://blog.csdn.net/ywq935/article/details/79886793" target="_blank">k8s&#xFF08;&#x4E8C;&#xFF09;&#x3001;&#x5BF9;&#x5916;&#x670D;&#x52A1;</a> </p>
+<h4 id="&#x66F4;&#x65B0;helm-dependency"><a name="&#x66F4;&#x65B0;helm-dependency" class="plugin-anchor" href="#&#x66F4;&#x65B0;helm-dependency"><i class="fa fa-link" aria-hidden="true"></i></a>&#x66F4;&#x65B0;helm dependency:</h4>
+<p>harbor&#x7684;helm&#x90E8;&#x7F72;&#x4F9D;&#x8D56;&#x4E86;postgresql&#x7684;helm&#xFF0C;&#x5728;&#x5B98;&#x65B9;&#x7684;&#x5B89;&#x88C5;&#x6587;&#x6863;&#x6CA1;&#x6709;&#x660E;&#x786E;&#x8BF4;&#x660E;&#xFF0C;&#x76F4;&#x63A5;&#x6309;&#x7167;&#x5B98;&#x65B9;&#x6587;&#x6863;&#x8BF4;&#x660E;&#x5B89;&#x88C5;&#xFF0C;&#x5C31;&#x4F1A;&#x7F3A;&#x5931;postgresql&#x7684;&#x90E8;&#x7F72;&#xFF0C;&#x5BFC;&#x81F4;helm install failed</p>
+<pre><code>helm dependency update
+</code></pre><p>&#x4FEE;&#x6539;value.yaml&#x6587;&#x4EF6;,&#x6DFB;&#x52A0;pvc&#x6301;&#x4E45;&#x5B58;&#x50A8;&#x5E76;&#x5C06;&#x76F8;&#x5E94;&#x7EC4;&#x4EF6;&#x4E0A;&#x4E0B;&#x6587;&#x4E2D;&#x7684;volume&#x90E8;&#x5206;&#x6CE8;&#x91CA;&#x6253;&#x5F00;:</p>
+<pre><code>mysql:
+  volumes:
+    data:
+    storageClass: &quot;cephrbd&quot;
+    accessMode: ReadWriteOnce
+
+adminserver:
+  volumes:
+    config:
+    storageClass: &quot;cephrbd&quot;
+    accessMode: ReadWriteOnce
+    size: 1G
+
+registry:
+  volumes:
+    data:
+    storageClass: &quot;cephrbd&quot;
+    accessMode: ReadWriteOnce
+    size: 5G
+</code></pre><p>&#x5B8C;&#x6574;value.yaml&#x6587;&#x4EF6;&#x5982;&#x4E0B;:</p>
+<pre><code># Configure persisten Volumes per application
+## Applications that require storage have a `volumes` definition which will be used
+## when `persistence.enabled` is set to true.
+## example
+# mysql:
+#   volumes:
+#     data:
+## Persistent Volume Storage Class
+## If defined, storageClassName: &lt;storageClass&gt;
+## If set to &quot;-&quot;, storageClassName: &quot;&quot;, which disables dynamic provisioning
+## If undefined (the default) or set to null, no storageClassName spec is
+##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+##   GKE, AWS &amp; OpenStack)
+##
+#     storageClass: &quot;-&quot;
+#     accessMode: ReadWriteOnce
+#     size: 1Gi
+
+mysql:
+  volumes:
+    data:
+    storageClass: &quot;cephrbd&quot;
+    accessMode: ReadWriteOnce
+adminserver:
+  volumes:
+    config:
+    storageClass: &quot;cephrbd&quot;
+    accessMode: ReadWriteOnce
+    size: 1G
+
+registry:
+  volumes:
+    data:
+    storageClass: &quot;cephrbd&quot;
+    accessMode: ReadWriteOnce
+    size: 5G
+
+## Configure resource requests and limits per application
+## ref: http://kubernetes.io/docs/user-guide/compute-resources/
+##
+# mysql:
+#   resources:
+#     requests:
+#       memory: 256Mi
+#       cpu: 100m
+
+persistence:
+  enabled: true
+
+# The tag for Harbor docker images.
+harborImageTag: &amp;harbor_image_tag v1.4.0
+
+# The FQDN for Harbor service.
+externalDomain: harbor.my.domain
+# If set to true, you don&apos;t need to set tlsCrt/tlsKey/caCrt, but must add
+# Harbor FQDN as insecure-registries for your docker client.
+insecureRegistry: false
+#insecureRegistry: true
+# The TLS certificate for Harbor. The common name of tlsCrt must match the externalDomain above.
+tlsCrt: 
+#tlsCrt: root/traefik/ssl/kokoerp.crt
+tlsKey:
+#tlsKey: root/traefik/ssl/kokoerp.key
+caCrt:
+
+# The secret key used for encryption. Must be a string of 16 chars.
+secretKey: not-a-secure-key
+
+# These annotations allow the registry to work behind the nginx
+# ingress controller.
+ingress:
+  annotations:
+    ingress.kubernetes.io/ssl-redirect: &quot;true&quot;
+    ingress.kubernetes.io/body-size: &quot;0&quot;
+    ingress.kubernetes.io/proxy-body-size: &quot;0&quot;
+
+adminserver:
+  image:
+    repository: vmware/harbor-adminserver
+    tag: *harbor_image_tag
+    pullPolicy: IfNotPresent
+  emailHost: &quot;smtp.mydomain.com&quot;
+  emailPort: &quot;25&quot;
+  emailUser: &quot;sample_admin@mydomain.com&quot;
+  emailSsl: &quot;false&quot;
+  emailFrom: &quot;admin &lt;sample_admin@mydomain.com&gt;&quot;
+  emailIdentity: &quot;&quot;
+  emailInsecure: &quot;False&quot;
+  emailPwd: not-a-secure-password
+  adminPassword: Harbor12345
+  authenticationMode: &quot;db_auth&quot;
+  selfRegistration: &quot;on&quot;
+  ldap:
+    url: &quot;ldaps://ldapserver&quot;
+    searchDN: &quot;&quot;
+    baseDN: &quot;&quot;
+    filter: &quot;(objectClass=person)&quot;
+    uid: &quot;uid&quot;
+    scope: &quot;2&quot;
+    timeout: &quot;5&quot;
+    verifyCert: &quot;True&quot;
+  ## Persist data to a persistent volume
+  volumes:
+    config:
+      storageClass: &quot;cephrbd&quot;
+      accessMode: ReadWriteOnce
+      size: 1Gi
+  # resources:
+  #  requests:
+  #    memory: 256Mi
+  #    cpu: 100m
+
+## jobservice
+#
+jobservice:
+  image:
+    repository: vmware/harbor-jobservice
+    tag: *harbor_image_tag
+    pullPolicy: IfNotPresent
+  secret: not-a-secure-secret
+# resources:
+#   requests:
+#     memory: 256Mi
+#     cpu: 100m
+
+## UI
+#
+ui:
+  image:
+    repository: vmware/harbor-ui
+    tag: *harbor_image_tag
+    pullPolicy: IfNotPresent
+  secret: not-a-secure-secret
+  privateKeyPem: |
+    -----BEGIN RSA PRIVATE KEY-----
+    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
+    -----END RSA PRIVATE KEY-----
+# resources:
+#  requests:
+#    memory: 256Mi
+#    cpu: 100m
+
+## MySQL Settings. Currently Harbor does not support an external
+## MySQL server, only their own image. Until this is fixed, do not
+## Change the settings below.
+#
+mysql:
+  image:
+    repository: vmware/harbor-db
+    tag: *harbor_image_tag
+    pullPolicy: IfNotPresent
+  # If left blank will use the included mysql service name.
+  host: ~
+  port: 3306
+  user: &quot;root&quot;
+  pass: &quot;registry&quot;
+  database: &quot;registry&quot;
+  volumes:
+    data:
+      storageClass: &quot;cephrbd&quot;
+      accessMode: ReadWriteOnce
+      size: 1Gi
+  # resources:
+  #  requests:
+  #    memory: 256Mi
+  #    cpu: 100m
+
+registry:
+  image:
+    repository: vmware/registry-photon
+    tag: v2.6.2-v1.4.0
+    pullPolicy: IfNotPresent
+  httpSecret: not-a-secure-secret
+  logLevel:
+# comment out one of the below to use your cloud&apos;s object storage.
+#  objectStorage:
+#    gcs:
+#      keyfile: &quot;&quot;
+#      bucket: &quot;&quot;
+#      chunksize: &quot;5242880&quot;
+#    s3:
+#      region: &quot;&quot;
+#      accesskey: &quot;&quot;
+#      secretkey: &quot;&quot;
+#      bucket: &quot;&quot;
+#      encrypt: &quot;true&quot;
+#    azure:
+#      accountname: &quot;&quot;
+#      accountkey: &quot;&quot;
+#      container: &quot;&quot;
+  rootCrt: |
+    -----BEGIN CERTIFICATE-----
+    MIIE0zCCArugAwIBAgIJAIgs3S+hsjhmMA0GCSqGSIb3DQEBCwUAMAAwHhcNMTcx
+    MTA5MTcyNzQ5WhcNMjcxMTA3MTcyNzQ5WjAAMIICIjANBgkqhkiG9w0BAQEFAAOC
+    Ag8AMIICCgKCAgEA4WYbxdrFGG6RnfyYKlHYML3lEqtA9cYWWOynE9BeaEr/cMnM
+    bBr1dd91/Nm6RiYhQvTDU2Kc6NejqjdliW5B9xUoVKayri8OU81a8ViXeNgKwCPR
+    AiTTla1zoX5DnvoxpO9G3lxyNvTKXc0cw8NjQDAXpaDbzJYLkshCeuyD9bco8R96
+    /zrpBEX8tADN3+3yA3fMcZzVXsBm4BTpHJRk/qBpHYEPSHzxyH3iGMNKk3vMUBZz
+    e0EYkK8NCA2CuEKMnC3acx9IdRwkx10abGvHQCLRCVY7rGoak+b0oZ99RJIRQ9Iq
+    YXsn8fsMBQly6xxvSeY5XuSP7Xb6JKDt3y8Spi4gR1M/5aEzhuOyu201rMna7Rs/
+    GPfaKjBlbX0jiLDa7v4zjsBPsPaf/c4uooz3ICLsdukaom+E538R0EiOkXt/wyw2
+    2YmaWNCsYlEpke7cVC33e/0dPBq4IHsVflawSF9OWS23ikVAs/n+76KjuucEDmbT
+    aKUYAJjvAmZL14j+EKc/CoplhCe6pKhavjmNIOfCSdlreIPBhOVbf1f817wKoSIZ
+    qVyCA1AYNkI9RYS00axtJGBGMlKbdQqCNpLL58c6To2awmckIZCEcATKOp++NoGm
+    Ib0bhdSasdGB5VCtwZVluN8bLl13zBKoxTGjNlEatUGDRnDAnLdZbXXffjsCAwEA
+    AaNQME4wHQYDVR0OBBYEFCMYYMOL0E/Uyj5wseDfIl7o4ELsMB8GA1UdIwQYMBaA
+    FCMYYMOL0E/Uyj5wseDfIl7o4ELsMAwGA1UdEwQFMAMBAf8wDQYJKoZIhvcNAQEL
+    BQADggIBABG8fPvrrR+erpwQFuB/56j2i6sO+qoOJPpAMYwkzICrT0eerWAavwoy
+    f0UAKN7cUeEJXjIR7s7CogGFijWdaWaQsXUD0zJq5aotLYZLimEc1O0uAmJEsfYC
+    v7mG07eU6ge22sSo5hxhVplGt52hnXnT0DdgSRZpq2mvgd9lcopAidM+KHlaasXk
+    IecHKM99KX9D8smr0AcQ6M/Ygbf2qjO9YRmpBIjyQWEake4y/4LWm+3+v08ecg4B
+    g+iMC0Rw1QcPqgwaGaWu71RtYhyTg7SnAknb5nBcHIbLb0hdLgQTa3ZdtXgqchIi
+    GuFlEBmHFZP6bLJORRUQ0ari5wpXIsYfrB4T8PybTzva3OCMlEsMjuysFr9ewhzM
+    9UGLiSQNDyKA10J8WwlzbeD0AAW944hW4Dbg6SWv4gAo51T+6AukRdup5y6lfQ5a
+    h4Lbo6pzaA369IsJBntvKvia6hUf/SghnbG7pCHX/AEilcgTb13HndF/G+7aZgKR
+    mi9qvNRSDsE/BrgZawovp81+j6aL4y6UtXYspHr+SuWsKYsaH7pl5HspNCyJ5vV6
+    dpJAwosFBqSEnI333wAunpMYmi/jKHH/j4WqjLnCInp0/wouzYu42l8Pmz591BSp
+    Jag500bEBxqI2RLELgMt/bUdjp4N2M7mrxdrN+2579HTzb6Hviu9
+    -----END CERTIFICATE-----
+  ## Persist data to a persistent volume
+  volumes:
+    data:
+      storageClass: &quot;cephrbd&quot;
+      accessMode: ReadWriteOnce
+      size: 5Gi
+  # resources:
+  #  requests:
+  #    memory: 256Mi
+  #    cpu: 100m
+
+clair:
+  enabled: true
+  image:
+    repository: vmware/clair-photon
+    tag: v2.0.1-v1.4.0
+    pullPolicy: IfNotPresent
+## The following needs to match the credentials
+## in the `postgresql` configuration under the
+## `postgresql` namespace below.
+  postgresPassword: not-a-secure-password
+  postgresUser: clair
+  postgresDatabase: clair
+# resources:
+#  requests:
+#    memory: 256Mi
+#    cpu: 100m
+# pgResources:
+#  requests:
+#    memory: 256Mi
+#    cpu: 100m
+#  volumes:
+#    pgData:
+#      storageClass: &quot;cephrbd&quot;
+#      accessMode: ReadWriteOnce
+#      size: 1Gi
+  # resources:
+  #  requests:
+  #    memory: 256Mi
+  #    cpu: 100m
+
+## Notary support is not yet fully implemented in the Helm Charts
+## Enabling it will just break things.
+#
+notary:
+  enabled: false
+
+## Settings for postgresql dependency.
+## see https://github.com/kubernetes/charts/tree/master/stable/postgresql
+## for further configurables.
+postgresql:
+  postgresUser: clair
+  postgresPassword: not-a-secure-password
+  postgresDatabase: clair
+  persistence:
+    # enabled: false
+    enabled: true
+    storageClass: &quot;cephrbd&quot;
+    accessMode: ReadWriteOnce
+    size: 8Gi
+</code></pre><h4 id="&#x90E8;&#x7F72;"><a name="&#x90E8;&#x7F72;" class="plugin-anchor" href="#&#x90E8;&#x7F72;"><i class="fa fa-link" aria-hidden="true"></i></a>&#x90E8;&#x7F72;:</h4>
+<pre><code>helm install . --debug --name hub --set externalDomain=hub.test.com
+</code></pre><p>&#x7B49;&#x5F85;&#x4E00;&#x6BB5;&#x65F6;&#x95F4;&#x7684;&#x955C;&#x50CF;&#x62C9;&#x53D6;&#x540E;,&#x67E5;&#x770B;pod:</p>
+<pre><code>hub-harbor-adminserver-0                 1/1       Running            1          3h
+hub-harbor-clair-6c7d9dcdb7-q4lv4        1/1       Running            2          3h
+hub-harbor-jobservice-75f7fbcc9c-ggwp4   1/1       Running            2          3h
+hub-harbor-mysql-0                       1/1       Running            0          3h
+hub-harbor-registry-0                    1/1       Running            1          3h
+hub-harbor-ui-57b4674ff9-kcfq6           1/1       Running            0          3h
+hub-postgresql-ccf8d56d5-jg4wq           1/1       Running            1          3h
+</code></pre><p>&#x6DFB;&#x52A0;dns,&#x6307;&#x5411;ingress gateway(&#x5373;traefik&#x7684;node ip):</p>
+<pre><code>echo &quot;192.168.1.238  hub.test.com&quot;  &gt;&gt; /etc/hosts
+</code></pre><p>&#x6D4F;&#x89C8;&#x5668;&#x6253;&#x5F00;&#x6D4B;&#x8BD5;,&#x9ED8;&#x8BA4;&#x767B;&#x5F55;&#x53E3;&#x4EE4;&#x4E3A;admin/Harbor12345
+<img src="http://mycloudn.kokoerp.com/20181024170107199.jpg" alt="&#x5728;&#x8FD9;&#x91CC;&#x63D2;&#x5165;&#x56FE;&#x7247;&#x63CF;&#x8FF0;">
+&#x53EF;&#x4EE5;&#x770B;&#x5230;&#x9ED8;&#x8BA4;&#x6709;&#x4E00;&#x4E2A;&#x516C;&#x5F00;&#x9879;&#x76EE;library,&#x5C1D;&#x8BD5;&#x5F80;&#x8FD9;&#x91CC;&#x63A8;&#x9001;&#x955C;&#x50CF;</p>
+<h4 id="docker&#x63A8;&#x9001;&#x6D4B;&#x8BD5;"><a name="docker&#x63A8;&#x9001;&#x6D4B;&#x8BD5;" class="plugin-anchor" href="#docker&#x63A8;&#x9001;&#x6D4B;&#x8BD5;"><i class="fa fa-link" aria-hidden="true"></i></a>Docker&#x63A8;&#x9001;&#x6D4B;&#x8BD5;</h4>
+<p>&#x627E;&#x4E00;&#x53F0;&#x5B89;&#x88C5;&#x4E86;docker&#x7684;&#x673A;&#x5668;,&#x4FEE;&#x6539;docker&#x670D;&#x52A1;&#x811A;&#x672C;:</p>
+<pre><code>~# cat /lib/systemd/system/docker.service
+
+#ExecStart=/usr/bin/dockerd -H fd://
+ExecStart=/usr/bin/dockerd  --insecure-registry hub.kokoerp.com
+</code></pre><p>&#x91CD;&#x542F;docker&#x5E76;&#x767B;&#x5F55;&#x6D4B;&#x8BD5;:</p>
+<pre><code>~# systemctl daemon-reload
+~# systemctl restart docker
+
+root@h2:~# docker login hub.test.com
+Username (admin): admin
+Password: 
+Login Succeeded
+</code></pre><p>&#x63A8;&#x9001;&#x955C;&#x50CF;&#x6D4B;&#x8BD5;:</p>
+<pre><code>root@h2:~# docker tag busybox hub.test.com/library/busybox:test1
+root@h2:~# docker push hub.test.com/library/busybox:test1
+The push refers to a repository [hub.test.com/library/busybox]
+8a788232037e: Pushed 
+test1: digest: sha256:915f390a8912e16d4beb8689720a17348f3f6d1a7b659697df850ab625ea29d5 size: 527
+</code></pre><p>&#x53EF;&#x4EE5;&#x770B;&#x5230;&#x63A8;&#x9001;&#x6210;&#x529F;</p>
+<h4 id="ldap&#x914D;&#x7F6E;"><a name="ldap&#x914D;&#x7F6E;" class="plugin-anchor" href="#ldap&#x914D;&#x7F6E;"><i class="fa fa-link" aria-hidden="true"></i></a>ldap&#x914D;&#x7F6E;:</h4>
+<p><img src="http://mycloudn.kokoerp.com/20181024170504541.jpg" alt="&#x5728;&#x8FD9;&#x91CC;&#x63D2;&#x5165;&#x56FE;&#x7247;&#x63CF;&#x8FF0;"></p>
+<p>harbor&#x53EF;&#x4EE5;&#x57FA;&#x4E8E;&#x4F01;&#x4E1A;&#x5185;&#x90E8;&#x7684;ldap&#x6765;&#x83B7;&#x53D6;&#x4EBA;&#x5458;&#x4FE1;&#x606F;,&#x53EF;&#x4EE5;&#x5728;ui&#x4E0A;&#x521B;&#x5EFA;&#x975E;&#x516C;&#x5F00;&#x9879;&#x76EE;,&#x5C06;ldap&#x4E2D;&#x83B7;&#x53D6;&#x7684;&#x4EBA;&#x5458;&#x52A0;&#x5165;&#x9879;&#x76EE;&#x5E76;&#x8D4B;&#x4E88;&#x76F8;&#x5E94;pull push&#x6743;&#x9650;,ui&#x64CD;&#x4F5C;&#x754C;&#x9762;&#x6BD4;&#x8F83;&#x53CB;&#x597D;,&#x8FD9;&#x91CC;&#x5C31;&#x4E0D;&#x5C55;&#x793A;&#x4E86;.</p>
+
+                                
+                                </section>
+                            
+    </div>
+    <div class="search-results">
+        <div class="has-results">
+            
+            <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+            <ul class="search-results-list"></ul>
+            
+        </div>
+        <div class="no-results">
+            
+            <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+            
+        </div>
+    </div>
+</div>
+
+                        </div>
+                    </div>
+                
+            </div>
+
+            
+                
+                <a href="Docker-registry仓库历史镜像批量清理.html" class="navigation navigation-prev " aria-label="Previous page: 7.1. Docker-registry历史镜像批量清理.md">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+                
+                
+                <a href="../part8/" class="navigation navigation-next " aria-label="Next page: 8. 问题记录">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+                
+            
+        
+    </div>
+
+    <script>
+        var gitbook = gitbook || [];
+        gitbook.push(function() {
+            gitbook.page.hasChanged({"page":{"title":"7.2. Harbor部署使用","date":"2018/10/24 17:05:46","tags":["Kubernetes","Docker"],"level":"7.1.2","depth":2,"next":{"title":"8. 问题记录","level":"8.1","depth":1,"path":"part8/README.md","ref":"./part8/README.md","articles":[{"title":"8.1. 集群部署问题记录","level":"8.1.1","depth":2,"path":"part8/Kubernetes部署问题记录.md","ref":"./part8/Kubernetes部署问题记录.md","articles":[]},{"title":"8.2. Service ipvs模式间断性TCP连接故障排查","level":"8.1.2","depth":2,"path":"part8/Service-ipvs模式间断性TCP连接故障排查.md","ref":"./part8/Service-ipvs模式间断性TCP连接故障排查.md","articles":[]},{"title":"8.3. kubeadm证书-etcd证书过期紧急处理","level":"8.1.3","depth":2,"path":"part8/kubeadm证书-etcd证书过期紧急处理.md","ref":"./part8/kubeadm证书-etcd证书过期紧急处理.md","articles":[]},{"title":"8.4. Kubernetes-Pod无法终结问题排查","level":"8.1.4","depth":2,"path":"part8/Kubernetes-Pod无法终结问题排查.md","ref":"./part8/Kubernetes-Pod无法终结问题排查.md","articles":[]}]},"previous":{"title":"7.1. Docker-registry历史镜像批量清理.md","level":"7.1.1","depth":2,"path":"part7/Docker-registry仓库历史镜像批量清理.md","ref":"./part7/Docker-registry仓库历史镜像批量清理.md","articles":[]},"dir":"ltr"},"config":{"plugins":["-sharing","anchors","github","expandable-chapters","splitter","back-to-top-button"],"styles":{"website":"./styles/website.css"},"pluginsConfig":{"github":{"url":"https://github.com/yinwenqin/kubeSourceCodeNote"},"splitter":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"back-to-top-button":{},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false},"anchors":{},"expandable-chapters":{}},"theme":"default","author":"ywq","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"Kubernetes生态圈使用","language":"zh-hans","links":{},"gitbook":"3.2.3","description":""},"file":{"path":"part7/企业级docker仓库Harbor在kubernetes上搭建使用.md","mtime":"2019-11-21T07:58:03.719Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2019-11-21T08:49:48.491Z"},"basePath":"..","book":{"language":""}});
+        });
+    </script>
+</div>
+
+        
+    <script src="../gitbook/gitbook.js"></script>
+    <script src="../gitbook/theme.js"></script>
+    
+        
+        <script src="../gitbook/gitbook-plugin-github/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-expandable-chapters/expandable-chapters.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-splitter/splitter.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-back-to-top-button/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search/search-engine.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search/search.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-lunr/lunr.min.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-lunr/search-lunr.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-fontsettings/fontsettings.js"></script>
+        
+    
+
+    </body>
+</html>
+

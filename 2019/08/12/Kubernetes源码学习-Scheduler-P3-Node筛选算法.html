@@ -1,0 +1,1569 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-CN">
+
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link rel="stylesheet" href="/lib/pace/pace-theme-bounce.min.css?v=1.0.2">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link rel="stylesheet" href="/lib/fancybox/source/jquery.fancybox.css">
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+    
+      
+    
+
+    
+  
+
+  
+
+  
+
+  
+    
+      
+    
+
+    
+  
+
+  
+    
+    
+    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic|Roboto Slab:300,300italic,400,400italic,700,700italic|Roboto Mono:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext">
+  
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.1.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.1.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.1.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.1.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.1.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '7.1.1',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":true,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: true,
+    fancybox: true,
+    fastclick: true,
+    lazyload: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"shrinkIn","post_header":"slideLeftIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideDownIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <script>
+  (function(i,s,o,g,r,a,m){i["DaoVoiceObject"]=r;i[r]=i[r]||function(){(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;a.charset="utf-8";m.parentNode.insertBefore(a,m)})(window,document,"script",('https:' == document.location.protocol ? 'https:' : 'http:') + "//widget.daovoice.io/widget/0f81ff2f.js","daovoice")
+  daovoice('init', {
+      app_id: "bd399fce"
+    });
+  daovoice('update');
+  </script>
+
+  <meta name="description" content="P3-Node筛选算法前言在上一篇文档中，我们找到调度器筛选node的算法入口pkg/scheduler/core/generic_scheduler.go:162 Schedule()方法 p2-调度器框架 那么在本篇，由此Schedule()函数展开，看一看调度器的node筛选算法，优先级排序算法留作下一篇. 正文Schedule()的筛选算法核心是findNodesThatFit()方法 ,">
+<meta name="keywords" content="Kubernetes,Golang,读源码">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kubernetes源码学习-Scheduler-P3-Node筛选算法">
+<meta property="og:url" content="https://www.ipyker.com/2019/08/12/Kubernetes源码学习-Scheduler-P3-Node筛选算法.html">
+<meta property="og:site_name" content="随笔漫谈">
+<meta property="og:description" content="P3-Node筛选算法前言在上一篇文档中，我们找到调度器筛选node的算法入口pkg/scheduler/core/generic_scheduler.go:162 Schedule()方法 p2-调度器框架 那么在本篇，由此Schedule()函数展开，看一看调度器的node筛选算法，优先级排序算法留作下一篇. 正文Schedule()的筛选算法核心是findNodesThatFit()方法 ,">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://mycloudn.kokoerp.com/zone.jpg">
+<meta property="og:image" content="http://mycloudn.kokoerp.com/podFitsOnNode.jpg">
+<meta property="og:image" content="http://mycloudn.kokoerp.com/predicates.jpg">
+<meta property="og:updated_time" content="2019-11-21T07:48:40.100Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Kubernetes源码学习-Scheduler-P3-Node筛选算法">
+<meta name="twitter:description" content="P3-Node筛选算法前言在上一篇文档中，我们找到调度器筛选node的算法入口pkg/scheduler/core/generic_scheduler.go:162 Schedule()方法 p2-调度器框架 那么在本篇，由此Schedule()函数展开，看一看调度器的node筛选算法，优先级排序算法留作下一篇. 正文Schedule()的筛选算法核心是findNodesThatFit()方法 ,">
+<meta name="twitter:image" content="http://mycloudn.kokoerp.com/zone.jpg">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="随笔漫谈" type="application/atom+xml">
+
+
+
+  
+  
+  <link rel="canonical" href="https://www.ipyker.com/2019/08/12/Kubernetes源码学习-Scheduler-P3-Node筛选算法">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Kubernetes源码学习-Scheduler-P3-Node筛选算法 | 随笔漫谈</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+ 
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">随笔漫谈</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-book">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/gitbooks/" rel="section"><i class="menu-item-icon fa fa-fw fa-book"></i> <br>book</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-互动">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/guestbook/" rel="section"><i class="menu-item-icon fa fa-fw fa-comments"></i> <br>互动</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.ipyker.com/2019/08/12/Kubernetes源码学习-Scheduler-P3-Node筛选算法.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="丨ywq丨">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随笔漫谈">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Kubernetes源码学习-Scheduler-P3-Node筛选算法
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-08-12 20:16:58" itemprop="dateCreated datePublished" datetime="2019-08-12T20:16:58+08:00">2019-08-12</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-11-21 15:48:40" itemprop="dateModified" datetime="2019-11-21T15:48:40+08:00">2019-11-21</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+            <div class="post-symbolscount">
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">本文字数：</span>
+                
+                <span title="本文字数">13k</span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">12 分钟</span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="P3-Node筛选算法"><a href="#P3-Node筛选算法" class="headerlink" title="P3-Node筛选算法"></a>P3-Node筛选算法</h1><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>在上一篇文档中，我们找到调度器筛选node的算法入口<code>pkg/scheduler/core/generic_scheduler.go:162</code> <code>Schedule()</code>方法</p>
+<p><a href="https://github.com/yinwenqin/kubeSourceCodeNote/blob/master/scheduler/Kubernetes%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0-Scheduler-P2-%E8%B0%83%E5%BA%A6%E5%99%A8%E6%A1%86%E6%9E%B6.md" target="_blank" rel="noopener">p2-调度器框架</a></p>
+<p>那么在本篇，由此<code>Schedule()</code>函数展开，看一看调度器的node筛选算法，优先级排序算法留作下一篇.</p>
+<h2 id="正文"><a href="#正文" class="headerlink" title="正文"></a>正文</h2><p>Schedule()的筛选算法核心是<code>findNodesThatFit()</code>方法 ,直接跳转过去:</p>
+<p><code>pkg/scheduler/core/generic_scheduler.go:184</code> –&gt; <code>pkg/scheduler/core/generic_scheduler.go:435</code></p>
+<p>下面注释划出重点，篇幅有限省略部分代码:</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(g *genericScheduler)</span> <span class="title">findNodesThatFit</span><span class="params">(pod *v1.Pod, nodes []*v1.Node)</span> <span class="params">([]*v1.Node, FailedPredicateMap, error)</span></span> &#123;</span><br><span class="line">	<span class="keyword">var</span> filtered []*v1.Node</span><br><span class="line">	failedPredicateMap := FailedPredicateMap&#123;&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> <span class="built_in">len</span>(g.predicates) == <span class="number">0</span> &#123;</span><br><span class="line">		filtered = nodes</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		allNodes := <span class="keyword">int32</span>(g.cache.NodeTree().NumNodes())</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 筛选的node对象的数量，点击进去可查看详情，当集群规模小于100台时，全部检查，当集群大于100台时，</span></span><br><span class="line">    <span class="comment">// 检查指定比例的机器，若指定比例范围内都没有找到合适的node，则继续查找</span></span><br><span class="line">		numNodesToFind := g.numFeasibleNodesToFind(allNodes)</span><br><span class="line"></span><br><span class="line">		... <span class="comment">// 省略</span></span><br><span class="line"></span><br><span class="line">		ctx, cancel := context.WithCancel(context.Background())</span><br><span class="line"></span><br><span class="line">		<span class="comment">// 负责筛选节点的匿名函数主体，核心实现在于内部的podFitsOnNode函数</span></span><br><span class="line">		checkNode := <span class="function"><span class="keyword">func</span><span class="params">(i <span class="keyword">int</span>)</span></span> &#123;</span><br><span class="line">			nodeName := g.cache.NodeTree().Next()</span><br><span class="line">			fits, failedPredicates, err := podFitsOnNode(</span><br><span class="line">				pod,</span><br><span class="line">				meta,</span><br><span class="line">				g.nodeInfoSnapshot.NodeInfoMap[nodeName],</span><br><span class="line">				g.predicates,</span><br><span class="line">				g.schedulingQueue,</span><br><span class="line">				g.alwaysCheckAllPredicates,</span><br><span class="line">			)</span><br><span class="line">			<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">				predicateResultLock.Lock()</span><br><span class="line">				errs[err.Error()]++</span><br><span class="line">				predicateResultLock.Unlock()</span><br><span class="line">				<span class="keyword">return</span></span><br><span class="line">			&#125;</span><br><span class="line">			<span class="keyword">if</span> fits &#123;</span><br><span class="line">				length := atomic.AddInt32(&amp;filteredLen, <span class="number">1</span>)</span><br><span class="line">				<span class="keyword">if</span> length &gt; numNodesToFind &#123;</span><br><span class="line">					cancel()</span><br><span class="line">					atomic.AddInt32(&amp;filteredLen, <span class="number">-1</span>)</span><br><span class="line">				&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">					filtered[length<span class="number">-1</span>] = g.nodeInfoSnapshot.NodeInfoMap[nodeName].Node()</span><br><span class="line">				&#125;</span><br><span class="line">			&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">				predicateResultLock.Lock()</span><br><span class="line">				failedPredicateMap[nodeName] = failedPredicates</span><br><span class="line">				predicateResultLock.Unlock()</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">		</span><br><span class="line">    <span class="comment">// 标记一下这里，并发执行筛选，待会儿看看它的并发是怎么设计的</span></span><br><span class="line">		<span class="comment">// Stops searching for more nodes once the configured number of feasible nodes</span></span><br><span class="line">		<span class="comment">// are found.</span></span><br><span class="line">		workqueue.ParallelizeUntil(ctx, <span class="number">16</span>, <span class="keyword">int</span>(allNodes), checkNode)</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 调度器的扩展处理逻辑，如自定义的扩展筛选、优先级排序算法</span></span><br><span class="line">	<span class="keyword">if</span> <span class="built_in">len</span>(filtered) &gt; <span class="number">0</span> &amp;&amp; <span class="built_in">len</span>(g.extenders) != <span class="number">0</span> &#123;</span><br><span class="line">	... <span class="comment">// 省略</span></span><br><span class="line">	&#125;</span><br><span class="line">  <span class="comment">// 返回结果</span></span><br><span class="line">	<span class="keyword">return</span> filtered, failedPredicateMap, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里一眼就可以看出核心匿名函数内的主体是<code>podFitsOnNode()</code>,但是并不是直接执行<code>podFitsOnNode()</code>函数，而是又封装了一层函数，这个函数的作用是在外层使用<code>nodeName := g.cache.NodeTree().Next()</code>来获取要判断的node主体，传递给<code>podFitsOnNode()</code>函数，而后对<code>podFitsOnNode</code>函数执行返回的结果进行处理。着眼于其下的并发处理实现:<code>workqueue.ParallelizeUntil(ctx, 16, int(allNodes), checkNode)</code>,就可以理解这样封装的好处了,来看看并发实现的内部吧:</p>
+<p><code>vendor/k8s.io/client-go/util/workqueue/parallelizer.go:38</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">ParallelizeUntil</span><span class="params">(ctx context.Context, workers, pieces <span class="keyword">int</span>, doWorkPiece DoWorkPieceFunc)</span></span> &#123;</span><br><span class="line">	<span class="keyword">var</span> stop &lt;-<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;</span><br><span class="line">	<span class="keyword">if</span> ctx != <span class="literal">nil</span> &#123;</span><br><span class="line">		stop = ctx.Done()</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	toProcess := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">int</span>, pieces)</span><br><span class="line">	<span class="keyword">for</span> i := <span class="number">0</span>; i &lt; pieces; i++ &#123;</span><br><span class="line">		toProcess &lt;- i</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="built_in">close</span>(toProcess)</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> pieces &lt; workers &#123;</span><br><span class="line">		workers = pieces</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	wg := sync.WaitGroup&#123;&#125;</span><br><span class="line">	wg.Add(workers)</span><br><span class="line">	<span class="keyword">for</span> i := <span class="number">0</span>; i &lt; workers; i++ &#123;</span><br><span class="line">		<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">			<span class="keyword">defer</span> utilruntime.HandleCrash()</span><br><span class="line">			<span class="keyword">defer</span> wg.Done()</span><br><span class="line">			<span class="keyword">for</span> piece := <span class="keyword">range</span> toProcess &#123;</span><br><span class="line">				<span class="keyword">select</span> &#123;</span><br><span class="line">				<span class="keyword">case</span> &lt;-stop:</span><br><span class="line">					<span class="keyword">return</span></span><br><span class="line">				<span class="keyword">default</span>:</span><br><span class="line">					doWorkPiece(piece)</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;()</span><br><span class="line">	&#125;</span><br><span class="line">	wg.Wait()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>敲黑板记笔记</strong>:</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">1</span><span class="variable">.chan</span> <span class="keyword">struct</span>&#123;&#125;是什么鬼? <span class="keyword">struct</span>&#123;&#125;类型的chan，不占用内存，通常用作go协程之间传递信号，详情可参</span><br><span class="line">考:https:<span class="comment">//dave.cheney.net/2014/03/25/the-empty-struct</span></span><br><span class="line"></span><br><span class="line"><span class="number">2</span><span class="variable">.ParallelizeUntil</span>函数接收<span class="number">4</span>个参数,分别是父协程上下文,max workers,<span class="keyword">task</span> number,<span class="keyword">task</span>执行函数，它启动</span><br><span class="line">指定数量的worker协程，数量最大不超过max workers，共同完成指定数量(<span class="keyword">task</span> number)的<span class="keyword">task</span>，每个<span class="keyword">task</span>执行指</span><br><span class="line">定的执行函数。这意味着，ParallelizeUntil函数只负责并发的数量，而并发的对象主体，需要由<span class="keyword">task</span>执行函数自行</span><br><span class="line">获取。因此我们看到上面的checkNode匿名函数，内部通过nodeName := g<span class="variable">.cache</span><span class="variable">.NodeTree</span>()<span class="variable">.Next</span>()来获取<span class="keyword">task</span></span><br><span class="line">的对象主体，g<span class="variable">.cache</span><span class="variable">.NodeTree</span>()对象内部必然维护了一个指针，来获取当前<span class="keyword">task</span>所需的对象主体。这里使用的并发粒度是以node为单位的.</span><br><span class="line"></span><br><span class="line">ParallelizeUntil()的这种实现方式，可以很好地将并发实现和具体功能实现解耦，因此只要功能实现内部处理好指针，</span><br><span class="line">都可以复用ParallelizeUntil()函数来实现并发的控制。</span><br></pre></td></tr></table></figure>
+<p>来看看<code>checkNode()</code>内部是怎样获取每个子协程对应的node主体的:</p>
+<p><code>pkg/scheduler/core/generic_scheduler.go:460 --&gt; pkg/scheduler/internal/cache/node_tree.go:161</code></p>
+<p><img src="http://mycloudn.kokoerp.com/zone.jpg" alt></p>
+<p>可以看到，这里有一个zone的逻辑层级，这个层级仿佛没有见过，google了一番才了解了这个颇为冷门的功能：这是一个轻量级的支持集群联邦特性的实现，单个cluster可以属于多个zone，但这个功能目前只有GCE和AWS支持，且绝大多数的使用场景也用不到，可以说是颇为冷门。默认情况下，cluster只属于一个zone，可以理解为cluster和zone是同层级，因此后面见到有关zone相关的层级，我们直接越过它。有兴趣的朋友可以了解一下zone的概念:</p>
+<p><a href="https://kubernetes.io/docs/setup/best-practices/multiple-zones/" target="_blank" rel="noopener">https://kubernetes.io/docs/setup/best-practices/multiple-zones/</a></p>
+<p>继续往下, <code>pkg/scheduler/internal/cache/node_tree.go:176</code> –&gt; <code>pkg/scheduler/internal/cache/node_tree.go:47</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// nodeArray is a struct that has nodes that are in a zone.</span></span><br><span class="line"><span class="comment">// We use a slice (as opposed to a set/map) to store the nodes because iterating over the nodes is</span></span><br><span class="line"><span class="comment">// a lot more frequent than searching them by name.</span></span><br><span class="line"><span class="keyword">type</span> nodeArray <span class="keyword">struct</span> &#123;</span><br><span class="line">	nodes     []<span class="keyword">string</span></span><br><span class="line">	lastIndex <span class="keyword">int</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(na *nodeArray)</span> <span class="title">next</span><span class="params">()</span> <span class="params">(nodeName <span class="keyword">string</span>, exhausted <span class="keyword">bool</span>)</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> <span class="built_in">len</span>(na.nodes) == <span class="number">0</span> &#123;</span><br><span class="line">		klog.Error(<span class="string">"The nodeArray is empty. It should have been deleted from NodeTree."</span>)</span><br><span class="line">		<span class="keyword">return</span> <span class="string">""</span>, <span class="literal">false</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> na.lastIndex &gt;= <span class="built_in">len</span>(na.nodes) &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="string">""</span>, <span class="literal">true</span></span><br><span class="line">	&#125;</span><br><span class="line">	nodeName = na.nodes[na.lastIndex]</span><br><span class="line">	na.lastIndex++</span><br><span class="line">	<span class="keyword">return</span> nodeName, <span class="literal">false</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>果然可以看到, nodeArray结构体内部维护了一个lastIndex指针来获取node，印证了上面的推测。</p>
+<p>回到<code>pkg/scheduler/core/generic_scheduler.go:461</code>,正式进入<code>podFitsOnNode</code>内部:</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">podFitsOnNode</span><span class="params">(</span></span></span><br><span class="line"><span class="function"><span class="params">	pod *v1.Pod,</span></span></span><br><span class="line"><span class="function"><span class="params">	meta predicates.PredicateMetadata,</span></span></span><br><span class="line"><span class="function"><span class="params">	info *schedulernodeinfo.NodeInfo,</span></span></span><br><span class="line"><span class="function"><span class="params">	predicateFuncs <span class="keyword">map</span>[<span class="keyword">string</span>]predicates.FitPredicate,</span></span></span><br><span class="line"><span class="function"><span class="params">	queue internalqueue.SchedulingQueue,</span></span></span><br><span class="line"><span class="function"><span class="params">	alwaysCheckAllPredicates <span class="keyword">bool</span>,</span></span></span><br><span class="line"><span class="function"><span class="params">)</span> <span class="params">(<span class="keyword">bool</span>, []predicates.PredicateFailureReason, error)</span></span> &#123;</span><br><span class="line">	<span class="keyword">var</span> failedPredicates []predicates.PredicateFailureReason</span><br><span class="line"></span><br><span class="line">	podsAdded := <span class="literal">false</span></span><br><span class="line">	<span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">2</span>; i++ &#123;</span><br><span class="line">		metaToUse := meta</span><br><span class="line">		nodeInfoToUse := info</span><br><span class="line">		<span class="keyword">if</span> i == <span class="number">0</span> &#123;</span><br><span class="line">			podsAdded, metaToUse, nodeInfoToUse = addNominatedPods(pod, meta, info, queue)</span><br><span class="line">		&#125; <span class="keyword">else</span> <span class="keyword">if</span> !podsAdded || <span class="built_in">len</span>(failedPredicates) != <span class="number">0</span> &#123;</span><br><span class="line">			<span class="keyword">break</span></span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">for</span> _, predicateKey := <span class="keyword">range</span> predicates.Ordering() &#123;</span><br><span class="line">			<span class="keyword">var</span> (</span><br><span class="line">				fit     <span class="keyword">bool</span></span><br><span class="line">				reasons []predicates.PredicateFailureReason</span><br><span class="line">				err     error</span><br><span class="line">			)</span><br><span class="line">			<span class="comment">//TODO (yastij) : compute average predicate restrictiveness to export it as Prometheus metric</span></span><br><span class="line">			<span class="keyword">if</span> predicate, exist := predicateFuncs[predicateKey]; exist &#123;</span><br><span class="line">				fit, reasons, err = predicate(pod, metaToUse, nodeInfoToUse)</span><br><span class="line">				<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">					<span class="keyword">return</span> <span class="literal">false</span>, []predicates.PredicateFailureReason&#123;&#125;, err</span><br><span class="line">				&#125;</span><br><span class="line">			 ... <span class="comment">// 省略</span></span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> <span class="built_in">len</span>(failedPredicates) == <span class="number">0</span>, failedPredicates, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>注释和部分代码已省略,基于<code>podFitsOnNode</code>函数内的注释，来做一下说明:</p>
+<p>1.通过指定<code>pod.spec.priority</code>,来为pod指定调度优先级的功能，在1.14版本已经正式GA，这里所有的调度相关功能都会考虑到pod优先级,因为优先级的原因，因此除了正常的Schedule调度动作外，还会有<code>Preempt</code>抢占调度的行为，这个<code>podFitsOnNode()</code>方法会被在这两个地方调用。</p>
+<p>2.Schedule调度时，会取出当前node上所有已存在的pod，与被提名调度的pod进行优先级对比，取出所有优先级大于等于提名pod，将它们需求的资源加上提名pod所需求的资源，进行汇总，predicate筛选算法计算的时候，是基于这个汇总的结果来进行计算的。举个例子，<code>node A memory cap = 128Gi</code>，其上现承载有20个pod，其中10个pod的优先级大于等于提名pod，它们<code>sum(request.memory) = 100Gi</code>，若提名pod的<code>request.memory = 32Gi</code>, <code>(100+32) &gt; 128</code>,因此筛选时会在内存选项失败返回<strong>false</strong>；若提名pod的<code>request.memory = 16Gi</code>,<code>(100+16) &lt; 128</code>,则内存项筛选通过。那么剩下的优先级较低的10个pod就不考虑它们了吗，它们也要占用内存呀？处理方式是：如果它们占用内存造成node资源不足无法调度提名pod，则调度器会将它们剔出当前node，这即是<code>Preempt</code>抢占。Preempt抢占的说明会在后面的文章中补充.</p>
+<p>3.对于每个提名pod,其调度过程会被重复执行1次，为什么需要重复执行呢？考虑到有一些场景下，会判断到pod之间的亲和力筛选策略，例如pod A对pod B有亲和性，这时它们一起调度到node上，但pod B此时实际并未完成调度启动，那么pod A的<code>inter-pod affinity predicates</code>一定会失败，因此，重复执行1次筛选过程是有必要的.</p>
+<p>有了以上理解，我们接着看代码，图中已注释:</p>
+<p><img src="http://mycloudn.kokoerp.com/podFitsOnNode.jpg" alt></p>
+<p>图中<code>pkg/scheduler/core/generic_scheduler.go:608</code>位置正式开始了逐个计算筛选算法，那么筛选方法、筛选方法顺序在哪里呢？在上一篇<a href="[https://github.com/yinwenqin/kubeSourceCodeNote/blob/master/scheduler/P2-%E8%B0%83%E5%BA%A6%E5%99%A8%E6%A1%86%E6%9E%B6.md](https://github.com/yinwenqin/kubeSourceCodeNote/blob/master/scheduler/P2-调度器框架.md">P2-框架篇</a>)中已经有讲过，默认调度算法都在<code>pkg/scheduler/algorithm/</code>路径下，我们接着往下看.</p>
+<p><strong>Predicates Ordering / Predicates  Function</strong></p>
+<p>筛选算法相关的<code>key/func/ordering</code>，全部集中在<code>pkg/scheduler/algorithm/predicates/predicates.go</code>这个文件中</p>
+<p><strong>筛选顺序</strong>:</p>
+<p><code>pkg/scheduler/algorithm/predicates/predicates.go:142</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 默认predicate顺序</span></span><br><span class="line"><span class="keyword">var</span> (</span><br><span class="line">	predicatesOrdering = []<span class="keyword">string</span>&#123;CheckNodeConditionPred, CheckNodeUnschedulablePred,</span><br><span class="line">		GeneralPred, HostNamePred, PodFitsHostPortsPred,</span><br><span class="line">		MatchNodeSelectorPred, PodFitsResourcesPred, NoDiskConflictPred,</span><br><span class="line">		PodToleratesNodeTaintsPred, PodToleratesNodeNoExecuteTaintsPred, CheckNodeLabelPresencePred,</span><br><span class="line">		CheckServiceAffinityPred, MaxEBSVolumeCountPred, MaxGCEPDVolumeCountPred, MaxCSIVolumeCountPred,</span><br><span class="line">		MaxAzureDiskVolumeCountPred, MaxCinderVolumeCountPred, CheckVolumeBindingPred, NoVolumeZoneConflictPred,</span><br><span class="line">		CheckNodeMemoryPressurePred, CheckNodePIDPressurePred, CheckNodeDiskPressurePred, MatchInterPodAffinityPred&#125;</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<p>官方的备注:</p>
+<p><a href="https://github.com/kubernetes/community/blob/master/contributors/design-proposals/scheduling/predicates-ordering.md" target="_blank" rel="noopener">链接</a></p>
+<p><img src="http://mycloudn.kokoerp.com/predicates.jpg" alt></p>
+<p><strong>筛选key</strong></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> (</span><br><span class="line">	<span class="comment">// MatchInterPodAffinityPred defines the name of predicate MatchInterPodAffinity.</span></span><br><span class="line">	MatchInterPodAffinityPred = <span class="string">"MatchInterPodAffinity"</span></span><br><span class="line">	<span class="comment">// CheckVolumeBindingPred defines the name of predicate CheckVolumeBinding.</span></span><br><span class="line">	CheckVolumeBindingPred = <span class="string">"CheckVolumeBinding"</span></span><br><span class="line">	<span class="comment">// CheckNodeConditionPred defines the name of predicate CheckNodeCondition.</span></span><br><span class="line">	CheckNodeConditionPred = <span class="string">"CheckNodeCondition"</span></span><br><span class="line">	<span class="comment">// GeneralPred defines the name of predicate GeneralPredicates.</span></span><br><span class="line">	GeneralPred = <span class="string">"GeneralPredicates"</span></span><br><span class="line">	<span class="comment">// HostNamePred defines the name of predicate HostName.</span></span><br><span class="line">	HostNamePred = <span class="string">"HostName"</span></span><br><span class="line">	<span class="comment">// PodFitsHostPortsPred defines the name of predicate PodFitsHostPorts.</span></span><br><span class="line">	PodFitsHostPortsPred = <span class="string">"PodFitsHostPorts"</span></span><br><span class="line">	<span class="comment">// MatchNodeSelectorPred defines the name of predicate MatchNodeSelector.</span></span><br><span class="line">	MatchNodeSelectorPred = <span class="string">"MatchNodeSelector"</span></span><br><span class="line">	<span class="comment">// PodFitsResourcesPred defines the name of predicate PodFitsResources.</span></span><br><span class="line">	PodFitsResourcesPred = <span class="string">"PodFitsResources"</span></span><br><span class="line">	<span class="comment">// NoDiskConflictPred defines the name of predicate NoDiskConflict.</span></span><br><span class="line">	NoDiskConflictPred = <span class="string">"NoDiskConflict"</span></span><br><span class="line">	<span class="comment">// PodToleratesNodeTaintsPred defines the name of predicate PodToleratesNodeTaints.</span></span><br><span class="line">	PodToleratesNodeTaintsPred = <span class="string">"PodToleratesNodeTaints"</span></span><br><span class="line">	<span class="comment">// CheckNodeUnschedulablePred defines the name of predicate CheckNodeUnschedulablePredicate.</span></span><br><span class="line">	CheckNodeUnschedulablePred = <span class="string">"CheckNodeUnschedulable"</span></span><br><span class="line">	<span class="comment">// PodToleratesNodeNoExecuteTaintsPred defines the name of predicate PodToleratesNodeNoExecuteTaints.</span></span><br><span class="line">	PodToleratesNodeNoExecuteTaintsPred = <span class="string">"PodToleratesNodeNoExecuteTaints"</span></span><br><span class="line">	<span class="comment">// CheckNodeLabelPresencePred defines the name of predicate CheckNodeLabelPresence.</span></span><br><span class="line">	CheckNodeLabelPresencePred = <span class="string">"CheckNodeLabelPresence"</span></span><br><span class="line">	<span class="comment">// CheckServiceAffinityPred defines the name of predicate checkServiceAffinity.</span></span><br><span class="line">	CheckServiceAffinityPred = <span class="string">"CheckServiceAffinity"</span></span><br><span class="line">	<span class="comment">// MaxEBSVolumeCountPred defines the name of predicate MaxEBSVolumeCount.</span></span><br><span class="line">	<span class="comment">// DEPRECATED</span></span><br><span class="line">	<span class="comment">// All cloudprovider specific predicates are deprecated in favour of MaxCSIVolumeCountPred.</span></span><br><span class="line">	MaxEBSVolumeCountPred = <span class="string">"MaxEBSVolumeCount"</span></span><br><span class="line">	<span class="comment">// MaxGCEPDVolumeCountPred defines the name of predicate MaxGCEPDVolumeCount.</span></span><br><span class="line">	<span class="comment">// DEPRECATED</span></span><br><span class="line">	<span class="comment">// All cloudprovider specific predicates are deprecated in favour of MaxCSIVolumeCountPred.</span></span><br><span class="line">	MaxGCEPDVolumeCountPred = <span class="string">"MaxGCEPDVolumeCount"</span></span><br><span class="line">	<span class="comment">// MaxAzureDiskVolumeCountPred defines the name of predicate MaxAzureDiskVolumeCount.</span></span><br><span class="line">	<span class="comment">// DEPRECATED</span></span><br><span class="line">	<span class="comment">// All cloudprovider specific predicates are deprecated in favour of MaxCSIVolumeCountPred.</span></span><br><span class="line">	MaxAzureDiskVolumeCountPred = <span class="string">"MaxAzureDiskVolumeCount"</span></span><br><span class="line">	<span class="comment">// MaxCinderVolumeCountPred defines the name of predicate MaxCinderDiskVolumeCount.</span></span><br><span class="line">	<span class="comment">// DEPRECATED</span></span><br><span class="line">	<span class="comment">// All cloudprovider specific predicates are deprecated in favour of MaxCSIVolumeCountPred.</span></span><br><span class="line">	MaxCinderVolumeCountPred = <span class="string">"MaxCinderVolumeCount"</span></span><br><span class="line">	<span class="comment">// MaxCSIVolumeCountPred defines the predicate that decides how many CSI volumes should be attached</span></span><br><span class="line">	MaxCSIVolumeCountPred = <span class="string">"MaxCSIVolumeCountPred"</span></span><br><span class="line">	<span class="comment">// NoVolumeZoneConflictPred defines the name of predicate NoVolumeZoneConflict.</span></span><br><span class="line">	NoVolumeZoneConflictPred = <span class="string">"NoVolumeZoneConflict"</span></span><br><span class="line">	<span class="comment">// CheckNodeMemoryPressurePred defines the name of predicate CheckNodeMemoryPressure.</span></span><br><span class="line">	CheckNodeMemoryPressurePred = <span class="string">"CheckNodeMemoryPressure"</span></span><br><span class="line">	<span class="comment">// CheckNodeDiskPressurePred defines the name of predicate CheckNodeDiskPressure.</span></span><br><span class="line">	CheckNodeDiskPressurePred = <span class="string">"CheckNodeDiskPressure"</span></span><br><span class="line">	<span class="comment">// CheckNodePIDPressurePred defines the name of predicate CheckNodePIDPressure.</span></span><br><span class="line">	CheckNodePIDPressurePred = <span class="string">"CheckNodePIDPressure"</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">// DefaultMaxGCEPDVolumes defines the maximum number of PD Volumes for GCE</span></span><br><span class="line">	<span class="comment">// GCE instances can have up to 16 PD volumes attached.</span></span><br><span class="line">	DefaultMaxGCEPDVolumes = <span class="number">16</span></span><br><span class="line">	<span class="comment">// DefaultMaxAzureDiskVolumes defines the maximum number of PD Volumes for Azure</span></span><br><span class="line">	<span class="comment">// Larger Azure VMs can actually have much more disks attached.</span></span><br><span class="line">	<span class="comment">// TODO We should determine the max based on VM size</span></span><br><span class="line">	DefaultMaxAzureDiskVolumes = <span class="number">16</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">// KubeMaxPDVols defines the maximum number of PD Volumes per kubelet</span></span><br><span class="line">	KubeMaxPDVols = <span class="string">"KUBE_MAX_PD_VOLS"</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">// EBSVolumeFilterType defines the filter name for EBSVolumeFilter.</span></span><br><span class="line">	EBSVolumeFilterType = <span class="string">"EBS"</span></span><br><span class="line">	<span class="comment">// GCEPDVolumeFilterType defines the filter name for GCEPDVolumeFilter.</span></span><br><span class="line">	GCEPDVolumeFilterType = <span class="string">"GCE"</span></span><br><span class="line">	<span class="comment">// AzureDiskVolumeFilterType defines the filter name for AzureDiskVolumeFilter.</span></span><br><span class="line">	AzureDiskVolumeFilterType = <span class="string">"AzureDisk"</span></span><br><span class="line">	<span class="comment">// CinderVolumeFilterType defines the filter name for CinderVolumeFilter.</span></span><br><span class="line">	CinderVolumeFilterType = <span class="string">"Cinder"</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<p><strong>筛选Function</strong></p>
+<p>每个<code>predicate key</code>对应的<code>function name</code>一般为<code>${KEY}Predicate</code>,function的内容其实都比较简单,不一一介绍了，自行查看，这里仅列举一个:</p>
+<p><code>pkg/scheduler/algorithm/predicates/predicates.go:1567</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// CheckNodeMemoryPressurePredicate checks if a pod can be scheduled on a node</span></span><br><span class="line"><span class="comment">// reporting memory pressure condition.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">CheckNodeMemoryPressurePredicate</span><span class="params">(pod *v1.Pod, meta PredicateMetadata, nodeInfo *schedulernodeinfo.NodeInfo)</span> <span class="params">(<span class="keyword">bool</span>, []PredicateFailureReason, error)</span></span> &#123;</span><br><span class="line">	<span class="keyword">var</span> podBestEffort <span class="keyword">bool</span></span><br><span class="line">	<span class="keyword">if</span> predicateMeta, ok := meta.(*predicateMetadata); ok &#123;</span><br><span class="line">		podBestEffort = predicateMeta.podBestEffort</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		<span class="comment">// We couldn't parse metadata - fallback to computing it.</span></span><br><span class="line">		podBestEffort = isPodBestEffort(pod)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// pod is not BestEffort pod</span></span><br><span class="line">	<span class="keyword">if</span> !podBestEffort &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">true</span>, <span class="literal">nil</span>, <span class="literal">nil</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// check if node is under memory pressure</span></span><br><span class="line">	<span class="keyword">if</span> nodeInfo.MemoryPressureCondition() == v1.ConditionTrue &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">false</span>, []PredicateFailureReason&#123;ErrNodeUnderMemoryPressure&#125;, <span class="literal">nil</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">true</span>, <span class="literal">nil</span>, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>筛选算法过程到这里就已然清晰明了！</p>
+<h3 id="重点回顾"><a href="#重点回顾" class="headerlink" title="重点回顾"></a>重点回顾</h3><p>筛选算法代码中的几个不易理解的点(亮点?)圈出:</p>
+<ul>
+<li><strong>node粒度的并发控制</strong></li>
+<li><strong>基于优先级的pod资源总和归纳计算</strong></li>
+<li><strong>筛选过程重复1次</strong></li>
+</ul>
+<p>本篇调度器筛选算法篇到此结束，下一篇将学习调度器优先级排序的算法详情内容</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div id="reward-container">
+  <div>Thank you for your accept. mua！</div>
+  <button id="reward-button" disable="enable" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+
+    
+      
+      
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/reward/wechatpay.png" alt="丨ywq丨 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+      
+      
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/reward/alipay.png" alt="丨ywq丨 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        
+
+
+
+
+  
+
+
+
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>丨ywq丨</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    
+    <a href="https://www.ipyker.com/2019/08/12/Kubernetes源码学习-Scheduler-P3-Node筛选算法.html" title="Kubernetes源码学习-Scheduler-P3-Node筛选算法">https://www.ipyker.com/2019/08/12/Kubernetes源码学习-Scheduler-P3-Node筛选算法.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li>
+</ul>
+
+      </div>
+    
+    <div>
+      
+        <div>
+    
+        <div style="text-align:center;color: #ccc;font-size:16px;">-------------本文结束<i class="fa fa-heart"></i>感谢您的阅读-------------</div>
+    
+</div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Kubernetes/" rel="tag"><i class="fa fa-tag"></i> Kubernetes</a>
+          
+            <a href="/tags/Golang/" rel="tag"><i class="fa fa-tag"></i> Golang</a>
+          
+            <a href="/tags/读源码/" rel="tag"><i class="fa fa-tag"></i> 读源码</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/08/09/Kubernetes源码学习-Scheduler-P2-调度器框架.html" rel="next" title="Kubernetes源码学习-Scheduler-P2-调度器框架">
+                <i class="fa fa-chevron-left"></i> Kubernetes源码学习-Scheduler-P2-调度器框架
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/08/20/Hexo-GithubPages,免建站快速部署你的专属博客.html" rel="prev" title="Hexo + Github pages: 免建站快速部署你的专属博客">
+                Hexo + Github pages: 免建站快速部署你的专属博客 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC80NDM5Mi8yMDkyNA=="></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="丨ywq丨">
+            
+              <p class="site-author-name" itemprop="name">丨ywq丨</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives">
+                
+                    <span class="site-state-item-count">74</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                      <a href="/tags">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">15</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/yinwenqin" title="GitHub &rarr; https://github.com/yinwenqin" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://blog.csdn.net/ywq935" title="CSDN &rarr; https://blog.csdn.net/ywq935" rel="noopener" target="_blank"><i class="fa fa-fw fa-globe"></i>CSDN</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-book"></i>
+                推荐阅读
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.upweto.top/gitbooks/useKubernetes/" title="http://blog.upweto.top/gitbooks/useKubernetes/" rel="noopener" target="_blank">kubernetes使用指南</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.upweto.top/gitbooks/kubeSourceCodeNote/" title="http://blog.upweto.top/gitbooks/kubeSourceCodeNote/" rel="noopener" target="_blank">kubernetes源码笔记</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#P3-Node筛选算法"><span class="nav-number">1.</span> <span class="nav-text">P3-Node筛选算法</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#正文"><span class="nav-number">1.2.</span> <span class="nav-text">正文</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#重点回顾"><span class="nav-number">1.2.1.</span> <span class="nav-text">重点回顾</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" style=" text-align:center;">&copy; 2017 – <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ywq</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"> 站点字数合计:</i>
+    </span>
+    
+    <span title="站点总字数">583k</span>
+  
+  
+</div>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+<div class="run_time" style=" text-align:center;">
+  <span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
+  <script>
+    var now = new Date(); 
+    function createtime() { 
+        var grt= new Date("08/23/2018 10:00:00");//此处修改你的建站时间或者网站上线时间 
+        now.setTime(now.getTime()+250); 
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days); 
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours); 
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum); 
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;} 
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum); 
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;} 
+        document.getElementById("timeDate").innerHTML = "本站已安全运行 "+dnum+" 天 "; 
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒"; 
+    } 
+    setInterval("createtime()",250);
+  </script>
+</div>
+
+        
+<div class="busuanzi-count" style=" text-align:center;">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-user"></i>
+    </span>
+    <span class="site-uv" title="总访客量">
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span> 人
+    </span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+  
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-eye"></i>
+    </span>
+    <span class="site-pv" title="总访问量">
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span> 次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+  
+    
+    
+      
+    
+  
+  <script color="black" opacity="0.7" zindex="-1" count="140" src="//cdn.jsdelivr.net/gh/theme-next/theme-next-canvas-nest@1.0.0/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+  
+  
+  <script id="ribbon" size="300" alpha="0.1" zindex="-1" src="/lib/canvas-ribbon/canvas-ribbon.js"></script>
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/fancybox/source/jquery.fancybox.pack.js"></script>
+
+
+  
+
+
+  <script src="/js/utils.js?v=7.1.1"></script>
+
+  <script src="/js/motion.js?v=7.1.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/schemes/muse.js?v=7.1.1"></script>
+
+
+
+
+  
+  <script src="/js/scrollspy.js?v=7.1.1"></script>
+<script src="/js/post-details.js?v=7.1.1"></script>
+
+
+
+  
+
+
+  <script src="/js/next-boot.js?v=7.1.1"></script>
+
+
+  
+
+  
+
+  
+  
+  
+
+  
+
+  
+  
+  
+
+
+  
+
+
+  
+    <script>
+  window.livereOptions = {
+    refer: '2019/08/12/Kubernetes源码学习-Scheduler-P3-Node筛选算法.html'
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+</script>
+
+  
+
+
+  
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url).replace(/\/{2,}/g, '/');
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x"></i></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x"></i></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+  
+  <script src="/lib/bookmark/bookmark.min.js?v=1.0"></script>
+  <script>
+  
+    bookmark.scrollToMark('auto', "#更多");
+  
+  </script>
+
+
+  
+
+  
+
+  
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/koharu.model.json"},"display":{"position":"left","width":250,"height":500},"mobile":{"show":false},"react":{"opacity":0.7},"log":false});</script></body>
+</html>
+<!-- 页面点击小红心 -->
+<script type="text/javascript" src="/js/src/clicklove.js"></script>

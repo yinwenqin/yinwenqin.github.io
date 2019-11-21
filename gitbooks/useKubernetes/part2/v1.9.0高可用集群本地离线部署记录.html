@@ -1,0 +1,1312 @@
+
+<!DOCTYPE HTML>
+<html lang="zh-hans" >
+    <head>
+        <meta charset="UTF-8">
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <title>2.1. v1.9.0高可用集群部署 · Kubernetes生态圈使用</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="description" content="">
+        <meta name="generator" content="GitBook 3.2.3">
+        <meta name="author" content="ywq">
+        
+        
+    
+    <link rel="stylesheet" href="../gitbook/style.css">
+
+    
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-anchors/plugin.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-expandable-chapters/expandable-chapters.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-splitter/splitter.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-back-to-top-button/plugin.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-highlight/website.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-search/search.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-fontsettings/website.css">
+                
+            
+        
+
+    
+
+    
+        
+    
+
+        
+    
+    
+    <meta name="HandheldFriendly" content="true"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="../gitbook/images/apple-touch-icon-precomposed-152.png">
+    <link rel="shortcut icon" href="../gitbook/images/favicon.ico" type="image/x-icon">
+
+    
+    <link rel="next" href="v1.14多master集群部署.html" />
+    
+    
+    <link rel="prev" href="./" />
+    
+
+    </head>
+    <body>
+        
+<div class="book">
+    <div class="book-summary">
+        
+            
+<div id="book-search-input" role="search">
+    <input type="text" placeholder="输入并搜索" />
+</div>
+
+            
+                <nav role="navigation">
+                
+
+
+<ul class="summary">
+    
+    
+
+    
+
+    
+        
+        <li class="header">Part 1-写在前面</li>
+        
+        
+    
+        <li class="chapter " data-level="1.1" data-path="../">
+            
+                <a href="../">
+            
+                    
+                    1. 总览篇
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Part 2-集群相关</li>
+        
+        
+    
+        <li class="chapter " data-level="2.1" data-path="./">
+            
+                <a href="./">
+            
+                    
+                    2. 集群相关
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter active" data-level="2.1.1" data-path="v1.9.0高可用集群本地离线部署记录.html">
+            
+                <a href="v1.9.0高可用集群本地离线部署记录.html">
+            
+                    
+                    2.1. v1.9.0高可用集群部署
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.1.2" data-path="v1.14多master集群部署.html">
+            
+                <a href="v1.14多master集群部署.html">
+            
+                    
+                    2.2. v1.14.3高可用集群部署
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.1.3" data-path="Kubernetes中的Pause容器.html">
+            
+                <a href="Kubernetes中的Pause容器.html">
+            
+                    
+                    2.3. Kubernetes中的Pause容器
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.1.4" data-path="RBAC权限控制.html">
+            
+                <a href="RBAC权限控制.html">
+            
+                    
+                    2.4. RBAC权限控制
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.1.5" data-path="docker-k8s常用命令速查及rest-api.html">
+            
+                <a href="docker-k8s常用命令速查及rest-api.html">
+            
+                    
+                    2.5. 常用命令与rest-api速查
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.1.6" data-path="Kubernetes各组件参数配置优化建议.html">
+            
+                <a href="Kubernetes各组件参数配置优化建议.html">
+            
+                    
+                    2.6. Kubernetes各组件参数配置优化建议
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Part 3-网络与服务</li>
+        
+        
+    
+        <li class="chapter " data-level="3.1" data-path="../part3/">
+            
+                <a href="../part3/">
+            
+                    
+                    3. 网络与服务
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="3.1.1" data-path="../part3/Traefik提供ingress-http服务.html">
+            
+                <a href="../part3/Traefik提供ingress-http服务.html">
+            
+                    
+                    3.1. Traefik 提供ingress http服务
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.1.2" data-path="../part3/kube-router提供BGP全直通网络.html">
+            
+                <a href="../part3/kube-router提供BGP全直通网络.html">
+            
+                    
+                    3.2. Kube-router BGP全直通网络
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.1.3" data-path="../part3/kube-router工作模式抓包分析.html">
+            
+                <a href="../part3/kube-router工作模式抓包分析.html">
+            
+                    
+                    3.3. Kube-router ipvs Service模式抓包分析
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.1.4" data-path="../part3/VXLAN和Flannel.html">
+            
+                <a href="../part3/VXLAN和Flannel.html">
+            
+                    
+                    3.4. VXLAN和Flannel
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Part 4-监控</li>
+        
+        
+    
+        <li class="chapter " data-level="4.1" data-path="../part4/">
+            
+                <a href="../part4/">
+            
+                    
+                    4. Prometheus监控
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="4.1.1" data-path="../part4/监控--Prometheus部署篇.html">
+            
+                <a href="../part4/监控--Prometheus部署篇.html">
+            
+                    
+                    4.1. Prometheus部署篇
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="4.1.2" data-path="../part4/监控--Prometheus扩展篇（mysqld-exporter、服务发现、监控项、联邦、relabel）.html">
+            
+                <a href="../part4/监控--Prometheus扩展篇（mysqld-exporter、服务发现、监控项、联邦、relabel）.html">
+            
+                    
+                    4.2. Prometheus扩展篇
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="4.1.3" data-path="../part4/监控--Prometheus告警篇（告警消息对接钉钉接口）.html">
+            
+                <a href="../part4/监控--Prometheus告警篇（告警消息对接钉钉接口）.html">
+            
+                    
+                    4.3. Prometheus告警篇
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Part 5-分布式存储Ceph</li>
+        
+        
+    
+        <li class="chapter " data-level="5.1" data-path="../part5/">
+            
+                <a href="../part5/">
+            
+                    
+                    5. Ceph存储
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="5.1.1" data-path="../part5/Ceph集群生产环境安装部署.html">
+            
+                <a href="../part5/Ceph集群生产环境安装部署.html">
+            
+                    
+                    5.1. Ceph部署篇
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.1.2" data-path="../part5/cephfs调优-性能测试-监控-常用命令.html">
+            
+                <a href="../part5/cephfs调优-性能测试-监控-常用命令.html">
+            
+                    
+                    5.2. Ceph性能调优
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.1.3" data-path="../part5/分布式存储Cephfs使用.html">
+            
+                <a href="../part5/分布式存储Cephfs使用.html">
+            
+                    
+                    5.3. Cephfs在k8s中使用
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.1.4" data-path="../part5/分布式存储Ceph-RBD使用.html">
+            
+                <a href="../part5/分布式存储Ceph-RBD使用.html">
+            
+                    
+                    5.4. Ceph RBD在k8s中使用
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.1.5" data-path="../part5/Cephfs-CephRBD在k8s中的适用场景讨论及数据库性能压测.html">
+            
+                <a href="../part5/Cephfs-CephRBD在k8s中的适用场景讨论及数据库性能压测.html">
+            
+                    
+                    5.5. Ceph在k8s中的综合场景应用及数据库OLTP性能压测
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Part 6-微服务框架Istio</li>
+        
+        
+    
+        <li class="chapter " data-level="6.1" data-path="../part6/">
+            
+                <a href="../part6/">
+            
+                    
+                    6. Istio微服务框架
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="6.1.1" data-path="../part6/微服务框架istio安装测试.html">
+            
+                <a href="../part6/微服务框架istio安装测试.html">
+            
+                    
+                    6.1. istio安装测试
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="6.1.2" data-path="../part6/微服务框架istio流量策略控制.html">
+            
+                <a href="../part6/微服务框架istio流量策略控制.html">
+            
+                    
+                    6.2. istio流量策略控制
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="6.1.3" data-path="../part6/微服务框架istio服务可视化与监控.html">
+            
+                <a href="../part6/微服务框架istio服务可视化与监控.html">
+            
+                    
+                    6.3. istio服务可视化与监控
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="6.1.4" data-path="../part6/微服务--istio1.0抢鲜测试.html">
+            
+                <a href="../part6/微服务--istio1.0抢鲜测试.html">
+            
+                    
+                    6.4. istio v1.0 抢鲜测试
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Part 7-周边生态</li>
+        
+        
+    
+        <li class="chapter " data-level="7.1" data-path="../part7/">
+            
+                <a href="../part7/">
+            
+                    
+                    7. 周边生态
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="7.1.1" data-path="../part7/Docker-registry仓库历史镜像批量清理.html">
+            
+                <a href="../part7/Docker-registry仓库历史镜像批量清理.html">
+            
+                    
+                    7.1. Docker-registry历史镜像批量清理.md
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="7.1.2" data-path="../part7/企业级docker仓库Harbor在kubernetes上搭建使用.html">
+            
+                <a href="../part7/企业级docker仓库Harbor在kubernetes上搭建使用.html">
+            
+                    
+                    7.2. Harbor部署使用
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Part 8-问题记录</li>
+        
+        
+    
+        <li class="chapter " data-level="8.1" data-path="../part8/">
+            
+                <a href="../part8/">
+            
+                    
+                    8. 问题记录
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="8.1.1" data-path="../part8/Kubernetes部署问题记录.html">
+            
+                <a href="../part8/Kubernetes部署问题记录.html">
+            
+                    
+                    8.1. 集群部署问题记录
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="8.1.2" data-path="../part8/Service-ipvs模式间断性TCP连接故障排查.html">
+            
+                <a href="../part8/Service-ipvs模式间断性TCP连接故障排查.html">
+            
+                    
+                    8.2. Service ipvs模式间断性TCP连接故障排查
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="8.1.3" data-path="../part8/kubeadm证书-etcd证书过期紧急处理.html">
+            
+                <a href="../part8/kubeadm证书-etcd证书过期紧急处理.html">
+            
+                    
+                    8.3. kubeadm证书-etcd证书过期紧急处理
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="8.1.4" data-path="../part8/Kubernetes-Pod无法终结问题排查.html">
+            
+                <a href="../part8/Kubernetes-Pod无法终结问题排查.html">
+            
+                    
+                    8.4. Kubernetes-Pod无法终结问题排查
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+
+    <li class="divider"></li>
+
+    <li>
+        <a href="https://www.gitbook.com" target="blank" class="gitbook-link">
+            本书使用 GitBook 发布
+        </a>
+    </li>
+</ul>
+
+
+                </nav>
+            
+        
+    </div>
+
+    <div class="book-body">
+        
+            <div class="body-inner">
+                
+                    
+
+<div class="book-header" role="navigation">
+    
+
+    <!-- Title -->
+    <h1>
+        <i class="fa fa-circle-o-notch fa-spin"></i>
+        <a href=".." >2.1. v1.9.0高可用集群部署</a>
+    </h1>
+</div>
+
+
+
+
+                    <div class="page-wrapper" tabindex="-1" role="main">
+                        <div class="page-inner">
+                            
+<div id="book-search-results">
+    <div class="search-noresults">
+    
+                                <section class="normal markdown-section">
+                                
+                                <h2 id="&#x4E00;&#x3001;&#x90E8;&#x7F72;&#x8BF4;&#x660E;"><a name="&#x4E00;&#x3001;&#x90E8;&#x7F72;&#x8BF4;&#x660E;" class="plugin-anchor" href="#&#x4E00;&#x3001;&#x90E8;&#x7F72;&#x8BF4;&#x660E;"><i class="fa fa-link" aria-hidden="true"></i></a>&#x4E00;&#x3001;&#x90E8;&#x7F72;&#x8BF4;&#x660E;</h2>
+<p>1.&#x8282;&#x70B9;</p>
+<pre><code>master1:  IP:192.168.0.170/24 hostname&#xFF1A;171
+
+master2:  IP:192.168.0.171/24 hostname&#xFF1A;172
+
+VIP:192.168.0.169/24
+</code></pre><p><img src="http://mycloudn.kokoerp.com/20180411093123251.jpg" alt="&#x8FD9;&#x91CC;&#x5199;&#x56FE;&#x7247;&#x63CF;&#x8FF0;"></p>
+<p>2.&#x5DE5;&#x5177;&#x7248;&#x672C;&#xFF1A;</p>
+<pre><code>etcd-v3.1.10-linux-amd64.tar.gz
+kubeadm-1.9.0-0.x86_64.rpm
+kubectl-1.9.0-0.x86_64.rpm
+kubelet-1.9.9-9.x86_64.rpm
+kubernetes-cni-0.6.0-0.x86_64.rpm
+socat-1.7.3.2-2.el7.x86_64.rpm
+</code></pre><p>docker&#x79BB;&#x7EBF;&#x955C;&#x50CF;&#xFF1A;</p>
+<pre><code>etcd-amd64_v3.1.10.tar
+k8s-dns-dnsmasq-nanny-amd64_v1.14.7.tar
+k8s-dns-kube-dns-amd64_1.14.7.tar
+k8s-dns-sidecar-amd64_1.14.7.tar
+kube-apiserver-amd64_v1.9.0.tar
+kube-controller-manager-amd64_v1.9.0.tar
+kube-proxy-amd64_v1.9.0.tar
+kubernetes-dashboard_v1.8.1.tar
+kube-scheduler-amd64_v1.9.0.tar
+pause-amd64_3.0.tar
+</code></pre><p>&#x4EE5;&#x4E0A;&#x5B89;&#x88C5;&#x5305;&#x7684;&#x4E91;&#x76D8;&#x94FE;&#x63A5;&#x968F;&#x540E;&#x9644;&#x4E0A;.&#x6709;&#x68AF;&#x5B50;&#x7FFB;&#x5899;&#x7684;&#x76F4;&#x63A5;&#x88C5;&#xFF0C;&#x65E0;&#x9700;&#x79BB;&#x7EBF;&#x5305;&#x3002;</p>
+<h4 id="&#x7EC4;&#x4EF6;&#x4F5C;&#x7528;&#x8BF4;&#x660E;"><a name="&#x7EC4;&#x4EF6;&#x4F5C;&#x7528;&#x8BF4;&#x660E;" class="plugin-anchor" href="#&#x7EC4;&#x4EF6;&#x4F5C;&#x7528;&#x8BF4;&#x660E;"><i class="fa fa-link" aria-hidden="true"></i></a>&#x7EC4;&#x4EF6;&#x4F5C;&#x7528;&#x8BF4;&#x660E;</h4>
+<p>&#x96C6;&#x7FA4;&#x4E24;&#x4E2A;&#x6700;&#x91CD;&#x8981;&#x7684;&#x6838;&#x5FC3;&#xFF1A;<strong>apiserver master</strong>&#x548C;<strong>etcd</strong></p>
+<p>1.apiserver master&#xFF1A;&#xFF08;&#x9700;&#x9AD8;&#x53EF;&#x7528;&#xFF09;&#x96C6;&#x7FA4;&#x6838;&#x5FC3;&#xFF0C;&#x96C6;&#x7FA4;API&#x63A5;&#x53E3;&#x3001;&#x96C6;&#x7FA4;&#x5404;&#x4E2A;&#x7EC4;&#x4EF6;&#x901A;&#x4FE1;&#x7684;&#x4E2D;&#x67A2;&#xFF1B;&#x96C6;&#x7FA4;&#x5B89;&#x5168;&#x63A7;&#x5236;&#xFF1B;</p>
+<p>2.etcd &#xFF1A;&#xFF08;&#x9700;&#x9AD8;&#x53EF;&#x7528;&#xFF09;&#x96C6;&#x7FA4;&#x7684;&#x6570;&#x636E;&#x4E2D;&#x5FC3;&#xFF0C;&#x7528;&#x4E8E;&#x5B58;&#x653E;&#x96C6;&#x7FA4;&#x7684;&#x914D;&#x7F6E;&#x4EE5;&#x53CA;&#x72B6;&#x6001;&#x4FE1;&#x606F;&#xFF0C;&#x975E;&#x5E38;&#x91CD;&#x8981;&#xFF0C;&#x5982;&#x679C;&#x6570;&#x636E;&#x4E22;&#x5931;&#x90A3;&#x4E48;&#x96C6;&#x7FA4;&#x5C06;&#x65E0;&#x6CD5;&#x6062;&#x590D;&#xFF1B;&#x56E0;&#x6B64;&#x9AD8;&#x53EF;&#x7528;&#x96C6;&#x7FA4;&#x90E8;&#x7F72;&#x9996;&#x5148;&#x5C31;&#x662F;etcd&#x662F;&#x9AD8;&#x53EF;&#x7528;&#x96C6;&#x7FA4;&#xFF1B;
+kube-scheduler&#xFF1A;&#x8C03;&#x5EA6;&#x5668; &#xFF08;&#x5185;&#x90E8;&#x81EA;&#x9009;&#x4E3E;&#xFF09;&#x96C6;&#x7FA4;Pod&#x7684;&#x8C03;&#x5EA6;&#x4E2D;&#x5FC3;&#xFF1B;&#x9ED8;&#x8BA4;kubeadm&#x5B89;&#x88C5;&#x60C5;&#x51B5;&#x4E0B;&#x2013;leader-elect&#x53C2;&#x6570;&#x5DF2;&#x7ECF;&#x8BBE;&#x7F6E;&#x4E3A;true&#xFF0C;&#x4FDD;&#x8BC1;master&#x96C6;&#x7FA4;&#x4E2D;&#x53EA;&#x6709;&#x4E00;&#x4E2A;kube-scheduler&#x5904;&#x4E8E;&#x6D3B;&#x8DC3;&#x72B6;&#x6001;&#xFF1B;</p>
+<p>3.kube-controller-manager&#xFF1A; &#x63A7;&#x5236;&#x5668;&#xFF08;&#x5185;&#x90E8;&#x81EA;&#x9009;&#x4E3E;&#xFF09;&#x96C6;&#x7FA4;&#x72B6;&#x6001;&#x7BA1;&#x7406;&#x5668;&#xFF0C;&#x5F53;&#x96C6;&#x7FA4;&#x72B6;&#x6001;&#x4E0E;&#x671F;&#x671B;&#x4E0D;&#x540C;&#x65F6;&#xFF0C;kcm&#x4F1A;&#x52AA;&#x529B;&#x8BA9;&#x96C6;&#x7FA4;&#x6062;&#x590D;&#x671F;&#x671B;&#x72B6;&#x6001;&#xFF0C;&#x6BD4;&#x5982;&#xFF1A;&#x5F53;&#x4E00;&#x4E2A;pod&#x6B7B;&#x6389;&#xFF0C;kcm&#x4F1A;&#x52AA;&#x529B;&#x65B0;&#x5EFA;&#x4E00;&#x4E2A;pod&#x6765;&#x6062;&#x590D;&#x5BF9;&#x5E94;replicasset&#x671F;&#x671B;&#x7684;&#x72B6;&#x6001;&#xFF1B;&#x9ED8;&#x8BA4;kubeadm&#x5B89;&#x88C5;&#x60C5;&#x51B5;&#x4E0B;&#x2013;leader-elect&#x53C2;&#x6570;&#x5DF2;&#x7ECF;&#x8BBE;&#x7F6E;&#x4E3A;true&#xFF0C;&#x4FDD;&#x8BC1;master&#x96C6;&#x7FA4;&#x4E2D;&#x53EA;&#x6709;&#x4E00;&#x4E2A;kube-controller-manager&#x5904;&#x4E8E;&#x6D3B;&#x8DC3;&#x72B6;&#x6001;&#xFF1B;</p>
+<p>4.kubelet: &#x5C06;agent node&#x6CE8;&#x518C;&#x4E0A;apiserver,&#x662F;&#x8FD0;&#x884C;&#x5728;&#x6BCF;&#x4E2A;node&#x4E0A;&#x7684;&#x96C6;&#x7FA4;&#x7BA1;&#x7406;&#x5DE5;&#x5177;</p>
+<p>5.scheduler&#xFF1A;&#x4E13;&#x95E8;&#x8D1F;&#x8D23;pod&#x7684;&#x8C03;&#x5EA6;&#x4EFB;&#x52A1;&#xFF0C;&#x6839;&#x636E;&#x9884;&#x5B9A;&#x4E49;&#x7684;&#x5404;&#x79CD;&#x8C03;&#x5EA6;&#x89C4;&#x5219;&#xFF0C;&#x5C06;&#x5F85;&#x8C03;&#x5EA6;&#x7684;pod&#x5206;&#x914D;&#x81F3;&#x67D0;&#x4E00;&#x4E2A;&#x8282;&#x70B9;&#x4E0A;&#x3002;</p>
+<h2 id="&#x4E8C;&#x3001;&#x63D0;&#x524D;&#x51C6;&#x5907;"><a name="&#x4E8C;&#x3001;&#x63D0;&#x524D;&#x51C6;&#x5907;" class="plugin-anchor" href="#&#x4E8C;&#x3001;&#x63D0;&#x524D;&#x51C6;&#x5907;"><i class="fa fa-link" aria-hidden="true"></i></a>&#x4E8C;&#x3001;&#x63D0;&#x524D;&#x51C6;&#x5907;</h2>
+<p>1.&#x5173;&#x95ED;&#x9632;&#x706B;&#x5899;&#xFF0C;selinux&#xFF0C;swap</p>
+<pre><code>systemctl stop firewalld
+systemctl disable firewalld
+systemctl disable firewalld
+
+setenforce 0
+sed -i &quot;s/^SELINUX=enforcing/SELINUX=disabled/g&quot; /etc/sysconfig/selinux 
+sed -i &quot;s/^SELINUX=enforcing/SELINUX=disabled/g&quot; /etc/selinux/config 
+sed -i &quot;s/^SELINUX=permissive/SELINUX=disabled/g&quot; /etc/sysconfig/selinux 
+sed -i &quot;s/^SELINUX=permissive/SELINUX=disabled/g&quot; /etc/selinux/config 
+
+swapoff -a
+echo &apos;swapoff -a &apos; &gt;&gt; /etc/rc.d/rc.local
+</code></pre><p>2.&#x5185;&#x6838;&#x5F00;&#x542F;&#x7F51;&#x7EDC;&#x652F;&#x6301;</p>
+<pre><code>cat &lt;&lt;EOF &gt;  /etc/sysctl.d/k8s.conf
+net.bridge.bridge-nf-call-ip6tables = 1
+net.bridge.bridge-nf-call-iptables = 1
+EOF
+sysctl -p /etc/sysctl.conf
+</code></pre><p>&#x82E5;&#x6267;&#x884C;sysctl -p &#x65F6;&#x62A5;&#x9519;&#xFF0C;&#x5C1D;&#x8BD5;&#xFF1A;</p>
+<pre><code>modprobe br_netfilter
+ls /proc/sys/net/bridge
+</code></pre><h2 id="&#x4E09;&#x3001;&#x914D;&#x7F6E;keepalived"><a name="&#x4E09;&#x3001;&#x914D;&#x7F6E;keepalived" class="plugin-anchor" href="#&#x4E09;&#x3001;&#x914D;&#x7F6E;keepalived"><i class="fa fa-link" aria-hidden="true"></i></a>&#x4E09;&#x3001;&#x914D;&#x7F6E;keepalived</h2>
+<pre><code class="lang-bash">yum -y install keepalived 
+
+<span class="hljs-comment"># 192.168.0.170&#x914D;&#x7F6E;</span>
+cat &gt;/etc/keepalived/keepalived.conf  &lt;&lt;EOL
+global_defs {
+  router_id LVS_k8s
+}
+
+vrrp_script CheckK8sMaster {
+    <span class="hljs-comment">#&#x4FEE;&#x6539;&#x4E3A;&#x672C;&#x673A;IP</span>
+    script <span class="hljs-string">&quot;curl -k https://192.168.0.170:6443&quot;</span>
+    interval 3
+    timeout 5
+    weight 11
+    fall 3
+    rise 2
+}
+
+
+vrrp_instance VI_0 {
+    <span class="hljs-comment"># &#x7EDF;&#x4E00;&#x9ED8;&#x8BA4;&#x8BBE;&#x7F6E;&#x4E3A;BACKUP&#x72B6;&#x6001;&#xFF0C;&#x6210;&#x5458;&#x4F1A;&#x6839;&#x636E;&#x4F18;&#x5148;&#x7EA7;&#x503C;&#x6765;&#x81EA;&#x534F;&#x5546;&#x72B6;&#x6001;</span>
+    state BACKUP  
+    interface eth0
+    virtual_router_id 80
+    <span class="hljs-comment"># &#x4E3B;&#x8282;&#x70B9;&#x6743;&#x91CD;&#x6700;&#x9AD8; &#x4F9D;&#x6B21;&#x51CF;&#x5C11;</span>
+    priority 110
+
+    advert_int 1
+    <span class="hljs-comment">#&#x4FEE;&#x6539;&#x4E3A;&#x672C;&#x5730;IP</span>
+    mcast_src_ip 192.168.0.170
+
+    track_interface {
+        eth0
+    }
+    authentication {
+        auth_<span class="hljs-built_in">type</span> PASS
+        auth_pass yks888
+    }
+    unicast_peer {
+        <span class="hljs-comment">#&#x6CE8;&#x91CA;&#x6389;&#x672C;&#x5730;IP</span>
+        <span class="hljs-comment">#192.168.0.170</span>
+        192.168.0.171
+    }
+    virtual_ipaddress {
+        192.168.0.169/24
+    }
+    track_script {
+        CheckK8sMaster
+    }
+}
+EOF
+
+<span class="hljs-comment"># 192.168.0.171&#x914D;&#x7F6E;</span>
+cat &gt;/etc/keepalived/keepalived.conf  &lt;&lt;EOL
+
+global_defs {
+  router_id LVS_k8s
+}
+
+vrrp_script CheckK8sMaster {
+    <span class="hljs-comment">#&#x4FEE;&#x6539;&#x4E3A;&#x672C;&#x673A;IP</span>
+    script <span class="hljs-string">&quot;curl -k https://192.168.0.171:6443&quot;</span>
+    interval 3
+    timeout 5
+    weight 11
+    fall 3
+    rise 2
+}
+
+
+vrrp_instance VI_0 {
+    <span class="hljs-comment"># &#x7EDF;&#x4E00;&#x9ED8;&#x8BA4;&#x8BBE;&#x7F6E;&#x4E3A;BACKUP&#x72B6;&#x6001;&#xFF0C;&#x6210;&#x5458;&#x4F1A;&#x6839;&#x636E;&#x4F18;&#x5148;&#x7EA7;&#x503C;&#x6765;&#x81EA;&#x534F;&#x5546;&#x72B6;&#x6001;</span>
+    state BACKUP  
+    interface eth0
+    virtual_router_id 80
+    <span class="hljs-comment"># &#x4E3B;&#x8282;&#x70B9;&#x6743;&#x91CD;&#x6700;&#x9AD8; &#x4F9D;&#x6B21;&#x51CF;&#x5C11;</span>
+    priority 100
+
+    advert_int 1
+    <span class="hljs-comment">#&#x4FEE;&#x6539;&#x4E3A;&#x672C;&#x5730;IP</span>
+    mcast_src_ip 192.168.0.171
+
+    track_interface {
+        eth0
+    }
+    authentication {
+        auth_<span class="hljs-built_in">type</span> PASS
+        auth_pass yks888
+    }
+    unicast_peer {
+        <span class="hljs-comment">#&#x6CE8;&#x91CA;&#x6389;&#x672C;&#x5730;IP</span>
+        192.168.0.170
+        <span class="hljs-comment">#192.168.0.171</span>
+    }
+    virtual_ipaddress {
+        192.168.0.169/24
+    }
+    track_script {
+        CheckK8sMaster
+    }
+}
+EOF
+systemctl <span class="hljs-built_in">enable</span> keepalived &amp;&amp; systemctl restart keepalived
+</code></pre>
+<p>&#x68C0;&#x67E5;vip&#x662F;&#x5426;&#x6B63;&#x5E38;&#x6F02;&#x5728;master1&#x4E0A;&#xFF1A;</p>
+<pre><code>[root@170 pkgs]# ip a
+1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 65536 qdisc noqueue state UNKNOWN qlen 1
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+       valid_lft forever preferred_lft forever
+    inet6 ::1/128 scope host 
+       valid_lft forever preferred_lft forever
+2: ens33: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc pfifo_fast state UP qlen 1000
+    link/ether 00:0c:29:1c:5d:71 brd ff:ff:ff:ff:ff:ff
+    inet 192.168.0.170/24 brd 192.168.0.255 scope global ens33
+       valid_lft forever preferred_lft forever
+    inet 192.168.0.169/24 scope global secondary ens33
+       valid_lft forever preferred_lft forever
+</code></pre><h2 id="&#x56DB;&#x3001;etcd&#x914D;&#x7F6E;"><a name="&#x56DB;&#x3001;etcd&#x914D;&#x7F6E;" class="plugin-anchor" href="#&#x56DB;&#x3001;etcd&#x914D;&#x7F6E;"><i class="fa fa-link" aria-hidden="true"></i></a>&#x56DB;&#x3001;etcd&#x914D;&#x7F6E;</h2>
+<p>1.&#x914D;&#x7F6E;&#x73AF;&#x5883;&#x53D8;&#x91CF;&#xFF1A;</p>
+<pre><code>export NODE_NAME=170 #&#x5F53;&#x524D;&#x90E8;&#x7F72;&#x7684;&#x673A;&#x5668;&#x540D;&#x79F0;(&#x968F;&#x4FBF;&#x5B9A;&#x4E49;&#xFF0C;&#x53EA;&#x8981;&#x80FD;&#x533A;&#x5206;&#x4E0D;&#x540C;&#x673A;&#x5668;&#x5373;&#x53EF;)
+export NODE_IP=192.168.0.170 # &#x5F53;&#x524D;&#x90E8;&#x7F72;&#x7684;&#x673A;&#x5668; IP
+export NODE_IPS=&quot;192.168.0.170 192.168.0.171 &quot; # etcd &#x96C6;&#x7FA4;&#x6240;&#x6709;&#x673A;&#x5668; IP
+# etcd &#x96C6;&#x7FA4;&#x95F4;&#x901A;&#x4FE1;&#x7684;IP&#x548C;&#x7AEF;&#x53E3;
+export ETCD_NODES=&quot;170&quot;=https://192.168.0.170:2380,&quot;171&quot;=https://192.168.0.171:2380
+</code></pre><p>2.&#x521B;&#x5EFA;ca&#x548C;&#x8BC1;&#x4E66;&#x548C;&#x79D8;&#x94A5;</p>
+<pre><code>wget https://pkg.cfssl.org/R1.2/cfssl_linux-amd64
+chmod +x cfssl_linux-amd64
+mv cfssl_linux-amd64 /usr/local/bin/cfssl
+
+wget https://pkg.cfssl.org/R1.2/cfssljson_linux-amd64
+chmod +x cfssljson_linux-amd64
+mv cfssljson_linux-amd64 /usr/local/bin/cfssljson
+
+wget https://pkg.cfssl.org/R1.2/cfssl-certinfo_linux-amd64
+chmod +x cfssl-certinfo_linux-amd64
+mv cfssl-certinfo_linux-amd64 /usr/local/bin/cfssl-certinfo
+</code></pre><p>&#x751F;&#x6210;ETCD&#x7684;TLS &#x79D8;&#x94A5;&#x548C;&#x8BC1;&#x4E66;
+&#x4E3A;&#x4E86;&#x4FDD;&#x8BC1;&#x901A;&#x4FE1;&#x5B89;&#x5168;&#xFF0C;&#x5BA2;&#x6237;&#x7AEF;(&#x5982; etcdctl) &#x4E0E; etcd &#x96C6;&#x7FA4;&#x3001;etcd &#x96C6;&#x7FA4;&#x4E4B;&#x95F4;&#x7684;&#x901A;&#x4FE1;&#x9700;&#x8981;&#x4F7F;&#x7528; TLS &#x52A0;&#x5BC6;&#xFF0C;&#x672C;&#x8282;&#x521B;&#x5EFA; etcd TLS &#x52A0;&#x5BC6;&#x6240;&#x9700;&#x7684;&#x8BC1;&#x4E66;&#x548C;&#x79C1;&#x94A5;&#x3002;
+&#x521B;&#x5EFA; CA &#x914D;&#x7F6E;&#x6587;&#x4EF6;&#xFF1A;</p>
+<pre><code>cat &gt;  ca-config.json &lt;&lt;EOF
+{
+&quot;signing&quot;: {
+&quot;default&quot;: {
+  &quot;expiry&quot;: &quot;87600h&quot;
+},
+&quot;profiles&quot;: {
+  &quot;kubernetes&quot;: {
+    &quot;usages&quot;: [
+        &quot;signing&quot;,
+        &quot;key encipherment&quot;,
+        &quot;server auth&quot;,
+        &quot;client auth&quot;
+    ],
+    &quot;expiry&quot;: &quot;87600h&quot;
+  }
+}
+}
+}
+EOF
+</code></pre><p>==ca-config.json==&#xFF1A;&#x53EF;&#x4EE5;&#x5B9A;&#x4E49;&#x591A;&#x4E2A; profiles&#xFF0C;&#x5206;&#x522B;&#x6307;&#x5B9A;&#x4E0D;&#x540C;&#x7684;&#x8FC7;&#x671F;&#x65F6;&#x95F4;&#x3001;&#x4F7F;&#x7528;&#x573A;&#x666F;&#x7B49;&#x53C2;&#x6570;&#xFF1B;&#x540E;&#x7EED;&#x5728;&#x7B7E;&#x540D;&#x8BC1;&#x4E66;&#x65F6;&#x4F7F;&#x7528;&#x67D0;&#x4E2A; profile&#xFF1B;
+==signing==&#xFF1A;&#x8868;&#x793A;&#x8BE5;&#x8BC1;&#x4E66;&#x53EF;&#x7528;&#x4E8E;&#x7B7E;&#x540D;&#x5176;&#x5B83;&#x8BC1;&#x4E66;&#xFF1B;&#x751F;&#x6210;&#x7684; ca.pem &#x8BC1;&#x4E66;&#x4E2D; CA=TRUE&#xFF1B;
+==server auth==&#xFF1A;&#x8868;&#x793A; client &#x53EF;&#x4EE5;&#x7528;&#x8BE5; CA &#x5BF9; server &#x63D0;&#x4F9B;&#x7684;&#x8BC1;&#x4E66;&#x8FDB;&#x884C;&#x9A8C;&#x8BC1;&#xFF1B;
+==client auth==&#xFF1A;&#x8868;&#x793A; server &#x53EF;&#x4EE5;&#x7528;&#x8BE5; CA &#x5BF9; client &#x63D0;&#x4F9B;&#x7684;&#x8BC1;&#x4E66;&#x8FDB;&#x884C;&#x9A8C;&#x8BC1;&#xFF1B;</p>
+<pre><code>cat &gt;  ca-csr.json &lt;&lt;EOF
+{
+&quot;CN&quot;: &quot;kubernetes&quot;,
+&quot;key&quot;: {
+&quot;algo&quot;: &quot;rsa&quot;,
+&quot;size&quot;: 2048
+},
+&quot;names&quot;: [
+{
+  &quot;C&quot;: &quot;CN&quot;,
+  &quot;ST&quot;: &quot;BeiJing&quot;,
+  &quot;L&quot;: &quot;BeiJing&quot;,
+  &quot;O&quot;: &quot;k8s&quot;,
+  &quot;OU&quot;: &quot;System&quot;
+}
+]
+}
+EOF
+</code></pre><p>&#x201C;CN&#x201D;&#xFF1A;Common Name&#xFF0C;kube-apiserver &#x4ECE;&#x8BC1;&#x4E66;&#x4E2D;&#x63D0;&#x53D6;&#x8BE5;&#x5B57;&#x6BB5;&#x4F5C;&#x4E3A;&#x8BF7;&#x6C42;&#x7684;&#x7528;&#x6237;&#x540D; (User Name)&#xFF1B;&#x6D4F;&#x89C8;&#x5668;&#x4F7F;&#x7528;&#x8BE5;&#x5B57;&#x6BB5;&#x9A8C;&#x8BC1;&#x7F51;&#x7AD9;&#x662F;&#x5426;&#x5408;&#x6CD5;&#xFF1B;
+&#x201C;O&#x201D;&#xFF1A;Organization&#xFF0C;kube-apiserver &#x4ECE;&#x8BC1;&#x4E66;&#x4E2D;&#x63D0;&#x53D6;&#x8BE5;&#x5B57;&#x6BB5;&#x4F5C;&#x4E3A;&#x8BF7;&#x6C42;&#x7528;&#x6237;&#x6240;&#x5C5E;&#x7684;&#x7EC4; (Group)&#xFF1B;
+==&#x751F;&#x6210; CA &#x8BC1;&#x4E66;&#x548C;&#x79C1;&#x94A5;==&#xFF1A;</p>
+<pre><code>cfssl gencert -initca ca-csr.json | cfssljson -bare ca
+ls ca*
+</code></pre><p>==&#x521B;&#x5EFA; etcd &#x8BC1;&#x4E66;&#x7B7E;&#x540D;&#x8BF7;&#x6C42;&#xFF1A;==</p>
+<pre><code>cat &gt; etcd-csr.json &lt;&lt;EOF
+{
+  &quot;CN&quot;: &quot;etcd&quot;,
+  &quot;hosts&quot;: [
+    &quot;127.0.0.1&quot;,
+    &quot;192.168.0.170&quot;,
+    &quot;192.168.0.171&quot;
+  ],
+  &quot;key&quot;: {
+    &quot;algo&quot;: &quot;rsa&quot;,
+    &quot;size&quot;: 2048
+  },
+  &quot;names&quot;: [
+    {
+      &quot;C&quot;: &quot;CN&quot;,
+      &quot;ST&quot;: &quot;BeiJing&quot;,
+      &quot;L&quot;: &quot;BeiJing&quot;,
+      &quot;O&quot;: &quot;k8s&quot;,
+      &quot;OU&quot;: &quot;System&quot;
+    }
+  ]
+}
+EOF
+</code></pre><p>hosts &#x5B57;&#x6BB5;&#x6307;&#x5B9A;&#x6388;&#x6743;&#x4F7F;&#x7528;&#x8BE5;&#x8BC1;&#x4E66;&#x7684; etcd &#x8282;&#x70B9; IP&#xFF1B;
+&#x6BCF;&#x4E2A;&#x8282;&#x70B9;IP &#x90FD;&#x8981;&#x5728;&#x91CC;&#x9762; &#x6216;&#x8005; &#x6BCF;&#x4E2A;&#x673A;&#x5668;&#x7533;&#x8BF7;&#x4E00;&#x4E2A;&#x5BF9;&#x5E94;IP&#x7684;&#x8BC1;&#x4E66;
+&#x751F;&#x6210; etcd &#x8BC1;&#x4E66;&#x548C;&#x79C1;&#x94A5;&#xFF1A;</p>
+<pre><code>cfssl gencert -ca=ca.pem \
+  -ca-key=ca-key.pem \
+  -config=ca-config.json \
+  -profile=kubernetes etcd-csr.json | cfssljson -bare etcd
+
+ls etcd*
+
+mkdir -p /etc/etcd/ssl
+cp etcd.pem etcd-key.pem  ca.pem /etc/etcd/ssl/
+</code></pre><p>&#x5C06;&#x751F;&#x6210;&#x7684;&#x79C1;&#x94A5;&#x6587;&#x4EF6;&#x5206;&#x53D1;&#x5230;master2&#x4E0A;&#xFF1A;</p>
+<pre><code>scp -r /etc/etcd/ssl root@192.168.0.171:/etc/etcd/
+</code></pre><p>3.&#x5B89;&#x88C5;etcd</p>
+<pre><code>wget http://github.com/coreos/etcd/releases/download/v3.1.10/etcd-v3.1.10-linux-amd64.tar.gz
+tar -xvf etcd-v3.1.10-linux-amd64.tar.gz
+mv etcd-v3.1.10-linux-amd64/etcd* /usr/local/bin
+mkdir -p /var/lib/etcd  # &#x5FC5;&#x987B;&#x5148;&#x521B;&#x5EFA;&#x5DE5;&#x4F5C;&#x76EE;&#x5F55;
+
+
+cat &gt; etcd.service &lt;&lt;EOF
+[Unit]
+Description=Etcd Server
+After=network.target
+After=network-online.target
+Wants=network-online.target
+Documentation=https://github.com/coreos
+
+[Service]
+Type=notify
+WorkingDirectory=/var/lib/etcd/
+ExecStart=/usr/local/bin/etcd \\
+  --name=${NODE_NAME} \\
+  --cert-file=/etc/etcd/ssl/etcd.pem \\
+  --key-file=/etc/etcd/ssl/etcd-key.pem \\
+  --peer-cert-file=/etc/etcd/ssl/etcd.pem \\
+  --peer-key-file=/etc/etcd/ssl/etcd-key.pem \\
+  --trusted-ca-file=/etc/etcd/ssl/ca.pem \\
+  --peer-trusted-ca-file=/etc/etcd/ssl/ca.pem \\
+  --initial-advertise-peer-urls=https://${NODE_IP}:2380 \\
+  --listen-peer-urls=https://${NODE_IP}:2380 \\
+  --listen-client-urls=https://${NODE_IP}:2379,http://127.0.0.1:2379 \\
+  --advertise-client-urls=https://${NODE_IP}:2379 \\
+  --initial-cluster-token=etcd-cluster-0 \\
+  --initial-cluster=${ETCD_NODES} \\
+  --initial-cluster-state=new \\
+  --data-dir=/var/lib/etcd
+Restart=on-failure
+RestartSec=5
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+#&#x6CE8;&#x610F;&#xFF0C;&#x4E0A;&#x65B9;&#x7684;&#x73AF;&#x5883;&#x53D8;&#x91CF;&#x4E00;&#x5B9A;&#x8981;&#x5148;&#x914D;&#x7F6E;&#x597D;&#x518D;&#x8FDB;&#x884C;&#x8FD9;&#x4E00;&#x6B65;&#x64CD;&#x4F5C;&#xFF0C;&#x5728;master2&#x4E0A;export&#x73AF;&#x5883;&#x53D8;&#x91CF;&#x65F6;&#x6CE8;&#x610F;&#x4FEE;&#x6539;ip
+mv etcd.service /etc/systemd/system/
+systemctl daemon-reload
+systemctl enable etcd
+systemctl start etcd
+systemctl status etcd
+</code></pre><p>master2&#x540C;&#x6837;&#x65B9;&#x6CD5;&#x5B89;&#x88C5;etcd</p>
+<p><strong>&#x9A8C;&#x8BC1;&#x670D;&#x52A1;</strong></p>
+<pre><code>etcdctl \
+  --endpoints=https://${NODE_IP}:2379  \
+  --ca-file=/etc/etcd/ssl/ca.pem \
+  --cert-file=/etc/etcd/ssl/etcd.pem \
+  --key-file=/etc/etcd/ssl/etcd-key.pem \
+  cluster-health
+</code></pre><p><strong>&#x9884;&#x671F;&#x7ED3;&#x679C;&#xFF1A;</strong></p>
+<pre><code>2018-04-06 20:07:41.355496 I | warning: ignoring ServerName for user-provided CA for backwards compatibility is deprecated
+2018-04-06 20:07:41.357436 I | warning: ignoring ServerName for user-provided CA for backwards compatibility is deprecated
+member 57d56677d6df8a53 is healthy: got healthy result from https://192.168.0.170:2379
+member 7ba40ace706232da is healthy: got healthy result from https://192.168.0.171:2379
+</code></pre><p><strong>&#x82E5;&#x6709;&#x5931;&#x8D25;&#xFF0C;&#x91CD;&#x65B0;&#x914D;&#x7F6E;</strong></p>
+<pre><code>systemctl stop etcd
+
+rm -Rf /var/lib/etcd
+
+rm -Rf /var/lib/etcd-cluster
+
+mkdir -p /var/lib/etcd
+
+systemctl start etcd
+</code></pre><h2 id="&#x4E94;docker&#x5B89;&#x88C5;"><a name="&#x4E94;docker&#x5B89;&#x88C5;" class="plugin-anchor" href="#&#x4E94;docker&#x5B89;&#x88C5;"><i class="fa fa-link" aria-hidden="true"></i></a>&#x4E94;.docker&#x5B89;&#x88C5;</h2>
+<p>&#x82E5;&#x539F;&#x6765;&#x5DF2;&#x7ECF;&#x5B89;&#x88C5;docker&#x7248;&#x672C;&#xFF0C;&#x5EFA;&#x8BAE;&#x5378;&#x8F7D;&#x540E;&#x5B89;&#x88C5;docker-ce&#x7248;&#x672C;&#xFF1A;</p>
+<pre><code>yum -y remove docker docker-common
+</code></pre><p>&#x57FA;&#x4E8E;aliyun&#x5B89;&#x88C5;docker-ce&#x65B9;&#x6CD5;&#xFF1A;</p>
+<pre><code>sudo yum install -y yum-utils device-mapper-persistent-data lvm2
+# Step 2: &#x6DFB;&#x52A0;&#x8F6F;&#x4EF6;&#x6E90;&#x4FE1;&#x606F;
+sudo yum-config-manager --add-repo http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
+
+# Step 3: &#x66F4;&#x65B0;&#x5E76;&#x5B89;&#x88C5; Docker-CE
+sudo yum makecache fast
+
+#&#x67E5;&#x770B;repo&#x4E2D;&#x6240;&#x6709;&#x7248;&#x672C;&#x7684;docker-ce
+yum list docker-ce --showduplicates | sort -r
+docker-ce.x86_64            18.03.1.ce-1.el7.centos             docker-ce-stable
+docker-ce.x86_64            18.03.0.ce-1.el7.centos             docker-ce-stable
+docker-ce.x86_64            17.12.1.ce-1.el7.centos             docker-ce-stable
+docker-ce.x86_64            17.12.0.ce-1.el7.centos             docker-ce-stable
+docker-ce.x86_64            17.09.1.ce-1.el7.centos             docker-ce-stable
+docker-ce.x86_64            17.09.0.ce-1.el7.centos             docker-ce-stable
+docker-ce.x86_64            17.06.2.ce-1.el7.centos             docker-ce-stable
+docker-ce.x86_64            17.06.1.ce-1.el7.centos             docker-ce-stable
+docker-ce.x86_64            17.06.0.ce-1.el7.centos             docker-ce-stable
+docker-ce.x86_64            17.03.2.ce-1.el7.centos             docker-ce-stable
+docker-ce.x86_64            17.03.1.ce-1.el7.centos             docker-ce-stable
+docker-ce.x86_64            17.03.0.ce-1.el7.centos             docker-ce-stable
+
+sudo yum -y install docker-ce-17.03.2.ce
+#&#x82E5;&#x63D0;&#x793A;&#x4F9D;&#x8D56;docker-ce-selinux&#xFF0C;&#x5219;&#x5148;&#x6267;&#x884C;yum -y install  docker-ce-selinux-17.03.2.ce
+# Step 4: &#x5F00;&#x542F;Docker&#x670D;&#x52A1;
+sudo service docker start &amp;&amp; systemctl enbale docker
+</code></pre><h2 id="&#x516D;&#x5B89;&#x88C5;kubelet&#x3001;kubectl&#x3001;kubeadm&#x3001;kubecni"><a name="&#x516D;&#x5B89;&#x88C5;kubelet&#x3001;kubectl&#x3001;kubeadm&#x3001;kubecni" class="plugin-anchor" href="#&#x516D;&#x5B89;&#x88C5;kubelet&#x3001;kubectl&#x3001;kubeadm&#x3001;kubecni"><i class="fa fa-link" aria-hidden="true"></i></a>&#x516D;.&#x5B89;&#x88C5;kubelet&#x3001;kubectl&#x3001;kubeadm&#x3001;kubecni</h2>
+<p>&#x51C6;&#x5907;&#x597D;&#x63D0;&#x524D;&#x4E0B;&#x8F7D;&#x597D;&#x7684;rpm&#x5305;&#xFF1A;</p>
+<pre><code>[root@170 pkgs]# cd /root/k8s_images/pkgs
+[root@170 pkgs]# ls
+etcd-v3.1.10-linux-amd64.tar.gz  kubeadm-1.9.0-0.x86_64.rpm  kubectl-1.9.0-0.x86_64.rpm  kubelet-1.9.9-9.x86_64.rpm  kubernetes-cni-0.6.0-0.x86_64.rpm  socat-1.7.3.2-2.el7.x86_64.rpm
+
+[root@170 pkgs]# yum -y install *.rpm
+</code></pre><p>&#x4FEE;&#x6539;kubelet&#x542F;&#x52A8;&#x53C2;&#x6570;&#x91CC;&#x7684;cgroup&#x9A71;&#x52A8;&#x4EE5;&#x4FBF;&#x517C;&#x5BB9;docker&#xFF1A;</p>
+<pre><code>vi /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+#Environment=&quot;KUBELET_CGROUP_ARGS=--cgroup-driver=systemd&quot;
+Environment=&quot;KUBELET_CGROUP_ARGS=--cgroup-driver=cgroupfs&quot;
+
+systemctl enable docker &amp;&amp; systemctl restart docker
+systemctl daemon-reload &amp;&amp; systemctl restart kubelet
+</code></pre><p>&#x5728;master2&#x4E0A;&#x540C;&#x6837;&#x64CD;&#x4F5C;</p>
+<h2 id="&#x4E03;kubeadm&#x521D;&#x59CB;&#x5316;"><a name="&#x4E03;kubeadm&#x521D;&#x59CB;&#x5316;" class="plugin-anchor" href="#&#x4E03;kubeadm&#x521D;&#x59CB;&#x5316;"><i class="fa fa-link" aria-hidden="true"></i></a>&#x4E03;.kubeadm&#x521D;&#x59CB;&#x5316;</h2>
+<p>&#x5C06;&#x51C6;&#x5907;&#x597D;&#x7684;&#x672C;&#x5730;&#x7684;docker images&#x955C;&#x50CF;&#x5BFC;&#x5165;&#x672C;&#x5730;&#x4ED3;&#x5E93;&#x5185;</p>
+<pre><code>[root@170 docker_images]# ls
+etcd-amd64_v3.1.10.tar    k8s-dns-dnsmasq-nanny-amd64_v1.14.7.tar  k8s-dns-sidecar-amd64_1.14.7.tar  kube-controller-manager-amd64_v1.9.0.tar  kubernetes-dashboard_v1.8.1.tar  pause-amd64_3.0.tar
+flannel:v0.9.1-amd64.tar  k8s-dns-kube-dns-amd64_1.14.7.tar        kube-apiserver-amd64_v1.9.0.tar   kube-proxy-amd64_v1.9.0.tar               kube-scheduler-amd64_v1.9.0.tar
+
+
+[root@170 docker_images]# for i in `ls`;do docker load -i $i;done
+</code></pre><p>config.yaml&#x521D;&#x59CB;&#x5316;&#x914D;&#x7F6E;&#x6587;&#x4EF6;&#xFF1A;</p>
+<pre><code>cat &lt;&lt;EOF &gt; config.yaml 
+apiVersion: kubeadm.k8s.io/v1alpha1
+kind: MasterConfiguration
+etcd:
+  endpoints:
+  - https://192.168.0.170:2379
+  - https://192.168.0.171:2379
+
+  caFile: /etc/etcd/ssl/ca.pem 
+  certFile: /etc/etcd/ssl/etcd.pem 
+  keyFile: /etc/etcd/ssl/etcd-key.pem
+  dataDir: /var/lib/etcd
+networking:
+  podSubnet: 10.244.0.0/16
+kubernetesVersion: 1.9.0
+api:
+  advertiseAddress: &quot;192.168.0.170&quot;
+token: &quot;b99a00.a144ef80536d4344&quot;
+tokenTTL: &quot;0s&quot;
+apiServerCertSANs:
+- &quot;170&quot;
+- &quot;171&quot;
+- 192.168.0.169
+- 192.168.0.170
+- 192.168.0.171
+featureGates:
+  CoreDNS: true
+EOF
+</code></pre><p>&#x521D;&#x59CB;&#x5316;&#x96C6;&#x7FA4;</p>
+<pre><code>kubeadm init --config config.yaml
+</code></pre><p>&#x7ED3;&#x679C;&#xFF1A;</p>
+<pre><code>To start using your cluster, you need to run the following as a regular user:
+
+  mkdir -p $HOME/.kube
+  sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+  sudo chown $(id -u):$(id -g) $HOME/.kube/config
+as root:
+
+  kubeadm join --token b99a00.a144ef80536d4344 192.168.0.169:6443 --discovery-token-ca-cert-hash sha256:ebc2f64e9bcb14639f26db90288b988c90efc43828829c557b6b66bbe6d68dfa
+
+[root@170 docker_images]# kubectl get nodes -o wide
+NAME      STATUS    ROLES     AGE       VERSION   EXTERNAL-IP   OS-IMAGE                KERNEL-VERSION          CONTAINER-RUNTIME
+170       Ready     master    5h        v1.9.0    &lt;none&gt;        CentOS Linux 7 (Core)   3.10.0-693.el7.x86_64   docker://18.3.0
+171       Ready     master    4h        v1.9.0    &lt;none&gt;        CentOS Linux 7 (Core)   3.10.0-693.el7.x86_64   docker://18.3.0
+</code></pre><p>&#x6CE8;&#x610F;&#xFF1A;&#x63D0;&#x793A;&#x4FE1;&#x606F;&#x4E2D;&#x7684;kubeadm join&#x90A3;&#x4E00;&#x884C;&#x8BF7;&#x4FDD;&#x5B58;&#x597D;&#xFF0C;&#x540E;&#x671F;&#x4F7F;&#x7528;kubeadm&#x6269;&#x589E;&#x96C6;&#x7FA4;node&#x65F6;&#xFF0C;&#x9700;&#x8981;&#x5728;&#x65B0;&#x7684;node&#x4E0A;&#x4F7F;&#x7528;&#x8FD9;&#x884C;&#x547D;&#x4EE4;&#x52A0;&#x5165;&#x96C6;&#x7FA4;</p>
+<pre><code>  mkdir -p $HOME/.kube
+  sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+  sudo chown $(id -u):$(id -g) $HOME/.kube/config
+</code></pre><p>&#x914D;&#x7F6E;master2&#xFF1A;</p>
+<pre><code>#&#x62F7;&#x8D1D;pki &#x8BC1;&#x4E66;
+mkdir -p /etc/kubernetes/pki
+scp -r /etc/kubernetes/pki/ root@192.168.0.171:/etc/kubernetes/ 
+
+#&#x62F7;&#x8D1D;&#x521D;&#x59CB;&#x5316;&#x914D;&#x7F6E;
+scp config.yaml root@192.168.0.171:/etc/kubernetes/
+
+#&#x5728;master2&#x4E0A;&#x521D;&#x59CB;&#x5316;
+kubeadm init --config /etc/kubernetes/config.yaml
+</code></pre><h2 id="&#x516B;&#x3001;&#x5B89;&#x88C5;&#x7F51;&#x7EDC;&#x63D2;&#x4EF6;kube-router"><a name="&#x516B;&#x3001;&#x5B89;&#x88C5;&#x7F51;&#x7EDC;&#x63D2;&#x4EF6;kube-router" class="plugin-anchor" href="#&#x516B;&#x3001;&#x5B89;&#x88C5;&#x7F51;&#x7EDC;&#x63D2;&#x4EF6;kube-router"><i class="fa fa-link" aria-hidden="true"></i></a>&#x516B;&#x3001;&#x5B89;&#x88C5;&#x7F51;&#x7EDC;&#x63D2;&#x4EF6;kube-router</h2>
+<pre><code># kube-router&#x7684;daemonSet&#x90E8;&#x7F72;yaml&#x6587;&#x4EF6;&#x5730;&#x5740;:
+# https://github.com/cloudnativelabs/kube-router/blob/master/daemonset/kubeadm-kuberouter.yaml
+kubectl apply -f kubeadm-kuberouter.yaml
+
+[root@170 docker_images]# kubectl get pods --all-namespaces
+NAMESPACE     NAME                          READY     STATUS    RESTARTS   AGE
+kube-system   coredns-546545bc84-j5mds      1/1       Running   2          5h
+kube-system   kube-apiserver-170            1/1       Running   2          5h
+kube-system   kube-apiserver-171            1/1       Running   2          4h
+kube-system   kube-controller-manager-170   1/1       Running   2          5h
+kube-system   kube-controller-manager-171   1/1       Running   2          4h
+kube-system   kube-proxy-5dg4j              1/1       Running   2          4h
+kube-system   kube-proxy-s6jtn              1/1       Running   2          5h
+kube-system   kube-router-wbxvq             1/1       Running   2          4h
+kube-system   kube-router-xrkbw             1/1       Running   2          4h
+kube-system   kube-scheduler-170            1/1       Running   2          5h
+kube-system   kube-scheduler-171            1/1       Running   2          4h
+</code></pre><p>&#x90E8;&#x7F72;&#x5B8C;&#x6210;</p>
+<p>&#x9ED8;&#x8BA4;&#x60C5;&#x51B5;&#x4E0B;&#xFF0C;&#x4E3A;&#x4E86;&#x4FDD;&#x8BC1;master&#x7684;&#x5B89;&#x5168;&#xFF0C;master&#x662F;&#x4E0D;&#x4F1A;&#x88AB;&#x8C03;&#x5EA6;&#x5230;app&#x7684;&#x3002;&#x7ED9;master&#x6DFB;&#x52A0;&#x8C03;&#x5EA6;taint&#x6C61;&#x70B9;&#xFF0C;&#x6253;&#x7834;&#x8FD9;&#x4E2A;&#x9650;&#x5236;&#xFF0C;&#x4F7F;pod&#x53EF;&#x4EE5;&#x8C03;&#x5EA6;&#x5728;master&#x4E0A;&#xFF1A;</p>
+<pre><code>kubectl taint nodes --all node-role.kubernetes.io/master-
+</code></pre><p>&#x914D;&#x7F6E;&#x79C1;&#x6709;docker&#x4ED3;&#x5E93;&#xFF0C;&#x52A0;&#x901F;&#x4F7F;&#x7528;&#xFF1A;</p>
+<pre><code>vim /lib/systemd/system/docker.service 
+&#x6CE8;&#x91CA;#ExecStart=/usr/bin/dockerd
+
+ExecStart=/usr/bin/dockerd --insecure-registry registry.yourself.com:5000
+#&#x586B;&#x5199;&#x81EA;&#x5DF1;&#x7684;docker&#x4ED3;&#x5E93;&#x5730;&#x5740;
+</code></pre><hr>
+<h3 id="2018-6-8&#x8865;&#x5145;&#xFF1A;"><a name="2018-6-8&#x8865;&#x5145;&#xFF1A;" class="plugin-anchor" href="#2018-6-8&#x8865;&#x5145;&#xFF1A;"><i class="fa fa-link" aria-hidden="true"></i></a>2018-6-8&#x8865;&#x5145;&#xFF1A;</h3>
+<p>k8s&#x96C6;&#x7FA4;&#x901A;&#x8FC7;kubeadm&#x52A0;&#x5165;&#x65B0;&#x7684;node&#xFF1A;</p>
+<p>&#x5728;&#x96C6;&#x7FA4;&#x521D;&#x59CB;&#x5316;&#x5B8C;&#x6210;&#x65F6;&#xFF0C;&#x4F1A;&#x63D0;&#x793A;&#x5982;&#x4E0B;&#x4FE1;&#x606F;&#xFF1A;</p>
+<pre><code>To start using your cluster, you need to run the following as a regular user:
+
+  mkdir -p $HOME/.kube
+  sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+  sudo chown $(id -u):$(id -g) $HOME/.kube/config
+as root:
+
+  kubeadm join --token b99a00.a144ef80536d4344 192.168.0.169:6443 --discovery-token-ca-cert-hash sha256:ebc2f64e9bcb14639f26db90288b988c90efc43828829c557b6b66bbe6d68dfa
+</code></pre><p>&#x5176;&#x4E2D;kubeadm join&#x662F;&#x4E3A;&#x540E;&#x671F;&#x65B0;&#x7684;node&#x52A0;&#x5165;&#x96C6;&#x7FA4;&#x65F6;&#x4F7F;&#x7528;&#x7684;&#xFF0C;&#x5728;&#x516C;&#x53F8;&#x751F;&#x4EA7;&#x4E0A;&#x7684;&#x96C6;&#x7FA4;&#x90E8;&#x7F72;&#x597D;&#x65F6;&#x6B64;&#x547D;&#x4EE4;&#x6CA1;&#x6709;&#x4FDD;&#x5B58;&#xFF0C;&#x4E14;token&#x65F6;&#x6709;&#x5B9E;&#x6548;&#x6027;&#x7684;&#x3002;&#x540E;&#x671F;&#x6709;node&#x52A0;&#x5165;&#x96C6;&#x7FA4;&#xFF0C;join&#x547D;&#x4EE4;&#x7684;&#x4E24;&#x4E2A;&#x53C2;&#x6570;&#x53EF;&#x4EE5;&#x5728;master&#x8282;&#x70B9;&#x4E0A;&#x901A;&#x8FC7;&#x5982;&#x4E0B;&#x547D;&#x4EE4;&#x83B7;&#x53D6;&#xFF1A;</p>
+<p>token&#xFF1A;</p>
+<pre><code>root@yksp009027:~# kubeadm token list
+TOKEN                     TTL         EXPIRES   USAGES                   DESCRIPTION                                                EXTRA GROUPS
+b97h00.a144ef08526d4345   &lt;forever&gt;   &lt;never&gt;   authentication,signing   The default bootstrap token generated by &apos;kubeadm init&apos;.   system:bootstrappers:kubeadm:default-node-token
+</code></pre><p>hash:</p>
+<pre><code>openssl x509 -pubkey -in /etc/kubernetes/pki/ca.crt | openssl rsa -pubin -outform der 2&gt;/dev/null | openssl dgst -sha256 -hex | sed &apos;s/^.* //&apos;
+7eb62962040916673ab58b0c40fb451caef7538452f5e6c8ff7719a81fdbf633
+</code></pre><p>&#x7136;&#x540E;&#x5728;&#x65B0;node&#x4E0A;&#x6267;&#x884C;&#xFF1A;</p>
+<pre><code>kubeadm join --token=$TOKEN $MASTER_IP:6443 --discovery-token-ca-cert-hash sha256:$HASH
+</code></pre><p>&#x67E5;&#x770B;node&#xFF0C;kubectl get nodes&#x65B0;node&#x5DF2;&#x8FDB;&#x5165;Ready&#x72B6;&#x6001;&#x3002;&#xFF08;&#x5728;join&#x524D;&#x8BF7;&#x4FDD;&#x8BC1;node&#x4E0A;&#x5B89;&#x88C5;&#x597D;kubelet&#x3001;docker&#x3001;kubeadm&#x3001;kubernetes-cni&#x3001;socat&#xFF0C;&#x5E76;&#x542F;&#x52A8;kubelet&#x3001;docker&#xFF0C;&#x53C2;&#x8003;&#x4E0A;&#x65B9;&#x6B65;&#x9AA4;&#xFF09;</p>
+
+                                
+                                </section>
+                            
+    </div>
+    <div class="search-results">
+        <div class="has-results">
+            
+            <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+            <ul class="search-results-list"></ul>
+            
+        </div>
+        <div class="no-results">
+            
+            <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+            
+        </div>
+    </div>
+</div>
+
+                        </div>
+                    </div>
+                
+            </div>
+
+            
+                
+                <a href="./" class="navigation navigation-prev " aria-label="Previous page: 2. 集群相关">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+                
+                
+                <a href="v1.14多master集群部署.html" class="navigation navigation-next " aria-label="Next page: 2.2. v1.14.3高可用集群部署">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+                
+            
+        
+    </div>
+
+    <script>
+        var gitbook = gitbook || [];
+        gitbook.push(function() {
+            gitbook.page.hasChanged({"page":{"title":"2.1. v1.9.0高可用集群部署","date":"2018/04/08 19:22:45","tags":["Kubernetes"],"level":"2.1.1","depth":2,"next":{"title":"2.2. v1.14.3高可用集群部署","level":"2.1.2","depth":2,"path":"part2/v1.14多master集群部署.md","ref":"./part2/v1.14多master集群部署.md","articles":[]},"previous":{"title":"2. 集群相关","level":"2.1","depth":1,"path":"part2/README.md","ref":"./part2/README.md","articles":[{"title":"2.1. v1.9.0高可用集群部署","level":"2.1.1","depth":2,"path":"part2/v1.9.0高可用集群本地离线部署记录.md","ref":"./part2/v1.9.0高可用集群本地离线部署记录.md","articles":[]},{"title":"2.2. v1.14.3高可用集群部署","level":"2.1.2","depth":2,"path":"part2/v1.14多master集群部署.md","ref":"./part2/v1.14多master集群部署.md","articles":[]},{"title":"2.3. Kubernetes中的Pause容器","level":"2.1.3","depth":2,"path":"part2/Kubernetes中的Pause容器.md","ref":"./part2/Kubernetes中的Pause容器.md","articles":[]},{"title":"2.4. RBAC权限控制","level":"2.1.4","depth":2,"path":"part2/RBAC权限控制.md","ref":"./part2/RBAC权限控制.md","articles":[]},{"title":"2.5. 常用命令与rest-api速查","level":"2.1.5","depth":2,"path":"part2/docker-k8s常用命令速查及rest-api.md","ref":"./part2/docker-k8s常用命令速查及rest-api.md","articles":[]},{"title":"2.6. Kubernetes各组件参数配置优化建议","level":"2.1.6","depth":2,"path":"part2/Kubernetes各组件参数配置优化建议.md","ref":"./part2/Kubernetes各组件参数配置优化建议.md","articles":[]}]},"dir":"ltr"},"config":{"plugins":["-sharing","anchors","github","expandable-chapters","splitter","back-to-top-button"],"styles":{"website":"./styles/website.css"},"pluginsConfig":{"github":{"url":"https://github.com/yinwenqin/kubeSourceCodeNote"},"splitter":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"back-to-top-button":{},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false},"anchors":{},"expandable-chapters":{}},"theme":"default","author":"ywq","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"Kubernetes生态圈使用","language":"zh-hans","links":{},"gitbook":"3.2.3","description":""},"file":{"path":"part2/v1.9.0高可用集群本地离线部署记录.md","mtime":"2019-11-21T07:58:03.022Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2019-11-21T08:49:48.491Z"},"basePath":"..","book":{"language":""}});
+        });
+    </script>
+</div>
+
+        
+    <script src="../gitbook/gitbook.js"></script>
+    <script src="../gitbook/theme.js"></script>
+    
+        
+        <script src="../gitbook/gitbook-plugin-github/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-expandable-chapters/expandable-chapters.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-splitter/splitter.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-back-to-top-button/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search/search-engine.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search/search.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-lunr/lunr.min.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-lunr/search-lunr.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-fontsettings/fontsettings.js"></script>
+        
+    
+
+    </body>
+</html>
+

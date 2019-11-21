@@ -1,0 +1,1565 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-CN">
+
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link rel="stylesheet" href="/lib/pace/pace-theme-bounce.min.css?v=1.0.2">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link rel="stylesheet" href="/lib/fancybox/source/jquery.fancybox.css">
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+    
+      
+    
+
+    
+  
+
+  
+
+  
+
+  
+    
+      
+    
+
+    
+  
+
+  
+    
+    
+    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic|Roboto Slab:300,300italic,400,400italic,700,700italic|Roboto Mono:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext">
+  
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.1.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.1.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.1.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.1.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.1.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '7.1.1',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":true,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: true,
+    fancybox: true,
+    fastclick: true,
+    lazyload: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"shrinkIn","post_header":"slideLeftIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideDownIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <script>
+  (function(i,s,o,g,r,a,m){i["DaoVoiceObject"]=r;i[r]=i[r]||function(){(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;a.charset="utf-8";m.parentNode.insertBefore(a,m)})(window,document,"script",('https:' == document.location.protocol ? 'https:' : 'http:') + "//widget.daovoice.io/widget/0f81ff2f.js","daovoice")
+  daovoice('init', {
+      app_id: "bd399fce"
+    });
+  daovoice('update');
+  </script>
+
+  <meta name="description" content="##  前言kube-router是由CNCF官方孵化的CNI插件项目，灵活度很高，支持Service网段、pod网段bgp宣告，与集群内外构建直连网络，同时支持ipvs Service代理，目前已有不少大中型公司采用此CNI，github的star数量已经超越calico，因此决定采用kube-router的cni解决方案。 IPVS Servicekube-router本身提供ipvs模式的s">
+<meta name="keywords" content="Kubernetes,Network">
+<meta property="og:type" content="article">
+<meta property="og:title" content="kube-router工作模式抓包分析">
+<meta property="og:url" content="https://www.ipyker.com/2018/11/13/kube-router工作模式抓包分析.html">
+<meta property="og:site_name" content="随笔漫谈">
+<meta property="og:description" content="##  前言kube-router是由CNCF官方孵化的CNI插件项目，灵活度很高，支持Service网段、pod网段bgp宣告，与集群内外构建直连网络，同时支持ipvs Service代理，目前已有不少大中型公司采用此CNI，github的star数量已经超越calico，因此决定采用kube-router的cni解决方案。 IPVS Servicekube-router本身提供ipvs模式的s">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://mycloudn.kokoerp.com/20190826184057.png">
+<meta property="og:image" content="http://mycloudn.kokoerp.com/20190826190032.png">
+<meta property="og:image" content="http://mycloudn.kokoerp.com/20190826185023.png">
+<meta property="og:updated_time" content="2019-11-21T07:48:40.141Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="kube-router工作模式抓包分析">
+<meta name="twitter:description" content="##  前言kube-router是由CNCF官方孵化的CNI插件项目，灵活度很高，支持Service网段、pod网段bgp宣告，与集群内外构建直连网络，同时支持ipvs Service代理，目前已有不少大中型公司采用此CNI，github的star数量已经超越calico，因此决定采用kube-router的cni解决方案。 IPVS Servicekube-router本身提供ipvs模式的s">
+<meta name="twitter:image" content="http://mycloudn.kokoerp.com/20190826184057.png">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="随笔漫谈" type="application/atom+xml">
+
+
+
+  
+  
+  <link rel="canonical" href="https://www.ipyker.com/2018/11/13/kube-router工作模式抓包分析">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>kube-router工作模式抓包分析 | 随笔漫谈</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+ 
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">随笔漫谈</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-book">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/gitbooks/" rel="section"><i class="menu-item-icon fa fa-fw fa-book"></i> <br>book</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-互动">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/guestbook/" rel="section"><i class="menu-item-icon fa fa-fw fa-comments"></i> <br>互动</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.ipyker.com/2018/11/13/kube-router工作模式抓包分析.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="丨ywq丨">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随笔漫谈">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">kube-router工作模式抓包分析
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-11-13 15:47:14" itemprop="dateCreated datePublished" datetime="2018-11-13T15:47:14+08:00">2018-11-13</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-11-21 15:48:40" itemprop="dateModified" datetime="2019-11-21T15:48:40+08:00">2019-11-21</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+            <div class="post-symbolscount">
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">本文字数：</span>
+                
+                <span title="本文字数">15k</span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">14 分钟</span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>## </p>
+<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>kube-router是由CNCF官方孵化的CNI插件项目，灵活度很高，支持Service网段、pod网段bgp宣告，与集群内外构建直连网络，同时支持ipvs Service代理，目前已有不少大中型公司采用此CNI，github的star数量已经超越calico，因此决定采用kube-router的cni解决方案。</p>
+<h2 id="IPVS-Service"><a href="#IPVS-Service" class="headerlink" title="IPVS Service"></a>IPVS Service</h2><p>kube-router本身提供ipvs模式的service代理，默认与Kube-proxy的ipvs模式可以说是几乎一致的，都为ipvs nat模式，但kube-router额外提供ipvs的DR(direct return)模式，需配合tunnel模式和Service annotation使用。网络组件过多反而会导致故障不易排查，因此，直接使用kube-router官方推荐的ipvs Service模式，弃用kube-proxy。<br><strong>删除kube-proxy</strong><br><figure class="highlight jboss-cli"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">KUBECONFIG=<span class="string">/etc/kubernetes/admin.conf</span> kubectl -n kube-system delete ds kube-proxy</span><br><span class="line">docker run <span class="params">--privileged</span> -v <span class="string">/lib/modules</span>:<span class="string">/lib/modules</span> <span class="params">--net=host</span> k8s.gcr.io/kube-proxy-amd64<span class="function">:v1.14.3</span> kube-proxy <span class="params">--cleanup</span></span><br></pre></td></tr></table></figure></p>
+<h3 id="kuberouter-ipvs的工作模式"><a href="#kuberouter-ipvs的工作模式" class="headerlink" title="kuberouter ipvs的工作模式"></a>kuberouter ipvs的工作模式</h3><p>kube-router会自动发现Service资源与endpoint资源，创建相应的ipvs条目,ipvs条目中的vip是Service的ClusterIP，realServer是Serivce关联的endpoints.<br><figure class="highlight x86asm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"># service</span><br><span class="line">$:~# kubectl get svc | grep <span class="number">10.96</span><span class="meta">.20</span><span class="meta">.77</span></span><br><span class="line">svc1     ClusterIP   <span class="number">10.96</span><span class="meta">.20</span><span class="meta">.77</span>      &lt;none&gt;        <span class="number">80</span>/TCP                                                     <span class="number">92d</span></span><br><span class="line"></span><br><span class="line"># endpoint</span><br><span class="line">$:~# kubectl get ep svc1</span><br><span class="line">NAME                          ENDPOINTS                                       AGE</span><br><span class="line">svc1   <span class="number">172.26</span><span class="meta">.13</span><span class="meta">.31</span>:<span class="number">80</span>,<span class="number">172.26</span><span class="meta">.2</span><span class="meta">.54</span>:<span class="number">80</span>,<span class="number">172.26</span><span class="meta">.5</span><span class="meta">.46</span>:<span class="number">80</span>   <span class="number">92d</span></span><br><span class="line"></span><br><span class="line"># kube-router自动创建ipvs条目</span><br><span class="line">$ ipvsadm</span><br><span class="line">TCP  <span class="number">10.96</span><span class="meta">.20</span><span class="meta">.77</span>:http rr</span><br><span class="line">  -&gt; <span class="number">172.26</span><span class="meta">.2</span><span class="meta">.54</span>:http             Masq    <span class="number">1</span>      <span class="number">0</span>          <span class="number">0</span></span><br><span class="line">  -&gt; <span class="number">172.26</span><span class="meta">.5</span><span class="meta">.46</span>:http             Masq    <span class="number">1</span>      <span class="number">0</span>          <span class="number">0</span></span><br><span class="line">  -&gt; <span class="number">172.26</span><span class="meta">.13</span><span class="meta">.31</span>:http            Masq    <span class="number">1</span>      <span class="number">0</span>          <span class="number">0</span></span><br></pre></td></tr></table></figure></p>
+<p>同时若配置好了bgp网络，会将Service ClusterIP通过bgp路由宣告出去,进入kube-router容器内部查看宣告的路由表:<br><figure class="highlight x86asm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$:~ #gobgp <span class="meta">global</span> rib  | grep <span class="number">10.96</span><span class="meta">.20</span><span class="meta">.77</span></span><br><span class="line">*&gt; <span class="number">10.96</span><span class="meta">.20</span><span class="meta">.77</span>/<span class="number">32</span>       <span class="number">192.168</span><span class="meta">.9</span><span class="meta">.27</span>                              <span class="number">00</span>:<span class="number">02</span>:<span class="number">08</span>   [&#123;Origin: i&#125;]</span><br></pre></td></tr></table></figure></p>
+<h3 id="流量是如何转发给ipvs的？"><a href="#流量是如何转发给ipvs的？" class="headerlink" title="流量是如何转发给ipvs的？"></a>流量是如何转发给ipvs的？</h3><p>流量是如何转发到direct server的呢？查看direct server的接口，你会发现多了一个虚拟接口，地址正是service clusterIP：<br><figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$:~#<span class="built_in"> ip </span>a | grep 10.96.20.77</span><br><span class="line">    inet 10.96.20.77/32 brd 10.96.20.77 scope link kube-dummy-if</span><br></pre></td></tr></table></figure></p>
+<p>假设你的路由已经都配置好了，发往service clusterIP的流量被送达了direct server，那么它是如何处理流量将其转发给内核的ipvs模块的呢？<br>来看看iptables吧，你会发现kube-router在iptables里新建了一个chain:<br><figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Chain KUBE-ROUTER-SERVICES (<span class="number">1</span> references)</span><br><span class="line">target     prot <span class="keyword">opt</span> <span class="keyword">source</span>               destination</span><br><span class="line">ACCEPT     <span class="keyword">all</span>  --  anywhere             anywhere             /* allow <span class="built_in">input</span> traffic <span class="keyword">to</span> ipvs services */ <span class="keyword">match</span>-<span class="keyword">set</span> kube-router-ipvs-services dst,dst</span><br><span class="line">ACCEPT     icmp --  anywhere             anywhere             /* allow icmp <span class="keyword">echo</span> requests <span class="keyword">to</span> service IPs */ icmp <span class="keyword">echo</span>-request</span><br><span class="line">REJECT     <span class="keyword">all</span>  --  anywhere             anywhere             /* reject <span class="keyword">all</span> unexpected traffic <span class="keyword">to</span> service IPs */ ! <span class="keyword">match</span>-<span class="keyword">set</span> kube-router-local-ips dst reject-with icmp-port-unreachable</span><br></pre></td></tr></table></figure></p>
+<p>注释中有写，它是将去往services clusterIP的流量转发进下一步，其余的流量会过滤掉，那么它是怎么匹配到services clusterIP的呢？iptabels里面并没有其他的规则了呀，答案是ipset:<br><figure class="highlight x86asm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$:~# ipset  list kube-router-ipvs-services | grep <span class="number">10.96</span><span class="meta">.20</span><span class="meta">.77</span></span><br><span class="line"><span class="number">10.96</span><span class="meta">.20</span><span class="meta">.77</span>,tcp:<span class="number">80</span> timeout <span class="number">0</span></span><br></pre></td></tr></table></figure></p>
+<p>匹配到ipset里的条目，则正常转发进入ipvs内核模块</p>
+<h2 id="抓包验证"><a href="#抓包验证" class="headerlink" title="抓包验证"></a>抓包验证</h2><p>了解完了上面的工作模式，光说理论也不行，下面就来实际抓包验证一下吧，分三种模式分别抓包：</p>
+<ul>
+<li>集群外部访问Service ClusterIP</li>
+<li>集群外部通过Ingress http访问集群内服务</li>
+<li>集群内部访问Service ClusterIP</li>
+</ul>
+<h3 id="bgp网络直通方案-三层"><a href="#bgp网络直通方案-三层" class="headerlink" title="bgp网络直通方案(三层)"></a>bgp网络直通方案(三层)</h3><h4 id="集群外部访问Service-ClusterIP"><a href="#集群外部访问Service-ClusterIP" class="headerlink" title="集群外部访问Service ClusterIP"></a>集群外部访问Service ClusterIP</h4><h5 id="环境"><a href="#环境" class="headerlink" title="环境:"></a>环境:</h5><figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">client</span>: 192<span class="selector-class">.168</span><span class="selector-class">.17</span><span class="selector-class">.3</span> #集群外</span><br><span class="line"><span class="selector-tag">direct</span> <span class="selector-tag">server</span>: 192<span class="selector-class">.168</span><span class="selector-class">.9</span><span class="selector-class">.27</span></span><br><span class="line"><span class="selector-tag">service</span> <span class="selector-tag">clusterIp</span>: 10<span class="selector-class">.104</span><span class="selector-class">.87</span><span class="selector-class">.154</span></span><br><span class="line"><span class="selector-tag">endpoint</span> <span class="selector-tag">pod</span>: 172<span class="selector-class">.26</span><span class="selector-class">.9</span><span class="selector-class">.31</span>  172<span class="selector-class">.26</span><span class="selector-class">.9</span><span class="selector-class">.32</span></span><br></pre></td></tr></table></figure>
+<p><strong>ipvs条目</strong>:</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">TCP</span>  10<span class="selector-class">.104</span><span class="selector-class">.87</span><span class="selector-class">.154</span><span class="selector-pseudo">:http</span> <span class="selector-tag">rr</span></span><br><span class="line">  <span class="selector-tag">-</span>&gt; 172<span class="selector-class">.26</span><span class="selector-class">.9</span><span class="selector-class">.31</span><span class="selector-pseudo">:http</span>             <span class="selector-tag">Masq</span>    1      0          0</span><br><span class="line">  <span class="selector-tag">-</span>&gt; 172<span class="selector-class">.26</span><span class="selector-class">.9</span><span class="selector-class">.32</span><span class="selector-pseudo">:http</span>             <span class="selector-tag">Masq</span>    1      0          0</span><br></pre></td></tr></table></figure>
+<p>部署好pod上的http服务后，首先在client端发起两次curl http请求,同时在service入口的主机上抓包:<br><figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">$:~# tcpdump host 10.104.87.154 <span class="keyword">or</span> host 172.26.9.31 <span class="keyword">or</span> host 172.26.9.32</span><br><span class="line">tcpdump: verbose output suppressed, use -v <span class="keyword">or</span> -vv <span class="keyword">for</span> full protocol decode</span><br><span class="line">listening on bond0, link-type EN10MB (Ethernet), capture size 262144 bytes</span><br><span class="line">17:10:34.272343<span class="built_in"> IP </span>192.168.17.4.53643 &gt; 10.104.87.154.http: Flags [S], seq 478846184, win 65535, options [mss 1460,nop,wscale 6,nop,nop,TS val 1042528917 ecr 0,sackOK,eol], length 0</span><br><span class="line">17:10:34.272364<span class="built_in"> IP </span>yksp009027.youkeshu.com.53643 &gt; 172.26.9.31.http: Flags [S], seq 478846184, win 65535, options [mss 1460,nop,wscale 6,nop,nop,TS val 1042528917 ecr 0,sackOK,eol], length 0</span><br><span class="line">17:10:34.273032<span class="built_in"> IP </span>172.26.9.31.http &gt; yksp009027.youkeshu.com.53643: Flags [S.], seq 420235101, ack 478846185, win 16060, options [mss 1460,nop,nop,sackOK,nop,wscale 6], length 0</span><br><span class="line">17:10:34.273040<span class="built_in"> IP </span>10.104.87.154.http &gt; 192.168.17.4.53643: Flags [S.], seq 420235101, ack 478846185, win 16060, options [mss 1460,nop,nop,sackOK,nop,wscale 6], length 0</span><br><span class="line">17:10:34.273371<span class="built_in"> IP </span>192.168.17.4.53643 &gt; 10.104.87.154.http: Flags [.], ack 1, win 4096, length 0</span><br><span class="line">17:10:34.273379<span class="built_in"> IP </span>yksp009027.youkeshu.com.53643 &gt; 172.26.9.31.http: Flags [.], ack 1, win 4096, length 0</span><br><span class="line">17:10:34.273447<span class="built_in"> IP </span>192.168.17.4.53643 &gt; 10.104.87.154.http: Flags [P.], seq 1:78, ack 1, win 4096, length 77: HTTP: <span class="builtin-name">GET</span> / HTTP/1.1</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">17:12:23.661092<span class="built_in"> IP </span>192.168.17.4.53644 &gt; 10.104.87.154.http: Flags [S], seq 1822033847, win 65535, options [mss 1460,nop,wscale 6,nop,nop,TS val 1042638076 ecr 0,sackOK,eol], length 0</span><br><span class="line">17:12:23.661110<span class="built_in"> IP </span>yksp009027.youkeshu.com.53644 &gt; 172.26.9.32.http: Flags [S], seq 1822033847, win 65535, options [mss 1460,nop,wscale 6,nop,nop,TS val 1042638076 ecr 0,sackOK,eol], length 0</span><br><span class="line">17:12:23.661248<span class="built_in"> IP </span>172.26.9.32.http &gt; yksp009027.youkeshu.com.53644: Flags [S.], seq 1318960293, ack 1822033848, win 16060, options [mss 1460,nop,nop,sackOK,nop,wscale 6], length 0</span><br><span class="line">17:12:23.661256<span class="built_in"> IP </span>10.104.87.154.http &gt; 192.168.17.4.53644: Flags [S.], seq 1318960293, ack 1822033848, win 16060, options [mss 1460,nop,nop,sackOK,nop,wscale 6], length 0</span><br><span class="line">17:12:23.661471<span class="built_in"> IP </span>192.168.17.4.53644 &gt; 10.104.87.154.http: Flags [.], ack 1, win 4096, length 0</span><br><span class="line">17:12:23.661482<span class="built_in"> IP </span>yksp009027.youkeshu.com.53644 &gt; 172.26.9.32.http: Flags [.], ack 1, win 4096, length 0</span><br><span class="line">17:12:23.661557<span class="built_in"> IP </span>192.168.17.4.53644 &gt; 10.104.87.154.http: Flags [P.], seq 1:78, ack 1, win 4096, length 77: HTTP: <span class="builtin-name">GET</span> / HTTP/1.1</span><br><span class="line">17:12:23.661563<span class="built_in"> IP </span>yksp009027.youkeshu.com.53644 &gt; 172.26.9.32.http: Flags [P.], seq 1:78, ack 1, win 4096, length 77: HTTP: <span class="builtin-name">GET</span> / HTTP/1.1</span><br></pre></td></tr></table></figure></p>
+<p>通过抓包结果可以看到，标准的ipvs nat模式，5个步骤:</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">1.源client<span class="built_in"> ip </span>-&gt; 目的direct server</span><br><span class="line">2.direct server收到包后，进行dnat转换，变为:源direct<span class="built_in"> server </span>-&gt; 目的endpoint ip</span><br><span class="line">3.endpoint回包给direct server</span><br><span class="line">4.direct server将收到的包snat转换,变为: 源direct<span class="built_in"> server </span>-&gt; 目的client ip,发送</span><br><span class="line">5.client收到回包</span><br><span class="line"></span><br><span class="line">同时也看到了,2次调用，ipvs默认rr算法生效，分别调度到了不同的endpoint</span><br></pre></td></tr></table></figure>
+<p><strong>示意图</strong></p>
+<p><img src="http://mycloudn.kokoerp.com/20190826184057.png" alt></p>
+<h4 id="集群内部访问Service-ClusterIP"><a href="#集群内部访问Service-ClusterIP" class="headerlink" title="集群内部访问Service ClusterIP"></a>集群内部访问Service ClusterIP</h4><h5 id="环境-1"><a href="#环境-1" class="headerlink" title="环境:"></a>环境:</h5><figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">client: 172.26.0.103 #集群内pod</span><br><span class="line">client pod所在node: 192.168.9.28</span><br><span class="line"></span><br><span class="line">direct server: 192.168.9.27</span><br><span class="line">service clusterIp: 10.104.87.154</span><br><span class="line"></span><br><span class="line">endpoint pod: 172.26.9.34</span><br><span class="line">endpoint pod所在node：192.168.20.203</span><br></pre></td></tr></table></figure>
+<p><strong>ipvs条目</strong>:</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">TCP</span>  10<span class="selector-class">.104</span><span class="selector-class">.87</span><span class="selector-class">.154</span><span class="selector-pseudo">:http</span> <span class="selector-tag">rr</span></span><br><span class="line">  <span class="selector-tag">-</span>&gt; 172<span class="selector-class">.26</span><span class="selector-class">.9</span><span class="selector-class">.34</span><span class="selector-pseudo">:http</span>             <span class="selector-tag">Masq</span>    1      0          0</span><br></pre></td></tr></table></figure>
+<p>部署好endpoint pod上的http服务后，首先在client pod端发起curl http请求:<br><code>curl 10.104.87.154</code></p>
+<p>在client pod所在node、service入口(direct server)主机上和endpoint pod内部同时一起抓包:<br><figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 192.168.9.27</span></span><br><span class="line">$:~# tcpdump host 10.104.87.154 <span class="keyword">or</span> host 172.26.9.34 <span class="keyword">and</span><span class="built_in"> port </span>80</span><br><span class="line">tcpdump: verbose output suppressed, use -v <span class="keyword">or</span> -vv <span class="keyword">for</span> full protocol decode</span><br><span class="line">listening on bond0, link-type EN10MB (Ethernet), capture size 262144 bytes</span><br><span class="line"></span><br><span class="line"><span class="comment"># 192.168.9.28 ,client pod所在node</span></span><br><span class="line">$:~# tcpdump host 10.104.87.154 <span class="keyword">or</span> host 172.26.9.34 <span class="keyword">and</span><span class="built_in"> port </span>80</span><br><span class="line">tcpdump: verbose output suppressed, use -v <span class="keyword">or</span> -vv <span class="keyword">for</span> full protocol decode</span><br><span class="line">listening on bond0, link-type EN10MB (Ethernet), capture size 262144 bytes</span><br><span class="line">17:22:08.200255<span class="built_in"> IP </span>172.26.0.103.59848 &gt; 172.26.9.34.http: Flags [S], seq 2739388076, win 16060, options [mss 1460,nop,nop,sackOK,nop,wscale 6], length 0</span><br><span class="line">17:22:08.227382<span class="built_in"> IP </span>172.26.9.34.http &gt; 172.26.0.103.59848: Flags [S.], seq 1541751593, ack 2739388077, win 16060, options [mss 1460,nop,nop,sackOK,nop,wscale 6], length 0</span><br><span class="line">17:22:08.227456<span class="built_in"> IP </span>172.26.0.103.59848 &gt; 172.26.9.34.http: Flags [.], ack 1, win 251, length 0</span><br><span class="line">17:22:08.227588<span class="built_in"> IP </span>172.26.0.103.59848 &gt; 172.26.9.34.http: Flags [P.], seq 1:78, ack 1, win 251, length 77: HTTP: <span class="builtin-name">GET</span> / HTTP/1.1</span><br><span class="line">17:22:08.256779<span class="built_in"> IP </span>172.26.9.34.http &gt; 172.26.0.103.59848: Flags [.], ack 78, win 251, length 0</span><br><span class="line">17:22:08.257093<span class="built_in"> IP </span>172.26.9.34.http &gt; 172.26.0.103.59848: Flags [P.], seq 1:311, ack 78, win 251, length 310: HTTP: HTTP/1.1 403 Forbidden</span><br><span class="line">17:22:08.257136<span class="built_in"> IP </span>172.26.0.103.59848 &gt; 172.26.9.34.http: Flags [.], ack 311, win 268, length 0</span><br><span class="line">17:22:08.285245<span class="built_in"> IP </span>172.26.9.34.http &gt; 172.26.0.103.59848: Flags [F.], seq 311, ack 79, win 251, length 0</span><br><span class="line">17:22:08.285297<span class="built_in"> IP </span>172.26.0.103.59848 &gt; 172.26.9.34.http: Flags [.], ack 312, win 268, length 0</span><br><span class="line"></span><br><span class="line"><span class="comment"># endpoint pod 172.26.9.34</span></span><br><span class="line">root@gittestdev-65f985fdcb-tplj2:~# tcpdump<span class="built_in"> port </span>80</span><br><span class="line">tcpdump: verbose output suppressed, use -v <span class="keyword">or</span> -vv <span class="keyword">for</span> full protocol decode</span><br><span class="line">listening on eth0, link-type EN10MB (Ethernet), capture size 262144 bytes</span><br><span class="line">09:15:26.939961<span class="built_in"> IP </span>172.26.0.103.52736 &gt; gittestdev-65f985fdcb-tplj2.http: Flags [S], seq 3722842581, win 16060, options [mss 1460,nop,nop,sackOK,nop,wscale 6], length 0</span><br><span class="line">09:15:26.940024<span class="built_in"> IP </span>gittestdev-65f985fdcb-tplj2.http &gt; 172.26.0.103.52736: Flags [S.], seq 4165097507, ack 3722842582, win 16060, options [mss 1460,nop,nop,sackOK,nop,wscale 6], length 0</span><br><span class="line">09:15:26.940199<span class="built_in"> IP </span>172.26.0.103.52736 &gt; gittestdev-65f985fdcb-tplj2.http: Flags [.], ack 1, win 251, length 0</span><br><span class="line">09:15:26.940266<span class="built_in"> IP </span>172.26.0.103.52736 &gt; gittestdev-65f985fdcb-tplj2.http: Flags [P.], seq 1:78, ack 1, win 251, length 77: HTTP: <span class="builtin-name">GET</span> / HTTP/1.1</span><br><span class="line">09:15:26.940291<span class="built_in"> IP </span>gittestdev-65f985fdcb-tplj2.http &gt; 172.26.0.103.52736: Flags [.], ack 78, win 251, length 0</span><br><span class="line">09:15:26.941167<span class="built_in"> IP </span>gittestdev-65f985fdcb-tplj2.http &gt; 172.26.0.103.52736: Flags [P.], seq 1:311, ack 78, win 251, length 310: HTTP: HTTP/1.1 403 Forbidden</span><br><span class="line">09:15:26.941375<span class="built_in"> IP </span>172.26.0.103.52736 &gt; gittestdev-65f985fdcb-tplj2.http: Flags [.], ack 311, win 268, length 0</span><br></pre></td></tr></table></figure></p>
+<p>查看client pod所在node上的ipvs会话信息是否包含刚访问的vip:</p>
+<figure class="highlight x86asm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="symbol">root@yksp009028:</span>~# ipvsadm -lnc | grep <span class="number">10.104</span><span class="meta">.87</span><span class="meta">.154</span></span><br><span class="line">TCP <span class="number">01</span>:<span class="number">56</span>  TIME_WAIT   <span class="number">172.26</span><span class="meta">.0</span><span class="meta">.103</span>:<span class="number">42228</span> <span class="number">10.104</span><span class="meta">.87</span><span class="meta">.154</span>:<span class="number">80</span>   <span class="number">172.26</span><span class="meta">.9</span><span class="meta">.34</span>:<span class="number">80</span></span><br></pre></td></tr></table></figure>
+<p>从以上几处结果可以总结出：</p>
+<ol>
+<li><p>去往vip的路由指向的默认direct server上没有流量经过;</p>
+</li>
+<li><p>client pod发起(172.26.0.103) 去往Service ClusterIP(10.104.87.154)的数据包，它所属的node在转发前，读取ipvs条目，根据ipvs条目内的信息，将数据包的目的地转换成了后端pod的地址，然后直接使用3层网络转发，将数据包转发到了后端pod。即数据包在本机内就已经基于ipvs，将目的地址从vip转换成了real server ip，出本机后是基于real server ip走的3层路由。</p>
+</li>
+<li><p>综上，集群内部service调用，走的是基于real server ip的路由，而不是如上面案例中的集群外部调用一样走基于vip的路由。</p>
+</li>
+</ol>
+<p><strong>示意图</strong></p>
+<p><img src="http://mycloudn.kokoerp.com/20190826190032.png" alt></p>
+<h3 id="Ingress-Gateway入口web代理方案-七层http协议"><a href="#Ingress-Gateway入口web代理方案-七层http协议" class="headerlink" title="Ingress Gateway入口web代理方案(七层http协议):"></a>Ingress Gateway入口web代理方案(七层http协议):</h3><h5 id="环境-2"><a href="#环境-2" class="headerlink" title="环境:"></a>环境:</h5><figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">client: 192.168.17.3</span><br><span class="line">target domain: test.domain.com</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">ingress gateway: 192.168.9.200</span><br><span class="line"></span><br><span class="line">service name: test</span><br><span class="line">service clusterIp: 10.104.87.154</span><br><span class="line"></span><br><span class="line">endpoint pod: 172.26.9.31  172.26.9.32</span><br></pre></td></tr></table></figure>
+<p>部署好pod上的http服务后，首先在client端发起两次curl请求,同时在ingress gateway入口的主机上抓包:<br><figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">$:~# tcpdump host 10.104.87.154 <span class="keyword">or</span> host 172.26.9.31 <span class="keyword">or</span> host 172.26.9.32 <span class="keyword">or</span> host 192.168.17.4</span><br><span class="line">tcpdump: verbose output suppressed, use -v <span class="keyword">or</span> -vv <span class="keyword">for</span> full protocol decode</span><br><span class="line">listening on bond0, link-type EN10MB (Ethernet), capture size 262144 bytes</span><br><span class="line"></span><br><span class="line">18:06:36.805139<span class="built_in"> IP </span>192.168.17.4.54349 &gt; 192.168.9.200.http: Flags [S], seq 194757065, win 65535, options [mss 1460,nop,wscale 6,nop,nop,TS val 1045875096 ecr 0,sackOK,eol], length 0</span><br><span class="line">18:06:36.805182<span class="built_in"> IP </span>192.168.9.200.http &gt; 192.168.17.4.54349: Flags [S.], seq 3062575155, ack 194757066, win 15928, options [mss 1460,sackOK,TS val 1690332192 ecr 1045875096,nop,wscale 6], length 0</span><br><span class="line">18:06:36.805419<span class="built_in"> IP </span>192.168.17.4.54349 &gt; 192.168.9.200.http: Flags [.], ack 1, win 2058, options [nop,nop,TS val 1045875096 ecr 1690332192], length 0</span><br><span class="line">18:06:36.805500<span class="built_in"> IP </span>192.168.17.4.54349 &gt; 192.168.9.200.http: Flags [P.], seq 1:88, ack 1, win 2058, options [nop,nop,TS val 1045875096 ecr 1690332192], length 87: HTTP: <span class="builtin-name">GET</span> / HTTP/1.1</span><br><span class="line">18:06:36.805517<span class="built_in"> IP </span>192.168.9.200.http &gt; 192.168.17.4.54349: Flags [.], ack 88, win 249, options [nop,nop,TS val 1690332192 ecr 1045875096], length 0</span><br><span class="line">18:06:36.806109<span class="built_in"> IP </span>192.168.9.29.52620 &gt; 172.26.9.32.http: Flags [P.], seq 2174011696:2174011984, ack 1336389137, win 268, length 288: HTTP: <span class="builtin-name">GET</span> / HTTP/1.1</span><br><span class="line">18:06:36.807499<span class="built_in"> IP </span>172.26.9.32.http &gt;  192.168.9.29.52620: Flags [P.], seq 1:315, ack 288, win 285, length 314: HTTP: HTTP/1.1 403 Forbidden</span><br><span class="line">18:06:36.807520<span class="built_in"> IP </span> 192.168.9.29.52620 &gt; 172.26.9.32.http: Flags [.], ack 315, win 285, length 0</span><br><span class="line">18:06:36.807764<span class="built_in"> IP </span>192.168.9.200.http &gt; 192.168.17.4.54349: Flags [P.], seq 1:287, ack 88, win 249, options [nop,nop,TS val 1690332193 ecr 1045875096], length 286: HTTP: HTTP/1.1 403 Forbidden</span><br><span class="line">18:06:36.807947<span class="built_in"> IP </span>192.168.17.4.54349 &gt; 192.168.9.200.http: Flags [.], ack 287, win 2054, options [nop,nop,TS val 1045875098 ecr 1690332193], length 0</span><br><span class="line">18:06:36.808319<span class="built_in"> IP </span>192.168.17.4.54349 &gt; 192.168.9.200.http: Flags [F.], seq 88, ack 287, win 2054, options [nop,nop,TS val 1045875098 ecr 1690332193], length 0</span><br><span class="line">18:06:36.808393<span class="built_in"> IP </span>192.168.9.200.http &gt; 192.168.17.4.54349: Flags [F.], seq 287, ack 89, win 249, options [nop,nop,TS val 1690332193 ecr 1045875098], length 0</span><br><span class="line">18:06:36.808586<span class="built_in"> IP </span>192.168.17.4.54349 &gt; 192.168.9.200.http: Flags [.], ack 288, win 2054, options [nop,nop,TS val 1045875098 ecr 1690332193], length 0</span><br><span class="line"></span><br><span class="line">---------------------------</span><br><span class="line"></span><br><span class="line">18:07:03.718999<span class="built_in"> IP </span>192.168.17.4.54356 &gt; 192.168.9.200.http: Flags [S], seq 2867048974, win 65535, options [mss 1460,nop,wscale 6,nop,nop,TS val 1045901890 ecr 0,sackOK,eol], length 0</span><br><span class="line">18:07:03.719049<span class="built_in"> IP </span>192.168.9.200.http &gt; 192.168.17.4.54356: Flags [S.], seq 3283487703, ack 2867048975, win 15928, options [mss 1460,sackOK,TS val 1690338921 ecr 1045901890,nop,wscale 6], length 0</span><br><span class="line">18:07:03.719350<span class="built_in"> IP </span>192.168.17.4.54356 &gt; 192.168.9.200.http: Flags [.], ack 1, win 2058, options [nop,nop,TS val 1045901890 ecr 1690338921], length 0</span><br><span class="line">18:07:03.719464<span class="built_in"> IP </span>192.168.17.4.54356 &gt; 192.168.9.200.http: Flags [P.], seq 1:88, ack 1, win 2058, options [nop,nop,TS val 1045901890 ecr 1690338921], length 87: HTTP: <span class="builtin-name">GET</span> / HTTP/1.1</span><br><span class="line">18:07:03.719490<span class="built_in"> IP </span>192.168.9.200.http &gt; 192.168.17.4.54356: Flags [.], ack 88, win 249, options [nop,nop,TS val 1690338921 ecr 1045901890], length 0</span><br><span class="line">18:07:03.719996<span class="built_in"> IP </span> 192.168.9.29.50680 &gt; 172.26.9.31.http: Flags [P.], seq 1:289, ack 1, win 268, length 288: HTTP: <span class="builtin-name">GET</span> / HTTP/1.1</span><br><span class="line">18:07:03.726891<span class="built_in"> IP </span>172.26.9.31.http &gt;  192.168.9.29.50680: Flags [P.], seq 1:315, ack 289, win 285, length 314: HTTP: HTTP/1.1 403 Forbidden</span><br><span class="line">18:07:03.726920<span class="built_in"> IP </span> 192.168.9.29.50680 &gt; 172.26.9.31.http: Flags [.], ack 315, win 285, length 0</span><br><span class="line">18:07:03.727225<span class="built_in"> IP </span>192.168.9.200.http &gt; 192.168.17.4.54356: Flags [P.], seq 1:287, ack 88, win 249, options [nop,nop,TS val 1690338923 ecr 1045901890], length 286: HTTP: HTTP/1.1 403 Forbidden</span><br><span class="line">18:07:03.727542<span class="built_in"> IP </span>192.168.17.4.54356 &gt; 192.168.9.200.http: Flags [.], ack 287, win 2054, options [nop,nop,TS val 1045901897 ecr 1690338923], length 0</span><br><span class="line">18:07:03.727796<span class="built_in"> IP </span>192.168.17.4.54356 &gt; 192.168.9.200.http: Flags [F.], seq 88, ack 287, win 2054, options [nop,nop,TS val 1045901897 ecr 1690338923], length 0</span><br><span class="line">18:07:03.727896<span class="built_in"> IP </span>192.168.9.200.http &gt; 192.168.17.4.54356: Flags [F.], seq 287, ack 89, win 249, options [nop,nop,TS val 1690338923 ecr 1045901897], length 0</span><br><span class="line">18:07:03.728119<span class="built_in"> IP </span>192.168.17.4.54356 &gt; 192.168.9.200.http: Flags [.], ack 288, win 2054, options [nop,nop,TS val 1045901897 ecr 1690338923], length 0</span><br></pre></td></tr></table></figure></p>
+<p>通过抓包结果可以得出，ingress gateway web代理的流程大致分为如下5个步骤:</p>
+<figure class="highlight lsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">1.</span>源client http request -&gt; 目的ingress gateway(web)</span><br><span class="line"><span class="number">2.</span>ingress gateway 通过host及path，查询k8s Ingress资源，查询出相应的Ingress后，获取关联的service，再通过service获取相应的endpoint</span><br><span class="line"><span class="number">3.</span>根据调度算法挑选出合适的endpoint，L7 web流量直接代理过去</span><br><span class="line"><span class="number">4.</span>endpoint返回http响应到ingress gateway</span><br><span class="line"><span class="number">5.</span>ingress gateway转发返回http响应给client</span><br></pre></td></tr></table></figure>
+<p>整个过程如我们猜想一致，中间并没有经过Service的ipvs或iptables的转发，而是直接将请求转发给了实际的endpoint,所以严格来说，这种方式，只使用了kube-router的pod网段路由，并没有使用其ipvs服务代理.</p>
+<p><strong>示意图</strong></p>
+<p><img src="http://mycloudn.kokoerp.com/20190826185023.png" alt></p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>通过抓包分析，对kube-router的工作模式会有一个更为具体的认知，熟悉你的cni插件，在遇到集群网络故障排查问题时是极有帮助的，无论使用的是何种cni，一定要对其充分了解才能较放心地使用。</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div id="reward-container">
+  <div>Thank you for your accept. mua！</div>
+  <button id="reward-button" disable="enable" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+
+    
+      
+      
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/reward/wechatpay.png" alt="丨ywq丨 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+      
+      
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/reward/alipay.png" alt="丨ywq丨 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        
+
+
+
+
+  
+
+
+
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>丨ywq丨</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    
+    <a href="https://www.ipyker.com/2018/11/13/kube-router工作模式抓包分析.html" title="kube-router工作模式抓包分析">https://www.ipyker.com/2018/11/13/kube-router工作模式抓包分析.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li>
+</ul>
+
+      </div>
+    
+    <div>
+      
+        <div>
+    
+        <div style="text-align:center;color: #ccc;font-size:16px;">-------------本文结束<i class="fa fa-heart"></i>感谢您的阅读-------------</div>
+    
+</div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Kubernetes/" rel="tag"><i class="fa fa-tag"></i> Kubernetes</a>
+          
+            <a href="/tags/Network/" rel="tag"><i class="fa fa-tag"></i> Network</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/11/07/Docker registry仓库历史镜像批量清理.html" rel="next" title="Docker registry仓库历史镜像批量清理">
+                <i class="fa fa-chevron-left"></i> Docker registry仓库历史镜像批量清理
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/12/06/k8s(十四)、RBAC权限控制.html" rel="prev" title="k8s(十四)、RBAC权限控制">
+                k8s(十四)、RBAC权限控制 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC80NDM5Mi8yMDkyNA=="></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="丨ywq丨">
+            
+              <p class="site-author-name" itemprop="name">丨ywq丨</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives">
+                
+                    <span class="site-state-item-count">74</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                      <a href="/tags">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">15</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/yinwenqin" title="GitHub &rarr; https://github.com/yinwenqin" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://blog.csdn.net/ywq935" title="CSDN &rarr; https://blog.csdn.net/ywq935" rel="noopener" target="_blank"><i class="fa fa-fw fa-globe"></i>CSDN</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-book"></i>
+                推荐阅读
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.upweto.top/gitbooks/useKubernetes/" title="http://blog.upweto.top/gitbooks/useKubernetes/" rel="noopener" target="_blank">kubernetes使用指南</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.upweto.top/gitbooks/kubeSourceCodeNote/" title="http://blog.upweto.top/gitbooks/kubeSourceCodeNote/" rel="noopener" target="_blank">kubernetes源码笔记</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#IPVS-Service"><span class="nav-number">2.</span> <span class="nav-text">IPVS Service</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#kuberouter-ipvs的工作模式"><span class="nav-number">2.1.</span> <span class="nav-text">kuberouter ipvs的工作模式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#流量是如何转发给ipvs的？"><span class="nav-number">2.2.</span> <span class="nav-text">流量是如何转发给ipvs的？</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#抓包验证"><span class="nav-number">3.</span> <span class="nav-text">抓包验证</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#bgp网络直通方案-三层"><span class="nav-number">3.1.</span> <span class="nav-text">bgp网络直通方案(三层)</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#集群外部访问Service-ClusterIP"><span class="nav-number">3.1.1.</span> <span class="nav-text">集群外部访问Service ClusterIP</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#环境"><span class="nav-number">3.1.1.1.</span> <span class="nav-text">环境:</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#集群内部访问Service-ClusterIP"><span class="nav-number">3.1.2.</span> <span class="nav-text">集群内部访问Service ClusterIP</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#环境-1"><span class="nav-number">3.1.2.1.</span> <span class="nav-text">环境:</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Ingress-Gateway入口web代理方案-七层http协议"><span class="nav-number">3.2.</span> <span class="nav-text">Ingress Gateway入口web代理方案(七层http协议):</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#环境-2"><span class="nav-number">3.2.0.1.</span> <span class="nav-text">环境:</span></a></li></ol></li></ol></li></ol><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">4.</span> <span class="nav-text">总结</span></a></li></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" style=" text-align:center;">&copy; 2017 – <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ywq</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"> 站点字数合计:</i>
+    </span>
+    
+    <span title="站点总字数">583k</span>
+  
+  
+</div>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+<div class="run_time" style=" text-align:center;">
+  <span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
+  <script>
+    var now = new Date(); 
+    function createtime() { 
+        var grt= new Date("08/23/2018 10:00:00");//此处修改你的建站时间或者网站上线时间 
+        now.setTime(now.getTime()+250); 
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days); 
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours); 
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum); 
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;} 
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum); 
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;} 
+        document.getElementById("timeDate").innerHTML = "本站已安全运行 "+dnum+" 天 "; 
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒"; 
+    } 
+    setInterval("createtime()",250);
+  </script>
+</div>
+
+        
+<div class="busuanzi-count" style=" text-align:center;">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-user"></i>
+    </span>
+    <span class="site-uv" title="总访客量">
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span> 人
+    </span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+  
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-eye"></i>
+    </span>
+    <span class="site-pv" title="总访问量">
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span> 次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+  
+    
+    
+      
+    
+  
+  <script color="black" opacity="0.7" zindex="-1" count="140" src="//cdn.jsdelivr.net/gh/theme-next/theme-next-canvas-nest@1.0.0/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+  
+  
+  <script id="ribbon" size="300" alpha="0.1" zindex="-1" src="/lib/canvas-ribbon/canvas-ribbon.js"></script>
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/fancybox/source/jquery.fancybox.pack.js"></script>
+
+
+  
+
+
+  <script src="/js/utils.js?v=7.1.1"></script>
+
+  <script src="/js/motion.js?v=7.1.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/schemes/muse.js?v=7.1.1"></script>
+
+
+
+
+  
+  <script src="/js/scrollspy.js?v=7.1.1"></script>
+<script src="/js/post-details.js?v=7.1.1"></script>
+
+
+
+  
+
+
+  <script src="/js/next-boot.js?v=7.1.1"></script>
+
+
+  
+
+  
+
+  
+  
+  
+
+  
+
+  
+  
+  
+
+
+  
+
+
+  
+    <script>
+  window.livereOptions = {
+    refer: '2018/11/13/kube-router工作模式抓包分析.html'
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+</script>
+
+  
+
+
+  
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url).replace(/\/{2,}/g, '/');
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x"></i></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x"></i></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+  
+  <script src="/lib/bookmark/bookmark.min.js?v=1.0"></script>
+  <script>
+  
+    bookmark.scrollToMark('auto', "#更多");
+  
+  </script>
+
+
+  
+
+  
+
+  
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/koharu.model.json"},"display":{"position":"left","width":250,"height":500},"mobile":{"show":false},"react":{"opacity":0.7},"log":false});</script></body>
+</html>
+<!-- 页面点击小红心 -->
+<script type="text/javascript" src="/js/src/clicklove.js"></script>

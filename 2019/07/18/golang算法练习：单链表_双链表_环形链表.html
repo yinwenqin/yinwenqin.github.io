@@ -1,0 +1,1521 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-CN">
+
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link rel="stylesheet" href="/lib/pace/pace-theme-bounce.min.css?v=1.0.2">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link rel="stylesheet" href="/lib/fancybox/source/jquery.fancybox.css">
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+    
+      
+    
+
+    
+  
+
+  
+
+  
+
+  
+    
+      
+    
+
+    
+  
+
+  
+    
+    
+    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic|Roboto Slab:300,300italic,400,400italic,700,700italic|Roboto Mono:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext">
+  
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.1.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.1.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.1.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.1.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.1.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '7.1.1',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":true,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: true,
+    fancybox: true,
+    fastclick: true,
+    lazyload: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"shrinkIn","post_header":"slideLeftIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideDownIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <script>
+  (function(i,s,o,g,r,a,m){i["DaoVoiceObject"]=r;i[r]=i[r]||function(){(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;a.charset="utf-8";m.parentNode.insertBefore(a,m)})(window,document,"script",('https:' == document.location.protocol ? 'https:' : 'http:') + "//widget.daovoice.io/widget/0f81ff2f.js","daovoice")
+  daovoice('init', {
+      app_id: "bd399fce"
+    });
+  daovoice('update');
+  </script>
+
+  <meta name="description" content="##  需求链表，常见且非常灵活的数据模型，可定制性强，可根据需求调整满足不同的使用需求，如FIFO\LIFO，快速查找等，这里分别列举基础的单向链表和双向链表增删改查操作备注：需求和运行输出结果均已在代码中注释 单向链表代码 12345678910111213141516171819202122232425262728293031323334353637383940414243444546474">
+<meta name="keywords" content="Golang,算法">
+<meta property="og:type" content="article">
+<meta property="og:title" content="golang算法练习:单链表&#x2F;双链表&#x2F;环形链表">
+<meta property="og:url" content="https://www.ipyker.com/2019/07/18/golang算法练习：单链表_双链表_环形链表.html">
+<meta property="og:site_name" content="随笔漫谈">
+<meta property="og:description" content="##  需求链表，常见且非常灵活的数据模型，可定制性强，可根据需求调整满足不同的使用需求，如FIFO\LIFO，快速查找等，这里分别列举基础的单向链表和双向链表增删改查操作备注：需求和运行输出结果均已在代码中注释 单向链表代码 12345678910111213141516171819202122232425262728293031323334353637383940414243444546474">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-11-21T07:48:40.126Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="golang算法练习:单链表&#x2F;双链表&#x2F;环形链表">
+<meta name="twitter:description" content="##  需求链表，常见且非常灵活的数据模型，可定制性强，可根据需求调整满足不同的使用需求，如FIFO\LIFO，快速查找等，这里分别列举基础的单向链表和双向链表增删改查操作备注：需求和运行输出结果均已在代码中注释 单向链表代码 12345678910111213141516171819202122232425262728293031323334353637383940414243444546474">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="随笔漫谈" type="application/atom+xml">
+
+
+
+  
+  
+  <link rel="canonical" href="https://www.ipyker.com/2019/07/18/golang算法练习：单链表_双链表_环形链表">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>golang算法练习:单链表/双链表/环形链表 | 随笔漫谈</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+ 
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">随笔漫谈</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-book">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/gitbooks/" rel="section"><i class="menu-item-icon fa fa-fw fa-book"></i> <br>book</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-互动">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/guestbook/" rel="section"><i class="menu-item-icon fa fa-fw fa-comments"></i> <br>互动</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.ipyker.com/2019/07/18/golang算法练习：单链表_双链表_环形链表.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="丨ywq丨">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随笔漫谈">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">golang算法练习:单链表/双链表/环形链表
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-07-18 17:42:53" itemprop="dateCreated datePublished" datetime="2019-07-18T17:42:53+08:00">2019-07-18</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-11-21 15:48:40" itemprop="dateModified" datetime="2019-11-21T15:48:40+08:00">2019-11-21</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+            <div class="post-symbolscount">
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">本文字数：</span>
+                
+                <span title="本文字数">12k</span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">11 分钟</span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>## </p>
+<h3 id="需求"><a href="#需求" class="headerlink" title="需求"></a>需求</h3><p>链表，常见且非常灵活的数据模型，可定制性强，可根据需求调整满足不同的使用需求，如FIFO\LIFO，快速查找等，这里分别列举基础的单向链表和双向链表增删改查操作<br><strong>备注：需求和运行输出结果均已在代码中注释</strong></p>
+<h3 id="单向链表"><a href="#单向链表" class="headerlink" title="单向链表"></a>单向链表</h3><p>代码</p>
+<figure class="highlight xquery"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br></pre></td><td class="code"><pre><span class="line">package main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">"errors"</span></span><br><span class="line">	<span class="string">"fmt"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">type Node struct &#123;</span><br><span class="line"><span class="built_in">	id</span>   int</span><br><span class="line"><span class="built_in">	name</span><span class="built_in"> string</span></span><br><span class="line">	<span class="keyword">next</span> *Node</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">type SingleLink struct &#123;</span><br><span class="line"><span class="built_in">	head</span> *Node</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func (singleLink *SingleLink) orderInsert(<span class="type">node</span> *Node) &#123;</span><br><span class="line">	// 按Node<span class="built_in">.id</span>从小到大的顺序，插入链表中</span><br><span class="line">	curNode := singleLink<span class="built_in">.head</span></span><br><span class="line">	<span class="keyword">if</span> curNode<span class="built_in">.id</span> == <span class="number">0</span> &#123;</span><br><span class="line">		// 第一次插入元素的空链表</span><br><span class="line">		singleLink<span class="built_in">.head</span> = <span class="type">node</span></span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		// 如果<span class="type">node</span><span class="built_in">.id</span>比队<span class="built_in">首id</span>小，则队首让位后移，要保证队首最小。因为取值比较的时候， 是取curNode.<span class="keyword">next</span>节点与<span class="type">node</span>进行比较，如果满足大小顺序，</span><br><span class="line">		// 则将<span class="type">node</span>插入curNode和curNode.<span class="keyword">next</span>之间</span><br><span class="line">		<span class="keyword">if</span> curNode<span class="built_in">.id</span> &gt; <span class="type">node</span><span class="built_in">.id</span> &#123;</span><br><span class="line">			<span class="type">node</span>.<span class="keyword">next</span> = curNode</span><br><span class="line">			singleLink<span class="built_in">.head</span> = <span class="type">node</span></span><br><span class="line">		&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">			// 如果<span class="type">node</span><span class="built_in">.id</span>不比队<span class="built_in">首id</span>小，则往后取一位，用后一位与<span class="type">node</span>比较，匹配则插入当前位与后一位中间</span><br><span class="line">			<span class="keyword">for</span> &#123;</span><br><span class="line">				<span class="keyword">if</span> curNode.<span class="keyword">next</span> == nil &#123;</span><br><span class="line">					// 循环到最后一位都没有插入成功，说明<span class="type">node</span><span class="built_in">.id</span>比现有链表中的所有<span class="type">node</span><span class="built_in">的id</span>都大，则<span class="type">node</span>成为新的队尾</span><br><span class="line">					curNode.<span class="keyword">next</span> = <span class="type">node</span></span><br><span class="line">					break</span><br><span class="line">				&#125;</span><br><span class="line">				<span class="keyword">if</span> curNode.<span class="keyword">next</span><span class="built_in">.id</span> &gt; <span class="type">node</span><span class="built_in">.id</span> &#123;</span><br><span class="line">					<span class="type">node</span>.<span class="keyword">next</span> = curNode.<span class="keyword">next</span></span><br><span class="line">					curNode.<span class="keyword">next</span> = <span class="type">node</span></span><br><span class="line">					break</span><br><span class="line">				&#125;</span><br><span class="line">				curNode = curNode.<span class="keyword">next</span></span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func (singleLink *SingleLink) pop<span class="built_in">(id</span> int) (<span class="type">node</span> *Node, err<span class="built_in"> error</span>) &#123;</span><br><span class="line">	// 弹出链表中指<span class="built_in">定id</span>的<span class="type">node</span></span><br><span class="line">	curNode := singleLink<span class="built_in">.head</span></span><br><span class="line">	<span class="keyword">if</span> curNode<span class="built_in">.id</span> ==<span class="built_in"> id</span> &#123;</span><br><span class="line">		// 要取的是队首</span><br><span class="line">		singleLink<span class="built_in">.head</span> = singleLink<span class="built_in">.head</span>.<span class="keyword">next</span></span><br><span class="line">		<span class="keyword">return</span> curNode, nil</span><br><span class="line">	&#125;</span><br><span class="line">	flag :=<span class="built_in"> false</span> // 是否查找到的标志</span><br><span class="line">	<span class="keyword">for</span> &#123;</span><br><span class="line">		<span class="keyword">if</span> curNode.<span class="keyword">next</span> == nil &#123;</span><br><span class="line">			break</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">if</span> curNode.<span class="keyword">next</span><span class="built_in">.id</span> ==<span class="built_in"> id</span> &#123;</span><br><span class="line">			flag =<span class="built_in"> true</span></span><br><span class="line">			selectNode := curNode.<span class="keyword">next</span></span><br><span class="line">			curNode.<span class="keyword">next</span> = curNode.<span class="keyword">next</span>.<span class="keyword">next</span></span><br><span class="line">			<span class="keyword">return</span> selectNode, nil</span><br><span class="line">		&#125;</span><br><span class="line">		curNode = curNode.<span class="keyword">next</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> !flag &#123;</span><br><span class="line">		// 如果循环结束还没有查找到，输出信息</span><br><span class="line">		<span class="keyword">return</span> nil, errors.New(<span class="string">"node not found"</span>)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func (singleLink *SingleLink) getLength() <span class="built_in">(number</span> int) &#123;</span><br><span class="line">	curNode := singleLink<span class="built_in">.head</span></span><br><span class="line">	<span class="keyword">if</span> singleLink<span class="built_in">.head</span><span class="built_in">.id</span> == <span class="number">0</span> || singleLink<span class="built_in">.head</span> == nil &#123;</span><br><span class="line">		// 空链表</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		<span class="keyword">for</span> &#123;</span><br><span class="line">		<span class="built_in">	number</span> += <span class="number">1</span></span><br><span class="line">			curNode = curNode.<span class="keyword">next</span></span><br><span class="line">			<span class="keyword">if</span> curNode == nil &#123;</span><br><span class="line">				break</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	fmt.Println(<span class="string">"current link length:"</span>,<span class="built_in"> number</span>)</span><br><span class="line">	<span class="keyword">return</span><span class="built_in"> number</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func (singleLink *SingleLink) list() &#123;</span><br><span class="line">	<span class="keyword">if</span> singleLink<span class="built_in">.head</span> == nil || singleLink<span class="built_in">.head</span><span class="built_in">.id</span> == <span class="number">0</span> &#123;</span><br><span class="line">		fmt.Println(<span class="string">"link is empty"</span>)</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		curNode := singleLink<span class="built_in">.head</span></span><br><span class="line">		<span class="keyword">for</span> &#123;</span><br><span class="line">			<span class="keyword">if</span> curNode == nil &#123;</span><br><span class="line">				break</span><br><span class="line">			&#125;</span><br><span class="line">			fmt.Print(*curNode, <span class="string">"==&gt;"</span>)</span><br><span class="line">			curNode = curNode.<span class="keyword">next</span></span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	fmt.Println()</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func main() &#123;</span><br><span class="line">	// 约定空链表的header初<span class="built_in">始id</span>为<span class="number">0</span>，后面加入的实<span class="built_in">例id</span>必须大于<span class="number">0</span></span><br><span class="line">	var originalHead = Node&#123;</span><br><span class="line">	<span class="built_in">	id</span>: <span class="number">0</span>,</span><br><span class="line">	&#125;</span><br><span class="line">	var s = SingleLink&#123;</span><br><span class="line">	<span class="built_in">	head</span>: &amp;originalHead,</span><br><span class="line">	&#125;</span><br><span class="line">	var node1 = Node&#123;</span><br><span class="line">	<span class="built_in">	id</span>:   <span class="number">1</span>,</span><br><span class="line">	<span class="built_in">	name</span>: <span class="string">"001"</span>,</span><br><span class="line">	&#125;</span><br><span class="line">	var node2 = Node&#123;</span><br><span class="line">	<span class="built_in">	id</span>:   <span class="number">2</span>,</span><br><span class="line">	<span class="built_in">	name</span>: <span class="string">"002"</span>,</span><br><span class="line">	&#125;</span><br><span class="line">	var node3 = Node&#123;</span><br><span class="line">	<span class="built_in">	id</span>:   <span class="number">3</span>,</span><br><span class="line">	<span class="built_in">	name</span>: <span class="string">"003"</span>,</span><br><span class="line">	&#125;</span><br><span class="line">	var node4 = Node&#123;</span><br><span class="line">	<span class="built_in">	id</span>:   <span class="number">4</span>,</span><br><span class="line">	<span class="built_in">	name</span>: <span class="string">"004"</span>,</span><br><span class="line">	&#125;</span><br><span class="line">	var node5 = Node&#123;</span><br><span class="line">	<span class="built_in">	id</span>:   <span class="number">5</span>,</span><br><span class="line">	<span class="built_in">	name</span>: <span class="string">"005"</span>,</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	s.orderInsert(&amp;node4)</span><br><span class="line">	s.list()</span><br><span class="line">	s.orderInsert(&amp;node2)</span><br><span class="line">	s.list()</span><br><span class="line">	s.orderInsert(&amp;node3)</span><br><span class="line">	s.list()</span><br><span class="line">	s.orderInsert(&amp;node5)</span><br><span class="line">	s.list()</span><br><span class="line">	s.orderInsert(&amp;node1)</span><br><span class="line">	s.list()</span><br><span class="line">	s.getLength()</span><br><span class="line">	popNode, err := s.pop(<span class="number">3</span>)</span><br><span class="line">	<span class="keyword">if</span> err != nil &#123;</span><br><span class="line">		fmt.Println(err)</span><br><span class="line">	&#125;</span><br><span class="line">	fmt.Println(<span class="string">"pop node successfully:"</span>, *popNode)</span><br><span class="line">	s.list()</span><br><span class="line"></span><br><span class="line">	/*</span><br><span class="line">		output:</span><br><span class="line">			&#123;<span class="number">4</span> <span class="number">004</span> <span class="xml"><span class="tag">&lt;<span class="name">nil</span>&gt;</span>&#125;==&gt;</span></span><br><span class="line"><span class="xml">			</span><span class="xquery">&#123;<span class="number">2</span> <span class="number">002</span> <span class="number">0xc00000a0e0</span>&#125;</span><span class="xml">==&gt;</span><span class="xquery">&#123;<span class="number">4</span> <span class="number">004</span> <span class="xml"><span class="tag">&lt;<span class="name">nil</span>&gt;</span>&#125;</span></span><span class="xml">==&gt;</span></span><br><span class="line"><span class="xml">			</span><span class="xquery">&#123;<span class="number">2</span> <span class="number">002</span> <span class="number">0xc00000a0c0</span>&#125;</span><span class="xml">==&gt;</span><span class="xquery">&#123;<span class="number">3</span> <span class="number">003</span> <span class="number">0xc00000a0e0</span>&#125;</span><span class="xml">==&gt;</span><span class="xquery">&#123;<span class="number">4</span> <span class="number">004</span> <span class="xml"><span class="tag">&lt;<span class="name">nil</span>&gt;</span>&#125;</span></span><span class="xml">==&gt;</span></span><br><span class="line"><span class="xml">			</span><span class="xquery">&#123;<span class="number">2</span> <span class="number">002</span> <span class="number">0xc00000a0c0</span>&#125;</span><span class="xml">==&gt;</span><span class="xquery">&#123;<span class="number">3</span> <span class="number">003</span> <span class="number">0xc00000a0e0</span>&#125;</span><span class="xml">==&gt;</span><span class="xquery">&#123;<span class="number">4</span> <span class="number">004</span> <span class="number">0xc00000a100</span>&#125;</span><span class="xml">==&gt;</span><span class="xquery">&#123;<span class="number">5</span> <span class="number">005</span> <span class="xml"><span class="tag">&lt;<span class="name">nil</span>&gt;</span>&#125;</span></span><span class="xml">==&gt;</span></span><br><span class="line"><span class="xml">			</span><span class="xquery">&#123;<span class="number">1</span> <span class="number">001</span> <span class="number">0xc00000a0a0</span>&#125;</span><span class="xml">==&gt;</span><span class="xquery">&#123;<span class="number">2</span> <span class="number">002</span> <span class="number">0xc00000a0c0</span>&#125;</span><span class="xml">==&gt;</span><span class="xquery">&#123;<span class="number">3</span> <span class="number">003</span> <span class="number">0xc00000a0e0</span>&#125;</span><span class="xml">==&gt;</span><span class="xquery">&#123;<span class="number">4</span> <span class="number">004</span> <span class="number">0xc00000a100</span>&#125;</span><span class="xml">==&gt;</span><span class="xquery">&#123;<span class="number">5</span> <span class="number">005</span> <span class="xml"><span class="tag">&lt;<span class="name">nil</span>&gt;</span>&#125;</span></span><span class="xml">==&gt;</span></span><br><span class="line"><span class="xml">			current link length: 5</span></span><br><span class="line"><span class="xml">			pop node successfully: </span><span class="xquery">&#123;<span class="number">3</span> <span class="number">003</span> <span class="number">0xc00000a0e0</span>&#125;</span><span class="xml"></span></span><br><span class="line"><span class="xml">			</span><span class="xquery">&#123;<span class="number">1</span> <span class="number">001</span> <span class="number">0xc00000a0a0</span>&#125;</span><span class="xml">==&gt;</span><span class="xquery">&#123;<span class="number">2</span> <span class="number">002</span> <span class="number">0xc00000a0e0</span>&#125;</span><span class="xml">==&gt;</span><span class="xquery">&#123;<span class="number">4</span> <span class="number">004</span> <span class="number">0xc00000a100</span>&#125;</span><span class="xml">==&gt;</span><span class="xquery">&#123;<span class="number">5</span> <span class="number">005</span> <span class="xml"><span class="tag">&lt;<span class="name">nil</span>&gt;</span>&#125;</span></span><span class="xml">==&gt;</span></span><br><span class="line"><span class="xml">	*/</span></span><br><span class="line"><span class="xml">&#125;</span></span><br></pre></td></tr></table></figure>
+<p><strong>问题</strong><br>单向链表的操作必须从首部开始，那么可不可以灵活一些，比如从尾部开始呢？当然可以，改造成双向链表即可满足</p>
+<h3 id="双向链表"><a href="#双向链表" class="headerlink" title="双向链表"></a>双向链表</h3><p>代码：<br>为了以示区别，增删改查全部改为从尾部开始循环<br><figure class="highlight xquery"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br></pre></td><td class="code"><pre><span class="line">package main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">"errors"</span></span><br><span class="line">	<span class="string">"fmt"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">type Node struct &#123;</span><br><span class="line"><span class="built_in">	id</span>   int</span><br><span class="line"><span class="built_in">	name</span><span class="built_in"> string</span></span><br><span class="line">	<span class="keyword">next</span> *Node</span><br><span class="line">	prev *Node</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">type CircleLink struct &#123;</span><br><span class="line"><span class="built_in">	head</span> *Node</span><br><span class="line"><span class="built_in">	tail</span> *Node</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func (circleLink *CircleLink) orderInsert(<span class="type">node</span> *Node) &#123;</span><br><span class="line">	// 按Node<span class="built_in">.id</span>从小到大的顺序，插入链表中</span><br><span class="line">	curNode := circleLink<span class="built_in">.head</span></span><br><span class="line">	<span class="keyword">if</span> curNode<span class="built_in">.id</span> == <span class="number">0</span> &#123;</span><br><span class="line">		// 第一次插入元素的空链表</span><br><span class="line">		circleLink<span class="built_in">.head</span> = <span class="type">node</span></span><br><span class="line">		circleLink<span class="built_in">.tail</span> = <span class="type">node</span></span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		// 如果<span class="type">node</span><span class="built_in">.id</span>比队<span class="built_in">首id</span>小，则队首让位后移，要保证队首最小。因为取值比较的时候， 是取curNode.<span class="keyword">next</span>节点与<span class="type">node</span>进行比较，如果满足大小顺序，</span><br><span class="line">		// 则将<span class="type">node</span>插入curNode和curNode.<span class="keyword">next</span>之间</span><br><span class="line">		<span class="keyword">if</span> curNode<span class="built_in">.id</span> &gt; <span class="type">node</span><span class="built_in">.id</span> &#123;</span><br><span class="line">			<span class="type">node</span>.<span class="keyword">next</span> = curNode</span><br><span class="line">			curNode.prev = <span class="type">node</span></span><br><span class="line">			circleLink<span class="built_in">.head</span> = <span class="type">node</span></span><br><span class="line">		&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">			// 如果<span class="type">node</span><span class="built_in">.id</span>不比队<span class="built_in">首id</span>小，则往后取一位，用后一位与<span class="type">node</span>比较，匹配则插入当前位与后一位中间</span><br><span class="line">			<span class="keyword">for</span> &#123;</span><br><span class="line">				<span class="keyword">if</span> curNode.<span class="keyword">next</span> == nil &#123;</span><br><span class="line">					// 循环到最后一位都没有插入成功，说明<span class="type">node</span><span class="built_in">.id</span>比现有链表中的所有<span class="type">node</span><span class="built_in">的id</span>都大，则<span class="type">node</span>成为新的队尾</span><br><span class="line">					curNode.<span class="keyword">next</span> = <span class="type">node</span></span><br><span class="line">					<span class="type">node</span>.prev = curNode</span><br><span class="line">					circleLink<span class="built_in">.tail</span> = <span class="type">node</span></span><br><span class="line">					break</span><br><span class="line">				&#125;</span><br><span class="line">				<span class="keyword">if</span> curNode.<span class="keyword">next</span><span class="built_in">.id</span> &gt; <span class="type">node</span><span class="built_in">.id</span> &#123;</span><br><span class="line">					<span class="type">node</span>.<span class="keyword">next</span> = curNode.<span class="keyword">next</span></span><br><span class="line">					<span class="type">node</span>.prev = curNode</span><br><span class="line">					curNode.<span class="keyword">next</span>.prev = <span class="type">node</span></span><br><span class="line">					curNode.<span class="keyword">next</span> = <span class="type">node</span></span><br><span class="line">					break</span><br><span class="line">				&#125;</span><br><span class="line">				curNode = curNode.<span class="keyword">next</span></span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func (circleLink *CircleLink) pop<span class="built_in">(id</span> int) (<span class="type">node</span> *Node, err<span class="built_in"> error</span>) &#123;</span><br><span class="line">	// 弹出链表中指<span class="built_in">定id</span>的<span class="type">node</span>.这次从链表尾部往首部循环</span><br><span class="line">	curNode := circleLink<span class="built_in">.tail</span></span><br><span class="line">	<span class="keyword">if</span> curNode<span class="built_in">.id</span> ==<span class="built_in"> id</span> &#123;</span><br><span class="line">		// 要取的是队尾</span><br><span class="line">		circleLink<span class="built_in">.tail</span> = circleLink<span class="built_in">.tail</span>.prev</span><br><span class="line">		<span class="keyword">return</span> curNode, nil</span><br><span class="line">	&#125;</span><br><span class="line">	flag :=<span class="built_in"> false</span> // 是否查找到的标志</span><br><span class="line">	<span class="keyword">for</span> &#123;</span><br><span class="line">		<span class="keyword">if</span> curNode.prev == nil &#123;</span><br><span class="line">			// 已经从队尾达到队首,全部都没命中</span><br><span class="line">			break</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">if</span> curNode<span class="built_in">.id</span> ==<span class="built_in"> id</span> &#123;</span><br><span class="line">			flag =<span class="built_in"> true</span></span><br><span class="line">			selectNode := curNode</span><br><span class="line">			<span class="keyword">if</span> curNode == circleLink<span class="built_in">.head</span> &#123;</span><br><span class="line">				// 如果命中的节点正好是队首</span><br><span class="line">				<span class="keyword">if</span> circleLink<span class="built_in">.head</span>.<span class="keyword">next</span> != nil &#123;</span><br><span class="line">					// 如果队首后面还有节点，则第二个节点置为新的首节点，且第二个节点的prev指向置为nil，这样<span class="built_in">原head</span>没有被引用，内存会释放出来</span><br><span class="line">					circleLink<span class="built_in">.head</span>.<span class="keyword">next</span>.prev = nil</span><br><span class="line">					circleLink<span class="built_in">.head</span> = circleLink<span class="built_in">.head</span>.<span class="keyword">next</span></span><br><span class="line">				&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">					// 如果队首之后没有节点了，那么直接首位都置空</span><br><span class="line">					circleLink<span class="built_in">.head</span> = nil</span><br><span class="line">					circleLink<span class="built_in">.tail</span> = nil</span><br><span class="line">				&#125;</span><br><span class="line">			&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">				// 命中的节点在队中间,则取出命中的节点，并维护好其前后指向关系</span><br><span class="line">				curNode.prev.<span class="keyword">next</span> = curNode.<span class="keyword">next</span></span><br><span class="line">				curNode.<span class="keyword">next</span>.prev = curNode.prev</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="keyword">return</span> selectNode, nil</span><br><span class="line">		&#125;</span><br><span class="line">		curNode = curNode.prev</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> !flag &#123;</span><br><span class="line">		// 如果循环结束还没有查找到，输出信息</span><br><span class="line">		<span class="keyword">return</span> nil, errors.New(<span class="string">"node not found"</span>)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func (circleLink *CircleLink) getLength() <span class="built_in">(number</span> int) &#123;</span><br><span class="line">	curNode := circleLink<span class="built_in">.tail</span></span><br><span class="line">	<span class="keyword">if</span> circleLink<span class="built_in">.tail</span><span class="built_in">.id</span> == <span class="number">0</span> || circleLink<span class="built_in">.tail</span> == nil &#123;</span><br><span class="line">		// 空链表</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		<span class="keyword">for</span> &#123;</span><br><span class="line">		<span class="built_in">	number</span> += <span class="number">1</span></span><br><span class="line">			curNode = curNode.prev</span><br><span class="line">			<span class="keyword">if</span> curNode == nil &#123;</span><br><span class="line">				break</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	fmt.Println(<span class="string">"current link length:"</span>,<span class="built_in"> number</span>)</span><br><span class="line">	<span class="keyword">return</span><span class="built_in"> number</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func (circleLink *CircleLink) list() &#123;</span><br><span class="line">	<span class="keyword">if</span> circleLink<span class="built_in">.tail</span> == nil || circleLink<span class="built_in">.tail</span><span class="built_in">.id</span> == <span class="number">0</span> &#123;</span><br><span class="line">		fmt.Println(<span class="string">"link is empty"</span>)</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		curNode := circleLink<span class="built_in">.tail</span></span><br><span class="line">		var nodes []*Node</span><br><span class="line">		<span class="keyword">for</span> &#123;</span><br><span class="line">			<span class="keyword">if</span> curNode == nil &#123;</span><br><span class="line">				break</span><br><span class="line">			&#125;</span><br><span class="line">			//fmt.Print(<span class="string">"&lt;=="</span>, *curNode)</span><br><span class="line">			// 从尾部到首部的循环，为了展示链接效果，将节点先加入一个slice中，稍后从slice的后面开始循环展示数据.此时slice是从尾部到首部排序的</span><br><span class="line">			nodes = append(nodes, curNode)</span><br><span class="line">			curNode = curNode.prev</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">for</span> i := <span class="number">0</span>; i &lt; len(nodes); i++ &#123;</span><br><span class="line">			index := len(nodes) - i - <span class="number">1</span> // 颠倒一下顺序，现在slice中的顺序和链表顺序恰好是相反的，为了打印的效果，让前面的节点先输出</span><br><span class="line">			fmt.Print(<span class="string">"&lt;==&gt;"</span>, nodes[index])</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	fmt.Println()</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func main() &#123;</span><br><span class="line">	// 约定空链表的header初<span class="built_in">始id</span>为<span class="number">0</span>，后面加入的实<span class="built_in">例id</span>必须大于<span class="number">0</span></span><br><span class="line">	var originalHead = Node&#123;</span><br><span class="line">	<span class="built_in">	id</span>: <span class="number">0</span>,</span><br><span class="line">	&#125;</span><br><span class="line">	var s = CircleLink&#123;</span><br><span class="line">	<span class="built_in">	head</span>: &amp;originalHead,</span><br><span class="line">	&#125;</span><br><span class="line">	var node1 = Node&#123;</span><br><span class="line">	<span class="built_in">	id</span>:   <span class="number">1</span>,</span><br><span class="line">	<span class="built_in">	name</span>: <span class="string">"001"</span>,</span><br><span class="line">	&#125;</span><br><span class="line">	var node2 = Node&#123;</span><br><span class="line">	<span class="built_in">	id</span>:   <span class="number">2</span>,</span><br><span class="line">	<span class="built_in">	name</span>: <span class="string">"002"</span>,</span><br><span class="line">	&#125;</span><br><span class="line">	var node3 = Node&#123;</span><br><span class="line">	<span class="built_in">	id</span>:   <span class="number">3</span>,</span><br><span class="line">	<span class="built_in">	name</span>: <span class="string">"003"</span>,</span><br><span class="line">	&#125;</span><br><span class="line">	var node4 = Node&#123;</span><br><span class="line">	<span class="built_in">	id</span>:   <span class="number">4</span>,</span><br><span class="line">	<span class="built_in">	name</span>: <span class="string">"004"</span>,</span><br><span class="line">	&#125;</span><br><span class="line">	var node5 = Node&#123;</span><br><span class="line">	<span class="built_in">	id</span>:   <span class="number">5</span>,</span><br><span class="line">	<span class="built_in">	name</span>: <span class="string">"005"</span>,</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	s.orderInsert(&amp;node4)</span><br><span class="line">	s.list()</span><br><span class="line">	s.orderInsert(&amp;node2)</span><br><span class="line">	s.list()</span><br><span class="line">	s.orderInsert(&amp;node3)</span><br><span class="line">	s.list()</span><br><span class="line">	s.orderInsert(&amp;node5)</span><br><span class="line">	s.list()</span><br><span class="line">	s.orderInsert(&amp;node1)</span><br><span class="line">	s.list()</span><br><span class="line">	s.getLength()</span><br><span class="line">	popNode, err := s.pop(<span class="number">3</span>)</span><br><span class="line">	<span class="keyword">if</span> err != nil &#123;</span><br><span class="line">		fmt.Println(err)</span><br><span class="line">	&#125;</span><br><span class="line">	fmt.Println(<span class="string">"pop node successfully:"</span>, *popNode)</span><br><span class="line">	s.list()</span><br><span class="line"></span><br><span class="line">	/*</span><br><span class="line">		output:</span><br><span class="line">			&lt;==&amp;&#123;<span class="number">4</span> <span class="number">004</span> <span class="xml"><span class="tag">&lt;<span class="name">nil</span>&gt;</span> </span><span class="xml"><span class="tag">&lt;<span class="name">nil</span>&gt;</span>&#125;</span></span><br><span class="line"><span class="xml">			<span class="tag">&lt;<span class="name">==&amp;</span></span></span><span class="xquery">&#123;<span class="number">2</span> <span class="number">002</span> <span class="number">0xc0000761e0</span> <span class="xml"><span class="tag">&lt;<span class="name">nil</span>&gt;</span>&#125;</span></span><span class="xml"><span class="tag">&lt;==<span class="string">&amp;</span></span></span><span class="xquery"><span class="xml"></span><span class="xquery">&#123;<span class="number">4</span> <span class="number">004</span> <span class="xml"><span class="tag">&lt;<span class="name">nil</span>&gt;</span> 0xc000076180&#125;</span></span><span class="xml"></span></span><span class="xml"><span class="tag"></span></span></span><br><span class="line"><span class="xml">			<span class="tag">&lt;<span class="name">==&amp;</span></span></span><span class="xquery">&#123;<span class="number">2</span> <span class="number">002</span> <span class="number">0xc0000761b0</span> <span class="xml"><span class="tag">&lt;<span class="name">nil</span>&gt;</span>&#125;</span></span><span class="xml"><span class="tag">&lt;==<span class="string">&amp;</span></span></span><span class="xquery"><span class="xml"></span><span class="xquery">&#123;<span class="number">3</span> <span class="number">003</span> <span class="number">0xc0000761e0</span> <span class="number">0xc000076180</span>&#125;</span><span class="xml"></span></span><span class="xml"><span class="tag">&lt;==<span class="string">&amp;</span></span></span><span class="xquery"><span class="xml"></span><span class="xquery">&#123;<span class="number">4</span> <span class="number">004</span> <span class="xml"><span class="tag">&lt;<span class="name">nil</span>&gt;</span> 0xc0000761b0&#125;</span></span><span class="xml"></span></span><span class="xml"><span class="tag"></span></span></span><br><span class="line"><span class="xml">			<span class="tag">&lt;<span class="name">==&amp;</span></span></span><span class="xquery">&#123;<span class="number">2</span> <span class="number">002</span> <span class="number">0xc0000761b0</span> <span class="xml"><span class="tag">&lt;<span class="name">nil</span>&gt;</span>&#125;</span></span><span class="xml"><span class="tag">&lt;==<span class="string">&amp;</span></span></span><span class="xquery"><span class="xml"></span><span class="xquery">&#123;<span class="number">3</span> <span class="number">003</span> <span class="number">0xc0000761e0</span> <span class="number">0xc000076180</span>&#125;</span><span class="xml"></span></span><span class="xml"><span class="tag">&lt;==<span class="string">&amp;</span></span></span><span class="xquery"><span class="xml"></span><span class="xquery">&#123;<span class="number">4</span> <span class="number">004</span> <span class="number">0xc000076210</span> <span class="number">0xc0000761b0</span>&#125;</span><span class="xml"></span></span><span class="xml"><span class="tag">&lt;==<span class="string">&amp;</span></span></span><span class="xquery"><span class="xml"></span><span class="xquery">&#123;<span class="number">5</span> <span class="number">005</span> <span class="xml"><span class="tag">&lt;<span class="name">nil</span>&gt;</span> 0xc0000761e0&#125;</span></span><span class="xml"></span></span><span class="xml"><span class="tag"></span></span></span><br><span class="line"><span class="xml">			<span class="tag">&lt;<span class="name">==&amp;</span></span></span><span class="xquery">&#123;<span class="number">1</span> <span class="number">001</span> <span class="number">0xc000076180</span> <span class="xml"><span class="tag">&lt;<span class="name">nil</span>&gt;</span>&#125;</span></span><span class="xml"><span class="tag">&lt;==<span class="string">&amp;</span></span></span><span class="xquery"><span class="xml"></span><span class="xquery">&#123;<span class="number">2</span> <span class="number">002</span> <span class="number">0xc0000761b0</span> <span class="number">0xc000076150</span>&#125;</span><span class="xml"></span></span><span class="xml"><span class="tag">&lt;==<span class="string">&amp;</span></span></span><span class="xquery"><span class="xml"></span><span class="xquery">&#123;<span class="number">3</span> <span class="number">003</span> <span class="number">0xc0000761e0</span> <span class="number">0xc000076180</span>&#125;</span><span class="xml"></span></span><span class="xml"><span class="tag">&lt;==<span class="string">&amp;</span></span></span><span class="xquery"><span class="xml"></span><span class="xquery">&#123;<span class="number">4</span> <span class="number">004</span> <span class="number">0xc000076210</span> <span class="number">0xc0000761b0</span>&#125;</span><span class="xml"></span></span><span class="xml"><span class="tag">&lt;==<span class="string">&amp;</span></span></span><span class="xquery"><span class="xml"></span><span class="xquery">&#123;<span class="number">5</span> <span class="number">005</span> <span class="xml"><span class="tag">&lt;<span class="name">nil</span>&gt;</span> 0xc0000761e0&#125;</span></span><span class="xml"></span></span><span class="xml"><span class="tag"></span></span></span><br><span class="line"><span class="xml">			current link length: 5</span></span><br><span class="line"><span class="xml">			pop node successfully: </span><span class="xquery">&#123;<span class="number">3</span> <span class="number">003</span> <span class="number">0xc0000761e0</span> <span class="number">0xc000076180</span>&#125;</span><span class="xml"></span></span><br><span class="line"><span class="xml">			<span class="tag">&lt;<span class="name">==&amp;</span></span></span><span class="xquery">&#123;<span class="number">1</span> <span class="number">001</span> <span class="number">0xc000076180</span> <span class="xml"><span class="tag">&lt;<span class="name">nil</span>&gt;</span>&#125;</span></span><span class="xml"><span class="tag">&lt;==<span class="string">&amp;</span></span></span><span class="xquery"><span class="xml"></span><span class="xquery">&#123;<span class="number">2</span> <span class="number">002</span> <span class="number">0xc0000761e0</span> <span class="number">0xc000076150</span>&#125;</span><span class="xml"></span></span><span class="xml"><span class="tag">&lt;==<span class="string">&amp;</span></span></span><span class="xquery"><span class="xml"></span><span class="xquery">&#123;<span class="number">4</span> <span class="number">004</span> <span class="number">0xc000076210</span> <span class="number">0xc000076180</span>&#125;</span><span class="xml"></span></span><span class="xml"><span class="tag">&lt;==<span class="string">&amp;</span></span></span><span class="xquery"><span class="xml"></span><span class="xquery">&#123;<span class="number">5</span> <span class="number">005</span> <span class="xml"><span class="tag">&lt;<span class="name">nil</span>&gt;</span> 0xc0000761e0&#125;</span></span><span class="xml"></span></span><span class="xml"><span class="tag"></span></span></span><br><span class="line"><span class="xml">	*/</span></span><br><span class="line"><span class="xml">&#125;</span></span><br></pre></td></tr></table></figure></p>
+<p><strong>问题</strong><br>从尾部开始查询的操作复杂度依旧与首部开始一样，为O(n)，有没有办法降低复杂度？当然可以，按照自定义链节点串联规则，完全可以使用二分等其他查找的方法降低复杂度，这个后面再补充</p>
+<h3 id="环形链表"><a href="#环形链表" class="headerlink" title="环形链表"></a>环形链表</h3><p>直接以约瑟夫问题，又称丢手帕游戏举例，此场景非常适用于使用环形链表模型，游戏规则见代码顶部注释<br>代码：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">"fmt"</span></span><br><span class="line">	<span class="string">"math/rand"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">约瑟夫问题，又叫丢手帕游戏，若干人围成一圈，从头开始，每次递进若干位随机数，然后出列一人，接着再从出列者的下一位开始继续循环，</span></span><br><span class="line"><span class="comment">直到圈内只剩最后一人,游戏结束</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> Child <span class="keyword">struct</span> &#123;</span><br><span class="line">	Id   <span class="keyword">int</span></span><br><span class="line">	next *Child</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> Ring <span class="keyword">struct</span> &#123;</span><br><span class="line">	Head *Child</span><br><span class="line">	Tail *Child</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(ring *Ring)</span> <span class="title">list</span><span class="params">()</span></span> &#123;</span><br><span class="line">	curChild := ring.Head</span><br><span class="line">	<span class="keyword">for</span> &#123;</span><br><span class="line">		fmt.Printf(<span class="string">"child %d ==&gt;\t"</span>, curChild.Id)</span><br><span class="line">		<span class="keyword">if</span> curChild.next == ring.Head &#123;</span><br><span class="line">			<span class="keyword">break</span></span><br><span class="line">		&#125;</span><br><span class="line">		curChild = curChild.next</span><br><span class="line">	&#125;</span><br><span class="line">	fmt.Println()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(ring *Ring)</span> <span class="title">play</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="comment">// 开始转圈,第一次是从头开始</span></span><br><span class="line">	startIndex := <span class="number">1</span></span><br><span class="line">	n := <span class="number">0</span></span><br><span class="line">	startChild := ring.Head</span><br><span class="line">	<span class="keyword">for</span> &#123;</span><br><span class="line">		<span class="keyword">if</span> startChild.next == startChild &#123;</span><br><span class="line">			fmt.Printf(<span class="string">"游戏结束，圈圈中的最后一位child是%d号\n"</span>, startChild.Id)</span><br><span class="line">			<span class="keyword">break</span></span><br><span class="line">		&#125;</span><br><span class="line">		n += <span class="number">1</span></span><br><span class="line">		randInt := rand.Intn(<span class="number">10</span>)</span><br><span class="line">		curChild := startChild</span><br><span class="line">		<span class="keyword">for</span> i := <span class="number">0</span>; i &lt; randInt<span class="number">-1</span>; i++ &#123;</span><br><span class="line">			<span class="comment">// 在出列child的前一位停下，因为是链表关系，所以需要维护好出列child的前一位的指向关系</span></span><br><span class="line">			curChild = curChild.next</span><br><span class="line">		&#125;</span><br><span class="line">		chooseChild := curChild.next</span><br><span class="line">		<span class="keyword">if</span> chooseChild == ring.Head &#123;</span><br><span class="line">			ring.Head = chooseChild.next</span><br><span class="line">		&#125;</span><br><span class="line">		curChild.next = chooseChild.next <span class="comment">// chooseChild的指针取消，chooseChild会被回收，出列</span></span><br><span class="line">		fmt.Printf(<span class="string">"第%d轮,从第%d号开始,前进%d位,出列的是%d号child,game continue!\n"</span>, n, startIndex, randInt, chooseChild.Id)</span><br><span class="line">		startIndex = (randInt + startIndex + <span class="number">1</span>) % <span class="number">20</span></span><br><span class="line">		startChild = chooseChild.next <span class="comment">// 下一轮，从chooseChild.next节点开始</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">ringInit</span><span class="params">(number <span class="keyword">int</span>)</span> <span class="params">(ring Ring)</span></span> &#123;</span><br><span class="line">	<span class="comment">// 构建一个指定成员数量的环形链表</span></span><br><span class="line">	<span class="keyword">for</span> i := <span class="number">1</span>; i &lt;= number; i++ &#123;</span><br><span class="line">		<span class="keyword">var</span> child = Child&#123;</span><br><span class="line">			Id: i,</span><br><span class="line">		&#125;</span><br><span class="line">		fmt.Println(child)</span><br><span class="line">		<span class="keyword">if</span> i == <span class="number">1</span> &#123;</span><br><span class="line">			<span class="comment">// 插入第一个节点</span></span><br><span class="line">			ring.Head = &amp;child</span><br><span class="line">			ring.Tail = &amp;child</span><br><span class="line">			ring.Tail.next = ring.Head <span class="comment">// 尾节点下一个指针指向首节点</span></span><br><span class="line">		&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">			<span class="comment">// 后面的节点，陆续成为新的尾结点</span></span><br><span class="line">			child.next = ring.Head</span><br><span class="line">			ring.Tail.next = &amp;child</span><br><span class="line">			ring.Tail = &amp;child</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	ring := ringInit(<span class="number">20</span>)</span><br><span class="line">	fmt.Println(*ring.Head, *ring.Tail)</span><br><span class="line">	ring.list()</span><br><span class="line">	ring.play()</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">	output:</span></span><br><span class="line"><span class="comment">		第1轮,从第1号开始,前进1位,出列的是2号child,game continue!</span></span><br><span class="line"><span class="comment">		第2轮,从第3号开始,前进7位,出列的是10号child,game continue!</span></span><br><span class="line"><span class="comment">		第3轮,从第11号开始,前进7位,出列的是18号child,game continue!</span></span><br><span class="line"><span class="comment">		第4轮,从第19号开始,前进9位,出列的是9号child,game continue!</span></span><br><span class="line"><span class="comment">		第5轮,从第9号开始,前进1位,出列的是12号child,game continue!</span></span><br><span class="line"><span class="comment">		第6轮,从第11号开始,前进8位,出列的是3号child,game continue!</span></span><br><span class="line"><span class="comment">		第7轮,从第0号开始,前进5位,出列的是11号child,game continue!</span></span><br><span class="line"><span class="comment">		第8轮,从第6号开始,前进0位,出列的是14号child,game continue!</span></span><br><span class="line"><span class="comment">		第9轮,从第7号开始,前进6位,出列的是4号child,game continue!</span></span><br><span class="line"><span class="comment">		第10轮,从第14号开始,前进0位,出列的是6号child,game continue!</span></span><br><span class="line"><span class="comment">		第11轮,从第15号开始,前进4位,出列的是16号child,game continue!</span></span><br><span class="line"><span class="comment">		第12轮,从第0号开始,前进1位,出列的是19号child,game continue!</span></span><br><span class="line"><span class="comment">		第13轮,从第2号开始,前进2位,出列的是5号child,game continue!</span></span><br><span class="line"><span class="comment">		第14轮,从第5号开始,前进9位,出列的是13号child,game continue!</span></span><br><span class="line"><span class="comment">		第15轮,从第15号开始,前进8位,出列的是20号child,game continue!</span></span><br><span class="line"><span class="comment">		第16轮,从第4号开始,前进4位,出列的是17号child,game continue!</span></span><br><span class="line"><span class="comment">		第17轮,从第9号开始,前进1位,出列的是7号child,game continue!</span></span><br><span class="line"><span class="comment">		第18轮,从第11号开始,前进5位,出列的是1号child,game continue!</span></span><br><span class="line"><span class="comment">		第19轮,从第17号开始,前进7位,出列的是15号child,game continue!</span></span><br><span class="line"><span class="comment">		游戏结束，圈圈中的最后一位child是8号</span></span><br><span class="line"><span class="comment">*/</span></span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div id="reward-container">
+  <div>Thank you for your accept. mua！</div>
+  <button id="reward-button" disable="enable" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+
+    
+      
+      
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/reward/wechatpay.png" alt="丨ywq丨 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+      
+      
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/reward/alipay.png" alt="丨ywq丨 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        
+
+
+
+
+  
+
+
+
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>丨ywq丨</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    
+    <a href="https://www.ipyker.com/2019/07/18/golang算法练习：单链表_双链表_环形链表.html" title="golang算法练习:单链表/双链表/环形链表">https://www.ipyker.com/2019/07/18/golang算法练习：单链表_双链表_环形链表.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li>
+</ul>
+
+      </div>
+    
+    <div>
+      
+        <div>
+    
+        <div style="text-align:center;color: #ccc;font-size:16px;">-------------本文结束<i class="fa fa-heart"></i>感谢您的阅读-------------</div>
+    
+</div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Golang/" rel="tag"><i class="fa fa-tag"></i> Golang</a>
+          
+            <a href="/tags/算法/" rel="tag"><i class="fa fa-tag"></i> 算法</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/07/18/golang算法练习：基于array的队列实现.html" rel="next" title="golang算法练习：基于array的队列实现">
+                <i class="fa fa-chevron-left"></i> golang算法练习：基于array的队列实现
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/07/22/golang算法练习：排序.html" rel="prev" title="golang算法练习：排序">
+                golang算法练习：排序 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC80NDM5Mi8yMDkyNA=="></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="丨ywq丨">
+            
+              <p class="site-author-name" itemprop="name">丨ywq丨</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives">
+                
+                    <span class="site-state-item-count">74</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                      <a href="/tags">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">15</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/yinwenqin" title="GitHub &rarr; https://github.com/yinwenqin" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://blog.csdn.net/ywq935" title="CSDN &rarr; https://blog.csdn.net/ywq935" rel="noopener" target="_blank"><i class="fa fa-fw fa-globe"></i>CSDN</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-book"></i>
+                推荐阅读
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.upweto.top/gitbooks/useKubernetes/" title="http://blog.upweto.top/gitbooks/useKubernetes/" rel="noopener" target="_blank">kubernetes使用指南</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.upweto.top/gitbooks/kubeSourceCodeNote/" title="http://blog.upweto.top/gitbooks/kubeSourceCodeNote/" rel="noopener" target="_blank">kubernetes源码笔记</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#需求"><span class="nav-number">1.</span> <span class="nav-text">需求</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#单向链表"><span class="nav-number">2.</span> <span class="nav-text">单向链表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#双向链表"><span class="nav-number">3.</span> <span class="nav-text">双向链表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#环形链表"><span class="nav-number">4.</span> <span class="nav-text">环形链表</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" style=" text-align:center;">&copy; 2017 – <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ywq</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"> 站点字数合计:</i>
+    </span>
+    
+    <span title="站点总字数">583k</span>
+  
+  
+</div>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+<div class="run_time" style=" text-align:center;">
+  <span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
+  <script>
+    var now = new Date(); 
+    function createtime() { 
+        var grt= new Date("08/23/2018 10:00:00");//此处修改你的建站时间或者网站上线时间 
+        now.setTime(now.getTime()+250); 
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days); 
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours); 
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum); 
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;} 
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum); 
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;} 
+        document.getElementById("timeDate").innerHTML = "本站已安全运行 "+dnum+" 天 "; 
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒"; 
+    } 
+    setInterval("createtime()",250);
+  </script>
+</div>
+
+        
+<div class="busuanzi-count" style=" text-align:center;">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-user"></i>
+    </span>
+    <span class="site-uv" title="总访客量">
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span> 人
+    </span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+  
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-eye"></i>
+    </span>
+    <span class="site-pv" title="总访问量">
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span> 次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+  
+    
+    
+      
+    
+  
+  <script color="black" opacity="0.7" zindex="-1" count="140" src="//cdn.jsdelivr.net/gh/theme-next/theme-next-canvas-nest@1.0.0/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+  
+  
+  <script id="ribbon" size="300" alpha="0.1" zindex="-1" src="/lib/canvas-ribbon/canvas-ribbon.js"></script>
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/fancybox/source/jquery.fancybox.pack.js"></script>
+
+
+  
+
+
+  <script src="/js/utils.js?v=7.1.1"></script>
+
+  <script src="/js/motion.js?v=7.1.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/schemes/muse.js?v=7.1.1"></script>
+
+
+
+
+  
+  <script src="/js/scrollspy.js?v=7.1.1"></script>
+<script src="/js/post-details.js?v=7.1.1"></script>
+
+
+
+  
+
+
+  <script src="/js/next-boot.js?v=7.1.1"></script>
+
+
+  
+
+  
+
+  
+  
+  
+
+  
+
+  
+  
+  
+
+
+  
+
+
+  
+    <script>
+  window.livereOptions = {
+    refer: '2019/07/18/golang算法练习：单链表_双链表_环形链表.html'
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+</script>
+
+  
+
+
+  
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url).replace(/\/{2,}/g, '/');
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x"></i></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x"></i></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+  
+  <script src="/lib/bookmark/bookmark.min.js?v=1.0"></script>
+  <script>
+  
+    bookmark.scrollToMark('auto', "#更多");
+  
+  </script>
+
+
+  
+
+  
+
+  
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/koharu.model.json"},"display":{"position":"left","width":250,"height":500},"mobile":{"show":false},"react":{"opacity":0.7},"log":false});</script></body>
+</html>
+<!-- 页面点击小红心 -->
+<script type="text/javascript" src="/js/src/clicklove.js"></script>

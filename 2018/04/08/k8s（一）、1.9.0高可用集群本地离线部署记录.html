@@ -1,0 +1,1597 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-CN">
+
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link rel="stylesheet" href="/lib/pace/pace-theme-bounce.min.css?v=1.0.2">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link rel="stylesheet" href="/lib/fancybox/source/jquery.fancybox.css">
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+    
+      
+    
+
+    
+  
+
+  
+
+  
+
+  
+    
+      
+    
+
+    
+  
+
+  
+    
+    
+    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic|Roboto Slab:300,300italic,400,400italic,700,700italic|Roboto Mono:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext">
+  
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.1.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.1.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.1.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.1.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.1.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '7.1.1',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":true,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: true,
+    fancybox: true,
+    fastclick: true,
+    lazyload: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"shrinkIn","post_header":"slideLeftIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideDownIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <script>
+  (function(i,s,o,g,r,a,m){i["DaoVoiceObject"]=r;i[r]=i[r]||function(){(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;a.charset="utf-8";m.parentNode.insertBefore(a,m)})(window,document,"script",('https:' == document.location.protocol ? 'https:' : 'http:') + "//widget.daovoice.io/widget/0f81ff2f.js","daovoice")
+  daovoice('init', {
+      app_id: "bd399fce"
+    });
+  daovoice('update');
+  </script>
+
+  <meta name="description" content="一、部署说明1.节点 12345master1:  IP:192.168.0.170/24 hostname：171master2:  IP:192.168.0.171/24 hostname：172VIP:192.168.0.169/24  2.工具版本： 123456etcd-v3.1.10-linux-amd64.tar.gzkubeadm-1.9.0-0.x86_64.rpmkubectl">
+<meta name="keywords" content="Kubernetes">
+<meta property="og:type" content="article">
+<meta property="og:title" content="k8s（一）、 1.9.0高可用集群本地离线部署记录">
+<meta property="og:url" content="https://www.ipyker.com/2018/04/08/k8s（一）、1.9.0高可用集群本地离线部署记录.html">
+<meta property="og:site_name" content="随笔漫谈">
+<meta property="og:description" content="一、部署说明1.节点 12345master1:  IP:192.168.0.170/24 hostname：171master2:  IP:192.168.0.171/24 hostname：172VIP:192.168.0.169/24  2.工具版本： 123456etcd-v3.1.10-linux-amd64.tar.gzkubeadm-1.9.0-0.x86_64.rpmkubectl">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://mycloudn.kokoerp.com/20180411093123251.jpg">
+<meta property="og:updated_time" content="2019-11-21T07:48:40.137Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="k8s（一）、 1.9.0高可用集群本地离线部署记录">
+<meta name="twitter:description" content="一、部署说明1.节点 12345master1:  IP:192.168.0.170/24 hostname：171master2:  IP:192.168.0.171/24 hostname：172VIP:192.168.0.169/24  2.工具版本： 123456etcd-v3.1.10-linux-amd64.tar.gzkubeadm-1.9.0-0.x86_64.rpmkubectl">
+<meta name="twitter:image" content="http://mycloudn.kokoerp.com/20180411093123251.jpg">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="随笔漫谈" type="application/atom+xml">
+
+
+
+  
+  
+  <link rel="canonical" href="https://www.ipyker.com/2018/04/08/k8s（一）、1.9.0高可用集群本地离线部署记录">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>k8s（一）、 1.9.0高可用集群本地离线部署记录 | 随笔漫谈</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+ 
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">随笔漫谈</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-book">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/gitbooks/" rel="section"><i class="menu-item-icon fa fa-fw fa-book"></i> <br>book</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-互动">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/guestbook/" rel="section"><i class="menu-item-icon fa fa-fw fa-comments"></i> <br>互动</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.ipyker.com/2018/04/08/k8s（一）、1.9.0高可用集群本地离线部署记录.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="丨ywq丨">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随笔漫谈">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">k8s（一）、 1.9.0高可用集群本地离线部署记录
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-04-08 19:22:45" itemprop="dateCreated datePublished" datetime="2018-04-08T19:22:45+08:00">2018-04-08</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-11-21 15:48:40" itemprop="dateModified" datetime="2019-11-21T15:48:40+08:00">2019-11-21</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+            <div class="post-symbolscount">
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">本文字数：</span>
+                
+                <span title="本文字数">17k</span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">15 分钟</span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="一、部署说明"><a href="#一、部署说明" class="headerlink" title="一、部署说明"></a>一、部署说明</h2><p>1.节点</p>
+<figure class="highlight x86asm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="symbol">master1:</span>  <span class="built_in">IP</span>:<span class="number">192.168</span><span class="meta">.0</span><span class="meta">.170</span>/<span class="number">24</span> hostname：<span class="number">171</span></span><br><span class="line"></span><br><span class="line"><span class="symbol">master2:</span>  <span class="built_in">IP</span>:<span class="number">192.168</span><span class="meta">.0</span><span class="meta">.171</span>/<span class="number">24</span> hostname：<span class="number">172</span></span><br><span class="line"></span><br><span class="line"><span class="symbol">VIP:</span><span class="number">192.168</span><span class="meta">.0</span><span class="meta">.169</span>/<span class="number">24</span></span><br></pre></td></tr></table></figure>
+<p><img src="http://mycloudn.kokoerp.com/20180411093123251.jpg" alt="这里写图片描述"></p>
+<p>2.工具版本：</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">etcd-v3</span><span class="selector-class">.1</span><span class="selector-class">.10-linux-amd64</span><span class="selector-class">.tar</span><span class="selector-class">.gz</span></span><br><span class="line"><span class="selector-tag">kubeadm-1</span><span class="selector-class">.9</span><span class="selector-class">.0-0</span><span class="selector-class">.x86_64</span><span class="selector-class">.rpm</span></span><br><span class="line"><span class="selector-tag">kubectl-1</span><span class="selector-class">.9</span><span class="selector-class">.0-0</span><span class="selector-class">.x86_64</span><span class="selector-class">.rpm</span></span><br><span class="line"><span class="selector-tag">kubelet-1</span><span class="selector-class">.9</span><span class="selector-class">.9-9</span><span class="selector-class">.x86_64</span><span class="selector-class">.rpm</span></span><br><span class="line"><span class="selector-tag">kubernetes-cni-0</span><span class="selector-class">.6</span><span class="selector-class">.0-0</span><span class="selector-class">.x86_64</span><span class="selector-class">.rpm</span></span><br><span class="line"><span class="selector-tag">socat-1</span><span class="selector-class">.7</span><span class="selector-class">.3</span><span class="selector-class">.2-2</span><span class="selector-class">.el7</span><span class="selector-class">.x86_64</span><span class="selector-class">.rpm</span></span><br></pre></td></tr></table></figure>
+<p>docker离线镜像：</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">etcd-amd64_v3</span><span class="selector-class">.1</span><span class="selector-class">.10</span><span class="selector-class">.tar</span></span><br><span class="line"><span class="selector-tag">k8s-dns-dnsmasq-nanny-amd64_v1</span><span class="selector-class">.14</span><span class="selector-class">.7</span><span class="selector-class">.tar</span></span><br><span class="line"><span class="selector-tag">k8s-dns-kube-dns-amd64_1</span><span class="selector-class">.14</span><span class="selector-class">.7</span><span class="selector-class">.tar</span></span><br><span class="line"><span class="selector-tag">k8s-dns-sidecar-amd64_1</span><span class="selector-class">.14</span><span class="selector-class">.7</span><span class="selector-class">.tar</span></span><br><span class="line"><span class="selector-tag">kube-apiserver-amd64_v1</span><span class="selector-class">.9</span><span class="selector-class">.0</span><span class="selector-class">.tar</span></span><br><span class="line"><span class="selector-tag">kube-controller-manager-amd64_v1</span><span class="selector-class">.9</span><span class="selector-class">.0</span><span class="selector-class">.tar</span></span><br><span class="line"><span class="selector-tag">kube-proxy-amd64_v1</span><span class="selector-class">.9</span><span class="selector-class">.0</span><span class="selector-class">.tar</span></span><br><span class="line"><span class="selector-tag">kubernetes-dashboard_v1</span><span class="selector-class">.8</span><span class="selector-class">.1</span><span class="selector-class">.tar</span></span><br><span class="line"><span class="selector-tag">kube-scheduler-amd64_v1</span><span class="selector-class">.9</span><span class="selector-class">.0</span><span class="selector-class">.tar</span></span><br><span class="line"><span class="selector-tag">pause-amd64_3</span><span class="selector-class">.0</span><span class="selector-class">.tar</span></span><br></pre></td></tr></table></figure>
+<p>以上安装包的云盘链接随后附上.有梯子翻墙的直接装，无需离线包。</p>
+<h4 id="组件作用说明"><a href="#组件作用说明" class="headerlink" title="组件作用说明"></a>组件作用说明</h4><p>集群两个最重要的核心：<strong>apiserver master</strong>和<strong>etcd</strong></p>
+<p>1.apiserver master：（需高可用）集群核心，集群API接口、集群各个组件通信的中枢；集群安全控制；</p>
+<p>2.etcd ：（需高可用）集群的数据中心，用于存放集群的配置以及状态信息，非常重要，如果数据丢失那么集群将无法恢复；因此高可用集群部署首先就是etcd是高可用集群；<br>kube-scheduler：调度器 （内部自选举）集群Pod的调度中心；默认kubeadm安装情况下–leader-elect参数已经设置为true，保证master集群中只有一个kube-scheduler处于活跃状态；</p>
+<p>3.kube-controller-manager： 控制器（内部自选举）集群状态管理器，当集群状态与期望不同时，kcm会努力让集群恢复期望状态，比如：当一个pod死掉，kcm会努力新建一个pod来恢复对应replicasset期望的状态；默认kubeadm安装情况下–leader-elect参数已经设置为true，保证master集群中只有一个kube-controller-manager处于活跃状态；</p>
+<p>4.kubelet: 将agent node注册上apiserver,是运行在每个node上的集群管理工具</p>
+<p>5.scheduler：专门负责pod的调度任务，根据预定义的各种调度规则，将待调度的pod分配至某一个节点上。</p>
+<h2 id="二、提前准备"><a href="#二、提前准备" class="headerlink" title="二、提前准备"></a>二、提前准备</h2><p>1.关闭防火墙，selinux，swap</p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">systemctl stop firewalld</span><br><span class="line">systemctl disable firewalld</span><br><span class="line">systemctl disable firewalld</span><br><span class="line"></span><br><span class="line">setenforce <span class="number">0</span></span><br><span class="line">sed -<span class="selector-tag">i</span> <span class="string">"s/^SELINUX=enforcing/SELINUX=disabled/g"</span> /etc/sysconfig/selinux </span><br><span class="line">sed -<span class="selector-tag">i</span> <span class="string">"s/^SELINUX=enforcing/SELINUX=disabled/g"</span> /etc/selinux/config </span><br><span class="line">sed -<span class="selector-tag">i</span> <span class="string">"s/^SELINUX=permissive/SELINUX=disabled/g"</span> /etc/sysconfig/selinux </span><br><span class="line">sed -<span class="selector-tag">i</span> <span class="string">"s/^SELINUX=permissive/SELINUX=disabled/g"</span> /etc/selinux/config </span><br><span class="line"></span><br><span class="line">swapoff -a</span><br><span class="line">echo <span class="string">'swapoff -a '</span> &gt;&gt; /etc/rc.d/rc.local</span><br></pre></td></tr></table></figure>
+<p>2.内核开启网络支持</p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">cat &lt;&lt;EOF &gt;  /etc/sysctl.d/k8s.conf</span><br><span class="line">net<span class="selector-class">.bridge</span><span class="selector-class">.bridge-nf-call-ip6tables</span> = <span class="number">1</span></span><br><span class="line">net<span class="selector-class">.bridge</span><span class="selector-class">.bridge-nf-call-iptables</span> = <span class="number">1</span></span><br><span class="line">EOF</span><br><span class="line">sysctl -<span class="selector-tag">p</span> /etc/sysctl.conf</span><br></pre></td></tr></table></figure>
+<p>若执行sysctl -p 时报错，尝试：</p>
+<figure class="highlight armasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="symbol">modprobe</span> <span class="keyword">br_netfilter</span></span><br><span class="line"><span class="keyword">ls </span>/<span class="meta">proc</span>/sys/net/<span class="keyword">bridge</span></span><br></pre></td></tr></table></figure>
+<h2 id="三、配置keepalived"><a href="#三、配置keepalived" class="headerlink" title="三、配置keepalived"></a>三、配置keepalived</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br></pre></td><td class="code"><pre><span class="line">yum -y install keepalived </span><br><span class="line"></span><br><span class="line"><span class="comment"># 192.168.0.170配置</span></span><br><span class="line">cat &gt;/etc/keepalived/keepalived.conf  &lt;&lt;EOL</span><br><span class="line">global_defs &#123;</span><br><span class="line">  router_id LVS_k8s</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">vrrp_script CheckK8sMaster &#123;</span><br><span class="line">    <span class="comment">#修改为本机IP</span></span><br><span class="line">    script <span class="string">"curl -k https://192.168.0.170:6443"</span></span><br><span class="line">    interval 3</span><br><span class="line">    timeout 5</span><br><span class="line">    weight 11</span><br><span class="line">    fall 3</span><br><span class="line">    rise 2</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">vrrp_instance VI_0 &#123;</span><br><span class="line">    <span class="comment"># 统一默认设置为BACKUP状态，成员会根据优先级值来自协商状态</span></span><br><span class="line">    state BACKUP  </span><br><span class="line">    interface eth0</span><br><span class="line">    virtual_router_id 80</span><br><span class="line">    <span class="comment"># 主节点权重最高 依次减少</span></span><br><span class="line">    priority 110</span><br><span class="line"></span><br><span class="line">    advert_int 1</span><br><span class="line">    <span class="comment">#修改为本地IP</span></span><br><span class="line">    mcast_src_ip 192.168.0.170</span><br><span class="line"></span><br><span class="line">    track_interface &#123;</span><br><span class="line">        eth0</span><br><span class="line">    &#125;</span><br><span class="line">    authentication &#123;</span><br><span class="line">        auth_type PASS</span><br><span class="line">        auth_pass yks888</span><br><span class="line">    &#125;</span><br><span class="line">    unicast_peer &#123;</span><br><span class="line">        <span class="comment">#注释掉本地IP</span></span><br><span class="line">        <span class="comment">#192.168.0.170</span></span><br><span class="line">        192.168.0.171</span><br><span class="line">    &#125;</span><br><span class="line">    virtual_ipaddress &#123;</span><br><span class="line">        192.168.0.169/24</span><br><span class="line">    &#125;</span><br><span class="line">    track_script &#123;</span><br><span class="line">        CheckK8sMaster</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line"><span class="comment"># 192.168.0.171配置</span></span><br><span class="line">cat &gt;/etc/keepalived/keepalived.conf  &lt;&lt;EOL</span><br><span class="line"></span><br><span class="line">global_defs &#123;</span><br><span class="line">  router_id LVS_k8s</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">vrrp_script CheckK8sMaster &#123;</span><br><span class="line">    <span class="comment">#修改为本机IP</span></span><br><span class="line">    script <span class="string">"curl -k https://192.168.0.171:6443"</span></span><br><span class="line">    interval 3</span><br><span class="line">    timeout 5</span><br><span class="line">    weight 11</span><br><span class="line">    fall 3</span><br><span class="line">    rise 2</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">vrrp_instance VI_0 &#123;</span><br><span class="line">    <span class="comment"># 统一默认设置为BACKUP状态，成员会根据优先级值来自协商状态</span></span><br><span class="line">    state BACKUP  </span><br><span class="line">    interface eth0</span><br><span class="line">    virtual_router_id 80</span><br><span class="line">    <span class="comment"># 主节点权重最高 依次减少</span></span><br><span class="line">    priority 100</span><br><span class="line"></span><br><span class="line">    advert_int 1</span><br><span class="line">    <span class="comment">#修改为本地IP</span></span><br><span class="line">    mcast_src_ip 192.168.0.171</span><br><span class="line"></span><br><span class="line">    track_interface &#123;</span><br><span class="line">        eth0</span><br><span class="line">    &#125;</span><br><span class="line">    authentication &#123;</span><br><span class="line">        auth_type PASS</span><br><span class="line">        auth_pass yks888</span><br><span class="line">    &#125;</span><br><span class="line">    unicast_peer &#123;</span><br><span class="line">        <span class="comment">#注释掉本地IP</span></span><br><span class="line">        192.168.0.170</span><br><span class="line">        <span class="comment">#192.168.0.171</span></span><br><span class="line">    &#125;</span><br><span class="line">    virtual_ipaddress &#123;</span><br><span class="line">        192.168.0.169/24</span><br><span class="line">    &#125;</span><br><span class="line">    track_script &#123;</span><br><span class="line">        CheckK8sMaster</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">EOF</span><br><span class="line">systemctl <span class="built_in">enable</span> keepalived &amp;&amp; systemctl restart keepalived</span><br></pre></td></tr></table></figure>
+<p>检查vip是否正常漂在master1上：</p>
+<figure class="highlight pf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">[root@<span class="number">170</span> pkgs]<span class="comment"># ip a</span></span><br><span class="line"><span class="number">1</span>: lo: <span class="variable">&lt;LOOPBACK,UP,LOWER_UP&gt;</span> mtu <span class="number">65536</span> qdisc noqueue <span class="keyword">state</span> UNKNOWN qlen <span class="number">1</span></span><br><span class="line">    link/loopback <span class="number">00</span>:<span class="number">00</span>:<span class="number">00</span>:<span class="number">00</span>:<span class="number">00</span>:<span class="number">00</span> brd <span class="number">00</span>:<span class="number">00</span>:<span class="number">00</span>:<span class="number">00</span>:<span class="number">00</span>:<span class="number">00</span></span><br><span class="line">    <span class="keyword">inet</span> <span class="number">127.0</span>.<span class="number">0.1</span>/<span class="number">8</span> scope host lo</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">    <span class="keyword">inet6</span> ::<span class="number">1</span>/<span class="number">128</span> scope host </span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line"><span class="number">2</span>: ens33: <span class="variable">&lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt;</span> mtu <span class="number">1500</span> qdisc pfifo_fast <span class="keyword">state</span> UP qlen <span class="number">1000</span></span><br><span class="line">    link/ether <span class="number">00</span>:<span class="number">0</span>c:<span class="number">29</span>:<span class="number">1</span>c:<span class="number">5</span>d:<span class="number">71</span> brd ff:ff:ff:ff:ff:ff</span><br><span class="line">    <span class="keyword">inet</span> <span class="number">192.168</span>.<span class="number">0.170</span>/<span class="number">24</span> brd <span class="number">192.168</span>.<span class="number">0.255</span> scope <span class="keyword">global</span> ens33</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">    <span class="keyword">inet</span> <span class="number">192.168</span>.<span class="number">0.169</span>/<span class="number">24</span> scope <span class="keyword">global</span> secondary ens33</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br></pre></td></tr></table></figure>
+<h2 id="四、etcd配置"><a href="#四、etcd配置" class="headerlink" title="四、etcd配置"></a>四、etcd配置</h2><p>1.配置环境变量：</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="builtin-name">export</span> <span class="attribute">NODE_NAME</span>=170 #当前部署的机器名称(随便定义，只要能区分不同机器即可)</span><br><span class="line"><span class="builtin-name">export</span> <span class="attribute">NODE_IP</span>=192.168.0.170 # 当前部署的机器 IP</span><br><span class="line"><span class="builtin-name">export</span> <span class="attribute">NODE_IPS</span>=<span class="string">"192.168.0.170 192.168.0.171 "</span> # etcd 集群所有机器 IP</span><br><span class="line"><span class="comment"># etcd 集群间通信的IP和端口</span></span><br><span class="line"><span class="builtin-name">export</span> <span class="attribute">ETCD_NODES</span>=<span class="string">"170"</span>=https://192.168.0.170:2380,"171"=https://192.168.0.171:2380</span><br></pre></td></tr></table></figure>
+<p>2.创建ca和证书和秘钥</p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">wget https:<span class="regexp">//</span>pkg.cfssl.org<span class="regexp">/R1.2/</span>cfssl_linux-amd64</span><br><span class="line">chmod +x cfssl_linux-amd64</span><br><span class="line">mv cfssl_linux-amd64 <span class="regexp">/usr/</span>local<span class="regexp">/bin/</span>cfssl</span><br><span class="line"></span><br><span class="line">wget https:<span class="regexp">//</span>pkg.cfssl.org<span class="regexp">/R1.2/</span>cfssljson_linux-amd64</span><br><span class="line">chmod +x cfssljson_linux-amd64</span><br><span class="line">mv cfssljson_linux-amd64 <span class="regexp">/usr/</span>local<span class="regexp">/bin/</span>cfssljson</span><br><span class="line"></span><br><span class="line">wget https:<span class="regexp">//</span>pkg.cfssl.org<span class="regexp">/R1.2/</span>cfssl-certinfo_linux-amd64</span><br><span class="line">chmod +x cfssl-certinfo_linux-amd64</span><br><span class="line">mv cfssl-certinfo_linux-amd64 <span class="regexp">/usr/</span>local<span class="regexp">/bin/</span>cfssl-certinfo</span><br></pre></td></tr></table></figure>
+<p>生成ETCD的TLS 秘钥和证书<br>为了保证通信安全，客户端(如 etcdctl) 与 etcd 集群、etcd 集群之间的通信需要使用 TLS 加密，本节创建 etcd TLS 加密所需的证书和私钥。<br>创建 CA 配置文件：</p>
+<figure class="highlight mipsasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">cat &gt;  ca-<span class="built_in">config</span>.<span class="keyword">json </span>&lt;&lt;EOF</span><br><span class="line">&#123;</span><br><span class="line"><span class="string">"signing"</span>: &#123;</span><br><span class="line"><span class="string">"default"</span>: &#123;</span><br><span class="line">  <span class="string">"expiry"</span>: <span class="string">"87600h"</span></span><br><span class="line">&#125;,</span><br><span class="line"><span class="string">"profiles"</span>: &#123;</span><br><span class="line">  <span class="string">"kubernetes"</span>: &#123;</span><br><span class="line">    <span class="string">"usages"</span>: [</span><br><span class="line">        <span class="string">"signing"</span>,</span><br><span class="line">        <span class="string">"key encipherment"</span>,</span><br><span class="line">        <span class="string">"server auth"</span>,</span><br><span class="line">        <span class="string">"client auth"</span></span><br><span class="line">    ],</span><br><span class="line">    <span class="string">"expiry"</span>: <span class="string">"87600h"</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br><span class="line">EOF</span><br></pre></td></tr></table></figure>
+<p>==ca-config.json==：可以定义多个 profiles，分别指定不同的过期时间、使用场景等参数；后续在签名证书时使用某个 profile；<br>==signing==：表示该证书可用于签名其它证书；生成的 ca.pem 证书中 CA=TRUE；<br>==server auth==：表示 client 可以用该 CA 对 server 提供的证书进行验证；<br>==client auth==：表示 server 可以用该 CA 对 client 提供的证书进行验证；</p>
+<figure class="highlight stata"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">cat</span> &gt;  <span class="keyword">ca</span>-csr.json &lt;&lt;EOF</span><br><span class="line">&#123;</span><br><span class="line"><span class="string">"CN"</span>: <span class="string">"kubernetes"</span>,</span><br><span class="line"><span class="string">"key"</span>: &#123;</span><br><span class="line"><span class="string">"algo"</span>: <span class="string">"rsa"</span>,</span><br><span class="line"><span class="string">"size"</span>: 2048</span><br><span class="line">&#125;,</span><br><span class="line"><span class="string">"names"</span>: [</span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">"C"</span>: <span class="string">"CN"</span>,</span><br><span class="line">  <span class="string">"ST"</span>: <span class="string">"BeiJing"</span>,</span><br><span class="line">  <span class="string">"L"</span>: <span class="string">"BeiJing"</span>,</span><br><span class="line">  <span class="string">"O"</span>: <span class="string">"k8s"</span>,</span><br><span class="line">  <span class="string">"OU"</span>: <span class="string">"System"</span></span><br><span class="line">&#125;</span><br><span class="line">]</span><br><span class="line">&#125;</span><br><span class="line">EOF</span><br></pre></td></tr></table></figure>
+<p>“CN”：Common Name，kube-apiserver 从证书中提取该字段作为请求的用户名 (User Name)；浏览器使用该字段验证网站是否合法；<br>“O”：Organization，kube-apiserver 从证书中提取该字段作为请求用户所属的组 (Group)；<br>==生成 CA 证书和私钥==：</p>
+<figure class="highlight stata"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cfssl gencert -initca <span class="keyword">ca</span>-csr.json | cfssljson -bare <span class="keyword">ca</span></span><br><span class="line"><span class="keyword">ls</span> <span class="keyword">ca</span>*</span><br></pre></td></tr></table></figure>
+<p>==创建 etcd 证书签名请求：==</p>
+<figure class="highlight prolog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">cat &gt; etcd-csr.json &lt;&lt;<span class="symbol">EOF</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">"CN"</span>: <span class="string">"etcd"</span>,</span><br><span class="line">  <span class="string">"hosts"</span>: [</span><br><span class="line">    <span class="string">"127.0.0.1"</span>,</span><br><span class="line">    <span class="string">"192.168.0.170"</span>,</span><br><span class="line">    <span class="string">"192.168.0.171"</span></span><br><span class="line">  ],</span><br><span class="line">  <span class="string">"key"</span>: &#123;</span><br><span class="line">    <span class="string">"algo"</span>: <span class="string">"rsa"</span>,</span><br><span class="line">    <span class="string">"size"</span>: <span class="number">2048</span></span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="string">"names"</span>: [</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="string">"C"</span>: <span class="string">"CN"</span>,</span><br><span class="line">      <span class="string">"ST"</span>: <span class="string">"BeiJing"</span>,</span><br><span class="line">      <span class="string">"L"</span>: <span class="string">"BeiJing"</span>,</span><br><span class="line">      <span class="string">"O"</span>: <span class="string">"k8s"</span>,</span><br><span class="line">      <span class="string">"OU"</span>: <span class="string">"System"</span></span><br><span class="line">    &#125;</span><br><span class="line">  ]</span><br><span class="line">&#125;</span><br><span class="line"><span class="symbol">EOF</span></span><br></pre></td></tr></table></figure>
+<p>hosts 字段指定授权使用该证书的 etcd 节点 IP；<br>每个节点IP 都要在里面 或者 每个机器申请一个对应IP的证书<br>生成 etcd 证书和私钥：</p>
+<figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">cfssl gencert -<span class="keyword">ca</span>=<span class="keyword">ca</span>.pem \</span><br><span class="line">  -<span class="keyword">ca</span>-key=<span class="keyword">ca</span>-key.pem \</span><br><span class="line">  -config=<span class="keyword">ca</span>-config.json \</span><br><span class="line">  -<span class="keyword">profile</span>=kubernetes etcd-csr.json | cfssljson -bare etcd</span><br><span class="line"></span><br><span class="line"><span class="keyword">ls</span> etcd*</span><br><span class="line"></span><br><span class="line"><span class="built_in">mkdir</span> -<span class="keyword">p</span> /etc/etcd/ssl</span><br><span class="line"><span class="keyword">cp</span> etcd.pem etcd-key.pem  <span class="keyword">ca</span>.pem /etc/etcd/ssl/</span><br></pre></td></tr></table></figure>
+<p>将生成的私钥文件分发到master2上：</p>
+<figure class="highlight elixir"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">scp -r /etc/etcd/ssl root<span class="variable">@192</span>.<span class="number">168.0</span>.<span class="number">171</span><span class="symbol">:/etc/etcd/</span></span><br></pre></td></tr></table></figure>
+<p>3.安装etcd</p>
+<figure class="highlight haml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line">wget http://github.com/coreos/etcd/releases/download/v3.1.10/etcd-v3.1.10-linux-amd64.tar.gz</span><br><span class="line">tar -xvf etcd-v3.1.10-linux-amd64.tar.gz</span><br><span class="line">mv etcd-v3.1.10-linux-amd64/etcd* /usr/local/bin</span><br><span class="line">mkdir -p /var/lib/etcd  # 必须先创建工作目录</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">cat &gt; etcd.service &lt;&lt;EOF</span><br><span class="line">[Unit]</span><br><span class="line">Description=Etcd Server</span><br><span class="line">After=network.target</span><br><span class="line">After=network-online.target</span><br><span class="line">Wants=network-online.target</span><br><span class="line">Documentation=https://github.com/coreos</span><br><span class="line"></span><br><span class="line">[Service]</span><br><span class="line">Type=notify</span><br><span class="line">WorkingDirectory=/var/lib/etcd/</span><br><span class="line">ExecStart=/usr/local/bin/etcd \\</span><br><span class="line">  -<span class="ruby">-name=$&#123;NODE_NAME&#125; \\</span></span><br><span class="line"><span class="ruby">  --cert-file=<span class="regexp">/etc/etcd</span><span class="regexp">/ssl/etcd</span>.pem \\</span></span><br><span class="line"><span class="ruby">  --key-file=<span class="regexp">/etc/etcd</span><span class="regexp">/ssl/etcd</span>-key.pem \\</span></span><br><span class="line"><span class="ruby">  --peer-cert-file=<span class="regexp">/etc/etcd</span><span class="regexp">/ssl/etcd</span>.pem \\</span></span><br><span class="line"><span class="ruby">  --peer-key-file=<span class="regexp">/etc/etcd</span><span class="regexp">/ssl/etcd</span>-key.pem \\</span></span><br><span class="line"><span class="ruby">  --trusted-ca-file=<span class="regexp">/etc/etcd</span><span class="regexp">/ssl/ca</span>.pem \\</span></span><br><span class="line"><span class="ruby">  --peer-trusted-ca-file=<span class="regexp">/etc/etcd</span><span class="regexp">/ssl/ca</span>.pem \\</span></span><br><span class="line"><span class="ruby">  --initial-advertise-peer-urls=<span class="symbol">https:</span>/<span class="regexp">/$&#123;NODE_IP&#125;:2380 \\</span></span></span><br><span class="line"><span class="ruby">  --listen-peer-urls=<span class="symbol">https:</span>/<span class="regexp">/$&#123;NODE_IP&#125;:2380 \\</span></span></span><br><span class="line"><span class="ruby">  --listen-client-urls=<span class="symbol">https:</span>/<span class="regexp">/$&#123;NODE_IP&#125;:2379,http:/</span><span class="regexp">/127.0.0.1:2379 \\</span></span></span><br><span class="line"><span class="ruby">  --advertise-client-urls=<span class="symbol">https:</span>/<span class="regexp">/$&#123;NODE_IP&#125;:2379 \\</span></span></span><br><span class="line"><span class="ruby">  --initial-cluster-token=etcd-cluster-<span class="number">0</span> \\</span></span><br><span class="line"><span class="ruby">  --initial-cluster=$&#123;ETCD_NODES&#125; \\</span></span><br><span class="line"><span class="ruby">  --initial-cluster-state=new \\</span></span><br><span class="line"><span class="ruby">  --data-dir=<span class="regexp">/var/lib</span><span class="regexp">/etcd</span></span></span><br><span class="line"><span class="ruby">Restart=on-failure</span></span><br><span class="line"><span class="ruby">RestartSec=<span class="number">5</span></span></span><br><span class="line"><span class="ruby">LimitNOFILE=<span class="number">65536</span></span></span><br><span class="line"><span class="ruby"></span></span><br><span class="line"><span class="ruby">[Install]</span></span><br><span class="line"><span class="ruby">WantedBy=multi-user.target</span></span><br><span class="line"><span class="ruby">EOF</span></span><br><span class="line"><span class="ruby"></span></span><br><span class="line"><span class="ruby"><span class="comment">#注意，上方的环境变量一定要先配置好再进行这一步操作，在master2上export环境变量时注意修改ip</span></span></span><br><span class="line"><span class="ruby">mv etcd.service /etc/systemd/system/</span></span><br><span class="line"><span class="ruby">systemctl daemon-reload</span></span><br><span class="line"><span class="ruby">systemctl enable etcd</span></span><br><span class="line"><span class="ruby">systemctl start etcd</span></span><br><span class="line"><span class="ruby">systemctl status etcd</span></span><br></pre></td></tr></table></figure>
+<p>master2同样方法安装etcd</p>
+<p><strong>验证服务</strong></p>
+<figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">etcdctl \</span><br><span class="line">  --endpoints=https:<span class="comment">//$&#123;NODE_IP&#125;:2379  \</span></span><br><span class="line">  --ca-<span class="keyword">file</span>=<span class="regexp">/etc/</span>etcd<span class="regexp">/ssl/</span>ca.pem \</span><br><span class="line">  --cert-<span class="keyword">file</span>=<span class="regexp">/etc/</span>etcd<span class="regexp">/ssl/</span>etcd.pem \</span><br><span class="line">  --key-<span class="keyword">file</span>=<span class="regexp">/etc/</span>etcd<span class="regexp">/ssl/</span>etcd-key.pem \</span><br><span class="line">  cluster-health</span><br></pre></td></tr></table></figure>
+<p><strong>预期结果：</strong></p>
+<figure class="highlight oxygene"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">2018</span>-<span class="number">04</span>-<span class="number">06</span> <span class="number">20</span>:<span class="number">07</span>:<span class="number">41.355496</span> I | warning: ignoring ServerName <span class="keyword">for</span> user-provided CA <span class="keyword">for</span> backwards compatibility <span class="keyword">is</span> <span class="keyword">deprecated</span></span><br><span class="line"><span class="number">2018</span>-<span class="number">04</span>-<span class="number">06</span> <span class="number">20</span>:<span class="number">07</span>:<span class="number">41.357436</span> I | warning: ignoring ServerName <span class="keyword">for</span> user-provided CA <span class="keyword">for</span> backwards compatibility <span class="keyword">is</span> <span class="keyword">deprecated</span></span><br><span class="line">member <span class="number">57</span>d56677d6df8a53 <span class="keyword">is</span> healthy: got healthy <span class="keyword">result</span> <span class="keyword">from</span> https:<span class="comment">//192.168.0.170:2379</span></span><br><span class="line">member <span class="number">7</span>ba40ace706232da <span class="keyword">is</span> healthy: got healthy <span class="keyword">result</span> <span class="keyword">from</span> https:<span class="comment">//192.168.0.171:2379</span></span><br></pre></td></tr></table></figure>
+<p><strong>若有失败，重新配置</strong></p>
+<figure class="highlight crystal"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">systemctl stop etcd</span><br><span class="line"></span><br><span class="line">rm -Rf /var/<span class="class"><span class="keyword">lib</span>/<span class="title">etcd</span></span></span><br><span class="line"></span><br><span class="line">rm -Rf /var/<span class="class"><span class="keyword">lib</span>/<span class="title">etcd</span>-<span class="title">cluster</span></span></span><br><span class="line"></span><br><span class="line">mkdir -p /var/<span class="class"><span class="keyword">lib</span>/<span class="title">etcd</span></span></span><br><span class="line"></span><br><span class="line">systemctl start etcd</span><br></pre></td></tr></table></figure>
+<h2 id="五-docker安装"><a href="#五-docker安装" class="headerlink" title="五.docker安装"></a>五.docker安装</h2><p>若原来已经安装docker版本，建议卸载后安装docker-ce版本：</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum -y <span class="builtin-name">remove</span> docker docker-common</span><br></pre></td></tr></table></figure>
+<p>基于aliyun安装docker-ce方法：</p>
+<figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">sudo yum install -<span class="keyword">y</span> yum-utils device-mapper-persistent-data lvm2</span><br><span class="line"># Step <span class="number">2</span>: 添加软件源信息</span><br><span class="line">sudo yum-config-manager --<span class="built_in">add</span>-repo http://mirrors.aliyun.<span class="keyword">com</span>/docker-<span class="keyword">ce</span>/linux/centos/docker-<span class="keyword">ce</span>.repo</span><br><span class="line"></span><br><span class="line"># Step <span class="number">3</span>: 更新并安装 Docker-CE</span><br><span class="line">sudo yum makecache fast</span><br><span class="line"></span><br><span class="line">#查看repo中所有版本的docker-<span class="keyword">ce</span></span><br><span class="line">yum <span class="keyword">list</span> docker-<span class="keyword">ce</span> --showduplicates | <span class="keyword">sort</span> -r</span><br><span class="line">docker-<span class="keyword">ce</span>.x86_64            <span class="number">18.03</span>.<span class="number">1</span>.<span class="keyword">ce</span>-<span class="number">1</span>.el7.centos             docker-<span class="keyword">ce</span>-stable</span><br><span class="line">docker-<span class="keyword">ce</span>.x86_64            <span class="number">18.03</span>.<span class="number">0</span>.<span class="keyword">ce</span>-<span class="number">1</span>.el7.centos             docker-<span class="keyword">ce</span>-stable</span><br><span class="line">docker-<span class="keyword">ce</span>.x86_64            <span class="number">17.12</span>.<span class="number">1</span>.<span class="keyword">ce</span>-<span class="number">1</span>.el7.centos             docker-<span class="keyword">ce</span>-stable</span><br><span class="line">docker-<span class="keyword">ce</span>.x86_64            <span class="number">17.12</span>.<span class="number">0</span>.<span class="keyword">ce</span>-<span class="number">1</span>.el7.centos             docker-<span class="keyword">ce</span>-stable</span><br><span class="line">docker-<span class="keyword">ce</span>.x86_64            <span class="number">17.09</span>.<span class="number">1</span>.<span class="keyword">ce</span>-<span class="number">1</span>.el7.centos             docker-<span class="keyword">ce</span>-stable</span><br><span class="line">docker-<span class="keyword">ce</span>.x86_64            <span class="number">17.09</span>.<span class="number">0</span>.<span class="keyword">ce</span>-<span class="number">1</span>.el7.centos             docker-<span class="keyword">ce</span>-stable</span><br><span class="line">docker-<span class="keyword">ce</span>.x86_64            <span class="number">17.06</span>.<span class="number">2</span>.<span class="keyword">ce</span>-<span class="number">1</span>.el7.centos             docker-<span class="keyword">ce</span>-stable</span><br><span class="line">docker-<span class="keyword">ce</span>.x86_64            <span class="number">17.06</span>.<span class="number">1</span>.<span class="keyword">ce</span>-<span class="number">1</span>.el7.centos             docker-<span class="keyword">ce</span>-stable</span><br><span class="line">docker-<span class="keyword">ce</span>.x86_64            <span class="number">17.06</span>.<span class="number">0</span>.<span class="keyword">ce</span>-<span class="number">1</span>.el7.centos             docker-<span class="keyword">ce</span>-stable</span><br><span class="line">docker-<span class="keyword">ce</span>.x86_64            <span class="number">17.03</span>.<span class="number">2</span>.<span class="keyword">ce</span>-<span class="number">1</span>.el7.centos             docker-<span class="keyword">ce</span>-stable</span><br><span class="line">docker-<span class="keyword">ce</span>.x86_64            <span class="number">17.03</span>.<span class="number">1</span>.<span class="keyword">ce</span>-<span class="number">1</span>.el7.centos             docker-<span class="keyword">ce</span>-stable</span><br><span class="line">docker-<span class="keyword">ce</span>.x86_64            <span class="number">17.03</span>.<span class="number">0</span>.<span class="keyword">ce</span>-<span class="number">1</span>.el7.centos             docker-<span class="keyword">ce</span>-stable</span><br><span class="line"></span><br><span class="line">sudo yum -<span class="keyword">y</span> install docker-<span class="keyword">ce</span>-<span class="number">17.03</span>.<span class="number">2</span>.<span class="keyword">ce</span></span><br><span class="line">#若提示依赖docker-<span class="keyword">ce</span>-selinux，则先执行yum -<span class="keyword">y</span> install  docker-<span class="keyword">ce</span>-selinux-<span class="number">17.03</span>.<span class="number">2</span>.<span class="keyword">ce</span></span><br><span class="line"># Step <span class="number">4</span>: 开启Docker服务</span><br><span class="line">sudo service docker start &amp;&amp; systemctl enbale docker</span><br></pre></td></tr></table></figure>
+<h2 id="六-安装kubelet、kubectl、kubeadm、kubecni"><a href="#六-安装kubelet、kubectl、kubeadm、kubecni" class="headerlink" title="六.安装kubelet、kubectl、kubeadm、kubecni"></a>六.安装kubelet、kubectl、kubeadm、kubecni</h2><p>准备好提前下载好的rpm包：</p>
+<figure class="highlight lsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@<span class="number">170</span> pkgs]# cd /root/k8s_images/pkgs</span><br><span class="line">[root@<span class="number">170</span> pkgs]# ls</span><br><span class="line">etcd-v3<span class="number">.1</span><span class="number">.10</span>-linux-amd64.tar.gz  kubeadm<span class="number">-1.9</span><span class="number">.0</span><span class="number">-0.</span>x86_64.rpm  kubectl<span class="number">-1.9</span><span class="number">.0</span><span class="number">-0.</span>x86_64.rpm  kubelet<span class="number">-1.9</span><span class="number">.9</span><span class="number">-9.</span>x86_64.rpm  kubernetes-cni<span class="number">-0.6</span><span class="number">.0</span><span class="number">-0.</span>x86_64.rpm  socat<span class="number">-1.7</span><span class="number">.3</span><span class="number">.2</span><span class="number">-2.</span>el7.x86_64.rpm</span><br><span class="line"></span><br><span class="line">[root@<span class="number">170</span> pkgs]# yum -y install *.rpm</span><br></pre></td></tr></table></figure>
+<p>修改kubelet启动参数里的cgroup驱动以便兼容docker：</p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">vi /etc/systemd/system/kubelet<span class="selector-class">.service</span><span class="selector-class">.d</span>/<span class="number">10</span>-kubeadm.conf</span><br><span class="line">#Environment=<span class="string">"KUBELET_CGROUP_ARGS=--cgroup-driver=systemd"</span></span><br><span class="line">Environment=<span class="string">"KUBELET_CGROUP_ARGS=--cgroup-driver=cgroupfs"</span></span><br><span class="line"></span><br><span class="line">systemctl enable docker &amp;&amp; systemctl restart docker</span><br><span class="line">systemctl daemon-reload &amp;&amp; systemctl restart kubelet</span><br></pre></td></tr></table></figure>
+<p>在master2上同样操作</p>
+<h2 id="七-kubeadm初始化"><a href="#七-kubeadm初始化" class="headerlink" title="七.kubeadm初始化"></a>七.kubeadm初始化</h2><p>将准备好的本地的docker images镜像导入本地仓库内</p>
+<figure class="highlight x86asm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@<span class="number">170</span> docker_images]# ls</span><br><span class="line">etcd-amd64_v3<span class="meta">.1</span><span class="meta">.10</span>.tar    k8s-dns-dnsmasq-nanny-amd64_v1<span class="meta">.14</span><span class="meta">.7</span>.tar  k8s-dns-sidecar-amd64_1<span class="meta">.14</span><span class="meta">.7</span>.tar  kube-controller-manager-amd64_v1<span class="meta">.9</span><span class="meta">.0</span>.tar  kubernetes-dashboard_v1<span class="meta">.8</span><span class="meta">.1</span>.tar  <span class="keyword">pause</span>-amd64_3<span class="meta">.0</span>.tar</span><br><span class="line"><span class="symbol">flannel:</span>v0<span class="meta">.9</span><span class="meta">.1</span>-amd64.tar  k8s-dns-kube-dns-amd64_1<span class="meta">.14</span><span class="meta">.7</span>.tar        kube-apiserver-amd64_v1<span class="meta">.9</span><span class="meta">.0</span>.tar   kube-proxy-amd64_v1<span class="meta">.9</span><span class="meta">.0</span>.tar               kube-scheduler-amd64_v1<span class="meta">.9</span><span class="meta">.0</span>.tar</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">[root@<span class="number">170</span> docker_images]# for i <span class="keyword">in</span> <span class="string">`ls`</span><span class="comment">;do docker load -i $i;done</span></span><br></pre></td></tr></table></figure>
+<p>config.yaml初始化配置文件：</p>
+<figure class="highlight dts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">cat <span class="params">&lt;&lt;EOF &gt;</span> config.yaml </span><br><span class="line"><span class="symbol">apiVersion:</span> kubeadm.k8s.io/v1alpha1</span><br><span class="line"><span class="symbol">kind:</span> MasterConfiguration</span><br><span class="line"><span class="symbol">etcd:</span></span><br><span class="line"><span class="symbol">  endpoints:</span></span><br><span class="line">  - https:<span class="comment">//192.168.0.170:2379</span></span><br><span class="line">  - https:<span class="comment">//192.168.0.171:2379</span></span><br><span class="line">  </span><br><span class="line"><span class="symbol">  caFile:</span> <span class="meta-keyword">/etc/</span>etcd<span class="meta-keyword">/ssl/</span>ca.pem </span><br><span class="line"><span class="symbol">  certFile:</span> <span class="meta-keyword">/etc/</span>etcd<span class="meta-keyword">/ssl/</span>etcd.pem </span><br><span class="line"><span class="symbol">  keyFile:</span> <span class="meta-keyword">/etc/</span>etcd<span class="meta-keyword">/ssl/</span>etcd-key.pem</span><br><span class="line"><span class="symbol">  dataDir:</span> <span class="meta-keyword">/var/</span>lib/etcd</span><br><span class="line"><span class="symbol">networking:</span></span><br><span class="line"><span class="symbol">  podSubnet:</span> <span class="number">10.244</span><span class="number">.0</span><span class="number">.0</span>/<span class="number">16</span></span><br><span class="line"><span class="symbol">kubernetesVersion:</span> <span class="number">1.9</span><span class="number">.0</span></span><br><span class="line"><span class="symbol">api:</span></span><br><span class="line"><span class="symbol">  advertiseAddress:</span> <span class="string">"192.168.0.170"</span></span><br><span class="line"><span class="symbol">token:</span> <span class="string">"b99a00.a144ef80536d4344"</span></span><br><span class="line"><span class="symbol">tokenTTL:</span> <span class="string">"0s"</span></span><br><span class="line"><span class="symbol">apiServerCertSANs:</span></span><br><span class="line">- <span class="string">"170"</span></span><br><span class="line">- <span class="string">"171"</span></span><br><span class="line">- <span class="number">192.168</span><span class="number">.0</span><span class="number">.169</span></span><br><span class="line">- <span class="number">192.168</span><span class="number">.0</span><span class="number">.170</span></span><br><span class="line">- <span class="number">192.168</span><span class="number">.0</span><span class="number">.171</span></span><br><span class="line"><span class="symbol">featureGates:</span></span><br><span class="line"><span class="symbol">  CoreDNS:</span> true</span><br><span class="line">EOF</span><br></pre></td></tr></table></figure>
+<p>初始化集群</p>
+<figure class="highlight arduino"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubeadm init --<span class="built_in">config</span> <span class="built_in">config</span>.yaml</span><br></pre></td></tr></table></figure>
+<p>结果：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">To <span class="keyword">start</span> <span class="keyword">using</span> your cluster, you need <span class="keyword">to</span> run the <span class="keyword">following</span> <span class="keyword">as</span> a regular <span class="keyword">user</span>:</span><br><span class="line"></span><br><span class="line">  mkdir -p $HOME/.kube</span><br><span class="line">  sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config</span><br><span class="line">  sudo chown $(<span class="keyword">id</span> -u):$(<span class="keyword">id</span> -g) $HOME/.kube/config</span><br><span class="line"><span class="keyword">as</span> root:</span><br><span class="line"></span><br><span class="line">  kubeadm <span class="keyword">join</span> <span class="comment">--token b99a00.a144ef80536d4344 192.168.0.169:6443 --discovery-token-ca-cert-hash sha256:ebc2f64e9bcb14639f26db90288b988c90efc43828829c557b6b66bbe6d68dfa</span></span><br><span class="line">  </span><br><span class="line">[root@<span class="number">170</span> docker_images]<span class="comment"># kubectl get nodes -o wide</span></span><br><span class="line"><span class="keyword">NAME</span>      <span class="keyword">STATUS</span>    <span class="keyword">ROLES</span>     AGE       <span class="keyword">VERSION</span>   <span class="keyword">EXTERNAL</span>-IP   OS-IMAGE                KERNEL-<span class="keyword">VERSION</span>          <span class="keyword">CONTAINER</span>-RUNTIME</span><br><span class="line"><span class="number">170</span>       Ready     <span class="keyword">master</span>    <span class="number">5</span>h        v1<span class="number">.9</span><span class="number">.0</span>    &lt;<span class="keyword">none</span>&gt;        CentOS Linux <span class="number">7</span> (Core)   <span class="number">3.10</span><span class="number">.0</span><span class="number">-693.</span>el7.x86_64   docker://<span class="number">18.3</span><span class="number">.0</span></span><br><span class="line"><span class="number">171</span>       Ready     <span class="keyword">master</span>    <span class="number">4</span>h        v1<span class="number">.9</span><span class="number">.0</span>    &lt;<span class="keyword">none</span>&gt;        CentOS Linux <span class="number">7</span> (Core)   <span class="number">3.10</span><span class="number">.0</span><span class="number">-693.</span>el7.x86_64   docker://<span class="number">18.3</span><span class="number">.0</span></span><br></pre></td></tr></table></figure>
+<p>注意：提示信息中的kubeadm join那一行请保存好，后期使用kubeadm扩增集群node时，需要在新的node上使用这行命令加入集群</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">mkdir -p <span class="variable">$HOME</span>/.kube</span><br><span class="line">sudo cp -i /etc/kubernetes/admin.conf <span class="variable">$HOME</span>/.kube/config</span><br><span class="line">sudo chown $(id -u):$(id -g) <span class="variable">$HOME</span>/.kube/config</span><br></pre></td></tr></table></figure>
+<p>配置master2：</p>
+<figure class="highlight elixir"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#拷贝pki 证书</span></span><br><span class="line">mkdir -p /etc/kubernetes/pki</span><br><span class="line">scp -r /etc/kubernetes/pki/ root<span class="variable">@192</span>.<span class="number">168.0</span>.<span class="number">171</span><span class="symbol">:/etc/kubernetes/</span> </span><br><span class="line"></span><br><span class="line"><span class="comment">#拷贝初始化配置</span></span><br><span class="line">scp config.yaml root<span class="variable">@192</span>.<span class="number">168.0</span>.<span class="number">171</span><span class="symbol">:/etc/kubernetes/</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#在master2上初始化</span></span><br><span class="line">kubeadm init --config /etc/kubernetes/config.yaml</span><br></pre></td></tr></table></figure>
+<h2 id="八、安装网络插件kube-router"><a href="#八、安装网络插件kube-router" class="headerlink" title="八、安装网络插件kube-router"></a>八、安装网络插件kube-router</h2><figure class="highlight clean"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"># kube-router的daemonSet部署yaml文件地址:</span><br><span class="line"># https:<span class="comment">//github.com/cloudnativelabs/kube-router/blob/master/daemonset/kubeadm-kuberouter.yaml</span></span><br><span class="line">kubectl apply -f kubeadm-kuberouter.yaml</span><br><span class="line"></span><br><span class="line">[root@<span class="number">170</span> docker_images]# kubectl get pods --all-namespaces</span><br><span class="line">NAMESPACE     NAME                          READY     STATUS    RESTARTS   AGE</span><br><span class="line">kube-<span class="keyword">system</span>   coredns<span class="number">-546545</span>bc84-j5mds      <span class="number">1</span>/<span class="number">1</span>       Running   <span class="number">2</span>          <span class="number">5</span>h</span><br><span class="line">kube-<span class="keyword">system</span>   kube-apiserver<span class="number">-170</span>            <span class="number">1</span>/<span class="number">1</span>       Running   <span class="number">2</span>          <span class="number">5</span>h</span><br><span class="line">kube-<span class="keyword">system</span>   kube-apiserver<span class="number">-171</span>            <span class="number">1</span>/<span class="number">1</span>       Running   <span class="number">2</span>          <span class="number">4</span>h</span><br><span class="line">kube-<span class="keyword">system</span>   kube-controller-manager<span class="number">-170</span>   <span class="number">1</span>/<span class="number">1</span>       Running   <span class="number">2</span>          <span class="number">5</span>h</span><br><span class="line">kube-<span class="keyword">system</span>   kube-controller-manager<span class="number">-171</span>   <span class="number">1</span>/<span class="number">1</span>       Running   <span class="number">2</span>          <span class="number">4</span>h</span><br><span class="line">kube-<span class="keyword">system</span>   kube-proxy<span class="number">-5</span>dg4j              <span class="number">1</span>/<span class="number">1</span>       Running   <span class="number">2</span>          <span class="number">4</span>h</span><br><span class="line">kube-<span class="keyword">system</span>   kube-proxy-s6jtn              <span class="number">1</span>/<span class="number">1</span>       Running   <span class="number">2</span>          <span class="number">5</span>h</span><br><span class="line">kube-<span class="keyword">system</span>   kube-router-wbxvq             <span class="number">1</span>/<span class="number">1</span>       Running   <span class="number">2</span>          <span class="number">4</span>h</span><br><span class="line">kube-<span class="keyword">system</span>   kube-router-xrkbw             <span class="number">1</span>/<span class="number">1</span>       Running   <span class="number">2</span>          <span class="number">4</span>h</span><br><span class="line">kube-<span class="keyword">system</span>   kube-scheduler<span class="number">-170</span>            <span class="number">1</span>/<span class="number">1</span>       Running   <span class="number">2</span>          <span class="number">5</span>h</span><br><span class="line">kube-<span class="keyword">system</span>   kube-scheduler<span class="number">-171</span>            <span class="number">1</span>/<span class="number">1</span>       Running   <span class="number">2</span>          <span class="number">4</span>h</span><br></pre></td></tr></table></figure>
+<p>部署完成</p>
+<p>默认情况下，为了保证master的安全，master是不会被调度到app的。给master添加调度taint污点，打破这个限制，使pod可以调度在master上：</p>
+<figure class="highlight crmsh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl taint nodes --all <span class="keyword">node</span><span class="title">-role</span>.kubernetes.io/<span class="literal">master</span>-</span><br></pre></td></tr></table></figure>
+<p>配置私有docker仓库，加速使用：</p>
+<figure class="highlight crystal"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">vim /<span class="class"><span class="keyword">lib</span>/<span class="title">systemd</span>/<span class="title">system</span>/<span class="title">docker</span>.<span class="title">service</span> </span></span><br><span class="line">注释<span class="comment">#ExecStart=/usr/bin/dockerd</span></span><br><span class="line"></span><br><span class="line">ExecStart=<span class="regexp">/usr/bin</span><span class="regexp">/dockerd --insecure-registry registry.yourself.com:5000</span></span><br><span class="line"><span class="regexp">#填写自己的docker仓库地址</span></span><br></pre></td></tr></table></figure>
+<hr>
+<h3 id="2018-6-8补充："><a href="#2018-6-8补充：" class="headerlink" title="2018-6-8补充："></a>2018-6-8补充：</h3><p>k8s集群通过kubeadm加入新的node：</p>
+<p>在集群初始化完成时，会提示如下信息：<br><figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">To</span> start using your cluster, you need <span class="keyword">to</span> <span class="builtin-name">run</span> the following as a regular user:</span><br><span class="line"></span><br><span class="line">  mkdir -p <span class="variable">$HOME</span>/.kube</span><br><span class="line">  sudo cp -i /etc/kubernetes/admin.conf <span class="variable">$HOME</span>/.kube/config</span><br><span class="line">  sudo chown $(id -u):$(id -g) <span class="variable">$HOME</span>/.kube/config</span><br><span class="line">as root:</span><br><span class="line"></span><br><span class="line">  kubeadm join --token b99a00.a144ef80536d4344 192.168.0.169:6443 --discovery-token-ca-cert-hash sha256:ebc2f64e9bcb14639f26db90288b988c90efc43828829c557b6b66bbe6d68dfa</span><br></pre></td></tr></table></figure></p>
+<p>其中kubeadm join是为后期新的node加入集群时使用的，在公司生产上的集群部署好时此命令没有保存，且token时有实效性的。后期有node加入集群，join命令的两个参数可以在master节点上通过如下命令获取：</p>
+<p>token：<br><figure class="highlight livecodeserver"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">root@yksp009027:~<span class="comment"># kubeadm token list</span></span><br><span class="line">TOKEN                     TTL         EXPIRES   USAGES                   DESCRIPTION                                                EXTRA GROUPS</span><br><span class="line">b97h00.a144ef08526d4345   &lt;<span class="keyword">forever</span>&gt;   &lt;never&gt;   authentication,signing   The default bootstrap <span class="keyword">token</span> generated <span class="keyword">by</span> <span class="string">'kubeadm init'</span>.   <span class="keyword">system</span>:bootstrappers:kubeadm:default-node-<span class="keyword">token</span></span><br></pre></td></tr></table></figure></p>
+<p>hash:</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">openssl x509 -pubkey -<span class="keyword">in</span> <span class="regexp">/etc/</span>kubernetes<span class="regexp">/pki/</span>ca.crt | openssl rsa -pubin -outform der <span class="number">2</span>&gt;<span class="regexp">/dev/</span><span class="literal">null</span> | openssl dgst -sha256 -hex | sed <span class="string">'s/^.* //'</span></span><br><span class="line"><span class="number">7</span>eb62962040916673ab58b0c40fb451caef7538452f5e6c8ff7719a81fdbf633</span><br></pre></td></tr></table></figure>
+<p>然后在新node上执行：</p>
+<figure class="highlight stata"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubeadm join --<span class="keyword">token</span>=<span class="variable">$TOKEN</span> <span class="variable">$MASTER_IP</span>:6443 --discovery-<span class="keyword">token</span>-<span class="keyword">ca</span>-cert-hash sha256:<span class="variable">$HASH</span></span><br></pre></td></tr></table></figure>
+<p>查看node，kubectl get nodes新node已进入Ready状态。（在join前请保证node上安装好kubelet、docker、kubeadm、kubernetes-cni、socat，并启动kubelet、docker，参考上方步骤）</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div id="reward-container">
+  <div>Thank you for your accept. mua！</div>
+  <button id="reward-button" disable="enable" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+
+    
+      
+      
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/reward/wechatpay.png" alt="丨ywq丨 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+      
+      
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/reward/alipay.png" alt="丨ywq丨 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        
+
+
+
+
+  
+
+
+
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>丨ywq丨</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    
+    <a href="https://www.ipyker.com/2018/04/08/k8s（一）、1.9.0高可用集群本地离线部署记录.html" title="k8s（一）、 1.9.0高可用集群本地离线部署记录">https://www.ipyker.com/2018/04/08/k8s（一）、1.9.0高可用集群本地离线部署记录.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li>
+</ul>
+
+      </div>
+    
+    <div>
+      
+        <div>
+    
+        <div style="text-align:center;color: #ccc;font-size:16px;">-------------本文结束<i class="fa fa-heart"></i>感谢您的阅读-------------</div>
+    
+</div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Kubernetes/" rel="tag"><i class="fa fa-tag"></i> Kubernetes</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/03/31/Django-rest-framework (一)、序列化.html" rel="next" title="Django-rest-framework (一)、序列化">
+                <i class="fa fa-chevron-left"></i> Django-rest-framework (一)、序列化
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/04/10/k8s（二）、web服务(Traefik部署_https_session sticky使用).html" rel="prev" title="k8s（二）、对外服务(Traefik部署/https/session sticky使用)">
+                k8s（二）、对外服务(Traefik部署/https/session sticky使用) <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC80NDM5Mi8yMDkyNA=="></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="丨ywq丨">
+            
+              <p class="site-author-name" itemprop="name">丨ywq丨</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives">
+                
+                    <span class="site-state-item-count">74</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                      <a href="/tags">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">15</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/yinwenqin" title="GitHub &rarr; https://github.com/yinwenqin" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://blog.csdn.net/ywq935" title="CSDN &rarr; https://blog.csdn.net/ywq935" rel="noopener" target="_blank"><i class="fa fa-fw fa-globe"></i>CSDN</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-book"></i>
+                推荐阅读
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.upweto.top/gitbooks/useKubernetes/" title="http://blog.upweto.top/gitbooks/useKubernetes/" rel="noopener" target="_blank">kubernetes使用指南</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.upweto.top/gitbooks/kubeSourceCodeNote/" title="http://blog.upweto.top/gitbooks/kubeSourceCodeNote/" rel="noopener" target="_blank">kubernetes源码笔记</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#一、部署说明"><span class="nav-number">1.</span> <span class="nav-text">一、部署说明</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#组件作用说明"><span class="nav-number">1.0.1.</span> <span class="nav-text">组件作用说明</span></a></li></ol></li></ol><li class="nav-item nav-level-2"><a class="nav-link" href="#二、提前准备"><span class="nav-number">2.</span> <span class="nav-text">二、提前准备</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#三、配置keepalived"><span class="nav-number">3.</span> <span class="nav-text">三、配置keepalived</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#四、etcd配置"><span class="nav-number">4.</span> <span class="nav-text">四、etcd配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#五-docker安装"><span class="nav-number">5.</span> <span class="nav-text">五.docker安装</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#六-安装kubelet、kubectl、kubeadm、kubecni"><span class="nav-number">6.</span> <span class="nav-text">六.安装kubelet、kubectl、kubeadm、kubecni</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#七-kubeadm初始化"><span class="nav-number">7.</span> <span class="nav-text">七.kubeadm初始化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#八、安装网络插件kube-router"><span class="nav-number">8.</span> <span class="nav-text">八、安装网络插件kube-router</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2018-6-8补充："><span class="nav-number">8.1.</span> <span class="nav-text">2018-6-8补充：</span></a></li></ol></li></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" style=" text-align:center;">&copy; 2017 – <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ywq</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"> 站点字数合计:</i>
+    </span>
+    
+    <span title="站点总字数">583k</span>
+  
+  
+</div>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+<div class="run_time" style=" text-align:center;">
+  <span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
+  <script>
+    var now = new Date(); 
+    function createtime() { 
+        var grt= new Date("08/23/2018 10:00:00");//此处修改你的建站时间或者网站上线时间 
+        now.setTime(now.getTime()+250); 
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days); 
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours); 
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum); 
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;} 
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum); 
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;} 
+        document.getElementById("timeDate").innerHTML = "本站已安全运行 "+dnum+" 天 "; 
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒"; 
+    } 
+    setInterval("createtime()",250);
+  </script>
+</div>
+
+        
+<div class="busuanzi-count" style=" text-align:center;">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-user"></i>
+    </span>
+    <span class="site-uv" title="总访客量">
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span> 人
+    </span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+  
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-eye"></i>
+    </span>
+    <span class="site-pv" title="总访问量">
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span> 次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+  
+    
+    
+      
+    
+  
+  <script color="black" opacity="0.7" zindex="-1" count="140" src="//cdn.jsdelivr.net/gh/theme-next/theme-next-canvas-nest@1.0.0/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+  
+  
+  <script id="ribbon" size="300" alpha="0.1" zindex="-1" src="/lib/canvas-ribbon/canvas-ribbon.js"></script>
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/fancybox/source/jquery.fancybox.pack.js"></script>
+
+
+  
+
+
+  <script src="/js/utils.js?v=7.1.1"></script>
+
+  <script src="/js/motion.js?v=7.1.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/schemes/muse.js?v=7.1.1"></script>
+
+
+
+
+  
+  <script src="/js/scrollspy.js?v=7.1.1"></script>
+<script src="/js/post-details.js?v=7.1.1"></script>
+
+
+
+  
+
+
+  <script src="/js/next-boot.js?v=7.1.1"></script>
+
+
+  
+
+  
+
+  
+  
+  
+
+  
+
+  
+  
+  
+
+
+  
+
+
+  
+    <script>
+  window.livereOptions = {
+    refer: '2018/04/08/k8s（一）、1.9.0高可用集群本地离线部署记录.html'
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+</script>
+
+  
+
+
+  
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url).replace(/\/{2,}/g, '/');
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x"></i></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x"></i></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+  
+  <script src="/lib/bookmark/bookmark.min.js?v=1.0"></script>
+  <script>
+  
+    bookmark.scrollToMark('auto', "#更多");
+  
+  </script>
+
+
+  
+
+  
+
+  
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/koharu.model.json"},"display":{"position":"left","width":250,"height":500},"mobile":{"show":false},"react":{"opacity":0.7},"log":false});</script></body>
+</html>
+<!-- 页面点击小红心 -->
+<script type="text/javascript" src="/js/src/clicklove.js"></script>

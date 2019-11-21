@@ -1,0 +1,1607 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-CN">
+
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link rel="stylesheet" href="/lib/pace/pace-theme-bounce.min.css?v=1.0.2">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link rel="stylesheet" href="/lib/fancybox/source/jquery.fancybox.css">
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+    
+      
+    
+
+    
+  
+
+  
+
+  
+
+  
+    
+      
+    
+
+    
+  
+
+  
+    
+    
+    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic|Roboto Slab:300,300italic,400,400italic,700,700italic|Roboto Mono:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext">
+  
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.1.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.1.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.1.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.1.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.1.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '7.1.1',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":true,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: true,
+    fancybox: true,
+    fastclick: true,
+    lazyload: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"shrinkIn","post_header":"slideLeftIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideDownIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <script>
+  (function(i,s,o,g,r,a,m){i["DaoVoiceObject"]=r;i[r]=i[r]||function(){(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;a.charset="utf-8";m.parentNode.insertBefore(a,m)})(window,document,"script",('https:' == document.location.protocol ? 'https:' : 'http:') + "//widget.daovoice.io/widget/0f81ff2f.js","daovoice")
+  daovoice('init', {
+      app_id: "bd399fce"
+    });
+  daovoice('update');
+  </script>
+
+  <meta name="description" content="P4-Node优先级算法前言在上一篇文档中，我们过了一遍node筛选算法： p3-Node筛选算法 按调度规则设计，对筛选出的node，选择优先级最高的作为最终的fit node。那么本篇承接上一篇，进入下一步，看一看node优先级排序的过程。 Tips: 本篇篇幅较长，因调度优选算法较为复杂，但请耐心结合本篇阅读源码，多看几次，一定会有收获。  正文1. 优先级函数1.1 优先级函数入口同上一篇">
+<meta name="keywords" content="Kubernetes,Golang,读源码">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kubernetes源码学习-Scheduler-P4-Node优先级算法">
+<meta property="og:url" content="https://www.ipyker.com/2019/08/22/Kubernetes源码学习-Scheduler-P4-Node优先级算法.html">
+<meta property="og:site_name" content="随笔漫谈">
+<meta property="og:description" content="P4-Node优先级算法前言在上一篇文档中，我们过了一遍node筛选算法： p3-Node筛选算法 按调度规则设计，对筛选出的node，选择优先级最高的作为最终的fit node。那么本篇承接上一篇，进入下一步，看一看node优先级排序的过程。 Tips: 本篇篇幅较长，因调度优选算法较为复杂，但请耐心结合本篇阅读源码，多看几次，一定会有收获。  正文1. 优先级函数1.1 优先级函数入口同上一篇">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://mycloudn.kokoerp.com/20190822165920.png">
+<meta property="og:image" content="http://mycloudn.kokoerp.com/image-20190821171031395.png">
+<meta property="og:image" content="http://mycloudn.kokoerp.com/image-20190822111624614.png">
+<meta property="og:updated_time" content="2019-11-21T07:48:40.100Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Kubernetes源码学习-Scheduler-P4-Node优先级算法">
+<meta name="twitter:description" content="P4-Node优先级算法前言在上一篇文档中，我们过了一遍node筛选算法： p3-Node筛选算法 按调度规则设计，对筛选出的node，选择优先级最高的作为最终的fit node。那么本篇承接上一篇，进入下一步，看一看node优先级排序的过程。 Tips: 本篇篇幅较长，因调度优选算法较为复杂，但请耐心结合本篇阅读源码，多看几次，一定会有收获。  正文1. 优先级函数1.1 优先级函数入口同上一篇">
+<meta name="twitter:image" content="http://mycloudn.kokoerp.com/20190822165920.png">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="随笔漫谈" type="application/atom+xml">
+
+
+
+  
+  
+  <link rel="canonical" href="https://www.ipyker.com/2019/08/22/Kubernetes源码学习-Scheduler-P4-Node优先级算法">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Kubernetes源码学习-Scheduler-P4-Node优先级算法 | 随笔漫谈</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+ 
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">随笔漫谈</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-book">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/gitbooks/" rel="section"><i class="menu-item-icon fa fa-fw fa-book"></i> <br>book</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-互动">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/guestbook/" rel="section"><i class="menu-item-icon fa fa-fw fa-comments"></i> <br>互动</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.ipyker.com/2019/08/22/Kubernetes源码学习-Scheduler-P4-Node优先级算法.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="丨ywq丨">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随笔漫谈">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Kubernetes源码学习-Scheduler-P4-Node优先级算法
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-08-22 11:09:53" itemprop="dateCreated datePublished" datetime="2019-08-22T11:09:53+08:00">2019-08-22</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-11-21 15:48:40" itemprop="dateModified" datetime="2019-11-21T15:48:40+08:00">2019-11-21</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+            <div class="post-symbolscount">
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">本文字数：</span>
+                
+                <span title="本文字数">21k</span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">19 分钟</span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="P4-Node优先级算法"><a href="#P4-Node优先级算法" class="headerlink" title="P4-Node优先级算法"></a>P4-Node优先级算法</h1><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>在上一篇文档中，我们过了一遍node筛选算法：</p>
+<p><a href="https://github.com/yinwenqin/kubeSourceCodeNote/blob/master/scheduler/Kubernetes%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0-Scheduler-P3-Node%E7%AD%9B%E9%80%89%E7%AE%97%E6%B3%95.md" target="_blank" rel="noopener">p3-Node筛选算法</a></p>
+<p>按调度规则设计，对筛选出的node，选择优先级最高的作为最终的fit node。那么本篇承接上一篇，进入下一步，看一看node优先级排序的过程。</p>
+<p>Tips: 本篇篇幅较长，因调度优选算法较为复杂，但请耐心结合本篇阅读源码，多看几次，一定会有收获。 </p>
+<h2 id="正文"><a href="#正文" class="headerlink" title="正文"></a>正文</h2><h3 id="1-优先级函数"><a href="#1-优先级函数" class="headerlink" title="1. 优先级函数"></a>1. 优先级函数</h3><h4 id="1-1-优先级函数入口"><a href="#1-1-优先级函数入口" class="headerlink" title="1.1 优先级函数入口"></a>1.1 优先级函数入口</h4><p>同上一篇，回到<code>pkg/scheduler/core/generic_scheduler.go</code>中的<code>Schedule()</code>函数，<code>pkg/scheduler/core/generic_scheduler.go:184</code>:</p>
+<p><img src="http://mycloudn.kokoerp.com/20190822165920.png" alt></p>
+<p>截图中有几处标注，metric相关的几行，是收集metric信息，用以提供给prometheus使用的，kubernetes的几个核心组件都有这个功能，以后如果读prometheus的源码，这个单独拎出来再讲。直接进入优先级函数<code>PrioritizeNodes()</code>内部<code>pkg/scheduler/core/generic_scheduler.go:215</code></p>
+<h4 id="1-2-优先级函数概括说明"><a href="#1-2-优先级函数概括说明" class="headerlink" title="1.2 优先级函数概括说明"></a>1.2 优先级函数概括说明</h4><p><code>pkg/scheduler/core/generic_scheduler.go:645 PrioritizeNodes()</code>，代码块较长，就不贴了.</p>
+<p>在此函数上方的注释可以得知，这个函数的工作逻辑：</p>
+<ul>
+<li><p>1.列出所有的优先级计算维度的方法，每个维度的方法返回该维度的得分，每个维度都有内部定义的weight权重，以及得分score，score取值范围在[0-10之间]，该维度的最终得分为 (score * weight)，得分越高越好</p>
+</li>
+<li><p>2.列出所有参与运算的node</p>
+</li>
+<li><p>3.循环对每一个node分别进行1中所有维度方法项计算，最后将该node的所有计算维度得分汇总</p>
+</li>
+</ul>
+<p>这里有一个重要的结构体始终贯穿整个函数栈，特别指出:</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">	<span class="comment">// HostPriority represents the priority of scheduling to a particular host, higher priority is better.</span></span><br><span class="line"><span class="keyword">type</span> HostPriority <span class="keyword">struct</span> &#123;</span><br><span class="line">	<span class="comment">// Name of the host</span></span><br><span class="line">	Host <span class="keyword">string</span></span><br><span class="line">	<span class="comment">// Score associated with the host</span></span><br><span class="line">	Score <span class="keyword">int</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>两个重要变量</strong></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// pkg/scheduler/core/generic_scheduler.go:678</span></span><br><span class="line"><span class="comment">// 注意，这里的results是个双层array的结构，统计的是各维度各node的分别得分，即[][]HostPriority类型，用伪代码抽象一下:</span></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">result = [</span></span><br><span class="line"><span class="comment">// 维度1,各node的得分</span></span><br><span class="line"><span class="comment">[&#123;node-a: 1&#125;,&#123;node-b: 2&#125;,&#123;node-c: 3&#125;...],</span></span><br><span class="line"><span class="comment">// 维度2,各node的得分</span></span><br><span class="line"><span class="comment">[&#123;node-a: 3&#125;,&#123;node-b: 1&#125;,&#123;node-c: 2&#125;...],</span></span><br><span class="line"><span class="comment">...</span></span><br><span class="line"><span class="comment">]</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line">  results := <span class="built_in">make</span>([]schedulerapi.HostPriorityList, <span class="built_in">len</span>(priorityConfigs), <span class="built_in">len</span>(priorityConfigs))</span><br><span class="line">  </span><br><span class="line">  </span><br><span class="line">  </span><br><span class="line">  <span class="comment">// pkg/scheduler/core/generic_scheduler.go:738</span></span><br><span class="line">  <span class="comment">// 这里的result是[]HostPriority类型，即汇总所有维度之后每个node的最终得分</span></span><br><span class="line">  result := <span class="built_in">make</span>(schedulerapi.HostPriorityList, <span class="number">0</span>, <span class="built_in">len</span>(nodes))</span><br></pre></td></tr></table></figure>
+<h4 id="1-3-优先级函数分段说明"><a href="#1-3-优先级函数分段说明" class="headerlink" title="1.3 优先级函数分段说明"></a>1.3 优先级函数分段说明</h4><h5 id="1-3-1-Function-DEPRECATED"><a href="#1-3-1-Function-DEPRECATED" class="headerlink" title="1.3.1 Function(DEPRECATED)"></a>1.3.1 Function(DEPRECATED)</h5><p><code>pkg/scheduler/core/generic_scheduler.go:682</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br><span class="line"> <span class="comment">// DEPRECATED: we can remove this when all priorityConfigs implement the</span></span><br><span class="line"><span class="comment">// Map-Reduce pattern.</span></span><br><span class="line"><span class="keyword">for</span> i := <span class="keyword">range</span> priorityConfigs &#123;</span><br><span class="line">	<span class="keyword">if</span> priorityConfigs[i].Function != <span class="literal">nil</span> &#123;</span><br><span class="line">		wg.Add(<span class="number">1</span>)</span><br><span class="line">		<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">(index <span class="keyword">int</span>)</span></span> &#123;</span><br><span class="line">			<span class="keyword">defer</span> wg.Done()</span><br><span class="line">			<span class="keyword">var</span> err error</span><br><span class="line">			results[index], err = priorityConfigs[index].Function(pod, nodeNameToInfo, nodes)</span><br><span class="line">			<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">				appendError(err)</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;(i)</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		results[i] = <span class="built_in">make</span>(schedulerapi.HostPriorityList, <span class="built_in">len</span>(nodes))</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>注释中说明这种直接计算方法(<code>priorityConfigs[i].Function</code>)是传统模式，已经DEPRECATED掉了，当前版本实际上只有一个维度(pod亲和性)采取了这种方法，取而代之的是Map-Reduce模式的计算方法,参见后方。Function运算的方式，随后会以pod亲和性这个维度的实例代码来说明。</p>
+<h5 id="1-3-2-Map-Reduce-Function"><a href="#1-3-2-Map-Reduce-Function" class="headerlink" title="1.3.2 Map-Reduce Function"></a>1.3.2 Map-Reduce Function</h5><p><code>pkg/scheduler/core/generic_scheduler.go:698</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">workqueue.ParallelizeUntil(context.TODO(), <span class="number">16</span>, <span class="built_in">len</span>(nodes), <span class="function"><span class="keyword">func</span><span class="params">(index <span class="keyword">int</span>)</span></span> &#123;</span><br><span class="line">	nodeInfo := nodeNameToInfo[nodes[index].Name]</span><br><span class="line">	<span class="keyword">for</span> i := <span class="keyword">range</span> priorityConfigs &#123;</span><br><span class="line">		<span class="keyword">if</span> priorityConfigs[i].Function != <span class="literal">nil</span> &#123;</span><br><span class="line">			<span class="keyword">continue</span></span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		<span class="keyword">var</span> err error</span><br><span class="line">		results[i][index], err = priorityConfigs[i].Map(pod, meta, nodeInfo)</span><br><span class="line">		<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">			appendError(err)</span><br><span class="line">			results[i][index].Host = nodes[index].Name</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i := <span class="keyword">range</span> priorityConfigs &#123;</span><br><span class="line">	<span class="keyword">if</span> priorityConfigs[i].Reduce == <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">continue</span></span><br><span class="line">	&#125;</span><br><span class="line">	wg.Add(<span class="number">1</span>)</span><br><span class="line">	<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">(index <span class="keyword">int</span>)</span></span> &#123;</span><br><span class="line">		<span class="keyword">defer</span> wg.Done()</span><br><span class="line">		<span class="keyword">if</span> err := priorityConfigs[index].Reduce(pod, meta, nodeNameToInfo, results[index]); err != <span class="literal">nil</span> &#123;</span><br><span class="line">			appendError(err)</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">if</span> klog.V(<span class="number">10</span>) &#123;</span><br><span class="line">			<span class="keyword">for</span> _, hostPriority := <span class="keyword">range</span> results[index] &#123;</span><br><span class="line">				klog.Infof(<span class="string">"%v -&gt; %v: %v, Score: (%d)"</span>, util.GetPodFullName(pod), hostPriority.Host, priorityConfigs[index].Name, hostPriority.Score)</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;(i)</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// Wait for all computations to be finished.</span></span><br><span class="line">wg.Wait()</span><br></pre></td></tr></table></figure>
+<p>这里可以看出，若该维度未直接指定<code>priorityConfigs[i].Function</code>，则采取Map-Reduce模式.</p>
+<figure class="highlight mathematica"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">引申：<span class="keyword">Map</span>-<span class="keyword">Reduce</span>是大数据里的思想，简单来说<span class="keyword">Map</span>函数是对一组元素集上的每一个元素进行高度并行的运算，得到与元素</span><br><span class="line">集对应(mapping关系)的结果集，<span class="keyword">Reduce</span>函数则对结果集进行归纳运算而后返回需要的结果。</span><br></pre></td></tr></table></figure>
+<p>这里再次出现了上一篇中特别提到的<code>workqueue.ParallelizeUntil()</code>并行运算控制方法，同样以node为粒度，运行Map函数；而下方并行度不高的Reduce函数，则使用的sync模块才实现并发控制。符合Map-Reduce的思想。</p>
+<p>没接触过Map-Reduce，但先不要被吓住，这里只是利用了这个思想，数据量并没有复杂到要拆分给多台机器分布式运算的级别。随后举一个使用Map-Reduce计算方法的维度的实例代码来说明。</p>
+<h3 id="2-优先级计算维度"><a href="#2-优先级计算维度" class="headerlink" title="2. 优先级计算维度"></a>2. 优先级计算维度</h3><h4 id="2-1-默认注册的计算维度"><a href="#2-1-默认注册的计算维度" class="headerlink" title="2.1 默认注册的计算维度"></a>2.1 默认注册的计算维度</h4><p>通过上面的内容，对优先级算法有了一个模糊的认知：<strong>统计节点的各计算维度得分的总和，分数越高优先级越高</strong>。那么默认的优先级计算维度分别有哪些呢？在前面的<a href="https://github.com/yinwenqin/kubeSourceCodeNote/blob/master/scheduler/P2-调度器框架.md" target="_blank" rel="noopener">scheduler-框架篇</a>中有讲过，调度算法全部位于<code>pkg/scheduler/algorithm</code>目录中，而<code>pkg/scheduler/algorithmprovider</code>内提供以工厂模式创建调度算法相关元素的方法，所以，我们直接来到<code>pkg/scheduler/algorithmprovider/defaults/register_priorities.go</code>文件内，所有默认的优先级计算维度的算法都在这里注册，篇幅有限，随便列举其中几个:</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">factory.RegisterPriorityFunction2(priorities.EqualPriority, core.EqualPriorityMap, <span class="literal">nil</span>, <span class="number">1</span>)</span><br><span class="line"><span class="comment">// Optional, cluster-autoscaler friendly priority function - give used nodes higher priority.</span></span><br><span class="line">factory.RegisterPriorityFunction2(priorities.MostRequestedPriority, priorities.MostRequestedPriorityMap, <span class="literal">nil</span>, <span class="number">1</span>)</span><br><span class="line">factory.RegisterPriorityFunction2(</span><br><span class="line">	priorities.RequestedToCapacityRatioPriority,</span><br><span class="line">	priorities.RequestedToCapacityRatioResourceAllocationPriorityDefault().PriorityMap,</span><br><span class="line">	<span class="literal">nil</span>,</span><br><span class="line">	<span class="number">1</span>)</span><br></pre></td></tr></table></figure>
+<p>如果仔细看代码里的注释可以发现，个别factory函数虽然已经将计算维度注册，但实际上默认并没有启用它，例如<code>ServiceSpreadingPriority</code>这一项中的注释表明，它已经相当大程度被<code>SelectorSpreadPriority</code>取代了，保留它是为了兼容此前的版本。那么默认使用的计算维度有哪些呢？</p>
+<h4 id="2-2-默认使用的计算维度"><a href="#2-2-默认使用的计算维度" class="headerlink" title="2.2 默认使用的计算维度"></a>2.2 默认使用的计算维度</h4><p>默认使用的计算维度，在这个地方声明:</p>
+<p><code>pkg/scheduler/algorithmprovider/defaults/defaults.go:108</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">defaultPriorities</span><span class="params">()</span> <span class="title">sets</span>.<span class="title">String</span></span> &#123;</span><br><span class="line">	<span class="keyword">return</span> sets.NewString(</span><br><span class="line">		priorities.SelectorSpreadPriority,</span><br><span class="line">		priorities.InterPodAffinityPriority,</span><br><span class="line">		priorities.LeastRequestedPriority,</span><br><span class="line">		priorities.BalancedResourceAllocation,</span><br><span class="line">		priorities.NodePreferAvoidPodsPriority,</span><br><span class="line">		priorities.NodeAffinityPriority,</span><br><span class="line">		priorities.TaintTolerationPriority,</span><br><span class="line">		priorities.ImageLocalityPriority,</span><br><span class="line">	)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="2-3-新旧两种计算方式"><a href="#2-3-新旧两种计算方式" class="headerlink" title="2.3 新旧两种计算方式"></a>2.3 新旧两种计算方式</h4><p>在注册的每一个计算维度，都有专属的维度描述关键字，即factory方法的第一个参数(str类型)。不难发现，这里的每一个关键字，<code>pkg/scheduler/algorithm/priorities</code>目录内都有与其对应的文件,图中圈出了几个例子(灵魂画笔请原谅):</p>
+<p><img src="http://mycloudn.kokoerp.com/image-20190821171031395.png" alt></p>
+<p>显而易见，维度计算的内容就在这些文件中，可以自行通过编辑器的跳转功能逐级查看进行验证.</p>
+<p>通过这是factory方法可以看出，所有维度，默认的注册权重都是1，除了<code>NodePreferAvoidPodsPriority</code>这一项之外，它的weight值是10000，这一项是为了避免pod调度到node上，我们找到文件查看该方法的注释:</p>
+<p><code>pkg/scheduler/algorithm/priorities/node_prefer_avoid_pods.go:31</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// CalculateNodePreferAvoidPodsPriorityMap priorities nodes according to the node annotation</span></span><br><span class="line"><span class="comment">// "scheduler.alpha.kubernetes.io/preferAvoidPods".</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">CalculateNodePreferAvoidPodsPriorityMap</span><span class="params">(pod *v1.Pod, meta <span class="keyword">interface</span>&#123;&#125;, nodeInfo *schedulernodeinfo.NodeInfo)</span> <span class="params">(schedulerapi.HostPriority, error)</span></span> &#123;</span><br><span class="line">... <span class="comment">// 省略</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>得知node可以通过annotation添加<code>scheduler.alpha.kubernetes.io/preferAvoidPods</code>指定来避免指定的pod调度到本身之上，因此此项优先级超高覆盖过其他的各计算维度。</p>
+<p>如果ctrl + F 过滤一下<strong>map</strong>关键字，你会发现，仅有<code>InterPodAffinityPriority</code>这一项是没有map关键字的：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// pods should be placed in the same topological domain (e.g. same node, same rack, same zone, same power domain, etc.)</span></span><br><span class="line"><span class="comment">// as some other pods, or, conversely, should not be placed in the same topological domain as some other pods.</span></span><br><span class="line">factory.RegisterPriorityConfigFactory(</span><br><span class="line">	priorities.InterPodAffinityPriority,</span><br><span class="line">	factory.PriorityConfigFactory&#123;</span><br><span class="line">		Function: <span class="function"><span class="keyword">func</span><span class="params">(args factory.PluginFactoryArgs)</span> <span class="title">priorities</span>.<span class="title">PriorityFunction</span></span> &#123;</span><br><span class="line">			<span class="keyword">return</span> priorities.NewInterPodAffinityPriority(args.NodeInfo, args.NodeLister, args.PodLister, args.HardPodAffinitySymmetricWeight)</span><br><span class="line">		&#125;,</span><br><span class="line">		Weight: <span class="number">1</span>,</span><br><span class="line">	&#125;,</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<p>这也印证了前面说的当前仅剩pod亲和性这一个维度在使用传统的Function,虽然已经被DEPRECATED掉了，传统的Function是直接计算出结果，Map-Reduce是将这个过程解耦拆成了两个步骤，且我们可以看到所有的factory函数，很多形参<code>reduceFunction</code>接收到的实参实际是是<code>nil</code>:</p>
+<p><img src="http://mycloudn.kokoerp.com/image-20190822111624614.png" alt></p>
+<p>这就说明这些维度的计算工作在map函数里面已经执行完成了，不需要再执行reduce函数了。因此，传统的Function的计算过程同样值得参考，那么首先就来看看<code>InterPodAffinityPriority</code>维度是怎么计算的吧!</p>
+<h3 id="3-传统计算Function"><a href="#3-传统计算Function" class="headerlink" title="3. 传统计算Function"></a>3. 传统计算Function</h3><h4 id="3-1-InterPodAffinityPriority"><a href="#3-1-InterPodAffinityPriority" class="headerlink" title="3.1 InterPodAffinityPriority"></a>3.1 InterPodAffinityPriority</h4><p>看代码之前，先来看一个标准的PodAffinity配置示例：</p>
+<p><strong>PodAffinity</strong>示例：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Pod</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">pod-a</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">default</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  affinity:</span></span><br><span class="line"><span class="attr">    podAffinity:</span></span><br><span class="line"><span class="attr">      preferredDuringSchedulingIgnoredDuringExecution:</span></span><br><span class="line"><span class="attr">      - podAffinityTerm:</span></span><br><span class="line"><span class="attr">        weight:</span> <span class="number">100</span></span><br><span class="line"><span class="attr">          labelSelector:</span></span><br><span class="line"><span class="attr">            matchExpressions:</span></span><br><span class="line"><span class="attr">            - key:</span> <span class="string">like</span></span><br><span class="line"><span class="attr">              operator:</span> <span class="string">In</span></span><br><span class="line"><span class="attr">              values:</span></span><br><span class="line"><span class="bullet">              -</span> <span class="string">pod-b</span></span><br><span class="line">          <span class="comment"># 拓扑层级，大多数是node层级，但其实还有zone/region等层级</span></span><br><span class="line"><span class="attr">          topologyKey:</span> <span class="string">kubernetes.io/hostname</span></span><br><span class="line">          </span><br><span class="line"><span class="attr">    podAntiAffinity:</span></span><br><span class="line"><span class="attr">      preferredDuringSchedulingIgnoredDuringExecution:</span></span><br><span class="line"><span class="attr">      - weight:</span> <span class="number">100</span> </span><br><span class="line"><span class="attr">        podAffinityTerm:</span></span><br><span class="line"><span class="attr">          labelSelector:</span></span><br><span class="line"><span class="attr">            matchExpressions:</span></span><br><span class="line"><span class="attr">            - key:</span> <span class="string">unlike</span></span><br><span class="line"><span class="attr">              operator:</span> <span class="string">In</span></span><br><span class="line"><span class="attr">              values:</span></span><br><span class="line"><span class="bullet">              -</span> <span class="string">pod-c</span></span><br><span class="line"><span class="attr">          topologyKey:</span> <span class="string">kubernetes.io/hostname</span>          </span><br><span class="line"><span class="attr">  containers:</span></span><br><span class="line"><span class="attr">  - name:</span> <span class="string">test</span></span><br><span class="line"><span class="attr">    image:</span> <span class="string">gcr.io/google_containers/pause:2.0</span></span><br></pre></td></tr></table></figure>
+<p>yaml中的申明意图是: pod-a亲近pod-b，疏远pod-c，所以在这项计算维度里，如果node上运行着pod-b ,则该node加分，如果该node上运行着pod-c，则node减分。</p>
+<p>来看代码，仔细读代码，你会发现示例中的几个层级的key: <code>PreferredDuringSchedulingIgnoredDuringExecution</code>,<code>podAffinityTerm</code>,<code>labelSelector</code>,<code>topologyKey</code>在代码中都会出现：</p>
+<p><code>pkg/scheduler/algorithm/priorities/interpod_affinity.go:119</code>:</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(ipa *InterPodAffinity)</span> <span class="title">CalculateInterPodAffinityPriority</span><span class="params">(pod *v1.Pod, nodeNameToInfo <span class="keyword">map</span>[<span class="keyword">string</span>]*schedulernodeinfo.NodeInfo, nodes []*v1.Node)</span> <span class="params">(schedulerapi.HostPriorityList, error)</span></span> &#123;</span><br><span class="line"> </span><br><span class="line">	affinity := pod.Spec.Affinity</span><br><span class="line">  <span class="comment">// 判断待调度pod是否存在亲和性约束</span></span><br><span class="line">	hasAffinityConstraints := affinity != <span class="literal">nil</span> &amp;&amp; affinity.PodAffinity != <span class="literal">nil</span></span><br><span class="line">  <span class="comment">// 判断待调度是否pod存在反亲和性约束</span></span><br><span class="line">	hasAntiAffinityConstraints := affinity != <span class="literal">nil</span> &amp;&amp; affinity.PodAntiAffinity != <span class="literal">nil</span></span><br><span class="line">  </span><br><span class="line">  ... <span class="comment">// 省略</span></span><br><span class="line">  </span><br><span class="line">  </span><br><span class="line">  <span class="comment">// 根据node上正在运行的pod来计算node得分的函数，分为两个层面计算，两个层面都可以加减分:</span></span><br><span class="line">  <span class="comment">// 1.待调度pod与现存pod的亲和性(软亲和性，因为待调度pod还未实际运行起来)</span></span><br><span class="line">  <span class="comment">// 2.现存pod与待调度pod的亲和性(硬亲和性，因为待调度pod正在运行)</span></span><br><span class="line">  <span class="comment">// 加减分操作由processTerm()方法进行计分，这个下面再讲</span></span><br><span class="line">  <span class="comment">// 这里是pod级别，被下方node级别的processNode调用</span></span><br><span class="line">	processPod := <span class="function"><span class="keyword">func</span><span class="params">(existingPod *v1.Pod)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">		existingPodNode, err := ipa.info.GetNodeInfo(existingPod.Spec.NodeName)</span><br><span class="line">		<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">			<span class="keyword">if</span> apierrors.IsNotFound(err) &#123;</span><br><span class="line">				klog.Errorf(<span class="string">"Node not found, %v"</span>, existingPod.Spec.NodeName)</span><br><span class="line">				<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">			&#125;</span><br><span class="line">			<span class="keyword">return</span> err</span><br><span class="line">		&#125;</span><br><span class="line">		existingPodAffinity := existingPod.Spec.Affinity</span><br><span class="line">    <span class="comment">// 判断node上正在运行的pod是否与待调度的pod存在亲和性约束</span></span><br><span class="line">		existingHasAffinityConstraints := existingPodAffinity != <span class="literal">nil</span> &amp;&amp; existingPodAffinity.PodAffinity != <span class="literal">nil</span></span><br><span class="line">    <span class="comment">// 判断node上正在运行的pod是否与待调度的pod存在反亲和性约束</span></span><br><span class="line">		existingHasAntiAffinityConstraints := existingPodAffinity != <span class="literal">nil</span> &amp;&amp; existingPodAffinity.PodAntiAffinity != <span class="literal">nil</span></span><br><span class="line"></span><br><span class="line">		<span class="keyword">if</span> hasAffinityConstraints &#123;</span><br><span class="line">			terms := affinity.PodAffinity.PreferredDuringSchedulingIgnoredDuringExecution</span><br><span class="line">			pm.processTerms(terms, pod, existingPod, existingPodNode, <span class="number">1</span>)</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">if</span> hasAntiAffinityConstraints &#123;</span><br><span class="line">			terms := affinity.PodAntiAffinity.PreferredDuringSchedulingIgnoredDuringExecution</span><br><span class="line">			pm.processTerms(terms, pod, existingPod, existingPodNode, <span class="number">-1</span>)</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		<span class="keyword">if</span> existingHasAffinityConstraints &#123;</span><br><span class="line">			<span class="keyword">if</span> ipa.hardPodAffinityWeight &gt; <span class="number">0</span> &#123;</span><br><span class="line">				terms := existingPodAffinity.PodAffinity.RequiredDuringSchedulingIgnoredDuringExecution</span><br><span class="line">				<span class="keyword">for</span> _, term := <span class="keyword">range</span> terms &#123;</span><br><span class="line">					pm.processTerm(&amp;term, existingPod, pod, existingPodNode, <span class="keyword">float64</span>(ipa.hardPodAffinityWeight))</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">			terms := existingPodAffinity.PodAffinity.PreferredDuringSchedulingIgnoredDuringExecution</span><br><span class="line">			pm.processTerms(terms, existingPod, pod, existingPodNode, <span class="number">1</span>)</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">if</span> existingHasAntiAffinityConstraints &#123;</span><br><span class="line">			terms := existingPodAffinity.PodAntiAffinity.PreferredDuringSchedulingIgnoredDuringExecution</span><br><span class="line">			pm.processTerms(terms, existingPod, pod, existingPodNode, <span class="number">-1</span>)</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">	&#125;</span><br><span class="line">  </span><br><span class="line">  <span class="comment">// 这里是node级别的，调用上方的processPod,被下方的并发控制函数调用，内部逻辑分支有两支:</span></span><br><span class="line">  <span class="comment">// 1.pod指定了亲和性约束，那么node上每个现存的pod都要与待调度pod进行硬、软亲和性计算</span></span><br><span class="line">  <span class="comment">// 2.pod未指定亲和性约束，那么仅需要对node上现存的已指定亲和性约束的pod，与待调度pod进行硬亲和性计算</span></span><br><span class="line">	processNode := <span class="function"><span class="keyword">func</span><span class="params">(i <span class="keyword">int</span>)</span></span> &#123;</span><br><span class="line">		nodeInfo := nodeNameToInfo[allNodeNames[i]]</span><br><span class="line">		<span class="keyword">if</span> nodeInfo.Node() != <span class="literal">nil</span> &#123;</span><br><span class="line">			<span class="keyword">if</span> hasAffinityConstraints || hasAntiAffinityConstraints &#123;</span><br><span class="line">				<span class="keyword">for</span> _, existingPod := <span class="keyword">range</span> nodeInfo.Pods() &#123;</span><br><span class="line">					<span class="keyword">if</span> err := processPod(existingPod); err != <span class="literal">nil</span> &#123;</span><br><span class="line">						pm.setError(err)</span><br><span class="line">					&#125;</span><br><span class="line">				&#125;</span><br><span class="line">			&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">				<span class="keyword">for</span> _, existingPod := <span class="keyword">range</span> nodeInfo.PodsWithAffinity() &#123;</span><br><span class="line">					<span class="keyword">if</span> err := processPod(existingPod); err != <span class="literal">nil</span> &#123;</span><br><span class="line">						pm.setError(err)</span><br><span class="line">					&#125;</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">  <span class="comment">// node级别并发</span></span><br><span class="line">	workqueue.ParallelizeUntil(context.TODO(), <span class="number">16</span>, <span class="built_in">len</span>(allNodeNames), processNode)</span><br><span class="line">  ... <span class="comment">// 省略</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">// 计算此Pod亲和性维度的各node的得分</span></span><br><span class="line">	result := <span class="built_in">make</span>(schedulerapi.HostPriorityList, <span class="number">0</span>, <span class="built_in">len</span>(nodes))</span><br><span class="line">	<span class="keyword">for</span> _, node := <span class="keyword">range</span> nodes &#123;</span><br><span class="line">		fScore := <span class="keyword">float64</span>(<span class="number">0</span>)</span><br><span class="line">		<span class="keyword">if</span> (maxCount - minCount) &gt; <span class="number">0</span> &#123;</span><br><span class="line">      <span class="comment">// 分母是maxCount - minCount,不直接使用maxCount做分母是因为maxCount可能为0，通过整除运算，控制node的最高得分为MaxPriority(默认10),最低位0</span></span><br><span class="line">			fScore = <span class="keyword">float64</span>(schedulerapi.MaxPriority) * ((pm.counts[node.Name] - minCount) / (maxCount - minCount))</span><br><span class="line">		&#125;</span><br><span class="line">		result = <span class="built_in">append</span>(result, schedulerapi.HostPriority&#123;Host: node.Name, Score: <span class="keyword">int</span>(fScore)&#125;)</span><br><span class="line">		<span class="keyword">if</span> klog.V(<span class="number">10</span>) &#123;</span><br><span class="line">			klog.Infof(<span class="string">"%v -&gt; %v: InterPodAffinityPriority, Score: (%d)"</span>, pod.Name, node.Name, <span class="keyword">int</span>(fScore))</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> result, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>上面代码中的注释已经将<code>CalculateInterPodAffinityPriority</code>这个函数的工作模式介绍的比较清晰了，那么再看一看计分函数<code>processTerm()</code>：</p>
+<p><code>pkg/scheduler/algorithm/priorities/interpod_affinity.go:107</code> –&gt; <code>pkg/scheduler/algorithm/priorities/interpod_affinity.go:86</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(p *podAffinityPriorityMap)</span> <span class="title">processTerm</span><span class="params">(term *v1.PodAffinityTerm, podDefiningAffinityTerm, podToCheck *v1.Pod, fixedNode *v1.Node, weight <span class="keyword">float64</span>)</span></span> &#123;</span><br><span class="line">	namespaces := priorityutil.GetNamespacesFromPodAffinityTerm(podDefiningAffinityTerm, term)</span><br><span class="line">	selector, err := metav1.LabelSelectorAsSelector(term.LabelSelector)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		p.setError(err)</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line">  <span class="comment">// 待调度pod和被检查pod存在亲和性则匹配,匹配且node与指定的term处于同一拓扑层级，则node加分</span></span><br><span class="line">	match := priorityutil.PodMatchesTermsNamespaceAndSelector(podToCheck, namespaces, selector)</span><br><span class="line">	<span class="keyword">if</span> match &#123;</span><br><span class="line">		<span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">			p.Lock()</span><br><span class="line">			<span class="keyword">defer</span> p.Unlock()</span><br><span class="line">			<span class="keyword">for</span> _, node := <span class="keyword">range</span> p.nodes &#123;</span><br><span class="line">        <span class="comment">// TopologyKey是拓扑逻辑层级，上面例子中的是kubernetes.io/hostname，kuernetes内建了几个层级</span></span><br><span class="line">        <span class="comment">// 如failure-domain.beta.kubernetes.io/zone，kubernetes.io/hostname等，参考:</span></span><br><span class="line">        <span class="comment">// https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#inter-pod-affinity-and-anti-affinity</span></span><br><span class="line">				<span class="keyword">if</span> priorityutil.NodesHaveSameTopologyKey(node, fixedNode, term.TopologyKey) &#123;</span><br><span class="line">					p.counts[node.Name] += weight</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;()</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>podAffinityPriority这个维度的算法到此就明了了</strong></p>
+<h3 id="4-Map-Reduce计算方法"><a href="#4-Map-Reduce计算方法" class="headerlink" title="4. Map-Reduce计算方法"></a>4. Map-Reduce计算方法</h3><p>在<code>pkg/scheduler/algorithmprovider/defaults/register_priorities.go:26</code>中的init()函数内，找出所有在注册且默认被使用的，同时包含map方法和reduce方法的factory函数，一共有3个，我们挑其中之一为例作启发，其余的就不写在文章里了，可以自行阅读:</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"> <span class="comment">// pkg/scheduler/algorithmprovider/defaults/register_priorities.go:58</span></span><br><span class="line"><span class="comment">// spreads pods by minimizing the number of pods (belonging to the same service or replication controller) on the same node.</span></span><br><span class="line">factory.RegisterPriorityConfigFactory(</span><br><span class="line">	priorities.SelectorSpreadPriority,</span><br><span class="line">	factory.PriorityConfigFactory&#123;</span><br><span class="line">		MapReduceFunction: <span class="function"><span class="keyword">func</span><span class="params">(args factory.PluginFactoryArgs)</span> <span class="params">(priorities.PriorityMapFunction, priorities.PriorityReduceFunction)</span></span> &#123;</span><br><span class="line">			<span class="keyword">return</span> priorities.NewSelectorSpreadPriority(args.ServiceLister, args.ControllerLister, args.ReplicaSetLister, args.StatefulSetLister)</span><br><span class="line">		&#125;,</span><br><span class="line">		Weight: <span class="number">1</span>,</span><br><span class="line">	&#125;,</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="comment">// pkg/scheduler/algorithmprovider/defaults/register_priorities.go:90</span></span><br><span class="line"> factory.RegisterPriorityFunction2(priorities.NodeAffinityPriority, priorities.CalculateNodeAffinityPriorityMap, priorities.CalculateNodeAffinityPriorityReduce, <span class="number">1</span>)</span><br><span class="line"> </span><br><span class="line"> <span class="comment">// pkg/scheduler/algorithmprovider/defaults/register_priorities.go:93</span></span><br><span class="line"> factory.RegisterPriorityFunction2(priorities.TaintTolerationPriority, priorities.ComputeTaintTolerationPriorityMap, priorities.ComputeTaintTolerationPriorityReduce, <span class="number">1</span>)</span><br></pre></td></tr></table></figure>
+<p>那就以第一个<code>ServiceSpreadingPriority</code>维度为例吧，名字直译为: 选择器均分优先级，注释中可以得知，这一项是为了保障属于同一个<strong>Service</strong>或<strong>replication controller</strong>的的pod，尽量分散开在不同的node里，保障高可用。</p>
+<p><code>NewSelectorSpreadPriority()</code>方法用来注册此维度的Map和Reduce函数，来看看其内容：</p>
+<p><code>pkg/scheduler/algorithmprovider/defaults/register_priorities.go:62 NewSelectorSpreadPriority()</code>—-&gt; <code>pkg/scheduler/algorithm/priorities/selector_spreading.go:45</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewSelectorSpreadPriority</span><span class="params">(</span></span></span><br><span class="line"><span class="function"><span class="params">	serviceLister algorithm.ServiceLister,</span></span></span><br><span class="line"><span class="function"><span class="params">	controllerLister algorithm.ControllerLister,</span></span></span><br><span class="line"><span class="function"><span class="params">	replicaSetLister algorithm.ReplicaSetLister,</span></span></span><br><span class="line"><span class="function"><span class="params">	statefulSetLister algorithm.StatefulSetLister)</span> <span class="params">(PriorityMapFunction, PriorityReduceFunction)</span></span> &#123;</span><br><span class="line">	selectorSpread := &amp;SelectorSpread&#123;</span><br><span class="line">		serviceLister:     serviceLister,</span><br><span class="line">		controllerLister:  controllerLister,</span><br><span class="line">		replicaSetLister:  replicaSetLister,</span><br><span class="line">		statefulSetLister: statefulSetLister,</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> selectorSpread.CalculateSpreadPriorityMap, selectorSpread.CalculateSpreadPriorityReduce</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>注意这4个参数:<code>serviceLister/replicaSetLister/statefulSetLister/controllerLister</code>,与pod相关的四个上层抽象概念<code>Service/RC/RS/StatefulSet</code>都列出来了，返回的map函数是<code>CalculateSpreadPriorityMap</code>,reduce函数是<code>CalculateSpreadPriorityReduce</code>,分别看一看他们吧</p>
+<h4 id="4-1-Map函数"><a href="#4-1-Map函数" class="headerlink" title="4.1  Map函数"></a>4.1  Map函数</h4><p><code>pkg/scheduler/algorithm/priorities/selector_spreading.go:66</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *SelectorSpread)</span> <span class="title">CalculateSpreadPriorityMap</span><span class="params">(pod *v1.Pod, meta <span class="keyword">interface</span>&#123;&#125;, nodeInfo *schedulernodeinfo.NodeInfo)</span> <span class="params">(schedulerapi.HostPriority, error)</span></span> &#123;</span><br><span class="line">	<span class="keyword">var</span> selectors []labels.Selector</span><br><span class="line">	node := nodeInfo.Node()</span><br><span class="line">	<span class="keyword">if</span> node == <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> schedulerapi.HostPriority&#123;&#125;, fmt.Errorf(<span class="string">"node not found"</span>)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	priorityMeta, ok := meta.(*priorityMetadata)</span><br><span class="line">	<span class="keyword">if</span> ok &#123;</span><br><span class="line">		selectors = priorityMeta.podSelectors</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		selectors = getSelectors(pod, s.serviceLister, s.controllerLister, s.replicaSetLister, s.statefulSetLister)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> <span class="built_in">len</span>(selectors) == <span class="number">0</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> schedulerapi.HostPriority&#123;</span><br><span class="line">			Host:  node.Name,</span><br><span class="line">			Score: <span class="keyword">int</span>(<span class="number">0</span>),</span><br><span class="line">		&#125;, <span class="literal">nil</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	count := countMatchingPods(pod.Namespace, selectors, nodeInfo)</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> schedulerapi.HostPriority&#123;</span><br><span class="line">		Host:  node.Name,</span><br><span class="line">		Score: count,</span><br><span class="line">	&#125;, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>继续看<code>countMatchingPods</code>函数:</p>
+<p><code>pkg/scheduler/algorithm/priorities/selector_spreading.go:187</code>:</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">countMatchingPods</span><span class="params">(namespace <span class="keyword">string</span>, selectors []labels.Selector, nodeInfo *schedulernodeinfo.NodeInfo)</span> <span class="title">int</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> nodeInfo.Pods() == <span class="literal">nil</span> || <span class="built_in">len</span>(nodeInfo.Pods()) == <span class="number">0</span> || <span class="built_in">len</span>(selectors) == <span class="number">0</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span></span><br><span class="line">	&#125;</span><br><span class="line">	count := <span class="number">0</span></span><br><span class="line">	<span class="keyword">for</span> _, pod := <span class="keyword">range</span> nodeInfo.Pods() &#123;</span><br><span class="line">		<span class="comment">// Ignore pods being deleted for spreading purposes</span></span><br><span class="line">		<span class="comment">// Similar to how it is done for SelectorSpreadPriority</span></span><br><span class="line">		<span class="keyword">if</span> namespace == pod.Namespace &amp;&amp; pod.DeletionTimestamp == <span class="literal">nil</span> &#123;</span><br><span class="line">			matches := <span class="literal">true</span></span><br><span class="line">			<span class="keyword">for</span> _, selector := <span class="keyword">range</span> selectors &#123;</span><br><span class="line">				<span class="keyword">if</span> !selector.Matches(labels.Set(pod.Labels)) &#123;</span><br><span class="line">					matches = <span class="literal">false</span></span><br><span class="line">					<span class="keyword">break</span></span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="keyword">if</span> matches &#123;</span><br><span class="line">				count++</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> count</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里的计算方式概括一下:</p>
+<p>已知<code>Service/RC/RS/StatefulSet</code>这四种对pod进行管理的抽象高层级资源(后面统称高层级资源)，选择器都是通过label来匹配pod的，因此，这里将待调度pod的高层级资源的selector选择器依次列出，与node上现运行的pod中的每一个进行依次比较，每出现一次<strong>待调度pod的selector，命中了某个现运行pod的标签</strong>的情况，则视为匹配成功，加1分，未命中则不加分(这里的分数越高代表匹配到的现运行pod数量越多，则最终优先级得分应该越低，待会儿在reduce函数里我们可以印证)。</p>
+<p>举个例子:</p>
+<ul>
+<li>假设待调度的为pod-a-1，node-a,node-b上现都运行有若干个pod</li>
+<li>node-a其中有1个pod-a-2与pod-a-1属于同一个Service，那么，node-a的count计数为1；</li>
+<li>node-b中没有pod被pod-a-1的selector命中，则node-b的count计数为0</li>
+<li>计数越多，则对应的最终优先级得分应该越低，因此node-b的得分会比node-a高</li>
+</ul>
+<p><strong>map函数到这里就结束了，但这个计数显然还不能作为节点在此维度的最终得分，因此，下面还有reduce函数</strong></p>
+<h4 id="4-1-Reduce函数"><a href="#4-1-Reduce函数" class="headerlink" title="4.1  Reduce函数"></a>4.1  Reduce函数</h4><p>基于前面map函数得出的各node的匹配次数count计数，来展开reduce函数运算:</p>
+<p><code>pkg/scheduler/algorithm/priorities/selector_spreading.go:99</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *SelectorSpread)</span> <span class="title">CalculateSpreadPriorityReduce</span><span class="params">(pod *v1.Pod, meta <span class="keyword">interface</span>&#123;&#125;, nodeNameToInfo <span class="keyword">map</span>[<span class="keyword">string</span>]*schedulernodeinfo.NodeInfo, result schedulerapi.HostPriorityList)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">	countsByZone := <span class="built_in">make</span>(<span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">int</span>, <span class="number">10</span>)</span><br><span class="line">	maxCountByZone := <span class="keyword">int</span>(<span class="number">0</span>)</span><br><span class="line">	maxCountByNodeName := <span class="keyword">int</span>(<span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">	<span class="keyword">for</span> i := <span class="keyword">range</span> result &#123;</span><br><span class="line">		<span class="keyword">if</span> result[i].Score &gt; maxCountByNodeName &#123;</span><br><span class="line">			maxCountByNodeName = result[i].Score</span><br><span class="line">		&#125;</span><br><span class="line">		zoneID := utilnode.GetZoneKey(nodeNameToInfo[result[i].Host].Node())</span><br><span class="line">		<span class="keyword">if</span> zoneID == <span class="string">""</span> &#123;</span><br><span class="line">			<span class="keyword">continue</span></span><br><span class="line">		&#125;</span><br><span class="line">		countsByZone[zoneID] += result[i].Score</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">for</span> zoneID := <span class="keyword">range</span> countsByZone &#123;</span><br><span class="line">		<span class="keyword">if</span> countsByZone[zoneID] &gt; maxCountByZone &#123;</span><br><span class="line">			maxCountByZone = countsByZone[zoneID]</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	haveZones := <span class="built_in">len</span>(countsByZone) != <span class="number">0</span></span><br><span class="line"></span><br><span class="line">	maxCountByNodeNameFloat64 := <span class="keyword">float64</span>(maxCountByNodeName)</span><br><span class="line">	maxCountByZoneFloat64 := <span class="keyword">float64</span>(maxCountByZone)</span><br><span class="line">	MaxPriorityFloat64 := <span class="keyword">float64</span>(schedulerapi.MaxPriority)</span><br><span class="line"></span><br><span class="line">	<span class="keyword">for</span> i := <span class="keyword">range</span> result &#123;</span><br><span class="line">		<span class="comment">// initializing to the default/max node score of maxPriority</span></span><br><span class="line">		fScore := MaxPriorityFloat64</span><br><span class="line">		<span class="keyword">if</span> maxCountByNodeName &gt; <span class="number">0</span> &#123;</span><br><span class="line">      <span class="comment">// 匹配数量最多的node，count=maxCountByNodeName，fScore得分为0</span></span><br><span class="line">      <span class="comment">// 匹配数量最少的node，假设count=0，则fScore得分为10</span></span><br><span class="line">			fScore = MaxPriorityFloat64 * (<span class="keyword">float64</span>(maxCountByNodeName-result[i].Score) / maxCountByNodeNameFloat64)</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="comment">// If there is zone information present, incorporate it</span></span><br><span class="line">		<span class="keyword">if</span> haveZones &#123;</span><br><span class="line">			zoneID := utilnode.GetZoneKey(nodeNameToInfo[result[i].Host].Node())</span><br><span class="line">			<span class="keyword">if</span> zoneID != <span class="string">""</span> &#123;</span><br><span class="line">				zoneScore := MaxPriorityFloat64</span><br><span class="line">				<span class="keyword">if</span> maxCountByZone &gt; <span class="number">0</span> &#123;</span><br><span class="line">					zoneScore = MaxPriorityFloat64 * (<span class="keyword">float64</span>(maxCountByZone-countsByZone[zoneID]) / maxCountByZoneFloat64)</span><br><span class="line">				&#125;</span><br><span class="line">        <span class="comment">// 这里将zone层级参与了运算，zoneWeighting=2/3，则nodeWeight取1/3，混合计算最终得分</span></span><br><span class="line">				fScore = (fScore * (<span class="number">1.0</span> - zoneWeighting)) + (zoneWeighting * zoneScore)</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">		result[i].Score = <span class="keyword">int</span>(fScore)</span><br><span class="line">		<span class="keyword">if</span> klog.V(<span class="number">10</span>) &#123;</span><br><span class="line">			klog.Infof(</span><br><span class="line">				<span class="string">"%v -&gt; %v: SelectorSpreadPriority, Score: (%d)"</span>, pod.Name, result[i].Host, <span class="keyword">int</span>(fScore),</span><br><span class="line">			)</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>不难发现，这里的Reduce函数统计得分的方式，与传统Function最后一步统计最终得分，步骤可以说是一致的:</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// PodAffinityPriority统计最终得分</span></span><br><span class="line">fScore = <span class="keyword">float64</span>(schedulerapi.MaxPriority) * ((pm.counts[node.Name] - minCount) / (maxCount - minCount))</span><br></pre></td></tr></table></figure>
+<p>只不过这里是使用Map-Reduce风格思想将其步骤解耦为了两步。Reduce函数介绍到此结束</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>优先级算法相对而言比predicate断言算法要复杂一些，并且在当前版本的维度计算中存在传统Function函数与Map-Reduce风格函数混用的现象，一定程度上提高了阅读的难度，但相信仔细重复阅读代码，还是不难理解的，毕竟数据量还未到达大数据的级别，只是利用了其映射归纳的思想，解耦的同时提高一定的并发性能。</p>
+<p>下一篇讲什么呢？我再研究研究，have fun!</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div id="reward-container">
+  <div>Thank you for your accept. mua！</div>
+  <button id="reward-button" disable="enable" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+
+    
+      
+      
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/reward/wechatpay.png" alt="丨ywq丨 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+      
+      
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/reward/alipay.png" alt="丨ywq丨 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        
+
+
+
+
+  
+
+
+
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>丨ywq丨</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    
+    <a href="https://www.ipyker.com/2019/08/22/Kubernetes源码学习-Scheduler-P4-Node优先级算法.html" title="Kubernetes源码学习-Scheduler-P4-Node优先级算法">https://www.ipyker.com/2019/08/22/Kubernetes源码学习-Scheduler-P4-Node优先级算法.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li>
+</ul>
+
+      </div>
+    
+    <div>
+      
+        <div>
+    
+        <div style="text-align:center;color: #ccc;font-size:16px;">-------------本文结束<i class="fa fa-heart"></i>感谢您的阅读-------------</div>
+    
+</div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Kubernetes/" rel="tag"><i class="fa fa-tag"></i> Kubernetes</a>
+          
+            <a href="/tags/Golang/" rel="tag"><i class="fa fa-tag"></i> Golang</a>
+          
+            <a href="/tags/读源码/" rel="tag"><i class="fa fa-tag"></i> 读源码</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/08/20/hexo图片-blog图床迁移至七牛云.html" rel="next" title="hexo图片展示: blog图床迁移至七牛云">
+                <i class="fa fa-chevron-left"></i> hexo图片展示: blog图床迁移至七牛云
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/09/02/Kubernetes源码学习-Scheduler-P5-Pod优先级抢占调度.html" rel="prev" title="Kubernetes源码学习-Scheduler-P5-Pod优先级抢占调度.md">
+                Kubernetes源码学习-Scheduler-P5-Pod优先级抢占调度.md <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC80NDM5Mi8yMDkyNA=="></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="丨ywq丨">
+            
+              <p class="site-author-name" itemprop="name">丨ywq丨</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives">
+                
+                    <span class="site-state-item-count">74</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                      <a href="/tags">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">15</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/yinwenqin" title="GitHub &rarr; https://github.com/yinwenqin" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://blog.csdn.net/ywq935" title="CSDN &rarr; https://blog.csdn.net/ywq935" rel="noopener" target="_blank"><i class="fa fa-fw fa-globe"></i>CSDN</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-book"></i>
+                推荐阅读
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.upweto.top/gitbooks/useKubernetes/" title="http://blog.upweto.top/gitbooks/useKubernetes/" rel="noopener" target="_blank">kubernetes使用指南</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.upweto.top/gitbooks/kubeSourceCodeNote/" title="http://blog.upweto.top/gitbooks/kubeSourceCodeNote/" rel="noopener" target="_blank">kubernetes源码笔记</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#P4-Node优先级算法"><span class="nav-number">1.</span> <span class="nav-text">P4-Node优先级算法</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#正文"><span class="nav-number">1.2.</span> <span class="nav-text">正文</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-优先级函数"><span class="nav-number">1.2.1.</span> <span class="nav-text">1. 优先级函数</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-1-优先级函数入口"><span class="nav-number">1.2.1.1.</span> <span class="nav-text">1.1 优先级函数入口</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-2-优先级函数概括说明"><span class="nav-number">1.2.1.2.</span> <span class="nav-text">1.2 优先级函数概括说明</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-3-优先级函数分段说明"><span class="nav-number">1.2.1.3.</span> <span class="nav-text">1.3 优先级函数分段说明</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#1-3-1-Function-DEPRECATED"><span class="nav-number">1.2.1.3.1.</span> <span class="nav-text">1.3.1 Function(DEPRECATED)</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#1-3-2-Map-Reduce-Function"><span class="nav-number">1.2.1.3.2.</span> <span class="nav-text">1.3.2 Map-Reduce Function</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-优先级计算维度"><span class="nav-number">1.2.2.</span> <span class="nav-text">2. 优先级计算维度</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#2-1-默认注册的计算维度"><span class="nav-number">1.2.2.1.</span> <span class="nav-text">2.1 默认注册的计算维度</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-2-默认使用的计算维度"><span class="nav-number">1.2.2.2.</span> <span class="nav-text">2.2 默认使用的计算维度</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-3-新旧两种计算方式"><span class="nav-number">1.2.2.3.</span> <span class="nav-text">2.3 新旧两种计算方式</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-传统计算Function"><span class="nav-number">1.2.3.</span> <span class="nav-text">3. 传统计算Function</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#3-1-InterPodAffinityPriority"><span class="nav-number">1.2.3.1.</span> <span class="nav-text">3.1 InterPodAffinityPriority</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-Map-Reduce计算方法"><span class="nav-number">1.2.4.</span> <span class="nav-text">4. Map-Reduce计算方法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#4-1-Map函数"><span class="nav-number">1.2.4.1.</span> <span class="nav-text">4.1  Map函数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-1-Reduce函数"><span class="nav-number">1.2.4.2.</span> <span class="nav-text">4.1  Reduce函数</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">1.3.</span> <span class="nav-text">总结</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" style=" text-align:center;">&copy; 2017 – <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ywq</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"> 站点字数合计:</i>
+    </span>
+    
+    <span title="站点总字数">583k</span>
+  
+  
+</div>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+<div class="run_time" style=" text-align:center;">
+  <span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
+  <script>
+    var now = new Date(); 
+    function createtime() { 
+        var grt= new Date("08/23/2018 10:00:00");//此处修改你的建站时间或者网站上线时间 
+        now.setTime(now.getTime()+250); 
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days); 
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours); 
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum); 
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;} 
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum); 
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;} 
+        document.getElementById("timeDate").innerHTML = "本站已安全运行 "+dnum+" 天 "; 
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒"; 
+    } 
+    setInterval("createtime()",250);
+  </script>
+</div>
+
+        
+<div class="busuanzi-count" style=" text-align:center;">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-user"></i>
+    </span>
+    <span class="site-uv" title="总访客量">
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span> 人
+    </span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+  
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-eye"></i>
+    </span>
+    <span class="site-pv" title="总访问量">
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span> 次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+  
+    
+    
+      
+    
+  
+  <script color="black" opacity="0.7" zindex="-1" count="140" src="//cdn.jsdelivr.net/gh/theme-next/theme-next-canvas-nest@1.0.0/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+  
+  
+  <script id="ribbon" size="300" alpha="0.1" zindex="-1" src="/lib/canvas-ribbon/canvas-ribbon.js"></script>
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/fancybox/source/jquery.fancybox.pack.js"></script>
+
+
+  
+
+
+  <script src="/js/utils.js?v=7.1.1"></script>
+
+  <script src="/js/motion.js?v=7.1.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/schemes/muse.js?v=7.1.1"></script>
+
+
+
+
+  
+  <script src="/js/scrollspy.js?v=7.1.1"></script>
+<script src="/js/post-details.js?v=7.1.1"></script>
+
+
+
+  
+
+
+  <script src="/js/next-boot.js?v=7.1.1"></script>
+
+
+  
+
+  
+
+  
+  
+  
+
+  
+
+  
+  
+  
+
+
+  
+
+
+  
+    <script>
+  window.livereOptions = {
+    refer: '2019/08/22/Kubernetes源码学习-Scheduler-P4-Node优先级算法.html'
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+</script>
+
+  
+
+
+  
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url).replace(/\/{2,}/g, '/');
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x"></i></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x"></i></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+  
+  <script src="/lib/bookmark/bookmark.min.js?v=1.0"></script>
+  <script>
+  
+    bookmark.scrollToMark('auto', "#更多");
+  
+  </script>
+
+
+  
+
+  
+
+  
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/koharu.model.json"},"display":{"position":"left","width":250,"height":500},"mobile":{"show":false},"react":{"opacity":0.7},"log":false});</script></body>
+</html>
+<!-- 页面点击小红心 -->
+<script type="text/javascript" src="/js/src/clicklove.js"></script>

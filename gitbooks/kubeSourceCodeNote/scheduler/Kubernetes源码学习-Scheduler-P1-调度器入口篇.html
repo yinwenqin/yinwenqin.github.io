@@ -1,0 +1,600 @@
+
+<!DOCTYPE HTML>
+<html lang="zh-hans" >
+    <head>
+        <meta charset="UTF-8">
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <title>2.1. 调度器入口 · Kubernetes源码学习</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="description" content="">
+        <meta name="generator" content="GitBook 3.2.3">
+        <meta name="author" content="ywq">
+        
+        
+    
+    <link rel="stylesheet" href="../gitbook/style.css">
+
+    
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-anchors/plugin.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-expandable-chapters/expandable-chapters.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-splitter/splitter.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-page-treeview/style.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-back-to-top-button/plugin.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-highlight/website.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-search/search.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-fontsettings/website.css">
+                
+            
+        
+
+    
+
+    
+        
+    
+
+        
+    
+    
+    <meta name="HandheldFriendly" content="true"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="../gitbook/images/apple-touch-icon-precomposed-152.png">
+    <link rel="shortcut icon" href="../gitbook/images/favicon.ico" type="image/x-icon">
+
+    
+    <link rel="next" href="Kubernetes源码学习-Scheduler-P2-调度器框架.html" />
+    
+    
+    <link rel="prev" href="./" />
+    
+
+    </head>
+    <body>
+        
+<div class="book">
+    <div class="book-summary">
+        
+            
+<div id="book-search-input" role="search">
+    <input type="text" placeholder="输入并搜索" />
+</div>
+
+            
+                <nav role="navigation">
+                
+
+
+<ul class="summary">
+    
+    
+
+    
+
+    
+        
+        <li class="header">Part I-写在前面</li>
+        
+        
+    
+        <li class="chapter " data-level="1.1" data-path="../">
+            
+                <a href="../">
+            
+                    
+                    1. 总览篇
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Part II-核心组件</li>
+        
+        
+    
+        <li class="chapter " data-level="2.1" data-path="./">
+            
+                <a href="./">
+            
+                    
+                    2. Scheduler
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter active" data-level="2.1.1" data-path="Kubernetes源码学习-Scheduler-P1-调度器入口篇.html">
+            
+                <a href="Kubernetes源码学习-Scheduler-P1-调度器入口篇.html">
+            
+                    
+                    2.1. 调度器入口
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.1.2" data-path="Kubernetes源码学习-Scheduler-P2-调度器框架.html">
+            
+                <a href="Kubernetes源码学习-Scheduler-P2-调度器框架.html">
+            
+                    
+                    2.2. 调度器框架
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.1.3" data-path="Kubernetes源码学习-Scheduler-P3-Node筛选算法.html">
+            
+                <a href="Kubernetes源码学习-Scheduler-P3-Node筛选算法.html">
+            
+                    
+                    2.3. Node筛选算法
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.1.4" data-path="Kubernetes源码学习-Scheduler-P4-Node优先级算法.html">
+            
+                <a href="Kubernetes源码学习-Scheduler-P4-Node优先级算法.html">
+            
+                    
+                    2.4. Node优先级算法
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.1.5" data-path="Kubernetes源码学习-Scheduler-P5-Pod优先级抢占调度.html">
+            
+                <a href="Kubernetes源码学习-Scheduler-P5-Pod优先级抢占调度.html">
+            
+                    
+                    2.5 Pod优先级调度
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2" >
+            
+                <span>
+            
+                    
+                    [3. Controller]
+            
+                </span>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="2.2.1" >
+            
+                <span>
+            
+                    
+                    [3.1 待补充]
+            
+                </span>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="2.3" >
+            
+                <span>
+            
+                    
+                    [4. ApiServer]
+            
+                </span>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="2.3.1" >
+            
+                <span>
+            
+                    
+                    [4.1 待补充]
+            
+                </span>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="2.4" >
+            
+                <span>
+            
+                    
+                    [5. Kubelet]
+            
+                </span>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="2.4.1" >
+            
+                <span>
+            
+                    
+                    [5.1 待补充]
+            
+                </span>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+
+    <li class="divider"></li>
+
+    <li>
+        <a href="https://www.gitbook.com" target="blank" class="gitbook-link">
+            本书使用 GitBook 发布
+        </a>
+    </li>
+</ul>
+
+
+                </nav>
+            
+        
+    </div>
+
+    <div class="book-body">
+        
+            <div class="body-inner">
+                
+                    
+
+<div class="book-header" role="navigation">
+    
+
+    <!-- Title -->
+    <h1>
+        <i class="fa fa-circle-o-notch fa-spin"></i>
+        <a href=".." >2.1. 调度器入口</a>
+    </h1>
+</div>
+
+
+
+
+                    <div class="page-wrapper" tabindex="-1" role="main">
+                        <div class="page-inner">
+                            
+<div id="book-search-results">
+    <div class="search-noresults">
+    
+                                <section class="normal markdown-section">
+                                
+                                <div class="treeview__container"><ul>
+<li><div><a href="#&#x8C03;&#x5EA6;&#x5668;&#x5165;&#x53E3;">&#x8C03;&#x5EA6;&#x5668;&#x5165;&#x53E3;</a><i class="level__parent level__item level__parent--opened" state="opened" onclick="var curState = this.getAttribute(&apos;state&apos;);var nextState = curState === &apos;opened&apos; ? &apos;hidden&apos; : &apos;opened&apos;;this.setAttribute(&apos;state&apos;, nextState);this.className = this.className.split(curState).join(nextState);var list = this.parentNode.nextElementSibling;if (nextState === &apos;hidden&apos;) {    list.style.display = &apos;none&apos;;} else {    list.style.display = &apos;block&apos;;}"></i></div>
+<ul>
+<li><div><a href="#&#x524D;&#x8A00;">&#x524D;&#x8A00;</a><i></i></div></li>
+<li><div><a href="#&#x5165;&#x53E3;&#x4E4B;&#x524D;">&#x5165;&#x53E3;&#x4E4B;&#x524D;</a><i></i></div></li>
+<li><div><a href="#cobra">cobra</a><i class="level__parent level__item level__parent--opened" state="opened" onclick="var curState = this.getAttribute(&apos;state&apos;);var nextState = curState === &apos;opened&apos; ? &apos;hidden&apos; : &apos;opened&apos;;this.setAttribute(&apos;state&apos;, nextState);this.className = this.className.split(curState).join(nextState);var list = this.parentNode.nextElementSibling;if (nextState === &apos;hidden&apos;) {    list.style.display = &apos;none&apos;;} else {    list.style.display = &apos;block&apos;;}"></i></div>
+<ul>
+<li> 
+<ul>
+<li><div><a href="#&#x4EC0;&#x4E48;&#x662F;cobra">&#x4EC0;&#x4E48;&#x662F;cobra?</a><i></i></div></li>
+<li><div><a href="#&#x5B89;&#x88C5;cobra">&#x5B89;&#x88C5;cobra</a><i></i></div></li>
+<li><div><a href="#&#x7B80;&#x5355;&#x8BD5;&#x7528;cobra">&#x7B80;&#x5355;&#x8BD5;&#x7528;cobra</a><i></i></div></li>
+</ul></li>
+</ul></li>
+<li><div><a href="#&#x8C03;&#x5EA6;&#x5668;&#x5165;&#x53E3;">&#x8C03;&#x5EA6;&#x5668;&#x5165;&#x53E3;</a><i></i></div></li>
+</ul></li>
+</ul>
+</div>
+
+<h1 id="&#x8C03;&#x5EA6;&#x5668;&#x5165;&#x53E3;"><a name="&#x8C03;&#x5EA6;&#x5668;&#x5165;&#x53E3;" class="plugin-anchor" href="#&#x8C03;&#x5EA6;&#x5668;&#x5165;&#x53E3;"><i class="fa fa-link" aria-hidden="true"></i></a>&#x8C03;&#x5EA6;&#x5668;&#x5165;&#x53E3;</h1>
+<h2 id="&#x524D;&#x8A00;"><a name="&#x524D;&#x8A00;" class="plugin-anchor" href="#&#x524D;&#x8A00;"><i class="fa fa-link" aria-hidden="true"></i></a>&#x524D;&#x8A00;</h2>
+<p>&#x672C;&#x7BC7;&#x4ECB;&#x7ECD;scheduler&#x7684;&#x521D;&#x59CB;&#x5316;&#x76F8;&#x5173;&#x903B;&#x8F91;</p>
+<h2 id="&#x5165;&#x53E3;&#x4E4B;&#x524D;"><a name="&#x5165;&#x53E3;&#x4E4B;&#x524D;" class="plugin-anchor" href="#&#x5165;&#x53E3;&#x4E4B;&#x524D;"><i class="fa fa-link" aria-hidden="true"></i></a>&#x5165;&#x53E3;&#x4E4B;&#x524D;</h2>
+<p>&#x5165;&#x53E3;&#x51FD;&#x6570;&#x662F;&#x4F4D;&#x4E8E;<code>cmd/kube-scheduler/scheduler.go</code>&#x4E2D;&#x7684;main()&#x65B9;&#x6CD5;,&#x8C03;&#x7528;&#x7684;&#x662F;app.NewSchedulerCommand()&#x65B9;&#x6CD5;&#xFF0C;&#x8DF3;&#x8F6C;&#x81F3;&#x6B64;&#x65B9;&#x6CD5;&#xFF0C;&#x53EF;&#x4EE5;&#x770B;&#x5230;&#x51FD;&#x6570;&#x4E0A;&#x65B9;&#x7684;&#x6CE8;&#x91CA;&#xFF1A;</p>
+<pre><code>// NewSchedulerCommand creates a *cobra.Command object with default parameters
+func NewSchedulerCommand() *cobra.Command {
+    ...
+}
+</code></pre><p>NewSchedulerCommand&#x521B;&#x5EFA;&#x7684;&#x662F;&#x4E00;&#x4E2A;cobra.Command&#x5BF9;&#x8C61;&#xFF0C;&#x540E;&#x7EED;&#x7684;&#x547D;&#x4EE4;&#x884C;&#x5904;&#x7406;&#x76F8;&#x5173;&#x529F;&#x80FD;&#x90FD;&#x662F;&#x501F;&#x52A9;cobra&#x6765;&#x5B9E;&#x73B0;&#x7684;&#xFF0C;&#x90A3;&#x4E48;&#x7EE7;&#x7EED;&#x5F80;&#x4E0B;&#x4E4B;&#x524D;&#xFF0C;&#x4E3A;&#x4E86;&#x907F;&#x514D;&#x4ECE;&#x5165;&#x53E3;&#x5F00;&#x59CB;&#x5C31;&#x4E00;&#x8138;&#x61F5;&#xFF0C;&#x6709;&#x5FC5;&#x8981;&#x4E86;&#x89E3;&#x4E00;&#x4E0B;cobra&#x8FD9;&#x4E2A;&#x5DE5;&#x5177;</p>
+<h2 id="cobra"><a name="cobra" class="plugin-anchor" href="#cobra"><i class="fa fa-link" aria-hidden="true"></i></a>cobra</h2>
+<h4 id="&#x4EC0;&#x4E48;&#x662F;cobra"><a name="&#x4EC0;&#x4E48;&#x662F;cobra" class="plugin-anchor" href="#&#x4EC0;&#x4E48;&#x662F;cobra"><i class="fa fa-link" aria-hidden="true"></i></a>&#x4EC0;&#x4E48;&#x662F;cobra?</h4>
+<p>github&#x4E3B;&#x9875;: <a href="https://github.com/spf13/cobra" target="_blank">https://github.com/spf13/cobra</a>
+&#x4E3B;&#x9875;&#x7684;&#x4ECB;&#x7ECD;&#x662F;: Cobra&#x662F;&#x4E00;&#x4E2A;&#x5F3A;&#x5927;&#x7684;&#x7528;&#x4E8E;&#x521B;&#x5EFA;&#x73B0;&#x4EE3;&#x5316;CLI&#x547D;&#x4EE4;&#x884C;&#x7A0B;&#x5E8F;&#x7684;&#x5E93;&#xFF0C;&#x7528;&#x4E8E;&#x751F;&#x6210;&#x5E94;&#x7528;&#x7A0B;&#x5E8F;&#x548C;&#x547D;&#x4EE4;&#x6587;&#x4EF6;&#x3002;&#x4F17;&#x591A;&#x9AD8;&#x77E5;&#x540D;&#x5EA6;&#x7684;&#x9879;&#x76EE;&#x91C7;&#x7528;&#x4E86;&#x5B83;&#xFF0C;&#x4F8B;&#x5982;&#x6211;&#x4EEC;&#x719F;&#x6089;&#x7684;kubernetes&#x548C;docker
+cobra&#x521B;&#x5EFA;&#x7684;&#x7A0B;&#x5E8F;CLI&#x9075;&#x5FAA;&#x7684;&#x6A21;&#x5F0F;&#x662F;: <code>APPNAME COMMAND ARG --FLAG</code>&#xFF0C;&#x4E0E;&#x5E38;&#x89C1;&#x7684;&#x5176;&#x4ED6;&#x547D;&#x4EE4;&#x884C;&#x7A0B;&#x5E8F;&#x4E00;&#x6837;&#xFF0C;&#x4F8B;&#x5982;git: <code>git clone URL --bare</code></p>
+<h4 id="&#x5B89;&#x88C5;cobra"><a name="&#x5B89;&#x88C5;cobra" class="plugin-anchor" href="#&#x5B89;&#x88C5;cobra"><i class="fa fa-link" aria-hidden="true"></i></a>&#x5B89;&#x88C5;cobra</h4>
+<pre><code>#&#x6700;&#x7B80;&#x5355;&#x7684;&#x5B89;&#x88C5;&#x65B9;&#x5F0F;&#xFF0C;&#x4F46;&#x6BEB;&#x65E0;&#x610F;&#x5916;&#xFF0C;&#x4E8B;&#x60C5;&#x5E76;&#x6CA1;&#x6709;&#x90A3;&#x4E48;&#x7B80;&#x5355;&#xFF0C;&#x6211;&#x4EEC;&#x7684;&#x7F51;&#x7EDC;&#x7684;&#x95EE;&#x9898;&#xFF0C;&#x5BFC;&#x81F4;&#x65E0;&#x6CD5;&#x6B63;&#x5E38;&#x5B89;&#x88C5;&#x4F9D;&#x8D56;&#xFF0C;
+go get -u github.com/spf13/cobra/cobra
+
+#&#x600E;&#x4E48;&#x529E;&#x5462;&#xFF1F;&#x5148;&#x8FDB;&#x5165;GOPATH&#x4E2D;&#xFF0C;&#x624B;&#x52A8;&#x5B89;&#x88C5;&#x62A5;&#x9519;&#x7F3A;&#x5931;&#x7684;&#x4E24;&#x4E2A;&#x4F9D;&#x8D56;:
+cd /Users/ywq/go/
+mkdir -p src/golang.org/x
+cd golang.org/x
+git clone https://github.com/golang/text.git
+git clone https://github.com/golang/sys.git
+
+#&#x7136;&#x540E;&#x6267;&#x884C;:
+go install github.com/spf13/cobra/cobra
+matebook-x-pro:x ywq$ ls /Users/ywq/go/bin/cobra
+/Users/ywq/go/bin/cobra
+#&#x5B89;&#x88C5;&#x5B8C;&#x6BD5;,&#x8BB0;&#x5F97;&#x628A;GOBIN&#x52A0;&#x5165;PATH&#x73AF;&#x5883;&#x53D8;&#x91CF;&#x54E6;,&#x5426;&#x5219;&#x65E0;&#x6CD5;&#x76F4;&#x63A5;&#x8FD0;&#x884C;cobra&#x547D;&#x4EE4;
+</code></pre><h4 id="&#x7B80;&#x5355;&#x8BD5;&#x7528;cobra"><a name="&#x7B80;&#x5355;&#x8BD5;&#x7528;cobra" class="plugin-anchor" href="#&#x7B80;&#x5355;&#x8BD5;&#x7528;cobra"><i class="fa fa-link" aria-hidden="true"></i></a>&#x7B80;&#x5355;&#x8BD5;&#x7528;cobra</h4>
+<pre><code>matebook-x-pro:local ywq$ cd /Users/ywq/go/src/local/
+matebook-x-pro:local ywq$ cobra init testapp --pkg-name=local/testapp
+matebook-x-pro:local ywq$ ls
+testapp
+matebook-x-pro:local ywq$ ls testapp/
+LICENSE  cmd/     main.go
+matebook-x-pro:local ywq$ ls testapp/cmd/
+root.go
+matebook-x-pro:local ywq$ cd testapp
+matebook-x-pro:local ywq$ go run main.go 
+# &#x62A5;&#x9519;&#xFF1A;subcommand is required&#xFF0C;&#x8981;&#x6C42;&#x63D0;&#x4F9B;&#x5B50;&#x547D;&#x4EE4;
+# &#x56E0;&#x9700;&#x8981;&#x591A;&#x6B21;&#x6D4B;&#x8BD5;&#xFF0C;&#x8FD9;&#x91CC;&#x6240;&#x6709;&#x7684;&#x6D4B;&#x8BD5;&#x6B65;&#x9AA4;&#x5C31;&#x628A;build&#x7684;&#x6B65;&#x9AA4;&#x8DF3;&#x8FC7;&#xFF0C;&#x76F4;&#x63A5;&#x4F7F;&#x7528;go run main.go&#x8FDB;&#x884C;&#x6D4B;&#x8BD5;
+</code></pre><p><strong>&#x6211;&#x4EEC;&#x6253;&#x5F00;IDE&#x6765;&#x67E5;&#x770B;&#x4E00;&#x4E0B;testapp&#x7684;&#x4EE3;&#x7801;&#x7ED3;&#x6784;:</strong>
+<img src="http://mycloudn.kokoerp.com/cobra1.jpg" alt="image">
+<img src="http://mycloudn.kokoerp.com/cobra2.jpg" alt="image"></p>
+<pre><code># &#x73B0;&#x5728;&#x8FD8;&#x672A;&#x521B;&#x5EFA;&#x5B50;&#x547D;&#x4EE4;&#xFF0C;&#x90A3;&#x4E48;&#x6765;&#x521B;&#x5EFA;&#x51E0;&#x4E2A;&#x8BD5;&#x8BD5;:
+matebook-x-pro:testapp ywq$ cobra add get
+get created at /Users/ywq/go/src/local/testapp
+matebook-x-pro:testapp ywq$ cobra add delete
+delete created at /Users/ywq/go/src/local/testapp
+matebook-x-pro:testapp ywq$ cobra add add
+add created at /Users/ywq/go/src/local/testapp
+matebook-x-pro:testapp ywq$ cobra add update
+matebook-x-pro:testapp ywq$ ls cmd/
+add.go        delete.go    get.go        root.go        update.go
+
+# &#x67E5;&#x770B;help&#xFF0C;&#x53EF;&#x4EE5;&#x53D1;&#x73B0;&#x521A;&#x6DFB;&#x52A0;&#x7684;&#x5B50;&#x547D;&#x4EE4;&#x5DF2;&#x7ECF;&#x52A0;&#x5165;&#x63D0;&#x793A;&#x5E76;&#x53EF;&#x7528;&#x4E86;
+matebook-x-pro:testapp ywq$ go run main.go -h
+...
+
+Available Commands:
+  add         A brief description of your command
+  delete      A brief description of your command
+  get         A brief description of your command
+  help        Help about any command
+  update      A brief description of your command
+
+# &#x8C03;&#x7528;&#x5B50;&#x547D;&#x4EE4;&#x8BD5;&#x8BD5;:
+matebook-x-pro:testapp ywq$ go run main.go get
+get called
+matebook-x-pro:testapp ywq$ go run main.go add
+add called
+</code></pre><p><strong>&#x6765;&#x770B;&#x770B;&#x65B0;&#x589E;&#x7684;&#x5B50;&#x547D;&#x4EE4;&#x662F;&#x600E;&#x4E48;&#x8FD0;&#x884C;&#x7684;&#x5462;&#xFF1F;</strong>
+<img src="http://mycloudn.kokoerp.com/cobra3.jpg" alt="image">
+&#x622A;&#x56FE;&#x5708;&#x4E2D;&#x90E8;&#x5206;&#x53EF;&#x4EE5;&#x770B;&#x51FA;&#xFF0C;&#x5B50;&#x547D;&#x4EE4;&#x662F;&#x5728;init()&#x51FD;&#x6570;&#x91CC;&#x4E3A;root&#x7EA7;&#x6DFB;&#x52A0;&#x4E86;&#x4E00;&#x4E2A;&#x5B50;&#x547D;&#x4EE4;&#xFF0C;&#x5148;&#x4E0D;&#x53BB;&#x7BA1;&#x5E95;&#x5C42;&#x5B9E;&#x73B0;&#xFF0C;&#x63A5;&#x7740;&#x5F80;&#x4E0B;.</p>
+<p><strong>&#x6D4B;&#x8BD5;cobra&#x7684;&#x5F3A;&#x5927;&#x7B80;&#x6D01;&#x7684;flag&#x5904;&#x7406;</strong>
+&#x6211;&#x4EEC;&#x5728;<code>cmd/delete.go</code>&#x7684;init()&#x51FD;&#x6570;&#x4E2D;&#xFF0C;&#x5B9A;&#x4E49;&#x4E00;&#x4E2A;flag&#x5904;&#x7406;&#x914D;&#x7F6E;:</p>
+<pre><code>var obj string
+deleteCmd.PersistentFlags().StringVar(&amp;obj,&quot;object&quot;, &quot;&quot;, &quot;A function to delete an test object&quot;)
+</code></pre><p>&#x5728;<code>Run:func()</code>&#x533F;&#x540D;&#x51FD;&#x6570;&#x4E2D;&#x6DFB;&#x52A0;&#x4E00;&#x884C;&#x8F93;&#x51FA;:
+<code>fmt.Println(&quot;delete obj:&quot;,cmd.Flag(&quot;object&quot;).Value)</code>
+<img src="http://mycloudn.kokoerp.com/cobra4.jpg" alt="image"></p>
+<p>&#x8FD0;&#x884C;&#x7ED3;&#x679C;:</p>
+<pre><code>matebook-x-pro:testapp ywq$ go run main.go delete --object obj1
+delete called
+delete obj: obj1
+</code></pre><p>&#x5982;&#x679C;&#x89C9;&#x5F97;<code>--</code>flag&#x7B26;&#x53F7;&#x592A;&#x9EBB;&#x70E6;&#xFF0C;cobra&#x540C;&#x6837;&#x652F;&#x6301;&#x77ED;&#x7B26;&#x53F7;<code>-</code>flag&#x7F29;&#x5199;:
+<img src="http://mycloudn.kokoerp.com/cobra5.jpg" alt="image"></p>
+<p>&#x8FD0;&#x884C;&#x7ED3;&#x679C;:</p>
+<pre><code>matebook-x-pro:testapp ywq$ go run main.go delete -o obj1
+delete called
+delete obj: obj1
+</code></pre><p>&#x8FD9;&#x91CC;&#x53EA;&#x662F;&#x4E24;&#x7EA7;&#x547D;&#x4EE4;&#x52A0;flag,&#x4F46;&#x6211;&#x4EEC;&#x5E38;&#x89C1;&#x7684;&#xFF0C;&#x4F8B;&#x5982;(kubectl delete pod xxx)&#xFF0C;&#x662F;&#x6709;3&#x7EA7;&#x547D;&#x4EE4; + args&#x7684;&#xFF0C;&#x600E;&#x4E48;&#x518D;&#x591A;&#x6DFB;&#x52A0;&#x4E00;&#x7EA7;&#x5B50;&#x547D;&#x4EE4;&#x5462;&#xFF1F;cobra&#x5E2E;&#x4F60;&#x4E00;&#x6761;&#x547D;&#x4EE4;&#x5B9E;&#x73B0;</p>
+<pre><code>matebook-x-pro:testapp ywq$ cobra add pods -p deleteCmd  # -p&#x4E3A;&#x7236;&#x7EA7;&#x547D;&#x4EE4;&#xFF0C;&#x9ED8;&#x8BA4;&#x5176;&#x540D;&#x79F0;&#x683C;&#x5F0F;&#x4E3A;(parentCommandName)Cmd
+matebook-x-pro:testapp ywq$ ls cmd
+add.go          delete.go       get.go          pods.go         root.go         update.go
+</code></pre><p>&#x53EF;&#x4EE5;&#x53D1;&#x73B0;,cmd/&#x76EE;&#x5F55;&#x4E0B;&#x591A;&#x4E86;&#x4E00;&#x4E2A;pods.go&#x6587;&#x4EF6;&#xFF0C;&#x6211;&#x4EEC;&#x6765;&#x770B;&#x770B;&#x5B83;&#x662F;&#x600E;&#x4E48;&#x5173;&#x8054;&#x4E0A;delete&#x7236;&#x7EA7;&#x547D;&#x4EE4;&#x7684;,&#x540C;&#x65F6;&#x4E3A;&#x5B83;&#x6DFB;&#x52A0;&#x4E00;&#x884C;&#x8F93;&#x51FA;:
+<img src="http://mycloudn.kokoerp.com/cobra6.jpg" alt="image">
+&#x6267;&#x884C;&#x547D;&#x4EE4;:</p>
+<pre><code>matebook-x-pro:testapp ywq$ go run main.go delete pods pod1
+pods called
+delete pods: pod1
+</code></pre><p>&#x770B;&#x5230;&#x8FD9;&#x91CC;&#xFF0C;&#x76F8;&#x4FE1;&#x5BF9;cobra&#x7684;&#x5F3A;&#x5927;&#x7B80;&#x6D01;&#x5DF2;&#x7ECF;&#x6709;&#x4E86;&#x521D;&#x6B65;&#x7684;&#x8BA4;&#x77E5;&#xFF0C;&#x5EFA;&#x8BAE;&#x81EA;&#x884C;&#x8FDB;&#x5165;&#x9879;&#x76EE;&#x4E3B;&#x9875;&#x4E86;&#x89E3;&#x8BE6;&#x60C5;&#x5E76;&#x8FDB;&#x884C;&#x5B89;&#x88C5;&#x6D4B;&#x8BD5;</p>
+<h2 id="&#x8C03;&#x5EA6;&#x5668;&#x5165;&#x53E3;"><a name="&#x8C03;&#x5EA6;&#x5668;&#x5165;&#x53E3;" class="plugin-anchor" href="#&#x8C03;&#x5EA6;&#x5668;&#x5165;&#x53E3;"><i class="fa fa-link" aria-hidden="true"></i></a>&#x8C03;&#x5EA6;&#x5668;&#x5165;&#x53E3;</h2>
+<p>&#x901A;&#x8FC7;&#x5BF9;&#x4E0A;&#x65B9;cobra&#x7684;&#x57FA;&#x672C;&#x4E86;&#x89E3;&#xFF0C;&#x6211;&#x4EEC;&#x4E0D;&#x96BE;&#x77E5;&#x9053;&#xFF0C;<code>cmd/kube-scheduler/scheduler.go</code>&#x5185;&#x7684;main()&#x65B9;&#x6CD5;&#x5185;&#x90E8;&#x5B9E;&#x9645;&#x8C03;&#x7528;&#x7684;&#x662F;<code>cobra.Command.Run</code>&#x5185;&#x7684;&#x533F;&#x540D;&#x51FD;&#x6570;&#xFF0C;&#x6211;&#x4EEC;&#x53EF;&#x4EE5;&#x8FDB;&#x5165;<code>NewSchedulerCommand()</code>&#x5185;&#x90E8;&#x786E;&#x8BA4;:
+<img src="http://mycloudn.kokoerp.com/main1.jpg" alt="image"></p>
+<p>&#x53EF;&#x4EE5;&#x770B;&#x5230;&#xFF0C;&#x8C03;&#x7528;&#x4E86;<code>Run</code>&#x5185;&#x90E8;<code>runCommand</code>&#x65B9;&#x6CD5;&#xFF0C;&#x518D;&#x6765;&#x770B;&#x770B;Run&#x65B9;&#x6CD5;&#x5185;&#x90E8;&#x9700;&#x8981;&#x91CD;&#x70B9;&#x5173;&#x6CE8;&#x7684;&#x51E0;&#x4E2A;&#x70B9;&#xFF1A;
+<img src="http://mycloudn.kokoerp.com/runCommand.jpg" alt="image"></p>
+<p>&#x5176;&#x4E2D;&#xFF0C;&#x4E0A;&#x65B9;&#x662F;&#x5BF9;&#x547D;&#x4EE4;&#x884C;&#x7684;&#x53C2;&#x6570;&#x3001;&#x9009;&#x9879;&#x6821;&#x9A8C;&#x7684;&#x6B65;&#x9AA4;&#xFF0C;&#x8DF3;&#x8FC7;&#xFF0C;&#x91CD;&#x70B9;&#x5173;&#x6CE8;&#x4E24;&#x4E2A;&#x53D8;&#x91CF;:<code>cc&#x548C;stopCh</code>&#xFF0C;&#x8FD9;&#x4E24;&#x4E2A;&#x53D8;&#x91CF;&#x4F1A;&#x4F5C;&#x4E3A;&#x6700;&#x540E;&#x8C03;&#x7528;<code>Run()</code>&#x65B9;&#x6CD5;&#x7684;&#x53C2;&#x6570;&#xFF0C;&#x5176;&#x4E2D;<code>stopCh</code>&#x4F5C;&#x7528;&#x662F;&#x4F5C;&#x4E3A;&#x4E3B;&#x7A0B;&#x5E8F;&#x9000;&#x51FA;&#x7684;&#x4FE1;&#x53F7;&#x901A;&#x77E5;&#x5176;&#x4ED6;&#x5404;&#x534F;&#x7A0B;&#x8FDB;&#x884C;&#x76F8;&#x5173;&#x7684;&#x9000;&#x51FA;&#x64CD;&#x4F5C;&#x7684;&#xFF0C;&#x53E6;&#x5916;&#x4E00;&#x4E2A;cc&#x53D8;&#x91CF;&#x975E;&#x5E38;&#x91CD;&#x8981;&#xFF0C;&#x53EF;&#x4EE5;&#x70B9;&#x51FB;<code>c.Complete()</code>&#x65B9;&#x6CD5;&#xFF0C;&#x67E5;&#x770B;&#x8BE5;&#x65B9;&#x6CD5;&#x7684;&#x8BE6;&#x60C5;&#xFF1A;
+<img src="http://mycloudn.kokoerp.com/runCommand.jpg" alt="image">
+<code>Complete()</code>&#x65B9;&#x6CD5;&#x672C;&#x8D28;&#x4E0A;&#x8FD4;&#x56DE;&#x7684;&#x662F;&#x4E00;&#x4E2A;Config&#x7ED3;&#x6784;&#x4F53;&#xFF0C;&#x8BE5;&#x7ED3;&#x6784;&#x4F53;&#x5185;&#x90E8;&#x7684;&#x5143;&#x7D20;&#x975E;&#x5E38;&#x4E30;&#x5BCC;&#xFF0C;&#x7BC7;&#x5E45;&#x6709;&#x9650;&#x5C31;&#x4E0D;&#x4E00;&#x4E00;&#x70B9;&#x5F00;&#x622A;&#x56FE;&#x4E86;&#xFF0C;&#x5927;&#x5BB6;&#x53EF;&#x4EE5;&#x81EA;&#x884C;&#x6DF1;&#x5165;&#x67E5;&#x770B;&#x8FD9;&#x4E9B;&#x5143;&#x7D20;&#x7684;&#x4F5C;&#x7528;&#xFF0C;&#x8FD9;&#x91CC;&#x7B80;&#x5355;&#x6982;&#x62EC;&#x4E00;&#x4E0B;&#x5176;&#x4E2D;&#x51E0;&#x4E2A;:</p>
+<pre><code>// scheduler &#x672C;&#x8EAB;&#x76F8;&#x5173;&#x7684;&#x914D;&#x7F6E;&#x90FD;&#x96C6;&#x4E2D;&#x4E8E;&#x6B64;&#xFF0C;&#x4F8B;&#x5982;&#x540D;&#x79F0;&#x3001;&#x8C03;&#x5EA6;&#x7B97;&#x6CD5;&#x3001;pod&#x4EB2;&#x548C;&#x6027;&#x6743;&#x91CD;&#x3001;leader&#x9009;&#x4E3E;&#x673A;&#x5236;&#x3001;metric&#x7ED1;&#x5B9A;&#x5730;&#x5740;&#xFF0C;&#x5065;&#x5EB7;&#x68C0;&#x67E5;&#x7ED1;&#x5B9A;&#x5730;&#x5740;&#xFF0C;&#x7ED1;&#x5B9A;&#x8D85;&#x65F6;&#x65F6;&#x95F4;&#x7B49;&#x7B49;
+ComponentConfig kubeschedulerconfig.KubeSchedulerConfiguration
+
+// &#x8FD9;&#x51E0;&#x4E2A;&#x5143;&#x7D20;&#x90FD;&#x662F;&#x4E0E;apiserver&#x8BA4;&#x8BC1;&#x6388;&#x6743;&#x76F8;&#x5173;&#x7684;
+InsecureServing        *apiserver.DeprecatedInsecureServingInfo // nil will disable serving on an insecure port
+InsecureMetricsServing *apiserver.DeprecatedInsecureServingInfo // non-nil if metrics should be served independently
+Authentication         apiserver.AuthenticationInfo
+Authorization          apiserver.AuthorizationInfo
+SecureServing          *apiserver.SecureServingInfo
+
+// Clientset.Interface&#x5185;&#x90E8;&#x5C01;&#x88C5;&#x4E86;&#x5411;apiServer&#x6240;&#x652F;&#x6301;&#x7684;&#x6240;&#x6709;apiVersion(apps/v1beta2,extensions/v1beta1...)&#x4E4B;&#x4E0B;&#x7684;resource(pod/deployment/service...)&#x53D1;&#x8D77;&#x67E5;&#x8BE2;&#x8BF7;&#x6C42;&#x7684;&#x529F;&#x80FD;
+Client          clientset.Interface
+
+// &#x8FD9;&#x51E0;&#x4E2A;&#x5143;&#x7D20;&#x90FD;&#x662F;&#x4E0E;Event&#x8D44;&#x6E90;&#x76F8;&#x5173;&#x7684;&#xFF0C;&#x5B9E;&#x73B0;rest api&#x5904;&#x7406;&#x4EE5;&#x53CA;&#x8BB0;&#x5F55;&#x3001;&#x901A;&#x77E5;&#x7B49;&#x529F;&#x80FD;
+EventClient     v1core.EventsGetter
+Recorder        record.EventRecorder
+Broadcaster     record.EventBroadcaster
+</code></pre><p>&#x8FD9;&#x91CC;&#x5C42;&#x7EA7;&#x975E;&#x5E38;&#x6DF1;&#xFF0C;&#x4E0D;&#x4FBF;&#x5C55;&#x793A;&#xFF0C;Config&#x8FD9;&#x4E00;&#x4E2A;&#x7ED3;&#x6784;&#x4F53;&#x975E;&#x5E38;&#x91CD;&#x8981;&#xFF0C;&#x53EF;&#x4EE5;&#x8BA4;&#x771F;&#x8BFB;&#x4E00;&#x8BFB;&#x4EE3;&#x7801;&#x3002;&#x56DE;&#x5230;<code>cmd/kube-scheduler/app/server.go</code>.<code>runCommand</code>&#x8FD9;&#x91CC;&#x6765;,&#x63A5;&#x7740;&#x5F80;&#x4E0B;&#xFF0C;&#x8FDB;&#x5165;&#x5176;&#x6700;&#x540E;return&#x8C03;&#x7528;&#x7684;<code>Run()</code>&#x51FD;&#x6570;&#x4E2D;&#xFF0C;&#x51FD;&#x6570;&#x4E2D;&#x7684;&#x524D;&#x90E8;&#x5206;&#x90FD;&#x662F;&#x542F;&#x52A8;scheduler&#x76F8;&#x5173;&#x7684;&#x7EC4;&#x4EF6;&#xFF0C;&#x5982;event broadcaster&#x3001;informers&#x3001;healthz server&#x3001;metric server&#x7B49;&#xFF0C;&#x91CD;&#x70B9;&#x770B;&#x56FE;&#x4E2D;&#x7EA2;&#x6846;&#x5708;&#x51FA;&#x7684;<code>sched.Run()</code>,&#x8FD9;&#x624D;&#x662F;scheduler&#x4E3B;&#x7A0B;&#x5E8F;&#x7684;&#x8C03;&#x7528;&#x8FD0;&#x884C;&#x51FD;&#x6570;:
+<img src="http://mycloudn.kokoerp.com/Run.jpg" alt="image"></p>
+<p>&#x8FDB;&#x5165;<code>sched.Run()</code>:
+<img src="http://mycloudn.kokoerp.com/scheRun.jpg" alt="image"></p>
+<p><code>wait.Until</code>&#x8FD9;&#x4E2A;&#x8C03;&#x7528;&#x7684;&#x903B;&#x8F91;&#x662F;&#xFF0C;&#x76F4;&#x5230;&#x6536;&#x5230;stop&#x4FE1;&#x53F7;&#x624D;&#x7EC8;&#x6B62;&#xFF0C;&#x5728;&#x6B64;&#x4E4B;&#x524D;&#x5FAA;&#x73AF;&#x8FD0;&#x884C;<code>sched.scheduleOne</code>&#x3002;&#x4EE3;&#x7801;&#x8D70;&#x5230;&#x8FD9;&#x91CC;&#xFF0C;&#x7EC8;&#x4E8E;&#x627E;&#x5230;&#x542F;&#x52A8;&#x5165;&#x53E3;&#x6700;&#x5185;&#x90E8;&#x7684;&#x4E3B;&#x4F53;&#x5566;:</p>
+<p><img src="http://mycloudn.kokoerp.com/image-20190827163439895.png" alt=""></p>
+<p><code>sched.scheduleOne</code>&#x8FD9;&#x4E2A;&#x51FD;&#x6570;&#x6709;&#x4EE3;&#x7801;&#x70B9;&#x957F;&#xFF0C;&#x6574;&#x4F53;&#x7684;&#x529F;&#x80FD;&#x53EF;&#x4EE5;&#x6982;&#x62EC;&#x4E3A;:</p>
+<p>1.&#x83B7;&#x53D6;&#x9700;&#x8C03;&#x5EA6;&#x7684;pod</p>
+<p>2.&#x4F7F;&#x7528;&#x8C03;&#x5EA6;&#x7B97;&#x6CD5;&#x5BFB;&#x627E;&#x5339;&#x914D;node&#x3001;&#x53D1;&#x8D77;&#x7ED1;&#x5B9A;&#x5230;node&#x8BF7;&#x6C42;&#x3001;&#x7ED1;&#x5B9A;&#x68C0;&#x67E5;&#x7B49;&#x4E00;&#x7CFB;&#x5217;&#x64CD;&#x4F5C;.</p>
+<p>3.&#x82E5;&#x5339;&#x914D;node&#x5931;&#x8D25;&#xFF0C;&#x5219;&#x5C1D;&#x8BD5;&#x6839;&#x636E;pod&#x7684;&#x6307;&#x5B9A;&#x4F18;&#x5148;&#x7EA7;&#x6765;&#x62A2;&#x5360;&#x8D44;&#x6E90;</p>
+<p><strong>&#x672C;&#x7BC7;&#x5165;&#x53E3;&#x7BC7;&#x5230;&#x8FD9;&#x91CC;&#x5C31;&#x5148;&#x544A;&#x4E00;&#x6BB5;&#x843D;&#xFF0C;&#x4E0B;&#x4E00;&#x7BC7;&#x5F00;&#x59CB;&#x9605;&#x8BFB;&#x5B66;&#x4E60;&#x8C03;&#x5EA6;&#x8FC7;&#x7A0B;&#x7684;&#x903B;&#x8F91;&#xFF01;</strong></p>
+
+                                
+                                </section>
+                            
+    </div>
+    <div class="search-results">
+        <div class="has-results">
+            
+            <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+            <ul class="search-results-list"></ul>
+            
+        </div>
+        <div class="no-results">
+            
+            <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+            
+        </div>
+    </div>
+</div>
+
+                        </div>
+                    </div>
+                
+            </div>
+
+            
+                
+                <a href="./" class="navigation navigation-prev " aria-label="Previous page: 2. Scheduler">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+                
+                
+                <a href="Kubernetes源码学习-Scheduler-P2-调度器框架.html" class="navigation navigation-next " aria-label="Next page: 2.2. 调度器框架">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+                
+            
+        
+    </div>
+
+    <script>
+        var gitbook = gitbook || [];
+        gitbook.push(function() {
+            gitbook.page.hasChanged({"page":{"title":"2.1. 调度器入口","level":"2.1.1","depth":2,"next":{"title":"2.2. 调度器框架","level":"2.1.2","depth":2,"path":"scheduler/Kubernetes源码学习-Scheduler-P2-调度器框架.md","ref":"./scheduler/Kubernetes源码学习-Scheduler-P2-调度器框架.md","articles":[]},"previous":{"title":"2. Scheduler","level":"2.1","depth":1,"path":"scheduler/README.md","ref":"./scheduler/README.md","articles":[{"title":"2.1. 调度器入口","level":"2.1.1","depth":2,"path":"scheduler/Kubernetes源码学习-Scheduler-P1-调度器入口篇.md","ref":"./scheduler/Kubernetes源码学习-Scheduler-P1-调度器入口篇.md","articles":[]},{"title":"2.2. 调度器框架","level":"2.1.2","depth":2,"path":"scheduler/Kubernetes源码学习-Scheduler-P2-调度器框架.md","ref":"./scheduler/Kubernetes源码学习-Scheduler-P2-调度器框架.md","articles":[]},{"title":"2.3. Node筛选算法","level":"2.1.3","depth":2,"path":"scheduler/Kubernetes源码学习-Scheduler-P3-Node筛选算法.md","ref":"./scheduler/Kubernetes源码学习-Scheduler-P3-Node筛选算法.md","articles":[]},{"title":"2.4. Node优先级算法","level":"2.1.4","depth":2,"path":"scheduler/Kubernetes源码学习-Scheduler-P4-Node优先级算法.md","ref":"./scheduler/Kubernetes源码学习-Scheduler-P4-Node优先级算法.md","articles":[]},{"title":"2.5 Pod优先级调度","level":"2.1.5","depth":2,"path":"scheduler/Kubernetes源码学习-Scheduler-P5-Pod优先级抢占调度.md","ref":"./scheduler/Kubernetes源码学习-Scheduler-P5-Pod优先级抢占调度.md","articles":[]}]},"dir":"ltr"},"config":{"plugins":["-sharing","anchors","github","expandable-chapters","splitter","page-treeview","back-to-top-button"],"styles":{"website":"./styles/website.css"},"pluginsConfig":{"page-treeview":{"copyright":"","minHeaderCount":"1","minHeaderDeep":"1"},"github":{"url":"https://github.com/yinwenqin/kubeSourceCodeNote"},"splitter":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"back-to-top-button":{},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false},"anchors":{},"expandable-chapters":{}},"theme":"default","author":"ywq","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"Kubernetes源码学习","language":"zh-hans","links":{},"gitbook":"3.2.3","description":""},"file":{"path":"scheduler/Kubernetes源码学习-Scheduler-P1-调度器入口篇.md","mtime":"2019-11-21T07:58:02.780Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2019-11-21T08:49:34.435Z"},"basePath":"..","book":{"language":""}});
+        });
+    </script>
+</div>
+
+        
+    <script src="../gitbook/gitbook.js"></script>
+    <script src="../gitbook/theme.js"></script>
+    
+        
+        <script src="../gitbook/gitbook-plugin-github/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-expandable-chapters/expandable-chapters.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-splitter/splitter.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-back-to-top-button/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search/search-engine.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search/search.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-lunr/lunr.min.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-lunr/search-lunr.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-fontsettings/fontsettings.js"></script>
+        
+    
+
+    </body>
+</html>
+

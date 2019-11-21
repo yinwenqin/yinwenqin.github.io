@@ -1,0 +1,1564 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-CN">
+
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link rel="stylesheet" href="/lib/pace/pace-theme-bounce.min.css?v=1.0.2">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link rel="stylesheet" href="/lib/fancybox/source/jquery.fancybox.css">
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+    
+      
+    
+
+    
+  
+
+  
+
+  
+
+  
+    
+      
+    
+
+    
+  
+
+  
+    
+    
+    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic|Roboto Slab:300,300italic,400,400italic,700,700italic|Roboto Mono:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext">
+  
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.1.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.1.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.1.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.1.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.1.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '7.1.1',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":true,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: true,
+    fancybox: true,
+    fastclick: true,
+    lazyload: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"shrinkIn","post_header":"slideLeftIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideDownIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <script>
+  (function(i,s,o,g,r,a,m){i["DaoVoiceObject"]=r;i[r]=i[r]||function(){(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;a.charset="utf-8";m.parentNode.insertBefore(a,m)})(window,document,"script",('https:' == document.location.protocol ? 'https:' : 'http:') + "//widget.daovoice.io/widget/0f81ff2f.js","daovoice")
+  daovoice('init', {
+      app_id: "bd399fce"
+    });
+  daovoice('update');
+  </script>
+
+  <meta name="description" content="前言承接上章k8s(七)、Prometheus部署篇，在上章的基础上，本章介绍Prometheus告警相关配置。 一、Querying expr &amp;amp; PromQL在了解告警规则之前，首先得了解Prometheus的数据查询表达式，来获取metric数据是否到达告警阈(ps:这个字儿念yu，第四声，不念第二声的fa)值。 OverviewPrometheus提供了一种功能性表达式语言，能够">
+<meta name="keywords" content="Kubernetes,Prometheus">
+<meta property="og:type" content="article">
+<meta property="og:title" content="k8s(八)、监控--Prometheus告警篇（告警消息对接钉钉接口）">
+<meta property="og:url" content="https://www.ipyker.com/2018/06/26/k8s(八)、监控--Prometheus告警篇（告警消息对接钉钉接口）.html">
+<meta property="og:site_name" content="随笔漫谈">
+<meta property="og:description" content="前言承接上章k8s(七)、Prometheus部署篇，在上章的基础上，本章介绍Prometheus告警相关配置。 一、Querying expr &amp;amp; PromQL在了解告警规则之前，首先得了解Prometheus的数据查询表达式，来获取metric数据是否到达告警阈(ps:这个字儿念yu，第四声，不念第二声的fa)值。 OverviewPrometheus提供了一种功能性表达式语言，能够">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://mycloudn.kokoerp.com/20180626193940302.jpg">
+<meta property="og:image" content="http://mycloudn.kokoerp.com/2018062619374775.jpg">
+<meta property="og:image" content="http://mycloudn.kokoerp.com/20180626195612177.jpg">
+<meta property="og:image" content="http://mycloudn.kokoerp.com/201806261947575.jpg">
+<meta property="og:image" content="http://mycloudn.kokoerp.com/20180626194803513.jpg">
+<meta property="og:updated_time" content="2019-11-21T07:48:40.129Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="k8s(八)、监控--Prometheus告警篇（告警消息对接钉钉接口）">
+<meta name="twitter:description" content="前言承接上章k8s(七)、Prometheus部署篇，在上章的基础上，本章介绍Prometheus告警相关配置。 一、Querying expr &amp;amp; PromQL在了解告警规则之前，首先得了解Prometheus的数据查询表达式，来获取metric数据是否到达告警阈(ps:这个字儿念yu，第四声，不念第二声的fa)值。 OverviewPrometheus提供了一种功能性表达式语言，能够">
+<meta name="twitter:image" content="http://mycloudn.kokoerp.com/20180626193940302.jpg">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="随笔漫谈" type="application/atom+xml">
+
+
+
+  
+  
+  <link rel="canonical" href="https://www.ipyker.com/2018/06/26/k8s(八)、监控--Prometheus告警篇（告警消息对接钉钉接口）">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>k8s(八)、监控--Prometheus告警篇（告警消息对接钉钉接口） | 随笔漫谈</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+ 
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">随笔漫谈</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-book">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/gitbooks/" rel="section"><i class="menu-item-icon fa fa-fw fa-book"></i> <br>book</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-互动">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/guestbook/" rel="section"><i class="menu-item-icon fa fa-fw fa-comments"></i> <br>互动</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.ipyker.com/2018/06/26/k8s(八)、监控--Prometheus告警篇（告警消息对接钉钉接口）.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="丨ywq丨">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随笔漫谈">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">k8s(八)、监控--Prometheus告警篇（告警消息对接钉钉接口）
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-06-26 19:50:47" itemprop="dateCreated datePublished" datetime="2018-06-26T19:50:47+08:00">2018-06-26</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-11-21 15:48:40" itemprop="dateModified" datetime="2019-11-21T15:48:40+08:00">2019-11-21</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+            <div class="post-symbolscount">
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">本文字数：</span>
+                
+                <span title="本文字数">43k</span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">39 分钟</span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id><a href="#" class="headerlink" title=" "></a> </h2><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>承接上章<a href="https://blog.csdn.net/ywq935/article/details/80818390" target="_blank" rel="noopener">k8s(七)、Prometheus部署篇</a>，在上章的基础上，本章介绍Prometheus告警相关配置。</p>
+<h2 id="一、Querying-expr-amp-PromQL"><a href="#一、Querying-expr-amp-PromQL" class="headerlink" title="一、Querying expr &amp; PromQL"></a>一、Querying expr &amp; PromQL</h2><p>在了解告警规则之前，首先得了解Prometheus的数据查询表达式，来获取metric数据是否到达告警阈(ps:这个字儿念yu，第四声，不念第二声的fa)值。</p>
+<p><strong>Overview</strong><br>Prometheus提供了一种功能性表达式语言，能够让用户实时的选择和聚合时间序列的数据。表达式返回的结果可以被显示为曲线图，也可以在prometheus浏览器中显示为表格，或者通过HTTP API经由外部系统处理。</p>
+<p><strong>表达式语言类型</strong><br>Prometheus表达式或子表达式可以评估为一下四种类型之一：<br>即时向量（Instant vector） - 包含每个时间序列单个样品的一组时间序列，共享相同的时间戳<br>范围向量（Range vector） - 包含一个范围内数据点的一组时间序列<br>标量（Scalar） - 一个简单的数字浮点值<br>字符串（String） - 一个简单的字符串值；当前未使用<br>根据使用情况（例如画图或者显示表达式的输出），只有某些类型是合法的，例如，即时向量表达式是可以画图的唯一类型。</p>
+<p><strong>时间序列选择器</strong></p>
+<p><strong>即时向量选择</strong><br>即时向量选择器允许选择一组时间序列，或者某个给定的时间戳的样本数据。下面这个例子选择了具有时间序列的http_requests_total metric对象：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http_requests_total</span><br></pre></td></tr></table></figure>
+<p>你可以通过附加一组标签，并用{}括起来，来进一步筛选这些时间序列。下面这个例子只选择有http_requests_total名称的、有prometheus工作标签的、有canary组标签的时间序列：</p>
+<figure class="highlight axapta"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http_requests_total&#123;job=<span class="string">"prometheus"</span>,<span class="keyword">group</span>=<span class="string">"canary"</span>&#125;</span><br></pre></td></tr></table></figure>
+<p>另外，也可以也可以将标签值反向匹配，或者对正则表达式匹配标签值。下面列举匹配操作符：</p>
+<p>=：选择正好相等的字符串标签<br>!=：选择不相等的字符串标签<br>=~：选择匹配正则表达式的标签（或子标签）<br>!=：选择不匹配正则表达式的标签（或子标签）<br>例如，选择staging、testing、development环境下的，GET之外的HTTP方法的http_requests_total的时间序列：</p>
+<figure class="highlight accesslog"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http_requests_total&#123;environment=~<span class="string">"staging|testing|development"</span>,method!=<span class="string">"<span class="keyword">GET</span>"</span>&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>范围向量选择</strong><br>范围向量表达式正如即时向量表达式一样运行，但是前者返回从当前时刻开始的一定时间范围的时间序列集合回来。语法是，在一个向量表达式之后添加[]来表示时间范围，持续时间用数字表示，后接下面单元之一：</p>
+<p>s：seconds<br>m：minutes<br>h：hours<br>d：days<br>w：weeks<br>y：years<br>在下面这个例子中，我们选择最后5分钟的记录，metric名称为http_requests_total、作业标签为prometheus的时间序列的所有值：</p>
+<figure class="highlight accesslog"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http_requests_total&#123;job=<span class="string">"prometheus"</span>&#125;<span class="string">[5m]</span></span><br></pre></td></tr></table></figure>
+<p><strong>操作符</strong><br>Prometheus支持多种二元和聚合的操作符。</p>
+<figure class="highlight erlang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">+ (addition)</span><br><span class="line">- <span class="params">(subtraction)</span></span><br><span class="line">* <span class="params">(multiplication)</span></span><br><span class="line">/ <span class="params">(division)</span></span><br><span class="line">% <span class="params">(modulo)</span></span><br><span class="line">^ <span class="params">(power/exponentiation)</span></span><br><span class="line"></span><br><span class="line">== <span class="params">(equal)</span></span><br><span class="line">!= <span class="params">(not-equal)</span></span><br><span class="line">&gt; <span class="params">(greater-than)</span></span><br><span class="line">&lt; <span class="params">(less-than)</span></span><br><span class="line">&gt;= <span class="params">(greater-or-equal)</span></span><br><span class="line">&lt;= <span class="params">(less-or-equal)</span></span><br><span class="line"></span><br><span class="line">and <span class="params">(intersection)</span></span><br><span class="line">or <span class="params">(union)</span></span><br><span class="line">unless <span class="params">(complement)</span></span><br></pre></td></tr></table></figure>
+<p><strong>函数</strong><br>Prometheus支持多种函数，来对数据进行操作，参考官网：<a href="https://prometheus.io/docs/prometheus/latest/querying/functions/" target="_blank" rel="noopener">https://prometheus.io/docs/prometheus/latest/querying/functions/</a></p>
+<p>了解了metric查询表达式的基础上，下面开始部署告警器组件。</p>
+<h2 id="二、告警媒介"><a href="#二、告警媒介" class="headerlink" title="二、告警媒介"></a>二、告警媒介</h2><p>prometheus支持多种类型的告警媒介，国内可以用的例如mail/webchat，也可以使用webhook自定义接口，公司一般使用的钉钉，prometheus没有定制的钉钉接口，因此在这里使用自定义的接口来中转，将消息发送至钉钉接口，接收钉钉告警消息。<br>首先看下告警配置，各项参数已添加中文注释，直接看注释：<br>alertmanager-config.yaml:</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">kind:</span> <span class="string">ConfigMap</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">alertmanager</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">kube-system</span></span><br><span class="line"><span class="attr">data:</span></span><br><span class="line">  <span class="string">config.yml:</span> <span class="string">|-</span></span><br><span class="line"><span class="attr">    global:</span></span><br><span class="line"><span class="attr">      resolve_timeout:</span> <span class="number">5</span><span class="string">m</span></span><br><span class="line"><span class="attr">    templates:</span></span><br><span class="line"><span class="bullet">    -</span> <span class="string">'/etc/alertmanager-templates/*.tmpl'</span></span><br><span class="line"><span class="attr">    route:</span></span><br><span class="line"><span class="attr">      group_by:</span> <span class="string">['alertname',</span> <span class="string">'cluster'</span><span class="string">,</span> <span class="string">'service'</span><span class="string">]</span></span><br><span class="line">	  <span class="comment">#根据['alertname', 'cluster', 'service']，在初始告警发送前，等待30秒，将这段时间的多个告警进行分组</span></span><br><span class="line">      <span class="comment"># When a new group of alerts is created by an incoming alert, wait at</span></span><br><span class="line">      <span class="comment"># least 'group_wait' to send the initial notification.</span></span><br><span class="line">      <span class="comment"># This way ensures that you get multiple alerts for the same group that start</span></span><br><span class="line">      <span class="comment"># firing shortly after another are batched together on the first</span></span><br><span class="line">      <span class="comment"># notification.</span></span><br><span class="line"></span><br><span class="line"><span class="attr">      group_wait:</span> <span class="number">30</span><span class="string">s</span></span><br><span class="line"></span><br><span class="line">      <span class="comment"># When the first notification was sent, wait 'group_interval' to send a batch</span></span><br><span class="line">      <span class="comment"># of new alerts that started firing for that group.</span></span><br><span class="line">	  <span class="comment">#按上面分组的消息，同一组消息，间隔5m才发送下一个。这个是为了尽量避免由一个问题带来的批量告警重复发送。</span></span><br><span class="line"><span class="attr">      group_interval:</span> <span class="number">5</span><span class="string">m</span></span><br><span class="line"></span><br><span class="line">      <span class="comment"># If an alert has successfully been sent, wait 'repeat_interval' to</span></span><br><span class="line">      <span class="comment"># resend them.</span></span><br><span class="line">      <span class="comment">#完全相同的一个告警消息，间隔repeat_interval时间才下一次发送，这里为了测试效果设置1m，一般这个值设置时间都较长</span></span><br><span class="line">      <span class="comment">#repeat_interval: 1m</span></span><br><span class="line"><span class="attr">      repeat_interval:</span> <span class="number">1</span><span class="string">m</span></span><br><span class="line"></span><br><span class="line">      <span class="comment"># A default receiver</span></span><br><span class="line"></span><br><span class="line">      <span class="comment"># If an alert isn't caught by a route, send it to default.</span></span><br><span class="line">      <span class="comment">#默认接收器为webhook_alert </span></span><br><span class="line"><span class="attr">      receiver:</span> <span class="string">webhook_alert</span> </span><br><span class="line"></span><br><span class="line">      <span class="comment"># All the above attributes are inherited by all child routes and can</span></span><br><span class="line">      <span class="comment"># overwritten on each.</span></span><br><span class="line"></span><br><span class="line">      <span class="comment"># The child route trees.</span></span><br><span class="line"><span class="attr">      routes:</span></span><br><span class="line">      <span class="comment">#给webhook_alert接收器定义匹配标签规则</span></span><br><span class="line">      <span class="comment"># Send severity=slack alerts to slack.</span></span><br><span class="line"><span class="attr">      - match:</span></span><br><span class="line"><span class="attr">          severity:</span> <span class="string">info</span></span><br><span class="line"><span class="attr">        receiver:</span> <span class="string">webhook_alert</span></span><br><span class="line"><span class="attr">      - match:</span></span><br><span class="line"><span class="attr">          severity:</span> <span class="string">warning</span></span><br><span class="line"><span class="attr">        receiver:</span> <span class="string">webhook_alert</span></span><br><span class="line">        </span><br><span class="line">    <span class="comment"># 接收器定义，这里是webhook类型，webhook_configs写上自定义api接口的url。</span></span><br><span class="line">    <span class="comment"># 注意，这里的webhook钩子接口是我自己写的接收prometheus告警的接口，api接收到prometheus的消息后会提取信息，通过钉钉的接口发给相应的人员。</span></span><br><span class="line">    <span class="comment"># 也可以使用wechat/mail的接口，配置方式参考官网：https://prometheus.io/docs/alerting/configuration/</span></span><br><span class="line"><span class="attr">    receivers:</span></span><br><span class="line"><span class="attr">    - name:</span> <span class="string">webhook_alert</span></span><br><span class="line"><span class="attr">      webhook_configs:</span></span><br><span class="line"><span class="attr">      - url:</span> <span class="string">'http://192.168.88.26:8080/api/1.0/utils/alert/?token=ADW82115yn7YEWXCEW88WEW6'</span></span><br><span class="line"><span class="attr">        send_resolved:</span> <span class="literal">true</span></span><br></pre></td></tr></table></figure>
+<p><strong>prometheus通过webhook发送的告警消息样例：</strong></p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">	<span class="attr">"receiver"</span>:<span class="string">"webhook_alert"</span>,</span><br><span class="line">	<span class="attr">"status"</span>:<span class="string">"firing"</span>,</span><br><span class="line">	<span class="attr">"alerts"</span>:[&#123;</span><br><span class="line">		<span class="attr">"status"</span>:<span class="string">"firing"</span>,</span><br><span class="line">		<span class="attr">"labels"</span>:&#123;</span><br><span class="line">			<span class="attr">"DEVDB"</span>:<span class="string">""</span>,<span class="attr">"alertname"</span>:<span class="string">"NodeMemoryUsage-low"</span>,</span><br><span class="line">			<span class="attr">"beta_kubernetes_io_arch"</span>:<span class="string">"amd64"</span>,</span><br><span class="line">			<span class="attr">"beta_kubernetes_io_os"</span>:<span class="string">"linux"</span>,</span><br><span class="line">			<span class="attr">"instance"</span>:<span class="string">"hv001238"</span>,</span><br><span class="line">			<span class="attr">"job"</span>:<span class="string">"kubernetes-node-exporter"</span>,<span class="attr">"kubernetes_io_hostname"</span>:<span class="string">"hv001238"</span>,<span class="attr">"node_role_kubernetes_io_master"</span>:<span class="string">""</span>,<span class="attr">"severity"</span>:<span class="string">"info"</span>,<span class="attr">"team"</span>:<span class="string">"node"</span></span><br><span class="line">		&#125;,</span><br><span class="line">		<span class="attr">"annotations"</span>:&#123;</span><br><span class="line">			<span class="attr">"description"</span>:<span class="string">"hv001238: Memory usage is above 80% (current value is: 52.18385396227273"</span>,</span><br><span class="line">			<span class="attr">"summary"</span>:<span class="string">"hv001238: High Memory usage detected"</span></span><br><span class="line">		&#125;,</span><br><span class="line">		<span class="attr">"startsAt"</span>:<span class="string">"2018-06-23T03:47:10.408935848Z"</span>,</span><br><span class="line">		<span class="attr">"endsAt"</span>:<span class="string">"0001-01-01T00:00:00Z"</span>,</span><br><span class="line">		<span class="attr">"generatorURL"</span>:<span class="string">"http://prometheus-785fc5bbf4-ztlrd:9090/graph?g0.expr=%28node_memory_MemTotal_bytes+-+%28node_memory_MemFree_bytes+%2B+node_memory_Buffers_bytes+%2B+node_memory_Cached_bytes%29%29+%2F+node_memory_MemTotal_bytes+%2A+100+%3E+1\\u0026g0.tab=1"</span></span><br><span class="line">	&#125;,],</span><br><span class="line"></span><br><span class="line">	<span class="attr">"groupLabels"</span>:&#123;<span class="attr">"alertname"</span>:<span class="string">"NodeMemoryUsage-low"</span>&#125;,</span><br><span class="line">	<span class="attr">"commonLabels"</span>:&#123;</span><br><span class="line">		<span class="attr">"DEVDB"</span>:<span class="string">""</span>,</span><br><span class="line">		<span class="attr">"alertname"</span>:<span class="string">"NodeMemoryUsage-low"</span>,</span><br><span class="line">		<span class="attr">"beta_kubernetes_io_arch"</span>:<span class="string">"amd64"</span>,</span><br><span class="line">		<span class="attr">"beta_kubernetes_io_os"</span>:<span class="string">"linux"</span>,</span><br><span class="line">		<span class="attr">"job"</span>:<span class="string">"kubernetes-node-exporter"</span>,</span><br><span class="line">		<span class="attr">"node_role_kubernetes_io_master"</span>:<span class="string">""</span>,</span><br><span class="line">		<span class="attr">"severity"</span>:<span class="string">"info"</span>,<span class="attr">"team"</span>:<span class="string">"node"</span>&#125;,</span><br><span class="line">		<span class="attr">"commonAnnotations"</span>:&#123;&#125;,</span><br><span class="line">		<span class="attr">"externalURL"</span>:<span class="string">"http://alertmanager-7cffc68878-xb2m6:9093"</span>,</span><br><span class="line">		<span class="attr">"version"</span>:<span class="string">"4"</span>,</span><br><span class="line">		<span class="attr">"groupKey"</span>:<span class="string">"&#123;&#125;/&#123;severity=\\"</span>info\\<span class="string">"&#125;:&#123;alertname=\\"</span>NodeMemoryUsage-low\\<span class="string">"&#125;"</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>消息太多，不够精简，我webhook端在接收之后将它精简提取为了如下格式：<br><figure class="highlight 1c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">	'description': 'hv<span class="number">001238</span>: Memory usage is above 80% (current value is: 39.<span class="number">42384016274741</span>', </span><br><span class="line">	'title': 'hv<span class="number">001238</span>: High Memory usage detected', </span><br><span class="line">	'notice_user': ['xxx', 'xxx', 'xxx'], </span><br><span class="line">	'start_time': '<span class="number">2018-06-23</span>T03:47:10.<span class="number">40893584</span>8Z',</span><br><span class="line">	'end_time': '<span class="number">0001-01-01</span>T00:00:00Z', </span><br><span class="line">	'status': 'firing', </span><br><span class="line">	'graph_link': 'http://http://prometheusv19.xxx.com/graph?g0.expr=%28node_memory_MemTotal_bytes+-+%28node_memory_MemFree_bytes+%2B+node_memory_Buffers_bytes+%2B+node_memory_Cached_bytes%29%29+%2F+node_memory_MemTotal_bytes+%2A+100+%3E+1&amp;g0.tab=1'</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>中转api接口python(django + rest-framework框架)代码样例如下，钉钉消息的接口可以自己去官网查：<a href="https://open-doc.dingtalk.com/docs/doc.htm?spm=a219a.7629140.0.0.HyEbQ7&amp;treeId=367&amp;articleId=107549&amp;docType=1" target="_blank" rel="noopener">钉钉官网</a></p>
+<figure class="highlight prolog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">from rest_framework.views import <span class="symbol">APIView</span></span><br><span class="line">from rest_framework.response import <span class="symbol">Response</span></span><br><span class="line">import collections</span><br><span class="line"></span><br><span class="line">from account.tasks.message import send_dingding_message</span><br><span class="line"></span><br><span class="line">class <span class="symbol">AlertView</span>(<span class="symbol">APIView</span>):</span><br><span class="line"></span><br><span class="line">    def post(self,request):</span><br><span class="line">        token = request.<span class="symbol">GET</span>.get(<span class="string">'token'</span>)</span><br><span class="line">        message = collections.<span class="symbol">OrderedDict</span>()</span><br><span class="line"></span><br><span class="line">        if token == <span class="string">'ADW82115yn7YEWXCEW88WEW6xxwetrcX'</span>:</span><br><span class="line">            # ops = [<span class="string">'xxx'</span>, <span class="string">'xxx'</span>, <span class="string">'xxx'</span>]</span><br><span class="line">            ops = [<span class="string">'xxx'</span>]</span><br><span class="line">            content = request.data</span><br><span class="line">            message[<span class="string">'title'</span>] = content[<span class="string">'alerts'</span>][<span class="number">0</span>][<span class="string">'annotations'</span>][<span class="string">'summary'</span>]</span><br><span class="line">            message[<span class="string">'status'</span>] = content[<span class="string">'status'</span>]</span><br><span class="line">            message[<span class="string">'description'</span>] = content[<span class="string">'alerts'</span>][<span class="number">0</span>][<span class="string">'annotations'</span>][<span class="string">'description'</span>]</span><br><span class="line">            message[<span class="string">'start_time'</span>] = content[<span class="string">'alerts'</span>][<span class="number">0</span>][<span class="string">'startsAt'</span>]</span><br><span class="line">            message[<span class="string">'end_time'</span>] = content[<span class="string">'alerts'</span>][<span class="number">0</span>][<span class="string">'endsAt'</span>]</span><br><span class="line">			#截图有效的url段，并将hostname从podname替换成自己真实环境的域名，这样接收到的消息点击链接可以直接查看告警数据及图形</span><br><span class="line">            valid_link = content[<span class="string">'alerts'</span>][<span class="number">0</span>][<span class="string">'generatorURL'</span>].split(<span class="string">"\\"</span>)[<span class="number">0</span>]</span><br><span class="line">            uri = valid_link.split(<span class="string">':9090'</span>)[<span class="number">1</span>]</span><br><span class="line">            host = <span class="string">"http://prometheus.xxx.com"</span></span><br><span class="line">            message[<span class="string">'graph_link'</span>] = host + uri</span><br><span class="line"></span><br><span class="line">            messages = <span class="string">""</span></span><br><span class="line">            for k,v in message.items():</span><br><span class="line">                messages = messages + <span class="string">'['</span> + k + <span class="string">']:'</span> + v + <span class="string">"\n"</span></span><br><span class="line"></span><br><span class="line">            print(messages)</span><br><span class="line">            res = send_dingding_message(user=ops,message=messages)</span><br><span class="line"></span><br><span class="line">            return <span class="symbol">Response</span>(res)</span><br><span class="line"></span><br><span class="line">def send_dingding_message(user,message)</span><br><span class="line">	#自己去获取钉钉的api接口，调用接口</span><br><span class="line">    return <span class="symbol">True</span></span><br></pre></td></tr></table></figure>
+<h2 id="三、Alertmanager部署"><a href="#三、Alertmanager部署" class="headerlink" title="三、Alertmanager部署"></a>三、Alertmanager部署</h2><p>Alertmanager相关部署yaml文件：<br><figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">alertmanager-templates<span class="selector-class">.yaml</span>     		#各类常见告警模板</span><br><span class="line">configmap<span class="selector-class">.yaml</span>                          #配置文件</span><br><span class="line">deployment<span class="selector-class">.yaml</span>                        #部署文件</span><br><span class="line">service<span class="selector-class">.yaml</span>                           #服务文件</span><br></pre></td></tr></table></figure></p>
+<p>alertmanager-templates.yaml：<br><figure class="highlight dust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br></pre></td><td class="code"><pre><span class="line"><span class="xml">apiVersion: v1</span></span><br><span class="line"><span class="xml">data:</span></span><br><span class="line"><span class="xml">  default.tmpl: |</span></span><br><span class="line"><span class="xml">    </span><span class="template-variable">&#123;&#123; define "__alertmanager" &#125;</span><span class="xml">&#125;AlertManager</span><span class="template-variable">&#123;&#123; end &#125;</span><span class="xml">&#125;</span></span><br><span class="line"><span class="xml">    </span><span class="template-variable">&#123;&#123; define "__alertmanagerURL" &#125;</span><span class="xml">&#125;</span><span class="template-variable">&#123;&#123; .ExternalURL &#125;</span><span class="xml">&#125;/#/alerts?receiver=</span><span class="template-variable">&#123;&#123; .Receiver &#125;</span><span class="xml">&#125;</span><span class="template-variable">&#123;&#123; end &#125;</span><span class="xml">&#125;</span></span><br><span class="line"><span class="xml"></span></span><br><span class="line"><span class="xml">    </span><span class="template-variable">&#123;&#123; define "__subject" &#125;</span><span class="xml">&#125;[</span><span class="template-variable">&#123;&#123; .Status | toUpper &#125;</span><span class="xml">&#125;</span><span class="template-variable">&#123;&#123; <span class="keyword">if</span> <span class="keyword">eq</span> .Status "firing" &#125;</span><span class="xml">&#125;:</span><span class="template-variable">&#123;&#123; .Alerts.Firing | len &#125;</span><span class="xml">&#125;</span><span class="template-variable">&#123;&#123; end &#125;</span><span class="xml">&#125;] </span><span class="template-variable">&#123;&#123; .GroupLabels.SortedPairs.Values | join " " &#125;</span><span class="xml">&#125; </span><span class="template-variable">&#123;&#123; <span class="keyword">if</span> <span class="keyword">gt</span> (len .CommonLabels) (len .GroupLabels) &#125;</span><span class="xml">&#125;(</span><span class="template-variable">&#123;&#123; with .CommonLabels.Remove .GroupLabels.Names &#125;</span><span class="xml">&#125;</span><span class="template-variable">&#123;&#123; .Values | join " " &#125;</span><span class="xml">&#125;</span><span class="template-variable">&#123;&#123; end &#125;</span><span class="xml">&#125;)</span><span class="template-variable">&#123;&#123; end &#125;</span><span class="xml">&#125;</span><span class="template-variable">&#123;&#123; end &#125;</span><span class="xml">&#125;</span></span><br><span class="line"><span class="xml">    </span><span class="template-variable">&#123;&#123; define "__description" &#125;</span><span class="xml">&#125;</span><span class="template-variable">&#123;&#123; end &#125;</span><span class="xml">&#125;</span></span><br><span class="line"><span class="xml"></span></span><br><span class="line"><span class="xml">    </span><span class="template-variable">&#123;&#123; define "__text_alert_list" &#125;</span><span class="xml">&#125;</span><span class="template-variable">&#123;&#123; range . &#125;</span><span class="xml">&#125;Labels:</span></span><br><span class="line"><span class="xml">    </span><span class="template-variable">&#123;&#123; range .Labels.SortedPairs &#125;</span><span class="xml">&#125; - </span><span class="template-variable">&#123;&#123; .Name &#125;</span><span class="xml">&#125; = </span><span class="template-variable">&#123;&#123; .Value &#125;</span><span class="xml">&#125;</span></span><br><span class="line"><span class="xml">    </span><span class="template-variable">&#123;&#123; end &#125;</span><span class="xml">&#125;Annotations:</span></span><br><span class="line"><span class="xml">    </span><span class="template-variable">&#123;&#123; range .Annotations.SortedPairs &#125;</span><span class="xml">&#125; - </span><span class="template-variable">&#123;&#123; .Name &#125;</span><span class="xml">&#125; = </span><span class="template-variable">&#123;&#123; .Value &#125;</span><span class="xml">&#125;</span></span><br><span class="line"><span class="xml">    </span><span class="template-variable">&#123;&#123; end &#125;</span><span class="xml">&#125;Source: </span><span class="template-variable">&#123;&#123; .GeneratorURL &#125;</span><span class="xml">&#125;</span></span><br><span class="line"><span class="xml">    </span><span class="template-variable">&#123;&#123; end &#125;</span><span class="xml">&#125;</span><span class="template-variable">&#123;&#123; end &#125;</span><span class="xml">&#125;</span></span><br><span class="line"><span class="xml"></span></span><br><span class="line"><span class="xml"></span></span><br><span class="line"><span class="xml">    </span><span class="template-variable">&#123;&#123; define "slack.<span class="keyword">default</span>.title" &#125;</span><span class="xml">&#125;</span><span class="template-variable">&#123;&#123; template "__subject" . &#125;</span><span class="xml">&#125;</span><span class="template-variable">&#123;&#123; end &#125;</span><span class="xml">&#125;</span></span><br><span class="line"><span class="xml">    </span><span class="template-variable">&#123;&#123; define "slack.<span class="keyword">default</span>.username" &#125;</span><span class="xml">&#125;</span><span class="template-variable">&#123;&#123; template "__alertmanager" . &#125;</span><span class="xml">&#125;</span><span class="template-variable">&#123;&#123; end &#125;</span><span class="xml">&#125;</span></span><br><span class="line"><span class="xml">    </span><span class="template-variable">&#123;&#123; define "slack.<span class="keyword">default</span>.fallback" &#125;</span><span class="xml">&#125;</span><span class="template-variable">&#123;&#123; template "slack.<span class="keyword">default</span>.title" . &#125;</span><span class="xml">&#125; | </span><span class="template-variable">&#123;&#123; template "slack.<span class="keyword">default</span>.titlelink" . &#125;</span><span class="xml">&#125;</span><span class="template-variable">&#123;&#123; end &#125;</span><span class="xml">&#125;</span></span><br><span class="line"><span class="xml">    </span><span class="template-variable">&#123;&#123; define "slack.<span class="keyword">default</span>.pretext" &#125;</span><span class="xml">&#125;</span><span class="template-variable">&#123;&#123; end &#125;</span><span class="xml">&#125;</span></span><br><span class="line"><span class="xml">    </span><span class="template-variable">&#123;&#123; define "slack.<span class="keyword">default</span>.titlelink" &#125;</span><span class="xml">&#125;</span><span class="template-variable">&#123;&#123; template "__alertmanagerURL" . &#125;</span><span class="xml">&#125;</span><span class="template-variable">&#123;&#123; end &#125;</span><span class="xml">&#125;</span></span><br><span class="line"><span class="xml">    </span><span class="template-variable">&#123;&#123; define "slack.<span class="keyword">default</span>.iconemoji" &#125;</span><span class="xml">&#125;</span><span class="template-variable">&#123;&#123; end &#125;</span><span class="xml">&#125;</span></span><br><span class="line"><span class="xml">    </span><span class="template-variable">&#123;&#123; define "slack.<span class="keyword">default</span>.iconurl" &#125;</span><span class="xml">&#125;</span><span class="template-variable">&#123;&#123; end &#125;</span><span class="xml">&#125;</span></span><br><span class="line"><span class="xml">    </span><span class="template-variable">&#123;&#123; define "slack.<span class="keyword">default</span>.text" &#125;</span><span class="xml">&#125;</span><span class="template-variable">&#123;&#123; end &#125;</span><span class="xml">&#125;</span></span><br><span class="line"><span class="xml"></span></span><br><span class="line"><span class="xml"></span></span><br><span class="line"><span class="xml">    </span><span class="template-variable">&#123;&#123; define "hipchat.<span class="keyword">default</span>.from" &#125;</span><span class="xml">&#125;</span><span class="template-variable">&#123;&#123; template "__alertmanager" . &#125;</span><span class="xml">&#125;</span><span class="template-variable">&#123;&#123; end &#125;</span><span class="xml">&#125;</span></span><br><span class="line"><span class="xml">    </span><span class="template-variable">&#123;&#123; define "hipchat.<span class="keyword">default</span>.message" &#125;</span><span class="xml">&#125;</span><span class="template-variable">&#123;&#123; template "__subject" . &#125;</span><span class="xml">&#125;</span><span class="template-variable">&#123;&#123; end &#125;</span><span class="xml">&#125;</span></span><br><span class="line"><span class="xml"></span></span><br><span class="line"><span class="xml"></span></span><br><span class="line"><span class="xml">    </span><span class="template-variable">&#123;&#123; define "pagerduty.<span class="keyword">default</span>.description" &#125;</span><span class="xml">&#125;</span><span class="template-variable">&#123;&#123; template "__subject" . &#125;</span><span class="xml">&#125;</span><span class="template-variable">&#123;&#123; end &#125;</span><span class="xml">&#125;</span></span><br><span class="line"><span class="xml">    </span><span class="template-variable">&#123;&#123; define "pagerduty.<span class="keyword">default</span>.client" &#125;</span><span class="xml">&#125;</span><span class="template-variable">&#123;&#123; template "__alertmanager" . &#125;</span><span class="xml">&#125;</span><span class="template-variable">&#123;&#123; end &#125;</span><span class="xml">&#125;</span></span><br><span class="line"><span class="xml">    </span><span class="template-variable">&#123;&#123; define "pagerduty.<span class="keyword">default</span>.clientURL" &#125;</span><span class="xml">&#125;</span><span class="template-variable">&#123;&#123; template "__alertmanagerURL" . &#125;</span><span class="xml">&#125;</span><span class="template-variable">&#123;&#123; end &#125;</span><span class="xml">&#125;</span></span><br><span class="line"><span class="xml">    </span><span class="template-variable">&#123;&#123; define "pagerduty.<span class="keyword">default</span>.instances" &#125;</span><span class="xml">&#125;</span><span class="template-variable">&#123;&#123; template "__text_alert_list" . &#125;</span><span class="xml">&#125;</span><span class="template-variable">&#123;&#123; end &#125;</span><span class="xml">&#125;</span></span><br><span class="line"><span class="xml"></span></span><br><span class="line"><span class="xml"></span></span><br><span class="line"><span class="xml">    </span><span class="template-variable">&#123;&#123; define "opsgenie.<span class="keyword">default</span>.message" &#125;</span><span class="xml">&#125;</span><span class="template-variable">&#123;&#123; template "__subject" . &#125;</span><span class="xml">&#125;</span><span class="template-variable">&#123;&#123; end &#125;</span><span class="xml">&#125;</span></span><br><span class="line"><span class="xml">    </span><span class="template-variable">&#123;&#123; define "opsgenie.<span class="keyword">default</span>.description" &#125;</span><span class="xml">&#125;</span><span class="template-variable">&#123;&#123; .CommonAnnotations.SortedPairs.Values | join " " &#125;</span><span class="xml">&#125;</span></span><br><span class="line"><span class="xml">    </span><span class="template-variable">&#123;&#123; <span class="keyword">if</span> <span class="keyword">gt</span> (len .Alerts.Firing) 0 -&#125;</span><span class="xml">&#125;</span></span><br><span class="line"><span class="xml">    Alerts Firing:</span></span><br><span class="line"><span class="xml">    </span><span class="template-variable">&#123;&#123; template "__text_alert_list" .Alerts.Firing &#125;</span><span class="xml">&#125;</span></span><br><span class="line"><span class="xml">    </span><span class="template-variable">&#123;&#123;- end &#125;</span><span class="xml">&#125;</span></span><br><span class="line"><span class="xml">    </span><span class="template-variable">&#123;&#123; <span class="keyword">if</span> <span class="keyword">gt</span> (len .Alerts.Resolved) 0 -&#125;</span><span class="xml">&#125;</span></span><br><span class="line"><span class="xml">    Alerts Resolved:</span></span><br><span class="line"><span class="xml">    </span><span class="template-variable">&#123;&#123; template "__text_alert_list" .Alerts.Resolved &#125;</span><span class="xml">&#125;</span></span><br><span class="line"><span class="xml">    </span><span class="template-variable">&#123;&#123;- end &#125;</span><span class="xml">&#125;</span></span><br><span class="line"><span class="xml">    </span><span class="template-variable">&#123;&#123;- end &#125;</span><span class="xml">&#125;</span></span><br><span class="line"><span class="xml">    </span><span class="template-variable">&#123;&#123; define "opsgenie.<span class="keyword">default</span>.source" &#125;</span><span class="xml">&#125;</span><span class="template-variable">&#123;&#123; template "__alertmanagerURL" . &#125;</span><span class="xml">&#125;</span><span class="template-variable">&#123;&#123; end &#125;</span><span class="xml">&#125;</span></span><br><span class="line"><span class="xml"></span></span><br><span class="line"><span class="xml"></span></span><br><span class="line"><span class="xml">    </span><span class="template-variable">&#123;&#123; define "victorops.<span class="keyword">default</span>.message" &#125;</span><span class="xml">&#125;</span><span class="template-variable">&#123;&#123; template "__subject" . &#125;</span><span class="xml">&#125; | </span><span class="template-variable">&#123;&#123; template "__alertmanagerURL" . &#125;</span><span class="xml">&#125;</span><span class="template-variable">&#123;&#123; end &#125;</span><span class="xml">&#125;</span></span><br><span class="line"><span class="xml">    </span><span class="template-variable">&#123;&#123; define "victorops.<span class="keyword">default</span>.from" &#125;</span><span class="xml">&#125;</span><span class="template-variable">&#123;&#123; template "__alertmanager" . &#125;</span><span class="xml">&#125;</span><span class="template-variable">&#123;&#123; end &#125;</span><span class="xml">&#125;</span></span><br><span class="line"><span class="xml"></span></span><br><span class="line"><span class="xml"></span></span><br><span class="line"><span class="xml">    </span><span class="template-variable">&#123;&#123; define "email.<span class="keyword">default</span>.subject" &#125;</span><span class="xml">&#125;</span><span class="template-variable">&#123;&#123; template "__subject" . &#125;</span><span class="xml">&#125;</span><span class="template-variable">&#123;&#123; end &#125;</span><span class="xml">&#125;</span></span><br><span class="line"><span class="xml">    </span><span class="template-variable">&#123;&#123; define "email.<span class="keyword">default</span>.html" &#125;</span><span class="xml">&#125;</span></span><br><span class="line"><span class="xml">    <span class="meta">&lt;!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"&gt;</span></span></span><br><span class="line"><span class="xml">    <span class="comment">&lt;!--</span></span></span><br><span class="line"><span class="xml">    Style and HTML derived from https://github.com/mailgun/transactional-email-templates</span></span><br><span class="line"><span class="xml"></span></span><br><span class="line"><span class="xml"></span></span><br><span class="line"><span class="xml">    The MIT License (MIT)</span></span><br><span class="line"><span class="xml"></span></span><br><span class="line"><span class="xml">    Copyright (c) 2014 Mailgun</span></span><br><span class="line"><span class="xml"></span></span><br><span class="line"><span class="xml">    Permission is hereby granted, free of charge, to any person obtaining a copy</span></span><br><span class="line"><span class="xml">    of this software and associated documentation files (the "Software"), to deal</span></span><br><span class="line"><span class="xml">    in the Software without restriction, including without limitation the rights</span></span><br><span class="line"><span class="xml">    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell</span></span><br><span class="line"><span class="xml">    copies of the Software, and to permit persons to whom the Software is</span></span><br><span class="line"><span class="xml">    furnished to do so, subject to the following conditions:</span></span><br><span class="line"><span class="xml"></span></span><br><span class="line"><span class="xml">    The above copyright notice and this permission notice shall be included in all</span></span><br><span class="line"><span class="xml">    copies or substantial portions of the Software.</span></span><br><span class="line"><span class="xml"></span></span><br><span class="line"><span class="xml">    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR</span></span><br><span class="line"><span class="xml">    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,</span></span><br><span class="line"><span class="xml">    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE</span></span><br><span class="line"><span class="xml">    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER</span></span><br><span class="line"><span class="xml">    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,</span></span><br><span class="line"><span class="xml">    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE</span></span><br><span class="line"><span class="xml">    SOFTWARE.</span></span><br><span class="line"><span class="xml">    --&gt;</span></span><br><span class="line"><span class="xml">    <span class="tag">&lt;<span class="name">html</span> <span class="attr">xmlns</span>=<span class="string">"http://www.w3.org/1999/xhtml"</span> <span class="attr">xmlns</span>=<span class="string">"http://www.w3.org/1999/xhtml"</span> <span class="attr">style</span>=<span class="string">"font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;"</span>&gt;</span></span></span><br><span class="line"><span class="xml">    <span class="tag">&lt;<span class="name">head</span> <span class="attr">style</span>=<span class="string">"font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;"</span>&gt;</span></span></span><br><span class="line"><span class="xml">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">name</span>=<span class="string">"viewport"</span> <span class="attr">content</span>=<span class="string">"width=device-width"</span> <span class="attr">style</span>=<span class="string">"font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;"</span> /&gt;</span></span></span><br><span class="line"><span class="xml">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">http-equiv</span>=<span class="string">"Content-Type"</span> <span class="attr">content</span>=<span class="string">"text/html; charset=UTF-8"</span> <span class="attr">style</span>=<span class="string">"font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;"</span> /&gt;</span></span></span><br><span class="line"><span class="xml">    <span class="tag">&lt;<span class="name">title</span> <span class="attr">style</span>=<span class="string">"font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;"</span>&gt;</span></span><span class="template-variable">&#123;&#123; template "__subject" . &#125;</span><span class="xml">&#125;<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span></span><br><span class="line"><span class="xml"></span></span><br><span class="line"><span class="xml">    <span class="tag">&lt;/<span class="name">head</span>&gt;</span></span></span><br><span class="line"><span class="xml"></span></span><br><span class="line"><span class="xml">    <span class="tag">&lt;<span class="name">body</span> <span class="attr">itemscope</span>=<span class="string">""</span> <span class="attr">itemtype</span>=<span class="string">"http://schema.org/EmailMessage"</span> <span class="attr">style</span>=<span class="string">"font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; -webkit-font-smoothing: antialiased; -webkit-text-size-adjust: none; height: 100%; line-height: 1.6em; width: 100% !important; background-color: #f6f6f6; margin: 0; padding: 0;"</span> <span class="attr">bgcolor</span>=<span class="string">"#f6f6f6"</span>&gt;</span></span></span><br><span class="line"><span class="xml"></span></span><br><span class="line"><span class="xml">    <span class="tag">&lt;<span class="name">table</span> <span class="attr">style</span>=<span class="string">"font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; width: 100%; background-color: #f6f6f6; margin: 0;"</span> <span class="attr">bgcolor</span>=<span class="string">"#f6f6f6"</span>&gt;</span></span></span><br><span class="line"><span class="xml">      <span class="tag">&lt;<span class="name">tr</span> <span class="attr">style</span>=<span class="string">"font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;"</span>&gt;</span></span></span><br><span class="line"><span class="xml">        <span class="tag">&lt;<span class="name">td</span> <span class="attr">style</span>=<span class="string">"font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0;"</span> <span class="attr">valign</span>=<span class="string">"top"</span>&gt;</span><span class="tag">&lt;/<span class="name">td</span>&gt;</span></span></span><br><span class="line"><span class="xml">        <span class="tag">&lt;<span class="name">td</span> <span class="attr">width</span>=<span class="string">"600"</span> <span class="attr">style</span>=<span class="string">"font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; display: block !important; max-width: 600px !important; clear: both !important; width: 100% !important; margin: 0 auto; padding: 0;"</span> <span class="attr">valign</span>=<span class="string">"top"</span>&gt;</span></span></span><br><span class="line"><span class="xml">          <span class="tag">&lt;<span class="name">div</span> <span class="attr">style</span>=<span class="string">"font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; max-width: 600px; display: block; margin: 0 auto; padding: 0;"</span>&gt;</span></span></span><br><span class="line"><span class="xml">            <span class="tag">&lt;<span class="name">table</span> <span class="attr">width</span>=<span class="string">"100%"</span> <span class="attr">cellpadding</span>=<span class="string">"0"</span> <span class="attr">cellspacing</span>=<span class="string">"0"</span> <span class="attr">style</span>=<span class="string">"font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; border-radius: 3px; background-color: #fff; margin: 0; border: 1px solid #e9e9e9;"</span> <span class="attr">bgcolor</span>=<span class="string">"#fff"</span>&gt;</span></span></span><br><span class="line"><span class="xml">              <span class="tag">&lt;<span class="name">tr</span> <span class="attr">style</span>=<span class="string">"font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;"</span>&gt;</span></span></span><br><span class="line"><span class="xml">                <span class="tag">&lt;<span class="name">td</span> <span class="attr">style</span>=<span class="string">"font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 16px; vertical-align: top; color: #fff; font-weight: 500; text-align: center; border-radius: 3px 3px 0 0; background-color: #E6522C; margin: 0; padding: 20px;"</span> <span class="attr">align</span>=<span class="string">"center"</span> <span class="attr">bgcolor</span>=<span class="string">"#E6522C"</span> <span class="attr">valign</span>=<span class="string">"top"</span>&gt;</span></span></span><br><span class="line"><span class="xml">                  </span><span class="template-variable">&#123;&#123; .Alerts | len &#125;</span><span class="xml">&#125; alert</span><span class="template-variable">&#123;&#123; <span class="keyword">if</span> <span class="keyword">gt</span> (len .Alerts) 1 &#125;</span><span class="xml">&#125;s</span><span class="template-variable">&#123;&#123; end &#125;</span><span class="xml">&#125; for </span><span class="template-variable">&#123;&#123; range .GroupLabels.SortedPairs &#125;</span><span class="xml">&#125;</span></span><br><span class="line"><span class="xml">                    </span><span class="template-variable">&#123;&#123; .Name &#125;</span><span class="xml">&#125;=</span><span class="template-variable">&#123;&#123; .Value &#125;</span><span class="xml">&#125;</span></span><br><span class="line"><span class="xml">                  </span><span class="template-variable">&#123;&#123; end &#125;</span><span class="xml">&#125;</span></span><br><span class="line"><span class="xml">                <span class="tag">&lt;/<span class="name">td</span>&gt;</span></span></span><br><span class="line"><span class="xml">              <span class="tag">&lt;/<span class="name">tr</span>&gt;</span></span></span><br><span class="line"><span class="xml">              <span class="tag">&lt;<span class="name">tr</span> <span class="attr">style</span>=<span class="string">"font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;"</span>&gt;</span></span></span><br><span class="line"><span class="xml">                <span class="tag">&lt;<span class="name">td</span> <span class="attr">style</span>=<span class="string">"font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0; padding: 10px;"</span> <span class="attr">valign</span>=<span class="string">"top"</span>&gt;</span></span></span><br><span class="line"><span class="xml">                  <span class="tag">&lt;<span class="name">table</span> <span class="attr">width</span>=<span class="string">"100%"</span> <span class="attr">cellpadding</span>=<span class="string">"0"</span> <span class="attr">cellspacing</span>=<span class="string">"0"</span> <span class="attr">style</span>=<span class="string">"font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;"</span>&gt;</span></span></span><br><span class="line"><span class="xml">                    <span class="tag">&lt;<span class="name">tr</span> <span class="attr">style</span>=<span class="string">"font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;"</span>&gt;</span></span></span><br><span class="line"><span class="xml">                      <span class="tag">&lt;<span class="name">td</span> <span class="attr">style</span>=<span class="string">"font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0; padding: 0 0 20px;"</span> <span class="attr">valign</span>=<span class="string">"top"</span>&gt;</span></span></span><br><span class="line"><span class="xml">                        <span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">"</span></span></span><span class="template-variable">&#123;&#123; template "__alertmanagerURL" . &#125;</span><span class="xml"><span class="tag"><span class="string">&#125;"</span> <span class="attr">style</span>=<span class="string">"font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; color: #FFF; text-decoration: none; line-height: 2em; font-weight: bold; text-align: center; cursor: pointer; display: inline-block; border-radius: 5px; text-transform: capitalize; background-color: #348eda; margin: 0; border-color: #348eda; border-style: solid; border-width: 10px 20px;"</span>&gt;</span>View in </span><span class="template-variable">&#123;&#123; template "__alertmanager" . &#125;</span><span class="xml">&#125;<span class="tag">&lt;/<span class="name">a</span>&gt;</span></span></span><br><span class="line"><span class="xml">                      <span class="tag">&lt;/<span class="name">td</span>&gt;</span></span></span><br><span class="line"><span class="xml">                    <span class="tag">&lt;/<span class="name">tr</span>&gt;</span></span></span><br><span class="line"><span class="xml">                    </span><span class="template-variable">&#123;&#123; <span class="keyword">if</span> <span class="keyword">gt</span> (len .Alerts.Firing) 0 &#125;</span><span class="xml">&#125;</span></span><br><span class="line"><span class="xml">                    <span class="tag">&lt;<span class="name">tr</span> <span class="attr">style</span>=<span class="string">"font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;"</span>&gt;</span></span></span><br><span class="line"><span class="xml">                      <span class="tag">&lt;<span class="name">td</span> <span class="attr">style</span>=<span class="string">"font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0; padding: 0 0 20px;"</span> <span class="attr">valign</span>=<span class="string">"top"</span>&gt;</span></span></span><br><span class="line"><span class="xml">                        <span class="tag">&lt;<span class="name">strong</span> <span class="attr">style</span>=<span class="string">"font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;"</span>&gt;</span>[</span><span class="template-variable">&#123;&#123; .Alerts.Firing | len &#125;</span><span class="xml">&#125;] Firing<span class="tag">&lt;/<span class="name">strong</span>&gt;</span></span></span><br><span class="line"><span class="xml">                      <span class="tag">&lt;/<span class="name">td</span>&gt;</span></span></span><br><span class="line"><span class="xml">                    <span class="tag">&lt;/<span class="name">tr</span>&gt;</span></span></span><br><span class="line"><span class="xml">                    </span><span class="template-variable">&#123;&#123; end &#125;</span><span class="xml">&#125;</span></span><br><span class="line"><span class="xml">                    </span><span class="template-variable">&#123;&#123; range .Alerts.Firing &#125;</span><span class="xml">&#125;</span></span><br><span class="line"><span class="xml">                    <span class="tag">&lt;<span class="name">tr</span> <span class="attr">style</span>=<span class="string">"font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;"</span>&gt;</span></span></span><br><span class="line"><span class="xml">                      <span class="tag">&lt;<span class="name">td</span> <span class="attr">style</span>=<span class="string">"font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0; padding: 0 0 20px;"</span> <span class="attr">valign</span>=<span class="string">"top"</span>&gt;</span></span></span><br><span class="line"><span class="xml">                        <span class="tag">&lt;<span class="name">strong</span> <span class="attr">style</span>=<span class="string">"font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;"</span>&gt;</span>Labels<span class="tag">&lt;/<span class="name">strong</span>&gt;</span><span class="tag">&lt;<span class="name">br</span> <span class="attr">style</span>=<span class="string">"font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;"</span> /&gt;</span></span></span><br><span class="line"><span class="xml">                        </span><span class="template-variable">&#123;&#123; range .Labels.SortedPairs &#125;</span><span class="xml">&#125;</span><span class="template-variable">&#123;&#123; .Name &#125;</span><span class="xml">&#125; = </span><span class="template-variable">&#123;&#123; .Value &#125;</span><span class="xml">&#125;<span class="tag">&lt;<span class="name">br</span> <span class="attr">style</span>=<span class="string">"font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;"</span> /&gt;</span></span><span class="template-variable">&#123;&#123; end &#125;</span><span class="xml">&#125;</span></span><br><span class="line"><span class="xml">                        </span><span class="template-variable">&#123;&#123; <span class="keyword">if</span> <span class="keyword">gt</span> (len .Annotations) 0 &#125;</span><span class="xml">&#125;<span class="tag">&lt;<span class="name">strong</span> <span class="attr">style</span>=<span class="string">"font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;"</span>&gt;</span>Annotations<span class="tag">&lt;/<span class="name">strong</span>&gt;</span><span class="tag">&lt;<span class="name">br</span> <span class="attr">style</span>=<span class="string">"font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;"</span> /&gt;</span></span><span class="template-variable">&#123;&#123; end &#125;</span><span class="xml">&#125;</span></span><br><span class="line"><span class="xml">                        </span><span class="template-variable">&#123;&#123; range .Annotations.SortedPairs &#125;</span><span class="xml">&#125;</span><span class="template-variable">&#123;&#123; .Name &#125;</span><span class="xml">&#125; = </span><span class="template-variable">&#123;&#123; .Value &#125;</span><span class="xml">&#125;<span class="tag">&lt;<span class="name">br</span> <span class="attr">style</span>=<span class="string">"font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;"</span> /&gt;</span></span><span class="template-variable">&#123;&#123; end &#125;</span><span class="xml">&#125;</span></span><br><span class="line"><span class="xml">                        <span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">"</span></span></span><span class="template-variable">&#123;&#123; .GeneratorURL &#125;</span><span class="xml"><span class="tag"><span class="string">&#125;"</span> <span class="attr">style</span>=<span class="string">"font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; color: #348eda; text-decoration: underline; margin: 0;"</span>&gt;</span>Source<span class="tag">&lt;/<span class="name">a</span>&gt;</span><span class="tag">&lt;<span class="name">br</span> <span class="attr">style</span>=<span class="string">"font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;"</span> /&gt;</span></span></span><br><span class="line"><span class="xml">                      <span class="tag">&lt;/<span class="name">td</span>&gt;</span></span></span><br><span class="line"><span class="xml">                    <span class="tag">&lt;/<span class="name">tr</span>&gt;</span></span></span><br><span class="line"><span class="xml">                    </span><span class="template-variable">&#123;&#123; end &#125;</span><span class="xml">&#125;</span></span><br><span class="line"><span class="xml"></span></span><br><span class="line"><span class="xml">                    </span><span class="template-variable">&#123;&#123; <span class="keyword">if</span> <span class="keyword">gt</span> (len .Alerts.Resolved) 0 &#125;</span><span class="xml">&#125;</span></span><br><span class="line"><span class="xml">                      </span><span class="template-variable">&#123;&#123; <span class="keyword">if</span> <span class="keyword">gt</span> (len .Alerts.Firing) 0 &#125;</span><span class="xml">&#125;</span></span><br><span class="line"><span class="xml">                    <span class="tag">&lt;<span class="name">tr</span> <span class="attr">style</span>=<span class="string">"font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;"</span>&gt;</span></span></span><br><span class="line"><span class="xml">                      <span class="tag">&lt;<span class="name">td</span> <span class="attr">style</span>=<span class="string">"font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0; padding: 0 0 20px;"</span> <span class="attr">valign</span>=<span class="string">"top"</span>&gt;</span></span></span><br><span class="line"><span class="xml">                        <span class="tag">&lt;<span class="name">br</span> <span class="attr">style</span>=<span class="string">"font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;"</span> /&gt;</span></span></span><br><span class="line"><span class="xml">                        <span class="tag">&lt;<span class="name">hr</span> <span class="attr">style</span>=<span class="string">"font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;"</span> /&gt;</span></span></span><br><span class="line"><span class="xml">                        <span class="tag">&lt;<span class="name">br</span> <span class="attr">style</span>=<span class="string">"font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;"</span> /&gt;</span></span></span><br><span class="line"><span class="xml">                      <span class="tag">&lt;/<span class="name">td</span>&gt;</span></span></span><br><span class="line"><span class="xml">                    <span class="tag">&lt;/<span class="name">tr</span>&gt;</span></span></span><br><span class="line"><span class="xml">                      </span><span class="template-variable">&#123;&#123; end &#125;</span><span class="xml">&#125;</span></span><br><span class="line"><span class="xml">                    <span class="tag">&lt;<span class="name">tr</span> <span class="attr">style</span>=<span class="string">"font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;"</span>&gt;</span></span></span><br><span class="line"><span class="xml">                      <span class="tag">&lt;<span class="name">td</span> <span class="attr">style</span>=<span class="string">"font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0; padding: 0 0 20px;"</span> <span class="attr">valign</span>=<span class="string">"top"</span>&gt;</span></span></span><br><span class="line"><span class="xml">                        <span class="tag">&lt;<span class="name">strong</span> <span class="attr">style</span>=<span class="string">"font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;"</span>&gt;</span>[</span><span class="template-variable">&#123;&#123; .Alerts.Resolved | len &#125;</span><span class="xml">&#125;] Resolved<span class="tag">&lt;/<span class="name">strong</span>&gt;</span></span></span><br><span class="line"><span class="xml">                      <span class="tag">&lt;/<span class="name">td</span>&gt;</span></span></span><br><span class="line"><span class="xml">                    <span class="tag">&lt;/<span class="name">tr</span>&gt;</span></span></span><br><span class="line"><span class="xml">                    </span><span class="template-variable">&#123;&#123; end &#125;</span><span class="xml">&#125;</span></span><br><span class="line"><span class="xml">                    </span><span class="template-variable">&#123;&#123; range .Alerts.Resolved &#125;</span><span class="xml">&#125;</span></span><br><span class="line"><span class="xml">                    <span class="tag">&lt;<span class="name">tr</span> <span class="attr">style</span>=<span class="string">"font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;"</span>&gt;</span></span></span><br><span class="line"><span class="xml">                      <span class="tag">&lt;<span class="name">td</span> <span class="attr">style</span>=<span class="string">"font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0; padding: 0 0 20px;"</span> <span class="attr">valign</span>=<span class="string">"top"</span>&gt;</span></span></span><br><span class="line"><span class="xml">                        <span class="tag">&lt;<span class="name">strong</span> <span class="attr">style</span>=<span class="string">"font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;"</span>&gt;</span>Labels<span class="tag">&lt;/<span class="name">strong</span>&gt;</span><span class="tag">&lt;<span class="name">br</span> <span class="attr">style</span>=<span class="string">"font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;"</span> /&gt;</span></span></span><br><span class="line"><span class="xml">                        </span><span class="template-variable">&#123;&#123; range .Labels.SortedPairs &#125;</span><span class="xml">&#125;</span><span class="template-variable">&#123;&#123; .Name &#125;</span><span class="xml">&#125; = </span><span class="template-variable">&#123;&#123; .Value &#125;</span><span class="xml">&#125;<span class="tag">&lt;<span class="name">br</span> <span class="attr">style</span>=<span class="string">"font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;"</span> /&gt;</span></span><span class="template-variable">&#123;&#123; end &#125;</span><span class="xml">&#125;</span></span><br><span class="line"><span class="xml">                        </span><span class="template-variable">&#123;&#123; <span class="keyword">if</span> <span class="keyword">gt</span> (len .Annotations) 0 &#125;</span><span class="xml">&#125;<span class="tag">&lt;<span class="name">strong</span> <span class="attr">style</span>=<span class="string">"font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;"</span>&gt;</span>Annotations<span class="tag">&lt;/<span class="name">strong</span>&gt;</span><span class="tag">&lt;<span class="name">br</span> <span class="attr">style</span>=<span class="string">"font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;"</span> /&gt;</span></span><span class="template-variable">&#123;&#123; end &#125;</span><span class="xml">&#125;</span></span><br><span class="line"><span class="xml">                        </span><span class="template-variable">&#123;&#123; range .Annotations.SortedPairs &#125;</span><span class="xml">&#125;</span><span class="template-variable">&#123;&#123; .Name &#125;</span><span class="xml">&#125; = </span><span class="template-variable">&#123;&#123; .Value &#125;</span><span class="xml">&#125;<span class="tag">&lt;<span class="name">br</span> <span class="attr">style</span>=<span class="string">"font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;"</span> /&gt;</span></span><span class="template-variable">&#123;&#123; end &#125;</span><span class="xml">&#125;</span></span><br><span class="line"><span class="xml">                        <span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">"</span></span></span><span class="template-variable">&#123;&#123; .GeneratorURL &#125;</span><span class="xml"><span class="tag"><span class="string">&#125;"</span> <span class="attr">style</span>=<span class="string">"font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; color: #348eda; text-decoration: underline; margin: 0;"</span>&gt;</span>Source<span class="tag">&lt;/<span class="name">a</span>&gt;</span><span class="tag">&lt;<span class="name">br</span> <span class="attr">style</span>=<span class="string">"font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;"</span> /&gt;</span></span></span><br><span class="line"><span class="xml">                      <span class="tag">&lt;/<span class="name">td</span>&gt;</span></span></span><br><span class="line"><span class="xml">                    <span class="tag">&lt;/<span class="name">tr</span>&gt;</span></span></span><br><span class="line"><span class="xml">                    </span><span class="template-variable">&#123;&#123; end &#125;</span><span class="xml">&#125;</span></span><br><span class="line"><span class="xml">                  <span class="tag">&lt;/<span class="name">table</span>&gt;</span></span></span><br><span class="line"><span class="xml">                <span class="tag">&lt;/<span class="name">td</span>&gt;</span></span></span><br><span class="line"><span class="xml">              <span class="tag">&lt;/<span class="name">tr</span>&gt;</span></span></span><br><span class="line"><span class="xml">            <span class="tag">&lt;/<span class="name">table</span>&gt;</span></span></span><br><span class="line"><span class="xml"></span></span><br><span class="line"><span class="xml">            <span class="tag">&lt;<span class="name">div</span> <span class="attr">style</span>=<span class="string">"font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; width: 100%; clear: both; color: #999; margin: 0; padding: 20px;"</span>&gt;</span></span></span><br><span class="line"><span class="xml">              <span class="tag">&lt;<span class="name">table</span> <span class="attr">width</span>=<span class="string">"100%"</span> <span class="attr">style</span>=<span class="string">"font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;"</span>&gt;</span></span></span><br><span class="line"><span class="xml">                <span class="tag">&lt;<span class="name">tr</span> <span class="attr">style</span>=<span class="string">"font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;"</span>&gt;</span></span></span><br><span class="line"><span class="xml">                  <span class="tag">&lt;<span class="name">td</span> <span class="attr">style</span>=<span class="string">"font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 12px; vertical-align: top; text-align: center; color: #999; margin: 0; padding: 0 0 20px;"</span> <span class="attr">align</span>=<span class="string">"center"</span> <span class="attr">valign</span>=<span class="string">"top"</span>&gt;</span><span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">"</span></span></span><span class="template-variable">&#123;&#123; .ExternalURL &#125;</span><span class="xml"><span class="tag"><span class="string">&#125;"</span> <span class="attr">style</span>=<span class="string">"font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 12px; color: #999; text-decoration: underline; margin: 0;"</span>&gt;</span>Sent by </span><span class="template-variable">&#123;&#123; template "__alertmanager" . &#125;</span><span class="xml">&#125;<span class="tag">&lt;/<span class="name">a</span>&gt;</span><span class="tag">&lt;/<span class="name">td</span>&gt;</span></span></span><br><span class="line"><span class="xml">                <span class="tag">&lt;/<span class="name">tr</span>&gt;</span></span></span><br><span class="line"><span class="xml">              <span class="tag">&lt;/<span class="name">table</span>&gt;</span></span></span><br><span class="line"><span class="xml">            <span class="tag">&lt;/<span class="name">div</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span></span><br><span class="line"><span class="xml">        <span class="tag">&lt;/<span class="name">td</span>&gt;</span></span></span><br><span class="line"><span class="xml">        <span class="tag">&lt;<span class="name">td</span> <span class="attr">style</span>=<span class="string">"font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0;"</span> <span class="attr">valign</span>=<span class="string">"top"</span>&gt;</span><span class="tag">&lt;/<span class="name">td</span>&gt;</span></span></span><br><span class="line"><span class="xml">      <span class="tag">&lt;/<span class="name">tr</span>&gt;</span></span></span><br><span class="line"><span class="xml">    <span class="tag">&lt;/<span class="name">table</span>&gt;</span></span></span><br><span class="line"><span class="xml"></span></span><br><span class="line"><span class="xml">    <span class="tag">&lt;/<span class="name">body</span>&gt;</span></span></span><br><span class="line"><span class="xml">    <span class="tag">&lt;/<span class="name">html</span>&gt;</span></span></span><br><span class="line"><span class="xml"></span></span><br><span class="line"><span class="xml">    </span><span class="template-variable">&#123;&#123; end &#125;</span><span class="xml">&#125;</span></span><br><span class="line"><span class="xml"></span></span><br><span class="line"><span class="xml">    </span><span class="template-variable">&#123;&#123; define "pushover.<span class="keyword">default</span>.title" &#125;</span><span class="xml">&#125;</span><span class="template-variable">&#123;&#123; template "__subject" . &#125;</span><span class="xml">&#125;</span><span class="template-variable">&#123;&#123; end &#125;</span><span class="xml">&#125;</span></span><br><span class="line"><span class="xml">    </span><span class="template-variable">&#123;&#123; define "pushover.<span class="keyword">default</span>.message" &#125;</span><span class="xml">&#125;</span><span class="template-variable">&#123;&#123; .CommonAnnotations.SortedPairs.Values | join " " &#125;</span><span class="xml">&#125;</span></span><br><span class="line"><span class="xml">    </span><span class="template-variable">&#123;&#123; <span class="keyword">if</span> <span class="keyword">gt</span> (len .Alerts.Firing) 0 &#125;</span><span class="xml">&#125;</span></span><br><span class="line"><span class="xml">    Alerts Firing:</span></span><br><span class="line"><span class="xml">    </span><span class="template-variable">&#123;&#123; template "__text_alert_list" .Alerts.Firing &#125;</span><span class="xml">&#125;</span></span><br><span class="line"><span class="xml">    </span><span class="template-variable">&#123;&#123; end &#125;</span><span class="xml">&#125;</span></span><br><span class="line"><span class="xml">    </span><span class="template-variable">&#123;&#123; <span class="keyword">if</span> <span class="keyword">gt</span> (len .Alerts.Resolved) 0 &#125;</span><span class="xml">&#125;</span></span><br><span class="line"><span class="xml">    Alerts Resolved:</span></span><br><span class="line"><span class="xml">    </span><span class="template-variable">&#123;&#123; template "__text_alert_list" .Alerts.Resolved &#125;</span><span class="xml">&#125;</span></span><br><span class="line"><span class="xml">    </span><span class="template-variable">&#123;&#123; end &#125;</span><span class="xml">&#125;</span></span><br><span class="line"><span class="xml">    </span><span class="template-variable">&#123;&#123; end &#125;</span><span class="xml">&#125;</span></span><br><span class="line"><span class="xml">    </span><span class="template-variable">&#123;&#123; define "pushover.<span class="keyword">default</span>.url" &#125;</span><span class="xml">&#125;</span><span class="template-variable">&#123;&#123; template "__alertmanagerURL" . &#125;</span><span class="xml">&#125;</span><span class="template-variable">&#123;&#123; end &#125;</span><span class="xml">&#125;</span></span><br><span class="line"><span class="xml">  slack.tmpl: |</span></span><br><span class="line"><span class="xml">    </span><span class="template-variable">&#123;&#123; define "slack.devops.text" &#125;</span><span class="xml">&#125;</span></span><br><span class="line"><span class="xml">    </span><span class="template-variable">&#123;&#123;range .Alerts&#125;</span><span class="xml">&#125;</span><span class="template-variable">&#123;&#123;.Annotations.DESCRIPTION&#125;</span><span class="xml">&#125;</span></span><br><span class="line"><span class="xml">    </span><span class="template-variable">&#123;&#123;end&#125;</span><span class="xml">&#125;</span></span><br><span class="line"><span class="xml">    </span><span class="template-variable">&#123;&#123; end &#125;</span><span class="xml">&#125;</span></span><br><span class="line"><span class="xml">kind: ConfigMap</span></span><br><span class="line"><span class="xml">metadata:</span></span><br><span class="line"><span class="xml">  creationTimestamp: null</span></span><br><span class="line"><span class="xml">  name: alertmanager-templates</span></span><br><span class="line"><span class="xml">  namespace: kube-system</span></span><br></pre></td></tr></table></figure></p>
+<p>configmap.yaml：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">kind:</span> <span class="string">ConfigMap</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">alertmanager</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">kube-system</span></span><br><span class="line"><span class="attr">data:</span></span><br><span class="line">  <span class="string">config.yml:</span> <span class="string">|-</span></span><br><span class="line"><span class="attr">    global:</span></span><br><span class="line">      <span class="comment"># ResolveTimeout is the time after which an alert is declared resolved</span></span><br><span class="line">      <span class="comment"># if it has not been updated.</span></span><br><span class="line"><span class="attr">      resolve_timeout:</span> <span class="number">5</span><span class="string">m</span></span><br><span class="line">      <span class="comment"># The smarthost and SMTP sender used for mail notifications.</span></span><br><span class="line"></span><br><span class="line">      <span class="comment"># The API URL to use for Slack notifications.</span></span><br><span class="line">    <span class="comment"># # The directory from which notification templates are read.</span></span><br><span class="line"><span class="attr">    templates:</span></span><br><span class="line"><span class="bullet">    -</span> <span class="string">'/etc/alertmanager-templates/*.tmpl'</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># The root route on which each incoming alert enters.</span></span><br><span class="line"><span class="attr">    route:</span></span><br><span class="line"></span><br><span class="line">      <span class="comment"># The labels by which incoming alerts are grouped together. For example,</span></span><br><span class="line">      <span class="comment"># multiple alerts coming in for cluster=A and alertname=LatencyHigh would</span></span><br><span class="line">      <span class="comment"># be batched into a single group.</span></span><br><span class="line"></span><br><span class="line"><span class="attr">      group_by:</span> <span class="string">['alertname',</span> <span class="string">'cluster'</span><span class="string">,</span> <span class="string">'service'</span><span class="string">]</span></span><br><span class="line"></span><br><span class="line">      <span class="comment"># When a new group of alerts is created by an incoming alert, wait at</span></span><br><span class="line">      <span class="comment"># least 'group_wait' to send the initial notification.</span></span><br><span class="line">      <span class="comment"># This way ensures that you get multiple alerts for the same group that start</span></span><br><span class="line">      <span class="comment"># firing shortly after another are batched together on the first</span></span><br><span class="line">      <span class="comment"># notification.</span></span><br><span class="line"></span><br><span class="line"><span class="attr">      group_wait:</span> <span class="number">30</span><span class="string">s</span></span><br><span class="line"></span><br><span class="line">      <span class="comment"># When the first notification was sent, wait 'group_interval' to send a batch</span></span><br><span class="line">      <span class="comment"># of new alerts that started firing for that group.</span></span><br><span class="line"></span><br><span class="line"><span class="attr">      group_interval:</span> <span class="number">5</span><span class="string">m</span></span><br><span class="line"></span><br><span class="line">      <span class="comment"># If an alert has successfully been sent, wait 'repeat_interval' to</span></span><br><span class="line">      <span class="comment"># resend them.</span></span><br><span class="line"></span><br><span class="line">      <span class="comment">#repeat_interval: 1m</span></span><br><span class="line"><span class="attr">      repeat_interval:</span> <span class="number">1</span><span class="string">m</span></span><br><span class="line"></span><br><span class="line">      <span class="comment"># A default receiver</span></span><br><span class="line"></span><br><span class="line">      <span class="comment"># If an alert isn't caught by a route, send it to default.</span></span><br><span class="line"><span class="attr">      receiver:</span> <span class="string">webhook_alert</span> </span><br><span class="line"></span><br><span class="line">      <span class="comment"># All the above attributes are inherited by all child routes and can</span></span><br><span class="line">      <span class="comment"># overwritten on each.</span></span><br><span class="line"></span><br><span class="line">      <span class="comment"># The child route trees.</span></span><br><span class="line"><span class="attr">      routes:</span></span><br><span class="line">      <span class="comment"># Send severity=slack alerts to slack.</span></span><br><span class="line"><span class="attr">      - match:</span></span><br><span class="line"><span class="attr">          severity:</span> <span class="string">info</span></span><br><span class="line"><span class="attr">        receiver:</span> <span class="string">webhook_alert</span></span><br><span class="line"><span class="attr">      - match:</span></span><br><span class="line"><span class="attr">          severity:</span> <span class="string">warning</span></span><br><span class="line"><span class="attr">        receiver:</span> <span class="string">webhook_alert</span></span><br><span class="line"></span><br><span class="line"><span class="attr">    receivers:</span></span><br><span class="line"><span class="attr">    - name:</span> <span class="string">webhook_alert</span></span><br><span class="line"><span class="attr">      webhook_configs:</span></span><br><span class="line"><span class="attr">      - url:</span> <span class="string">'http://192.168.88.26:8080/api/1.0/utils/alert/?token=ADW82115yn7YEWXCEW88WEW6'</span></span><br><span class="line"><span class="attr">        send_resolved:</span> <span class="literal">true</span></span><br></pre></td></tr></table></figure>
+<p>deployment.yaml:</p>
+<figure class="highlight less"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">apiVersion</span>: extensions/v1beta1</span><br><span class="line"><span class="attribute">kind</span>: Deployment</span><br><span class="line"><span class="attribute">metadata</span>:</span><br><span class="line">  <span class="attribute">name</span>: alertmanager</span><br><span class="line">  <span class="attribute">namespace</span>: kube-system</span><br><span class="line"><span class="attribute">spec</span>:</span><br><span class="line">  <span class="attribute">replicas</span>: <span class="number">1</span></span><br><span class="line">  <span class="attribute">selector</span>:</span><br><span class="line">    <span class="attribute">matchLabels</span>:</span><br><span class="line">      <span class="attribute">app</span>: alertmanager</span><br><span class="line">  <span class="attribute">template</span>:</span><br><span class="line">    <span class="attribute">metadata</span>:</span><br><span class="line">      <span class="attribute">name</span>: alertmanager</span><br><span class="line">      <span class="attribute">labels</span>:</span><br><span class="line">        <span class="attribute">app</span>: alertmanager</span><br><span class="line">    <span class="attribute">spec</span>:</span><br><span class="line">      <span class="attribute">containers</span>:</span><br><span class="line">      - <span class="attribute">name</span>: alertmanager</span><br><span class="line">        <span class="attribute">image</span>: quay.io/prometheus/<span class="attribute">alertmanager</span>:v0.<span class="number">15.0</span></span><br><span class="line">        <span class="attribute">args</span>:</span><br><span class="line">          - <span class="string">'--config.file=/etc/alertmanager/config.yml'</span></span><br><span class="line">          - <span class="string">'--storage.path=/alertmanager'</span></span><br><span class="line">        <span class="attribute">ports</span>:</span><br><span class="line">        - <span class="attribute">name</span>: alertmanager</span><br><span class="line">          <span class="attribute">containerPort</span>: <span class="number">9093</span></span><br><span class="line">        <span class="attribute">volumeMounts</span>:</span><br><span class="line">        - <span class="attribute">name</span>: config-volume</span><br><span class="line">          <span class="attribute">mountPath</span>: /etc/alertmanager</span><br><span class="line">        - <span class="attribute">name</span>: templates-volume</span><br><span class="line">          <span class="attribute">mountPath</span>: /etc/alertmanager-templates</span><br><span class="line">        - <span class="attribute">name</span>: alertmanager</span><br><span class="line">          <span class="attribute">mountPath</span>: /alertmanager</span><br><span class="line">      <span class="attribute">serviceAccountName</span>: prometheus</span><br><span class="line">      <span class="attribute">volumes</span>:</span><br><span class="line">      - <span class="attribute">name</span>: config-volume</span><br><span class="line">        <span class="attribute">configMap</span>:</span><br><span class="line">          <span class="attribute">name</span>: alertmanager</span><br><span class="line">      - <span class="attribute">name</span>: templates-volume</span><br><span class="line">        <span class="attribute">configMap</span>:</span><br><span class="line">          <span class="attribute">name</span>: alertmanager-templates</span><br><span class="line">      - <span class="attribute">name</span>: alertmanager</span><br><span class="line">        <span class="attribute">emptyDir</span>: &#123;&#125;</span><br></pre></td></tr></table></figure>
+<p>service.yaml:</p>
+<figure class="highlight less"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">apiVersion</span>: v1</span><br><span class="line"><span class="attribute">kind</span>: Service</span><br><span class="line"><span class="attribute">metadata</span>:</span><br><span class="line">  <span class="attribute">annotations</span>:</span><br><span class="line">    prometheus.io/<span class="attribute">scrape</span>: <span class="string">'true'</span></span><br><span class="line">    prometheus.io/<span class="attribute">path</span>: <span class="string">'/metrics'</span></span><br><span class="line">  <span class="attribute">labels</span>:</span><br><span class="line">    <span class="attribute">name</span>: alertmanager</span><br><span class="line">  <span class="attribute">name</span>: alertmanager</span><br><span class="line">  <span class="attribute">namespace</span>: kube-system</span><br><span class="line"><span class="attribute">spec</span>:</span><br><span class="line">  <span class="attribute">selector</span>:</span><br><span class="line">    <span class="attribute">app</span>: alertmanager</span><br><span class="line">  <span class="attribute">type</span>: NodePort</span><br><span class="line">  <span class="attribute">ports</span>:</span><br><span class="line">  - <span class="attribute">name</span>: alertmanager</span><br><span class="line">    <span class="attribute">protocol</span>: TCP</span><br><span class="line">    <span class="attribute">port</span>: <span class="number">9093</span></span><br><span class="line">    <span class="attribute">targetPort</span>: <span class="number">9093</span></span><br></pre></td></tr></table></figure>
+<p>依次部署上方几个yaml文件。<br>在配置完alertmanager之后，需要给prometheus主程序配置文件添加alertmanager相关的配置，即修改prometheus的configmap，添加data.rules.yml，增加一些达到触发告警阈值的规则。</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">rules.yml:</span> <span class="string">|</span></span><br><span class="line"><span class="string"></span><span class="attr">  groups:</span></span><br><span class="line"><span class="attr">  - name:</span> <span class="string">test-rule</span></span><br><span class="line"><span class="attr">    rules:</span></span><br><span class="line"><span class="attr">    - alert:</span> <span class="string">NodeFilesystemUsage-high</span></span><br><span class="line"><span class="attr">      expr:</span> <span class="string">(node_filesystem_size&#123;device="rootfs"&#125;</span> <span class="bullet">-</span> <span class="string">node_filesystem_free&#123;device="rootfs"&#125;)</span> <span class="string">/</span> <span class="string">node_filesystem_size&#123;device="rootfs"&#125;</span> <span class="string">*</span> <span class="number">100</span> <span class="string">&gt; 80</span></span><br><span class="line"><span class="string"></span><span class="attr">      for:</span> <span class="number">2</span><span class="string">m</span></span><br><span class="line"><span class="attr">      labels:</span></span><br><span class="line"><span class="attr">        team:</span> <span class="string">node</span></span><br><span class="line"><span class="attr">        severity:</span> <span class="string">warning</span></span><br><span class="line"><span class="attr">      annotations:</span></span><br><span class="line"><span class="attr">        summary:</span> <span class="string">"<span class="template-variable">&#123;&#123;$labels.instance&#125;&#125;</span>: High Filesystem usage detected"</span></span><br><span class="line"><span class="attr">        description:</span> <span class="string">"<span class="template-variable">&#123;&#123;$labels.instance&#125;&#125;</span>: Filesystem usage is above 80% (current value is: <span class="template-variable">&#123;&#123; $value &#125;&#125;</span>"</span></span><br><span class="line"><span class="attr">    - alert:</span> <span class="string">NodeMemoryUsage</span></span><br><span class="line"><span class="attr">      expr:</span> <span class="string">(node_memory_MemTotal</span> <span class="bullet">-</span> <span class="string">(node_memory_MemFree+node_memory_Buffers+node_memory_Cached</span> <span class="string">))</span> <span class="string">/</span> <span class="string">node_memory_MemTotal</span> <span class="string">*</span> <span class="number">100</span> <span class="string">&gt; 80</span></span><br><span class="line"><span class="string"></span><span class="attr">      for:</span> <span class="number">2</span><span class="string">m</span></span><br><span class="line"><span class="attr">      labels:</span></span><br><span class="line"><span class="attr">        team:</span> <span class="string">node</span></span><br><span class="line"><span class="attr">      annotations:</span></span><br><span class="line"><span class="attr">        summary:</span> <span class="string">"<span class="template-variable">&#123;&#123;$labels.instance&#125;&#125;</span>: High Memory usage detected"</span></span><br><span class="line"><span class="attr">        description:</span> <span class="string">"<span class="template-variable">&#123;&#123;$labels.instance&#125;&#125;</span>: Memory usage is above 80% (current value is: <span class="template-variable">&#123;&#123; $value &#125;&#125;</span>"</span></span><br><span class="line"><span class="attr">    - alert:</span> <span class="string">NodeMemoryUsage-low</span></span><br><span class="line"><span class="attr">      expr:</span> <span class="string">(node_memory_MemTotal_bytes</span> <span class="bullet">-</span> <span class="string">(node_memory_MemFree_bytes</span> <span class="string">+</span> <span class="string">node_memory_Buffers_bytes</span> <span class="string">+</span> <span class="string">node_memory_Cached_bytes))</span> <span class="string">/</span> <span class="string">node_memory_MemTotal_bytes</span> <span class="string">*</span> <span class="number">100</span> <span class="string">&gt; 1</span></span><br><span class="line"><span class="string"></span><span class="attr">      for:</span> <span class="number">1</span><span class="string">m</span></span><br><span class="line"><span class="attr">      labels:</span></span><br><span class="line"><span class="attr">        team:</span> <span class="string">node</span></span><br><span class="line"><span class="attr">        severity:</span> <span class="string">info</span></span><br><span class="line"><span class="attr">      annotations:</span></span><br><span class="line"><span class="attr">        summary:</span> <span class="string">"<span class="template-variable">&#123;&#123;$labels.instance&#125;&#125;</span>: High Memory usage detected"</span></span><br><span class="line"><span class="attr">        description:</span> <span class="string">"<span class="template-variable">&#123;&#123;$labels.instance&#125;&#125;</span>: Memory usage is above 80% (current value is: <span class="template-variable">&#123;&#123; $value &#125;&#125;</span>"</span></span><br><span class="line"><span class="attr">    - alert:</span> <span class="string">NodeCPUUsage</span></span><br><span class="line"><span class="attr">      expr:</span> <span class="string">(100</span> <span class="bullet">-</span> <span class="string">(avg</span> <span class="string">by</span> <span class="string">(instance)</span> <span class="string">(irate(node_cpu&#123;job="kubernetes-node-exporter",mode="idle"&#125;[5m]))</span> <span class="string">*</span> <span class="number">100</span><span class="string">))</span> <span class="string">&gt; 80</span></span><br><span class="line"><span class="string"></span><span class="attr">      for:</span> <span class="number">2</span><span class="string">m</span></span><br><span class="line"><span class="attr">      labels:</span></span><br><span class="line"><span class="attr">        team:</span> <span class="string">node</span></span><br><span class="line"><span class="attr">      annotations:</span></span><br><span class="line"><span class="attr">        summary:</span> <span class="string">"<span class="template-variable">&#123;&#123;$labels.instance&#125;&#125;</span>: High CPU usage detected"</span></span><br><span class="line"><span class="attr">        description:</span> <span class="string">"<span class="template-variable">&#123;&#123;$labels.instance&#125;&#125;</span>: CPU usage is above 80% (current value is: <span class="template-variable">&#123;&#123; $value &#125;&#125;</span>"</span></span><br><span class="line"><span class="attr">    - alert:</span> <span class="string">PodMemUsage</span></span><br><span class="line"><span class="attr">      expr:</span> <span class="string">container_memory_usage_bytes&#123;pod_name!="",namespace="default"&#125;/container_spec_memory_limit_bytes&#123;pod_name!="",namespace="default"&#125;</span> <span class="string">*100</span> <span class="string">!=</span> <span class="string">+Inf</span> <span class="string">&gt; 10</span></span><br><span class="line"><span class="string"></span><span class="attr">      for:</span> <span class="number">2</span><span class="string">m</span></span><br><span class="line"><span class="attr">      labels:</span></span><br><span class="line"><span class="attr">        team:</span> <span class="string">node</span></span><br><span class="line"><span class="attr">      annotations:</span></span><br><span class="line"><span class="attr">        summary:</span> <span class="string">"<span class="template-variable">&#123;&#123;$labels.instance&#125;&#125;</span>: Pod High Mem usage detected"</span></span><br><span class="line"><span class="attr">        description:</span> <span class="string">"<span class="template-variable">&#123;&#123;$labels.instance&#125;&#125;</span>: Pod CPU Mem is above 80% (current value is: <span class="template-variable">&#123;&#123; $value &#125;&#125;</span>"</span></span><br></pre></td></tr></table></figure>
+<p>更新之后的prometheus的configmap完整yaml文件如下：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">kind:</span> <span class="string">ConfigMap</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">prometheus-config</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">kube-system</span></span><br><span class="line"><span class="attr">data:</span></span><br><span class="line">  <span class="string">prometheus.yml:</span> <span class="string">|</span></span><br><span class="line"><span class="string"></span><span class="attr">    global:</span></span><br><span class="line"><span class="attr">      scrape_interval:</span>     <span class="number">15</span><span class="string">s</span></span><br><span class="line"><span class="attr">      evaluation_interval:</span> <span class="number">15</span><span class="string">s</span></span><br><span class="line"><span class="attr">    rule_files:</span></span><br><span class="line"><span class="bullet">    -</span> <span class="string">/etc/prometheus/rules.yml</span></span><br><span class="line"><span class="attr">    alerting:</span></span><br><span class="line"><span class="attr">      alertmanagers:</span></span><br><span class="line"><span class="attr">        - static_configs:</span></span><br><span class="line"><span class="attr">          - targets:</span> <span class="string">["alertmanager:9093"]</span></span><br><span class="line"><span class="attr">    scrape_configs:</span></span><br><span class="line"></span><br><span class="line"><span class="attr">    - job_name:</span> <span class="string">'kubernetes-apiservers'</span></span><br><span class="line"><span class="attr">      kubernetes_sd_configs:</span></span><br><span class="line"><span class="attr">      - role:</span> <span class="string">endpoints</span></span><br><span class="line"><span class="attr">      scheme:</span> <span class="string">https</span></span><br><span class="line"><span class="attr">      tls_config:</span></span><br><span class="line"><span class="attr">        ca_file:</span> <span class="string">/var/run/secrets/kubernetes.io/serviceaccount/ca.crt</span></span><br><span class="line"><span class="attr">      bearer_token_file:</span> <span class="string">/var/run/secrets/kubernetes.io/serviceaccount/token</span></span><br><span class="line"><span class="attr">      relabel_configs:</span></span><br><span class="line"><span class="attr">      - source_labels:</span> <span class="string">[__meta_kubernetes_namespace,</span> <span class="string">__meta_kubernetes_service_name,</span> <span class="string">__meta_kubernetes_endpoint_port_name]</span></span><br><span class="line"><span class="attr">        action:</span> <span class="string">keep</span></span><br><span class="line"><span class="attr">        regex:</span> <span class="string">default;kubernetes;https</span></span><br><span class="line"></span><br><span class="line"><span class="attr">    - job_name:</span> <span class="string">'kubernetes-nodes'</span></span><br><span class="line"><span class="attr">      kubernetes_sd_configs:</span></span><br><span class="line"><span class="attr">      - role:</span> <span class="string">node</span></span><br><span class="line"><span class="attr">      scheme:</span> <span class="string">https</span></span><br><span class="line"><span class="attr">      tls_config:</span></span><br><span class="line"><span class="attr">        ca_file:</span> <span class="string">/var/run/secrets/kubernetes.io/serviceaccount/ca.crt</span></span><br><span class="line"><span class="attr">      bearer_token_file:</span> <span class="string">/var/run/secrets/kubernetes.io/serviceaccount/token</span></span><br><span class="line"><span class="attr">      relabel_configs:</span></span><br><span class="line"><span class="attr">      - action:</span> <span class="string">labelmap</span></span><br><span class="line"><span class="attr">        regex:</span> <span class="string">__meta_kubernetes_node_label_(.+)</span></span><br><span class="line"><span class="attr">      - target_label:</span> <span class="string">__address__</span></span><br><span class="line"><span class="attr">        replacement:</span> <span class="string">kubernetes.default.svc:443</span></span><br><span class="line"><span class="attr">      - source_labels:</span> <span class="string">[__meta_kubernetes_node_name]</span></span><br><span class="line"><span class="attr">        regex:</span> <span class="string">(.+)</span></span><br><span class="line"><span class="attr">        target_label:</span> <span class="string">__metrics_path__</span></span><br><span class="line"><span class="attr">        replacement:</span> <span class="string">/api/v1/nodes/$&#123;1&#125;/proxy/metrics</span></span><br><span class="line"></span><br><span class="line"><span class="attr">    - job_name:</span> <span class="string">'kubernetes-cadvisor'</span></span><br><span class="line"><span class="attr">      kubernetes_sd_configs:</span></span><br><span class="line"><span class="attr">      - role:</span> <span class="string">node</span></span><br><span class="line"><span class="attr">      scheme:</span> <span class="string">https</span></span><br><span class="line"><span class="attr">      tls_config:</span></span><br><span class="line"><span class="attr">        ca_file:</span> <span class="string">/var/run/secrets/kubernetes.io/serviceaccount/ca.crt</span></span><br><span class="line"><span class="attr">      bearer_token_file:</span> <span class="string">/var/run/secrets/kubernetes.io/serviceaccount/token</span></span><br><span class="line"><span class="attr">      relabel_configs:</span></span><br><span class="line"><span class="attr">      - action:</span> <span class="string">labelmap</span></span><br><span class="line"><span class="attr">        regex:</span> <span class="string">__meta_kubernetes_node_label_(.+)</span></span><br><span class="line"><span class="attr">      - target_label:</span> <span class="string">__address__</span></span><br><span class="line"><span class="attr">        replacement:</span> <span class="string">kubernetes.default.svc:443</span></span><br><span class="line"><span class="attr">      - source_labels:</span> <span class="string">[__meta_kubernetes_node_name]</span></span><br><span class="line"><span class="attr">        regex:</span> <span class="string">(.+)</span></span><br><span class="line"><span class="attr">        target_label:</span> <span class="string">__metrics_path__</span></span><br><span class="line"><span class="attr">        replacement:</span> <span class="string">/api/v1/nodes/$&#123;1&#125;/proxy/metrics/cadvisor</span></span><br><span class="line"></span><br><span class="line"><span class="attr">    - job_name:</span> <span class="string">'kubernetes-service-endpoints'</span></span><br><span class="line"><span class="attr">      kubernetes_sd_configs:</span></span><br><span class="line"><span class="attr">      - role:</span> <span class="string">endpoints</span></span><br><span class="line"><span class="attr">      relabel_configs:</span></span><br><span class="line"><span class="attr">      - source_labels:</span> <span class="string">[__meta_kubernetes_service_annotation_prometheus_io_scrape]</span></span><br><span class="line"><span class="attr">        action:</span> <span class="string">keep</span></span><br><span class="line"><span class="attr">        regex:</span> <span class="literal">true</span></span><br><span class="line"><span class="attr">      - source_labels:</span> <span class="string">[__meta_kubernetes_service_annotation_prometheus_io_scheme]</span></span><br><span class="line"><span class="attr">        action:</span> <span class="string">replace</span></span><br><span class="line"><span class="attr">        target_label:</span> <span class="string">__scheme__</span></span><br><span class="line"><span class="attr">        regex:</span> <span class="string">(https?)</span></span><br><span class="line"><span class="attr">      - source_labels:</span> <span class="string">[__meta_kubernetes_service_annotation_prometheus_io_path]</span></span><br><span class="line"><span class="attr">        action:</span> <span class="string">replace</span></span><br><span class="line"><span class="attr">        target_label:</span> <span class="string">__metrics_path__</span></span><br><span class="line"><span class="attr">        regex:</span> <span class="string">(.+)</span></span><br><span class="line"><span class="attr">      - source_labels:</span> <span class="string">[__address__,</span> <span class="string">__meta_kubernetes_service_annotation_prometheus_io_port]</span></span><br><span class="line"><span class="attr">        action:</span> <span class="string">replace</span></span><br><span class="line"><span class="attr">        target_label:</span> <span class="string">__address__</span></span><br><span class="line"><span class="attr">        regex:</span> <span class="string">([^:]+)(?::\d+)?;(\d+)</span></span><br><span class="line"><span class="attr">        replacement:</span> <span class="string">$1:$2</span></span><br><span class="line"><span class="attr">      - action:</span> <span class="string">labelmap</span></span><br><span class="line"><span class="attr">        regex:</span> <span class="string">__meta_kubernetes_service_label_(.+)</span></span><br><span class="line"><span class="attr">      - source_labels:</span> <span class="string">[__meta_kubernetes_namespace]</span></span><br><span class="line"><span class="attr">        action:</span> <span class="string">replace</span></span><br><span class="line"><span class="attr">        target_label:</span> <span class="string">kubernetes_namespace</span></span><br><span class="line"><span class="attr">      - source_labels:</span> <span class="string">[__meta_kubernetes_service_name]</span></span><br><span class="line"><span class="attr">        action:</span> <span class="string">replace</span></span><br><span class="line"><span class="attr">        target_label:</span> <span class="string">kubernetes_name</span></span><br><span class="line"></span><br><span class="line"><span class="attr">    - job_name:</span> <span class="string">'kubernetes-services'</span></span><br><span class="line"><span class="attr">      kubernetes_sd_configs:</span></span><br><span class="line"><span class="attr">      - role:</span> <span class="string">service</span></span><br><span class="line"><span class="attr">      metrics_path:</span> <span class="string">/probe</span></span><br><span class="line"><span class="attr">      params:</span></span><br><span class="line"><span class="attr">        module:</span> <span class="string">[http_2xx]</span></span><br><span class="line"><span class="attr">      relabel_configs:</span></span><br><span class="line"><span class="attr">      - source_labels:</span> <span class="string">[__meta_kubernetes_service_annotation_prometheus_io_probe]</span></span><br><span class="line"><span class="attr">        action:</span> <span class="string">keep</span></span><br><span class="line"><span class="attr">        regex:</span> <span class="literal">true</span></span><br><span class="line"><span class="attr">      - source_labels:</span> <span class="string">[__address__]</span></span><br><span class="line"><span class="attr">        target_label:</span> <span class="string">__param_target</span></span><br><span class="line"><span class="attr">      - target_label:</span> <span class="string">__address__</span></span><br><span class="line"><span class="attr">        replacement:</span> <span class="string">blackbox-exporter.example.com:9115</span></span><br><span class="line"><span class="attr">      - source_labels:</span> <span class="string">[__param_target]</span></span><br><span class="line"><span class="attr">        target_label:</span> <span class="string">instance</span></span><br><span class="line"><span class="attr">      - action:</span> <span class="string">labelmap</span></span><br><span class="line"><span class="attr">        regex:</span> <span class="string">__meta_kubernetes_service_label_(.+)</span></span><br><span class="line"><span class="attr">      - source_labels:</span> <span class="string">[__meta_kubernetes_namespace]</span></span><br><span class="line"><span class="attr">        target_label:</span> <span class="string">kubernetes_namespace</span></span><br><span class="line"><span class="attr">      - source_labels:</span> <span class="string">[__meta_kubernetes_service_name]</span></span><br><span class="line"><span class="attr">        target_label:</span> <span class="string">kubernetes_name</span></span><br><span class="line"></span><br><span class="line"><span class="attr">    - job_name:</span> <span class="string">'kubernetes-ingresses'</span></span><br><span class="line"><span class="attr">      kubernetes_sd_configs:</span></span><br><span class="line"><span class="attr">      - role:</span> <span class="string">ingress</span></span><br><span class="line"><span class="attr">      relabel_configs:</span></span><br><span class="line"><span class="attr">      - source_labels:</span> <span class="string">[__meta_kubernetes_ingress_annotation_prometheus_io_probe]</span></span><br><span class="line"><span class="attr">        action:</span> <span class="string">keep</span></span><br><span class="line"><span class="attr">        regex:</span> <span class="literal">true</span></span><br><span class="line"><span class="attr">        regex:</span> <span class="string">(.+)</span></span><br><span class="line"><span class="attr">      - source_labels:</span> <span class="string">[__address__,</span> <span class="string">__meta_kubernetes_pod_annotation_prometheus_io_port]</span></span><br><span class="line"><span class="attr">        action:</span> <span class="string">replace</span></span><br><span class="line"><span class="attr">        regex:</span> <span class="string">([^:]+)(?::\d+)?;(\d+)</span></span><br><span class="line"><span class="attr">        replacement:</span> <span class="string">$1:$2</span></span><br><span class="line"><span class="attr">        target_label:</span> <span class="string">__address__</span></span><br><span class="line"><span class="attr">      - action:</span> <span class="string">labelmap</span></span><br><span class="line"><span class="attr">        regex:</span> <span class="string">__meta_kubernetes_pod_label_(.+)</span></span><br><span class="line"><span class="attr">      - source_labels:</span> <span class="string">[__meta_kubernetes_namespace]</span></span><br><span class="line"><span class="attr">        action:</span> <span class="string">replace</span></span><br><span class="line"><span class="attr">        target_label:</span> <span class="string">kubernetes_namespace</span></span><br><span class="line"><span class="attr">      - source_labels:</span> <span class="string">[__meta_kubernetes_pod_name]</span></span><br><span class="line"><span class="attr">        action:</span> <span class="string">replace</span></span><br><span class="line"><span class="attr">        target_label:</span> <span class="string">kubernetes_pod_name</span></span><br><span class="line"><span class="attr">    - job_name:</span> <span class="string">'kubernetes-node-exporter'</span></span><br><span class="line"><span class="attr">      scheme:</span> <span class="string">http</span></span><br><span class="line"><span class="attr">      tls_config:</span></span><br><span class="line"><span class="attr">        ca_file:</span> <span class="string">/var/run/secrets/kubernetes.io/serviceaccount/ca.crt</span></span><br><span class="line"><span class="attr">      bearer_token_file:</span> <span class="string">/var/run/secrets/kubernetes.io/serviceaccount/token</span></span><br><span class="line"><span class="attr">      kubernetes_sd_configs:</span></span><br><span class="line"><span class="attr">      - role:</span> <span class="string">node</span></span><br><span class="line"><span class="attr">      relabel_configs:</span></span><br><span class="line"><span class="attr">      - action:</span> <span class="string">labelmap</span></span><br><span class="line"><span class="attr">        regex:</span> <span class="string">__meta_kubernetes_node_label_(.+)</span></span><br><span class="line"><span class="attr">      - source_labels:</span> <span class="string">[__meta_kubernetes_role]</span></span><br><span class="line"><span class="attr">        action:</span> <span class="string">replace</span></span><br><span class="line"><span class="attr">        target_label:</span> <span class="string">kubernetes_role</span></span><br><span class="line"><span class="attr">      - source_labels:</span> <span class="string">[__address__]</span></span><br><span class="line"><span class="attr">        regex:</span> <span class="string">'(.*):10250'</span></span><br><span class="line"><span class="attr">        replacement:</span> <span class="string">'$&#123;1&#125;:31672'</span></span><br><span class="line"><span class="attr">        target_label:</span> <span class="string">__address__</span></span><br><span class="line">  <span class="string">rules.yml:</span> <span class="string">|</span></span><br><span class="line"><span class="string"></span><span class="attr">    groups:</span></span><br><span class="line"><span class="attr">    - name:</span> <span class="string">test-rule</span></span><br><span class="line"><span class="attr">      rules:</span></span><br><span class="line"><span class="attr">      - alert:</span> <span class="string">NodeFilesystemUsage-high</span></span><br><span class="line"><span class="attr">        expr:</span> <span class="string">(node_filesystem_size&#123;device="rootfs"&#125;</span> <span class="bullet">-</span> <span class="string">node_filesystem_free&#123;device="rootfs"&#125;)</span> <span class="string">/</span> <span class="string">node_filesystem_size&#123;device="rootfs"&#125;</span> <span class="string">*</span> <span class="number">100</span> <span class="string">&gt; 80</span></span><br><span class="line"><span class="string"></span><span class="attr">        for:</span> <span class="number">2</span><span class="string">m</span></span><br><span class="line"><span class="attr">        labels:</span></span><br><span class="line"><span class="attr">          team:</span> <span class="string">node</span></span><br><span class="line"><span class="attr">          severity:</span> <span class="string">warning</span></span><br><span class="line"><span class="attr">        annotations:</span></span><br><span class="line"><span class="attr">          summary:</span> <span class="string">"<span class="template-variable">&#123;&#123;$labels.instance&#125;&#125;</span>: High Filesystem usage detected"</span></span><br><span class="line"><span class="attr">          description:</span> <span class="string">"<span class="template-variable">&#123;&#123;$labels.instance&#125;&#125;</span>: Filesystem usage is above 80% (current value is: <span class="template-variable">&#123;&#123; $value &#125;&#125;</span>"</span></span><br><span class="line"><span class="attr">      - alert:</span> <span class="string">NodeMemoryUsage</span></span><br><span class="line"><span class="attr">        expr:</span> <span class="string">(node_memory_MemTotal</span> <span class="bullet">-</span> <span class="string">(node_memory_MemFree+node_memory_Buffers+node_memory_Cached</span> <span class="string">))</span> <span class="string">/</span> <span class="string">node_memory_MemTotal</span> <span class="string">*</span> <span class="number">100</span> <span class="string">&gt; 80</span></span><br><span class="line"><span class="string"></span><span class="attr">        for:</span> <span class="number">2</span><span class="string">m</span></span><br><span class="line"><span class="attr">        labels:</span></span><br><span class="line"><span class="attr">          team:</span> <span class="string">node</span></span><br><span class="line"><span class="attr">        annotations:</span></span><br><span class="line"><span class="attr">          summary:</span> <span class="string">"<span class="template-variable">&#123;&#123;$labels.instance&#125;&#125;</span>: High Memory usage detected"</span></span><br><span class="line"><span class="attr">          description:</span> <span class="string">"<span class="template-variable">&#123;&#123;$labels.instance&#125;&#125;</span>: Memory usage is above 80% (current value is: <span class="template-variable">&#123;&#123; $value &#125;&#125;</span>"</span></span><br><span class="line"><span class="attr">      - alert:</span> <span class="string">NodeMemoryUsage-low</span></span><br><span class="line"><span class="attr">        expr:</span> <span class="string">(node_memory_MemTotal_bytes</span> <span class="bullet">-</span> <span class="string">(node_memory_MemFree_bytes</span> <span class="string">+</span> <span class="string">node_memory_Buffers_bytes</span> <span class="string">+</span> <span class="string">node_memory_Cached_bytes))</span> <span class="string">/</span> <span class="string">node_memory_MemTotal_bytes</span> <span class="string">*</span> <span class="number">100</span> <span class="string">&gt; 1</span></span><br><span class="line"><span class="string"></span><span class="attr">        for:</span> <span class="number">1</span><span class="string">m</span></span><br><span class="line"><span class="attr">        labels:</span></span><br><span class="line"><span class="attr">          team:</span> <span class="string">node</span></span><br><span class="line"><span class="attr">          severity:</span> <span class="string">info</span></span><br><span class="line"><span class="attr">        annotations:</span></span><br><span class="line"><span class="attr">          summary:</span> <span class="string">"<span class="template-variable">&#123;&#123;$labels.instance&#125;&#125;</span>: High Memory usage detected"</span></span><br><span class="line"><span class="attr">          description:</span> <span class="string">"<span class="template-variable">&#123;&#123;$labels.instance&#125;&#125;</span>: Memory usage is above 80% (current value is: <span class="template-variable">&#123;&#123; $value &#125;&#125;</span>"</span></span><br><span class="line"><span class="attr">      - alert:</span> <span class="string">NodeCPUUsage</span></span><br><span class="line"><span class="attr">        expr:</span> <span class="string">(100</span> <span class="bullet">-</span> <span class="string">(avg</span> <span class="string">by</span> <span class="string">(instance)</span> <span class="string">(irate(node_cpu&#123;job="kubernetes-node-exporter",mode="idle"&#125;[5m]))</span> <span class="string">*</span> <span class="number">100</span><span class="string">))</span> <span class="string">&gt; 80</span></span><br><span class="line"><span class="string"></span><span class="attr">        for:</span> <span class="number">2</span><span class="string">m</span></span><br><span class="line"><span class="attr">        labels:</span></span><br><span class="line"><span class="attr">          team:</span> <span class="string">node</span></span><br><span class="line"><span class="attr">        annotations:</span></span><br><span class="line"><span class="attr">          summary:</span> <span class="string">"<span class="template-variable">&#123;&#123;$labels.instance&#125;&#125;</span>: High CPU usage detected"</span></span><br><span class="line"><span class="attr">          description:</span> <span class="string">"<span class="template-variable">&#123;&#123;$labels.instance&#125;&#125;</span>: CPU usage is above 80% (current value is: <span class="template-variable">&#123;&#123; $value &#125;&#125;</span>"</span></span><br><span class="line"><span class="attr">      - alert:</span> <span class="string">PodMemUsage</span></span><br><span class="line"><span class="attr">        expr:</span> <span class="string">container_memory_usage_bytes&#123;pod_name!="",namespace="default"&#125;/container_spec_memory_limit_bytes&#123;pod_name!="",namespace="default"&#125;</span> <span class="string">*100</span> <span class="string">!=</span> <span class="string">+Inf</span> <span class="string">&gt; 80</span></span><br><span class="line"><span class="string"></span><span class="attr">        for:</span> <span class="number">2</span><span class="string">m</span></span><br><span class="line"><span class="attr">        labels:</span></span><br><span class="line"><span class="attr">          team:</span> <span class="string">node</span></span><br><span class="line"><span class="attr">        annotations:</span></span><br><span class="line"><span class="attr">          summary:</span> <span class="string">"<span class="template-variable">&#123;&#123;$labels.instance&#125;&#125;</span>: Pod High Mem usage detected"</span></span><br><span class="line"><span class="attr">          description:</span> <span class="string">"<span class="template-variable">&#123;&#123;$labels.instance&#125;&#125;</span>: Pod CPU Mem is above 80% (current value is: <span class="template-variable">&#123;&#123; $value &#125;&#125;</span>"</span></span><br></pre></td></tr></table></figure>
+<p><strong>为了测试使用，增加了一项node内存使用率超过1%则触发告警，这个在使用时可以删掉。</strong></p>
+<p><strong>kubectl apply -f config.map更新prometheus配置文件，更新配置文件后，prometheus不会自动重载配置，需重启pod，为了优雅地重载，可以采取更新deployment注解的方式来触发滚动升级，保证服务不中断。使用如下命令：</strong></p>
+<figure class="highlight jboss-cli"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl <span class="keyword">patch</span> deployment prometheus <span class="params">--patch</span> '&#123;<span class="string">"spec"</span>: &#123;<span class="string">"template"</span>: &#123;<span class="string">"metadata"</span>: &#123;<span class="string">"annotations"</span>: &#123;<span class="string">"update-time"</span>: <span class="string">"2018-06-25 17:50"</span> &#125;&#125;&#125;&#125;&#125;' -n kube-system</span><br></pre></td></tr></table></figure>
+<h2 id="四、告警效果"><a href="#四、告警效果" class="headerlink" title="四、告警效果"></a>四、告警效果</h2><p>查看prometheus告警模块，可以看到激活的告警消息：<br><img src="http://mycloudn.kokoerp.com/20180626193940302.jpg" alt="这里写图片描述"></p>
+<p>钉钉收到告警消息：<br><img src="http://mycloudn.kokoerp.com/2018062619374775.jpg" alt="这里写图片描述"><br><img src="http://mycloudn.kokoerp.com/20180626195612177.jpg" alt="这里写图片描述"></p>
+<p>告警处于firing激活状态时，只有有效的start_time，endtime为无效值，状态为resolved时会有准确的end-time。</p>
+<p>点击告警消息中的链接，查看明细数据：<br><img src="http://mycloudn.kokoerp.com/201806261947575.jpg" alt="这里写图片描述"><br><img src="http://mycloudn.kokoerp.com/20180626194803513.jpg" alt="这里写图片描述"></p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>配置告警消息并不难，难点在于各项键控值的定义，metrics类型有很多，同时支持的各类应用也有很多，还有很多可摸索的空间。后期还要不断的扩充、调整监控类型，调整优化通知策略，prometheus非常地灵活，可以基于此不断发掘，打造最适合自己公司环境的容器云监控体系。</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div id="reward-container">
+  <div>Thank you for your accept. mua！</div>
+  <button id="reward-button" disable="enable" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+
+    
+      
+      
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/reward/wechatpay.png" alt="丨ywq丨 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+      
+      
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/reward/alipay.png" alt="丨ywq丨 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        
+
+
+
+
+  
+
+
+
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>丨ywq丨</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    
+    <a href="https://www.ipyker.com/2018/06/26/k8s(八)、监控--Prometheus告警篇（告警消息对接钉钉接口）.html" title="k8s(八)、监控--Prometheus告警篇（告警消息对接钉钉接口）">https://www.ipyker.com/2018/06/26/k8s(八)、监控--Prometheus告警篇（告警消息对接钉钉接口）.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li>
+</ul>
+
+      </div>
+    
+    <div>
+      
+        <div>
+    
+        <div style="text-align:center;color: #ccc;font-size:16px;">-------------本文结束<i class="fa fa-heart"></i>感谢您的阅读-------------</div>
+    
+</div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Kubernetes/" rel="tag"><i class="fa fa-tag"></i> Kubernetes</a>
+          
+            <a href="/tags/Prometheus/" rel="tag"><i class="fa fa-tag"></i> Prometheus</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/06/26/k8s(七)、监控--Prometheus部署篇.html" rel="next" title="k8s(七)、监控--Prometheus部署篇">
+                <i class="fa fa-chevron-left"></i> k8s(七)、监控--Prometheus部署篇
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/06/28/k8s(九)、监控--Prometheus扩展篇（mysqld-exporter、服务发现、监控项、联邦、relabel）.html" rel="prev" title="k8s(九)、监控--Prometheus扩展篇（mysqld-exporter、服务发现、监控项、联邦、relabel）">
+                k8s(九)、监控--Prometheus扩展篇（mysqld-exporter、服务发现、监控项、联邦、relabel） <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC80NDM5Mi8yMDkyNA=="></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="丨ywq丨">
+            
+              <p class="site-author-name" itemprop="name">丨ywq丨</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives">
+                
+                    <span class="site-state-item-count">74</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                      <a href="/tags">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">15</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/yinwenqin" title="GitHub &rarr; https://github.com/yinwenqin" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://blog.csdn.net/ywq935" title="CSDN &rarr; https://blog.csdn.net/ywq935" rel="noopener" target="_blank"><i class="fa fa-fw fa-globe"></i>CSDN</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-book"></i>
+                推荐阅读
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.upweto.top/gitbooks/useKubernetes/" title="http://blog.upweto.top/gitbooks/useKubernetes/" rel="noopener" target="_blank">kubernetes使用指南</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.upweto.top/gitbooks/kubeSourceCodeNote/" title="http://blog.upweto.top/gitbooks/kubeSourceCodeNote/" rel="noopener" target="_blank">kubernetes源码笔记</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#null"><span class="nav-number">1.</span> <span class="nav-text"> </span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">2.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#一、Querying-expr-amp-PromQL"><span class="nav-number">3.</span> <span class="nav-text">一、Querying expr &amp; PromQL</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#二、告警媒介"><span class="nav-number">4.</span> <span class="nav-text">二、告警媒介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#三、Alertmanager部署"><span class="nav-number">5.</span> <span class="nav-text">三、Alertmanager部署</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#四、告警效果"><span class="nav-number">6.</span> <span class="nav-text">四、告警效果</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">7.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" style=" text-align:center;">&copy; 2017 – <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ywq</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"> 站点字数合计:</i>
+    </span>
+    
+    <span title="站点总字数">583k</span>
+  
+  
+</div>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+<div class="run_time" style=" text-align:center;">
+  <span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
+  <script>
+    var now = new Date(); 
+    function createtime() { 
+        var grt= new Date("08/23/2018 10:00:00");//此处修改你的建站时间或者网站上线时间 
+        now.setTime(now.getTime()+250); 
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days); 
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours); 
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum); 
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;} 
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum); 
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;} 
+        document.getElementById("timeDate").innerHTML = "本站已安全运行 "+dnum+" 天 "; 
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒"; 
+    } 
+    setInterval("createtime()",250);
+  </script>
+</div>
+
+        
+<div class="busuanzi-count" style=" text-align:center;">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-user"></i>
+    </span>
+    <span class="site-uv" title="总访客量">
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span> 人
+    </span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+  
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-eye"></i>
+    </span>
+    <span class="site-pv" title="总访问量">
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span> 次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+  
+    
+    
+      
+    
+  
+  <script color="black" opacity="0.7" zindex="-1" count="140" src="//cdn.jsdelivr.net/gh/theme-next/theme-next-canvas-nest@1.0.0/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+  
+  
+  <script id="ribbon" size="300" alpha="0.1" zindex="-1" src="/lib/canvas-ribbon/canvas-ribbon.js"></script>
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/fancybox/source/jquery.fancybox.pack.js"></script>
+
+
+  
+
+
+  <script src="/js/utils.js?v=7.1.1"></script>
+
+  <script src="/js/motion.js?v=7.1.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/schemes/muse.js?v=7.1.1"></script>
+
+
+
+
+  
+  <script src="/js/scrollspy.js?v=7.1.1"></script>
+<script src="/js/post-details.js?v=7.1.1"></script>
+
+
+
+  
+
+
+  <script src="/js/next-boot.js?v=7.1.1"></script>
+
+
+  
+
+  
+
+  
+  
+  
+
+  
+
+  
+  
+  
+
+
+  
+
+
+  
+    <script>
+  window.livereOptions = {
+    refer: '2018/06/26/k8s(八)、监控--Prometheus告警篇（告警消息对接钉钉接口）.html'
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+</script>
+
+  
+
+
+  
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url).replace(/\/{2,}/g, '/');
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x"></i></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x"></i></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+  
+  <script src="/lib/bookmark/bookmark.min.js?v=1.0"></script>
+  <script>
+  
+    bookmark.scrollToMark('auto', "#更多");
+  
+  </script>
+
+
+  
+
+  
+
+  
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/koharu.model.json"},"display":{"position":"left","width":250,"height":500},"mobile":{"show":false},"react":{"opacity":0.7},"log":false});</script></body>
+</html>
+<!-- 页面点击小红心 -->
+<script type="text/javascript" src="/js/src/clicklove.js"></script>

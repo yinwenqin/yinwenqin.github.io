@@ -1,0 +1,1528 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-CN">
+
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link rel="stylesheet" href="/lib/pace/pace-theme-bounce.min.css?v=1.0.2">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link rel="stylesheet" href="/lib/fancybox/source/jquery.fancybox.css">
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+    
+      
+    
+
+    
+  
+
+  
+
+  
+
+  
+    
+      
+    
+
+    
+  
+
+  
+    
+    
+    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic|Roboto Slab:300,300italic,400,400italic,700,700italic|Roboto Mono:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext">
+  
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.1.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.1.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.1.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.1.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.1.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '7.1.1',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":true,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: true,
+    fancybox: true,
+    fastclick: true,
+    lazyload: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"shrinkIn","post_header":"slideLeftIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideDownIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <script>
+  (function(i,s,o,g,r,a,m){i["DaoVoiceObject"]=r;i[r]=i[r]||function(){(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;a.charset="utf-8";m.parentNode.insertBefore(a,m)})(window,document,"script",('https:' == document.location.protocol ? 'https:' : 'http:') + "//widget.daovoice.io/widget/0f81ff2f.js","daovoice")
+  daovoice('init', {
+      app_id: "bd399fce"
+    });
+  daovoice('update');
+  </script>
+
+  <meta name="description" content="（一）、前言    为什么引入消息队列？    1.程序解耦    2.提升性能    3.降低多业务逻辑复杂度 （二）、python操作rabbit mqrabbitmq配置安装基本使用参见上节文章，不再复述。若想使用python操作rabbitmq，需安装pika模块，直接pip安装：pip install pika 1.最简单的rabbitmq producer端与consumer端对话：p">
+<meta name="keywords" content="Python">
+<meta property="og:type" content="article">
+<meta property="og:title" content="python队列通信：rabbitMQ使用">
+<meta property="og:url" content="https://www.ipyker.com/2017/11/26/python队列通信：rabbitMQ使用.html">
+<meta property="og:site_name" content="随笔漫谈">
+<meta property="og:description" content="（一）、前言    为什么引入消息队列？    1.程序解耦    2.提升性能    3.降低多业务逻辑复杂度 （二）、python操作rabbit mqrabbitmq配置安装基本使用参见上节文章，不再复述。若想使用python操作rabbitmq，需安装pika模块，直接pip安装：pip install pika 1.最简单的rabbitmq producer端与consumer端对话：p">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://mycloudn.kokoerp.com/V0LzIwMTcxMTI1MTgwNjU2MzU5.jpg">
+<meta property="og:image" content="http://mycloudn.kokoerp.com/V0LzIwMTcxMTI1MTgyNDMwMDA3.jpg">
+<meta property="og:image" content="http://mycloudn.kokoerp.com/V0LzIwMTcxMTI1MTgzNzUwNTYw.jpg">
+<meta property="og:image" content="http://mycloudn.kokoerp.com/V0LzIwMTcxMTI2MTMzMjMxMDIw.jpg">
+<meta property="og:image" content="http://mycloudn.kokoerp.com/V0LzIwMTcxMTI2MTM0NDE2NzY4.jpg">
+<meta property="og:image" content="http://mycloudn.kokoerp.com/V0LzIwMTcxMTI2MTM1NDAxMjQ2.jpg">
+<meta property="og:image" content="http://mycloudn.kokoerp.com/V0LzIwMTcxMTI2MTQzNDQ3NTgz.jpg">
+<meta property="og:updated_time" content="2019-11-21T07:48:40.145Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="python队列通信：rabbitMQ使用">
+<meta name="twitter:description" content="（一）、前言    为什么引入消息队列？    1.程序解耦    2.提升性能    3.降低多业务逻辑复杂度 （二）、python操作rabbit mqrabbitmq配置安装基本使用参见上节文章，不再复述。若想使用python操作rabbitmq，需安装pika模块，直接pip安装：pip install pika 1.最简单的rabbitmq producer端与consumer端对话：p">
+<meta name="twitter:image" content="http://mycloudn.kokoerp.com/V0LzIwMTcxMTI1MTgwNjU2MzU5.jpg">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="随笔漫谈" type="application/atom+xml">
+
+
+
+  
+  
+  <link rel="canonical" href="https://www.ipyker.com/2017/11/26/python队列通信：rabbitMQ使用">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>python队列通信：rabbitMQ使用 | 随笔漫谈</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+ 
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">随笔漫谈</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-book">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/gitbooks/" rel="section"><i class="menu-item-icon fa fa-fw fa-book"></i> <br>book</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-互动">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/guestbook/" rel="section"><i class="menu-item-icon fa fa-fw fa-comments"></i> <br>互动</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.ipyker.com/2017/11/26/python队列通信：rabbitMQ使用.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="丨ywq丨">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随笔漫谈">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">python队列通信：rabbitMQ使用
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2017-11-26 14:37:00" itemprop="dateCreated datePublished" datetime="2017-11-26T14:37:00+08:00">2017-11-26</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-11-21 15:48:40" itemprop="dateModified" datetime="2019-11-21T15:48:40+08:00">2019-11-21</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+            <div class="post-symbolscount">
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">本文字数：</span>
+                
+                <span title="本文字数">8.3k</span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">8 分钟</span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p><strong>（一）、前言</strong><br>    为什么引入消息队列？<br>    1.程序解耦<br>    2.提升性能<br>    3.降低多业务逻辑复杂度</p>
+<p><strong>（二）、python操作rabbit mq</strong><br>rabbitmq配置安装基本使用参见上节文章，不再复述。<br>若想使用python操作rabbitmq，需安装pika模块，直接pip安装：<br>pip install pika</p>
+<p>1.最简单的rabbitmq producer端与consumer端对话：<br>producer：</p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-id">#Author</span> :ywq</span><br><span class="line"></span><br><span class="line">import pika</span><br><span class="line">auth=pika.PlainCredentials(<span class="string">'ywq'</span>,<span class="string">'qwe'</span>)  <span class="selector-id">#save</span> auth indo</span><br><span class="line"></span><br><span class="line">connection = pika.BlockingConnection(pika.ConnectionParameters(</span><br><span class="line">               <span class="string">'192.168.0.158'</span>,<span class="number">5672</span>,<span class="string">'/'</span>,auth))  <span class="selector-id">#connect</span> to rabbit</span><br><span class="line"></span><br><span class="line">channel = connection.channel()   <span class="selector-id">#create</span> channel</span><br><span class="line"></span><br><span class="line">channel.queue_declare(queue=<span class="string">'hello'</span>)   <span class="number">#dec</span>lare queue</span><br><span class="line"></span><br><span class="line"><span class="selector-id">#n</span> RabbitMQ <span class="selector-tag">a</span> message can never be sent directly to the queue, it always needs to go through an exchange.</span><br><span class="line">channel.basic_publish(exchange=<span class="string">''</span>,</span><br><span class="line">                      routing_key=<span class="string">'hello'</span>,</span><br><span class="line">                      body=<span class="string">'Hello World!'</span>)    <span class="selector-id">#the</span> <span class="selector-tag">body</span> is the msg <span class="attribute">content</span></span><br><span class="line"><span class="function"><span class="title">print</span><span class="params">(<span class="string">" [x] Sent 'Hello World!'"</span>)</span></span></span><br><span class="line">connection.close()</span><br></pre></td></tr></table></figure>
+<p>consumer：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#Author :ywq</span></span><br><span class="line"><span class="keyword">import</span> pika</span><br><span class="line">auth=pika.PlainCredentials(<span class="string">'ywq'</span>,<span class="string">'qwe'</span>) <span class="comment">#auth info</span></span><br><span class="line"></span><br><span class="line">connection = pika.BlockingConnection(pika.ConnectionParameters(</span><br><span class="line">               <span class="string">'192.168.0.158'</span>,<span class="number">5672</span>,<span class="string">'/'</span>,auth))   <span class="comment">#connect to rabbit</span></span><br><span class="line"></span><br><span class="line">channel = connection.channel()          <span class="comment">#create channel</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">channel.queue_declare(queue=<span class="string">'hello'</span>)      <span class="comment">#decalre queue</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">callback</span><span class="params">(ch, method, properties, body)</span>:</span></span><br><span class="line">    print(<span class="string">" [x] Received %r"</span> % body)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">channel.basic_consume(callback,</span><br><span class="line">                      queue=<span class="string">'hello'</span>,</span><br><span class="line">                      no_ack=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">print(<span class="string">' [*] Waiting for messages. To exit press CTRL+C'</span>)</span><br><span class="line">channel.start_consuming()</span><br></pre></td></tr></table></figure>
+<p>消息传递消费过程中，可以在rabbit web管理页面实时查看队列消息信息。<br><img src="http://mycloudn.kokoerp.com/V0LzIwMTcxMTI1MTgwNjU2MzU5.jpg" alt="这里写图片描述"></p>
+<p>2.持久化的消息队列，避免宕机等意外情况造成消息队列丢失。<br>consumer端无需改变，在producer端代码内加上两个属性，分别使消息持久化、队列持久化，只选其一还是会出现消息丢失，必须同时开启：</p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">delivery_mode</span>=<span class="number">2</span>  #make msg persisdent</span><br><span class="line"><span class="attr">durable</span>=<span class="literal">True</span></span><br></pre></td></tr></table></figure>
+<p>属性插入位置见如下代码（producer端）：</p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-id">#Author</span> :ywq</span><br><span class="line">import pika,sys</span><br><span class="line">auth_info=pika.PlainCredentials(<span class="string">'ywq'</span>,<span class="string">'qwe'</span>)</span><br><span class="line"></span><br><span class="line">connection=pika.BlockingConnection(pika.ConnectionParameters(</span><br><span class="line">             <span class="string">'192.168.0.158'</span>,<span class="number">5672</span>,<span class="string">'/'</span>,auth_info</span><br><span class="line">        ))</span><br><span class="line"></span><br><span class="line">channel=connection.channel()</span><br><span class="line"></span><br><span class="line">channel.queue_declare(queue=<span class="string">'test1'</span>,durable=True)  #durable=Ture, make queue persistent</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">msg=<span class="string">''</span>.join(sys<span class="selector-class">.argv</span>[<span class="number">1</span>:]) or <span class="string">'Hello'</span></span><br><span class="line"></span><br><span class="line">channel.basic_publish(</span><br><span class="line">    exchange=<span class="string">''</span>,</span><br><span class="line">    routing_key=<span class="string">'test1'</span>,</span><br><span class="line">    body=msg,</span><br><span class="line">    properties=pika.BasicProperties(</span><br><span class="line">            delivery_mode=<span class="number">2</span>  <span class="selector-id">#make</span> msg persisdent</span><br><span class="line">    )</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="title">print</span><span class="params">(<span class="string">'Send done:'</span>,msg)</span></span></span><br><span class="line">connection.close()</span><br></pre></td></tr></table></figure>
+<p>3.公平分发<br>在多consumer的情况下，默认rabbit是轮询发送消息的，但有的consumer消费速度快，有的消费速度慢，为了资源使用更平衡，引入ack确认机制。consumer消费完消息后会给rabbit发送ack，一旦未ack的消息数量超过指定允许的数量，则不再往该consumer发送，改为发送给其他consumer。</p>
+<p>producer端代码不用改变，需要给consumer端代码插入两个属性：<br><figure class="highlight jboss-cli"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">channel.basic_qos<span class="params">(<span class="attr">prefetch_count</span>= *)</span>   <span class="comment">#define the max  non_ack_count</span></span><br><span class="line">channel.basic_ack<span class="params">(<span class="attr">delivery_tag</span>=deliver.delivery_tag)</span>  <span class="comment">#send ack to rabbitmq</span></span><br></pre></td></tr></table></figure></p>
+<p>属性插入位置见如下代码（consumer端）：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#Author :ywq</span></span><br><span class="line"><span class="keyword">import</span> pika,time</span><br><span class="line">auth_info=pika.PlainCredentials(<span class="string">'ywq'</span>,<span class="string">'qwe'</span>)</span><br><span class="line">connection=pika.BlockingConnection(pika.ConnectionParameters(</span><br><span class="line">    <span class="string">'192.168.0.158'</span>,<span class="number">5672</span>,<span class="string">'/'</span>,auth_info</span><br><span class="line">    )</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">channel=connection.channel()</span><br><span class="line"></span><br><span class="line">channel.queue_declare(queue=<span class="string">'test2'</span>,durable=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">callback</span><span class="params">(chann,deliver,properties,body)</span>:</span></span><br><span class="line">    print(<span class="string">'Recv:'</span>,body)</span><br><span class="line">    time.sleep(<span class="number">5</span>)</span><br><span class="line">    chann.basic_ack(delivery_tag=deliver.delivery_tag)  <span class="comment">#send ack to rabbit</span></span><br><span class="line"></span><br><span class="line">channel.basic_qos(prefetch_count=<span class="number">1</span>)</span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">注意，no_ack=False  注意，这里的no_ack类型仅仅是告诉rabbit该消费者队列是否返回ack，若要返回ack，需要在callback内定义</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">prefetch_count=1,未ack的msg数量超过1个，则此consumer不再接受msg，此配置需写在channel.basic_consume上方，否则会造成non_ack情况出现。</span></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"></span><br><span class="line">channel.basic_consume(</span><br><span class="line">    callback,</span><br><span class="line">    queue=<span class="string">'test2'</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">channel.start_consuming()</span><br></pre></td></tr></table></figure>
+<p>三、消息发布/订阅<br>    上方的几种模式都是producer端发送一次，则consumer端接收一次，能不能实现一个producer发送，多个关联的consumer同时接收呢？of course，rabbit支持消息发布订阅，共支持三种模式，通过组件exchange转发器，实现3种模式：<br><img src="http://mycloudn.kokoerp.com/V0LzIwMTcxMTI1MTgyNDMwMDA3.jpg" alt="这里写图片描述"></p>
+<p>fanout: 所有bind到此exchange的queue都可以接收消息，类似广播。<br>direct: 通过routingKey和exchange决定的哪个唯一的queue可以接收消息，推送给绑定了该queue的consumer，类似组播。<br>topic:所有符合routingKey(此时可以是一个表达式)的routingKey所bind的queue可以接收消息，类似前缀列表匹配路由。</p>
+<p>1.fanout<br>publish端（producer）：</p>
+<figure class="highlight livecodeserver"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#Author :ywq</span></span><br><span class="line">import pika,sys,<span class="built_in">time</span></span><br><span class="line">auth_info=pika.PlainCredentials(<span class="string">'ywq'</span>,<span class="string">'qwe'</span>)</span><br><span class="line"></span><br><span class="line">connection=pika.BlockingConnection(pika.ConnectionParameters(</span><br><span class="line">    <span class="string">'192.168.0.158'</span>,<span class="number">5672</span>,<span class="string">'/'</span>,auth_info</span><br><span class="line">    )</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">channel=connection.channel()</span><br><span class="line"></span><br><span class="line">channel.exchange_declare(exchange=<span class="string">'hello'</span>,</span><br><span class="line">                         exchange_type=<span class="string">'fanout'</span></span><br><span class="line">                         )</span><br><span class="line"></span><br><span class="line">msg=<span class="string">''</span>.join(sys.argv[<span class="number">1</span>:]) <span class="keyword">or</span> <span class="string">'Hello world %s'</span> %<span class="built_in">time</span>.<span class="built_in">time</span>()</span><br><span class="line"></span><br><span class="line">channel.basic_publish(</span><br><span class="line">    exchange=<span class="string">'hello'</span>,</span><br><span class="line">    routing_key=<span class="string">''</span>,</span><br><span class="line">    body=msg,</span><br><span class="line">    properties=pika.BasicProperties(</span><br><span class="line">        delivery_mode=<span class="number">2</span></span><br><span class="line">    )</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">print(<span class="string">'send done'</span>)</span><br><span class="line">connection.<span class="built_in">close</span>()</span><br></pre></td></tr></table></figure>
+<p>subscribe端（consumer）：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#Author :ywq</span></span><br><span class="line"><span class="keyword">import</span> pika</span><br><span class="line">auth_info=pika.PlainCredentials(<span class="string">'ywq'</span>,<span class="string">'qwe'</span>)</span><br><span class="line">connection=pika.BlockingConnection(pika.ConnectionParameters(</span><br><span class="line">    <span class="string">'192.168.0.158'</span>,<span class="number">5672</span>,<span class="string">'/'</span>,auth_info</span><br><span class="line">    )</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">channel=connection.channel()</span><br><span class="line"></span><br><span class="line">channel.exchange_declare(</span><br><span class="line">    exchange=<span class="string">'hello'</span>,</span><br><span class="line">    exchange_type=<span class="string">'fanout'</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">random_num=channel.queue_declare(exclusive=<span class="literal">True</span>)  <span class="comment">#随机与rabbit建立一个queue，comsumer断开后，该queue立即删除释放</span></span><br><span class="line">queue_name=random_num.method.queue</span><br><span class="line">channel.basic_qos(prefetch_count=<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">channel.queue_bind(</span><br><span class="line">    queue=queue_name,</span><br><span class="line">    exchange=<span class="string">'hello'</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">callback</span><span class="params">(chann,deliver,properties,body)</span>:</span></span><br><span class="line">    print(<span class="string">'Recv:'</span>,body)</span><br><span class="line">    chann.basic_ack(delivery_tag=deliver.delivery_tag)  <span class="comment">#send ack to rabbit</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">channel.basic_consume(</span><br><span class="line">    callback,</span><br><span class="line">    queue=queue_name,</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">channel.start_consuming()</span><br></pre></td></tr></table></figure>
+<p>实现producer一次发送，多个关联consumer接收。<br>使用exchange模式时：<br>1.producer端不再申明queue，直接申明exchange<br>2.consumer端仍需绑定队列并指定exchange来接收message<br>3.consumer最好创建随机queue，使用完后立即释放。<br>随机队列名在web下可以检测到：<br><img src="http://mycloudn.kokoerp.com/V0LzIwMTcxMTI1MTgzNzUwNTYw.jpg" alt="这里写图片描述"></p>
+<p>2.direct<br><img src="http://mycloudn.kokoerp.com/V0LzIwMTcxMTI2MTMzMjMxMDIw.jpg" alt="这里写图片描述"><br>使用exchange同时consumer有选择性的接收消息。队列绑定关键字，producer将数据根据关键字发送到消息exchange，exchange根据 关键字 判定应该将数据发送至指定队列，consumer相应接收。即在fanout基础上增加了routing key.</p>
+<p>producer：</p>
+<figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">#Author :ywq</span><br><span class="line">import pika,sys</span><br><span class="line">auth_info=pika.PlainCredentials(<span class="string">'ywq'</span>,<span class="string">'qwe'</span>)</span><br><span class="line">connection=pika.BlockingConnection(pika.ConnectionParameters(</span><br><span class="line">    <span class="string">'192.168.0.158'</span>,<span class="number">5672</span>,<span class="string">'/'</span>,auth_info</span><br><span class="line">    )</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">channel=connection.channel()</span><br><span class="line">channel.exchange_declare(exchange=<span class="string">'direct_log'</span>,</span><br><span class="line">                      exchange_type=<span class="string">'direct'</span>,</span><br><span class="line">                      )</span><br><span class="line"><span class="keyword">while</span> True:</span><br><span class="line">    route_key=<span class="built_in">input</span>(<span class="string">'Input  routing key:'</span>)</span><br><span class="line"></span><br><span class="line">    msg=<span class="string">''</span>.<span class="keyword">join</span>(sys.<span class="built_in">argv</span>[<span class="number">1</span>:]) <span class="built_in">or</span> <span class="string">'Hello'</span></span><br><span class="line"></span><br><span class="line">    channel.basic_publish(</span><br><span class="line">        exchange=<span class="string">'direct_log'</span>,</span><br><span class="line">        routing_key=route_key,</span><br><span class="line">        body=msg,</span><br><span class="line">        properties=pika.BasicProperties(</span><br><span class="line">            delivery_mode=<span class="number">2</span></span><br><span class="line">        )</span><br><span class="line">    )</span><br><span class="line"></span><br><span class="line">connection.<span class="keyword">close</span>()</span><br></pre></td></tr></table></figure>
+<p>consumer：</p>
+<figure class="highlight nix"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#Author :ywq</span></span><br><span class="line"><span class="built_in">import</span> pika,sys</span><br><span class="line"><span class="attr">auth_info=pika.PlainCredentials('ywq','qwe')</span></span><br><span class="line"><span class="attr">connection=pika.BlockingConnection(pika.ConnectionParameters(</span></span><br><span class="line">    '<span class="number">192.168</span>.<span class="number">0.158</span>',<span class="number">5672</span>,'/',auth_info</span><br><span class="line">))</span><br><span class="line"></span><br><span class="line"><span class="attr">channel=connection.channel()</span></span><br><span class="line"></span><br><span class="line">channel.exchange_declare(</span><br><span class="line">    <span class="attr">exchange='direct_log',</span></span><br><span class="line">    <span class="attr">exchange_type='direct'</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="attr">queue_num=channel.queue_declare(exclusive=True)</span></span><br><span class="line"><span class="attr">queue_name=queue_num.method.queue</span></span><br><span class="line"></span><br><span class="line"><span class="attr">route_key=input('Input</span> routing key:')</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">channel.queue_bind(</span><br><span class="line">    <span class="attr">queue=queue_name,</span></span><br><span class="line">    <span class="attr">exchange='direct_log',</span></span><br><span class="line">    <span class="attr">routing_key=route_key</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">def callback(chann,deliver,property,body):</span><br><span class="line">    print('Recv:[level:%s],[msg:%s]' %(route_key,body))</span><br><span class="line">    chann.basic_ack(<span class="attr">delivery_tag=deliver.delivery_tag)</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">channel.basic_qos(<span class="attr">prefetch_count=1)</span></span><br><span class="line">channel.basic_consume(</span><br><span class="line">    callback,</span><br><span class="line">    <span class="attr">queue=queue_name</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">channel.start_consuming()</span><br></pre></td></tr></table></figure>
+<p>同时开启多个consumer，其中两个接收notice，两个接收warning，运行效果如下：<br><img src="http://mycloudn.kokoerp.com/V0LzIwMTcxMTI2MTM0NDE2NzY4.jpg" alt="这里写图片描述"></p>
+<p>3.topic<br><img src="http://mycloudn.kokoerp.com/V0LzIwMTcxMTI2MTM1NDAxMjQ2.jpg" alt="这里写图片描述"><br>相较于direct，topic能实现模糊匹配式工作方式（在consumer端指定匹配方式），只要routing key包含指定的关键字，则将该msg发往绑定的queue上。</p>
+<p>rabbitmq通配符规则：<br>符号“#”匹配一个或多个词，符号“*”匹配一个词。因此“abc.#”能够匹配到“abc.m.n”，但是“abc.**‘’ 只会匹配到“abc.m”。‘.’号为分割符。使用通配符匹配时必须使用‘.’号分割。</p>
+<p>producer：</p>
+<figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">#Author :ywq</span><br><span class="line">import pika,sys</span><br><span class="line">auth_info=pika.PlainCredentials(<span class="string">'ywq'</span>,<span class="string">'qwe'</span>)</span><br><span class="line">connection=pika.BlockingConnection(pika.ConnectionParameters(</span><br><span class="line">    <span class="string">'192.168.0.158'</span>,<span class="number">5672</span>,<span class="string">'/'</span>,auth_info</span><br><span class="line">    )</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">channel=connection.channel()</span><br><span class="line">channel.exchange_declare(exchange=<span class="string">'topic_log'</span>,</span><br><span class="line">                      exchange_type=<span class="string">'topic'</span>,</span><br><span class="line">                      )</span><br><span class="line"><span class="keyword">while</span> True:</span><br><span class="line">    route_key=<span class="built_in">input</span>(<span class="string">'Input  routing key:'</span>)</span><br><span class="line"></span><br><span class="line">    msg=<span class="string">''</span>.<span class="keyword">join</span>(sys.<span class="built_in">argv</span>[<span class="number">1</span>:]) <span class="built_in">or</span> <span class="string">'Hello'</span></span><br><span class="line"></span><br><span class="line">    channel.basic_publish(</span><br><span class="line">        exchange=<span class="string">'topic_log'</span>,</span><br><span class="line">        routing_key=route_key,</span><br><span class="line">        body=msg,</span><br><span class="line">        properties=pika.BasicProperties(</span><br><span class="line">            delivery_mode=<span class="number">2</span></span><br><span class="line">        )</span><br><span class="line">    )</span><br><span class="line"></span><br><span class="line">connection.<span class="keyword">close</span>()</span><br></pre></td></tr></table></figure>
+<p>consumer：</p>
+<figure class="highlight nix"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#Author :ywq</span></span><br><span class="line"><span class="built_in">import</span> pika,sys</span><br><span class="line"><span class="attr">auth_info=pika.PlainCredentials('ywq','qwe')</span></span><br><span class="line"><span class="attr">connection=pika.BlockingConnection(pika.ConnectionParameters(</span></span><br><span class="line">    '<span class="number">192.168</span>.<span class="number">0.158</span>',<span class="number">5672</span>,'/',auth_info</span><br><span class="line">))</span><br><span class="line"></span><br><span class="line"><span class="attr">channel=connection.channel()</span></span><br><span class="line"></span><br><span class="line">channel.exchange_declare(</span><br><span class="line">    <span class="attr">exchange='topic_log',</span></span><br><span class="line">    <span class="attr">exchange_type='topic'</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="attr">queue_num=channel.queue_declare(exclusive=True)</span></span><br><span class="line"><span class="attr">queue_name=queue_num.method.queue</span></span><br><span class="line"></span><br><span class="line"><span class="attr">route_key=input('Input</span> routing key:')</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">channel.queue_bind(</span><br><span class="line">    <span class="attr">queue=queue_name,</span></span><br><span class="line">    <span class="attr">exchange='topic_log',</span></span><br><span class="line">    <span class="attr">routing_key=route_key</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">def callback(chann,deliver,property,body):</span><br><span class="line">    print('Recv:[type:%s],[msg:%s]' %(route_key,body))</span><br><span class="line">    chann.basic_ack(<span class="attr">delivery_tag=deliver.delivery_tag)</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">channel.basic_qos(<span class="attr">prefetch_count=1)</span></span><br><span class="line">channel.basic_consume(</span><br><span class="line">    callback,</span><br><span class="line">    <span class="attr">queue=queue_name</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">channel.start_consuming()</span><br></pre></td></tr></table></figure>
+<p>运行效果：<br><img src="http://mycloudn.kokoerp.com/V0LzIwMTcxMTI2MTQzNDQ3NTgz.jpg" alt="这里写图片描述"></p>
+<p>rabbitmq三种publish/subscribe模型简单介绍完毕，<br>以上！</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div id="reward-container">
+  <div>Thank you for your accept. mua！</div>
+  <button id="reward-button" disable="enable" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+
+    
+      
+      
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/reward/wechatpay.png" alt="丨ywq丨 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+      
+      
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/reward/alipay.png" alt="丨ywq丨 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        
+
+
+
+
+  
+
+
+
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>丨ywq丨</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    
+    <a href="https://www.ipyker.com/2017/11/26/python队列通信：rabbitMQ使用.html" title="python队列通信：rabbitMQ使用">https://www.ipyker.com/2017/11/26/python队列通信：rabbitMQ使用.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li>
+</ul>
+
+      </div>
+    
+    <div>
+      
+        <div>
+    
+        <div style="text-align:center;color: #ccc;font-size:16px;">-------------本文结束<i class="fa fa-heart"></i>感谢您的阅读-------------</div>
+    
+</div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Python/" rel="tag"><i class="fa fa-tag"></i> Python</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/11/22/rabbitmq安装配置与基本操作.html" rel="next" title="rabbitmq安装配置与基本操作">
+                <i class="fa fa-chevron-left"></i> rabbitmq安装配置与基本操作
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/12/01/linux-IO复用模型select.html" rel="prev" title="Python I/O多路复用模块select使用">
+                Python I/O多路复用模块select使用 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC80NDM5Mi8yMDkyNA=="></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <div class="site-overview-wrap sidebar-panel sidebar-panel-active">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="丨ywq丨">
+            
+              <p class="site-author-name" itemprop="name">丨ywq丨</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives">
+                
+                    <span class="site-state-item-count">74</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                      <a href="/tags">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">15</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/yinwenqin" title="GitHub &rarr; https://github.com/yinwenqin" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://blog.csdn.net/ywq935" title="CSDN &rarr; https://blog.csdn.net/ywq935" rel="noopener" target="_blank"><i class="fa fa-fw fa-globe"></i>CSDN</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-book"></i>
+                推荐阅读
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.upweto.top/gitbooks/useKubernetes/" title="http://blog.upweto.top/gitbooks/useKubernetes/" rel="noopener" target="_blank">kubernetes使用指南</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.upweto.top/gitbooks/kubeSourceCodeNote/" title="http://blog.upweto.top/gitbooks/kubeSourceCodeNote/" rel="noopener" target="_blank">kubernetes源码笔记</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+        </div>
+      </div>
+
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" style=" text-align:center;">&copy; 2017 – <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ywq</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"> 站点字数合计:</i>
+    </span>
+    
+    <span title="站点总字数">583k</span>
+  
+  
+</div>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+<div class="run_time" style=" text-align:center;">
+  <span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
+  <script>
+    var now = new Date(); 
+    function createtime() { 
+        var grt= new Date("08/23/2018 10:00:00");//此处修改你的建站时间或者网站上线时间 
+        now.setTime(now.getTime()+250); 
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days); 
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours); 
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum); 
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;} 
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum); 
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;} 
+        document.getElementById("timeDate").innerHTML = "本站已安全运行 "+dnum+" 天 "; 
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒"; 
+    } 
+    setInterval("createtime()",250);
+  </script>
+</div>
+
+        
+<div class="busuanzi-count" style=" text-align:center;">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-user"></i>
+    </span>
+    <span class="site-uv" title="总访客量">
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span> 人
+    </span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+  
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-eye"></i>
+    </span>
+    <span class="site-pv" title="总访问量">
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span> 次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+  
+    
+    
+      
+    
+  
+  <script color="black" opacity="0.7" zindex="-1" count="140" src="//cdn.jsdelivr.net/gh/theme-next/theme-next-canvas-nest@1.0.0/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+  
+  
+  <script id="ribbon" size="300" alpha="0.1" zindex="-1" src="/lib/canvas-ribbon/canvas-ribbon.js"></script>
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/fancybox/source/jquery.fancybox.pack.js"></script>
+
+
+  
+
+
+  <script src="/js/utils.js?v=7.1.1"></script>
+
+  <script src="/js/motion.js?v=7.1.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/schemes/muse.js?v=7.1.1"></script>
+
+
+
+
+  
+  <script src="/js/scrollspy.js?v=7.1.1"></script>
+<script src="/js/post-details.js?v=7.1.1"></script>
+
+
+
+  
+
+
+  <script src="/js/next-boot.js?v=7.1.1"></script>
+
+
+  
+
+  
+
+  
+  
+  
+
+  
+
+  
+  
+  
+
+
+  
+
+
+  
+    <script>
+  window.livereOptions = {
+    refer: '2017/11/26/python队列通信：rabbitMQ使用.html'
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+</script>
+
+  
+
+
+  
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url).replace(/\/{2,}/g, '/');
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x"></i></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x"></i></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+  
+  <script src="/lib/bookmark/bookmark.min.js?v=1.0"></script>
+  <script>
+  
+    bookmark.scrollToMark('auto', "#更多");
+  
+  </script>
+
+
+  
+
+  
+
+  
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/koharu.model.json"},"display":{"position":"left","width":250,"height":500},"mobile":{"show":false},"react":{"opacity":0.7},"log":false});</script></body>
+</html>
+<!-- 页面点击小红心 -->
+<script type="text/javascript" src="/js/src/clicklove.js"></script>

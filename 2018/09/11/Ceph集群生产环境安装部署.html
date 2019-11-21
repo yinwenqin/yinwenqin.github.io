@@ -1,0 +1,1538 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-CN">
+
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link rel="stylesheet" href="/lib/pace/pace-theme-bounce.min.css?v=1.0.2">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link rel="stylesheet" href="/lib/fancybox/source/jquery.fancybox.css">
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+    
+      
+    
+
+    
+  
+
+  
+
+  
+
+  
+    
+      
+    
+
+    
+  
+
+  
+    
+    
+    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic|Roboto Slab:300,300italic,400,400italic,700,700italic|Roboto Mono:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext">
+  
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.1.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.1.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.1.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.1.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.1.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '7.1.1',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":true,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: true,
+    fancybox: true,
+    fastclick: true,
+    lazyload: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"shrinkIn","post_header":"slideLeftIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideDownIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <script>
+  (function(i,s,o,g,r,a,m){i["DaoVoiceObject"]=r;i[r]=i[r]||function(){(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;a.charset="utf-8";m.parentNode.insertBefore(a,m)})(window,document,"script",('https:' == document.location.protocol ? 'https:' : 'http:') + "//widget.daovoice.io/widget/0f81ff2f.js","daovoice")
+  daovoice('init', {
+      app_id: "bd399fce"
+    });
+  daovoice('update');
+  </script>
+
+  <meta name="description" content="前言ceph的组件以及工作流程非常的复杂,是一个庞大的系统,在尝试ceph之前尽量多查阅官方的文档,理解ceph的mon/osd/mds/pg/pool等各组件/Unit的协同工作方式Ceph官方文档 一、配置规划： 二、部署1. ntp-server开启ntp服务： 123apt-get install ntp ntpdate ntp-docsystemctl enable ntpsystem">
+<meta name="keywords" content="Kubernetes,Ceph">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Ceph集群生产环境安装部署">
+<meta property="og:url" content="https://www.ipyker.com/2018/09/11/Ceph集群生产环境安装部署.html">
+<meta property="og:site_name" content="随笔漫谈">
+<meta property="og:description" content="前言ceph的组件以及工作流程非常的复杂,是一个庞大的系统,在尝试ceph之前尽量多查阅官方的文档,理解ceph的mon/osd/mds/pg/pool等各组件/Unit的协同工作方式Ceph官方文档 一、配置规划： 二、部署1. ntp-server开启ntp服务： 123apt-get install ntp ntpdate ntp-docsystemctl enable ntpsystem">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://mycloudn.kokoerp.com/20180911115527618.jpg">
+<meta property="og:updated_time" content="2019-11-21T07:48:40.082Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Ceph集群生产环境安装部署">
+<meta name="twitter:description" content="前言ceph的组件以及工作流程非常的复杂,是一个庞大的系统,在尝试ceph之前尽量多查阅官方的文档,理解ceph的mon/osd/mds/pg/pool等各组件/Unit的协同工作方式Ceph官方文档 一、配置规划： 二、部署1. ntp-server开启ntp服务： 123apt-get install ntp ntpdate ntp-docsystemctl enable ntpsystem">
+<meta name="twitter:image" content="http://mycloudn.kokoerp.com/20180911115527618.jpg">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="随笔漫谈" type="application/atom+xml">
+
+
+
+  
+  
+  <link rel="canonical" href="https://www.ipyker.com/2018/09/11/Ceph集群生产环境安装部署">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Ceph集群生产环境安装部署 | 随笔漫谈</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+ 
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">随笔漫谈</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-book">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/gitbooks/" rel="section"><i class="menu-item-icon fa fa-fw fa-book"></i> <br>book</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-互动">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/guestbook/" rel="section"><i class="menu-item-icon fa fa-fw fa-comments"></i> <br>互动</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.ipyker.com/2018/09/11/Ceph集群生产环境安装部署.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="丨ywq丨">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随笔漫谈">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Ceph集群生产环境安装部署
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-09-11 15:34:00" itemprop="dateCreated datePublished" datetime="2018-09-11T15:34:00+08:00">2018-09-11</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-11-21 15:48:40" itemprop="dateModified" datetime="2019-11-21T15:48:40+08:00">2019-11-21</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+            <div class="post-symbolscount">
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">本文字数：</span>
+                
+                <span title="本文字数">11k</span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">10 分钟</span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id><a href="#" class="headerlink" title=" "></a> </h2><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>ceph的组件以及工作流程非常的复杂,是一个庞大的系统,在尝试ceph之前尽量多查阅官方的文档,理解ceph的mon/osd/mds/pg/pool等各组件/Unit的协同工作方式<br><a href="http://docs.ceph.com/docs/master/" target="_blank" rel="noopener"><strong>Ceph官方文档</strong></a></p>
+<h2 id="一、配置规划："><a href="#一、配置规划：" class="headerlink" title="一、配置规划："></a>一、配置规划：</h2><p><img src="http://mycloudn.kokoerp.com/20180911115527618.jpg" alt="这里写图片描述"></p>
+<h2 id="二、部署"><a href="#二、部署" class="headerlink" title="二、部署"></a>二、部署</h2><p><strong>1. ntp-server开启ntp服务：</strong></p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">apt-<span class="builtin-name">get</span> install<span class="built_in"> ntp </span>ntpdate ntp-doc</span><br><span class="line">systemctl <span class="builtin-name">enable</span> ntp</span><br><span class="line">systemctl start ntp</span><br></pre></td></tr></table></figure>
+<p><strong>2. ceph node</strong></p>
+<p><strong>三台node全部执行如下操作：</strong><br>磁盘分区规划如顶部表格，按照规划写的磁盘划分脚本，分别在3台node上执行脚本：</p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># cat ~/parted.sh </span></span><br><span class="line"></span><br><span class="line"><span class="comment">#!/bin/bash</span></span><br><span class="line">set -e</span><br><span class="line"><span class="keyword">if</span> [ ! -x <span class="string">"/usr/sbin/parted"</span> ]; then</span><br><span class="line">echo <span class="string">"This script requires /sbin/parted to run!"</span> &gt;&amp;<span class="number">2</span></span><br><span class="line"><span class="keyword">exit</span> <span class="number">1</span></span><br><span class="line">fi</span><br><span class="line">DISKS=<span class="string">"d e f g h i j k l m n o p"</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="variable">$&#123;DISKS&#125;</span>; <span class="keyword">do</span></span><br><span class="line">  echo <span class="string">"Creating partitions on /dev/sd$&#123;i&#125; ..."</span></span><br><span class="line">  parted -a optimal --script <span class="regexp">/dev/</span>sd<span class="variable">$&#123;i&#125;</span> -- mktable gpt</span><br><span class="line">  parted -a optimal --script <span class="regexp">/dev/</span>sd<span class="variable">$&#123;i&#125;</span> -- mkpart primary xfs <span class="number">0</span>% <span class="number">100</span>%</span><br><span class="line">  sleep <span class="number">1</span></span><br><span class="line">  <span class="comment">#echo "Formatting /dev/sd$&#123;i&#125;1 ..."</span></span><br><span class="line">  mkfs.xfs -f <span class="regexp">/dev/</span>sd<span class="variable">$&#123;i&#125;</span><span class="number">1</span> &amp;</span><br><span class="line">done</span><br><span class="line"></span><br><span class="line">SSDS=<span class="string">"b c"</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="variable">$&#123;SSDS&#125;</span>; <span class="keyword">do</span></span><br><span class="line">  parted -s <span class="regexp">/dev/</span>sd<span class="variable">$&#123;i&#125;</span> mklabel gpt</span><br><span class="line">  parted -s <span class="regexp">/dev/</span>sd<span class="variable">$&#123;i&#125;</span> mkpart primary <span class="number">0</span>% <span class="number">10</span>%</span><br><span class="line">  parted -s <span class="regexp">/dev/</span>sd<span class="variable">$&#123;i&#125;</span> mkpart primary <span class="number">11</span>% <span class="number">20</span>%</span><br><span class="line">  parted -s <span class="regexp">/dev/</span>sd<span class="variable">$&#123;i&#125;</span> mkpart primary <span class="number">21</span>% <span class="number">30</span>%</span><br><span class="line">  parted -s <span class="regexp">/dev/</span>sd<span class="variable">$&#123;i&#125;</span> mkpart primary <span class="number">31</span>% <span class="number">40</span>%</span><br><span class="line">  parted -s <span class="regexp">/dev/</span>sd<span class="variable">$&#123;i&#125;</span> mkpart primary <span class="number">41</span>% <span class="number">50</span>%</span><br><span class="line">  parted -s <span class="regexp">/dev/</span>sd<span class="variable">$&#123;i&#125;</span> mkpart primary <span class="number">51</span>% <span class="number">60</span>%</span><br><span class="line">  parted -s <span class="regexp">/dev/</span>sd<span class="variable">$&#123;i&#125;</span> mkpart primary <span class="number">61</span>% <span class="number">70</span>%</span><br><span class="line">done</span><br><span class="line"></span><br><span class="line">chown -R ceph:ceph <span class="regexp">/dev/</span>sdb[<span class="number">1</span>-<span class="number">7</span>]</span><br><span class="line">chown -R ceph:ceph <span class="regexp">/dev/</span>sdc[<span class="number">1</span>-<span class="number">7</span>]</span><br></pre></td></tr></table></figure>
+<p>添加 /etc/hosts解析，并scp到3台node上:<br><figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">192<span class="selector-class">.168</span><span class="selector-class">.20</span><span class="selector-class">.112</span>  <span class="selector-tag">h020112</span></span><br><span class="line">192<span class="selector-class">.168</span><span class="selector-class">.20</span><span class="selector-class">.113</span>  <span class="selector-tag">h020113</span></span><br><span class="line">192<span class="selector-class">.168</span><span class="selector-class">.20</span><span class="selector-class">.114</span>  <span class="selector-tag">h020114</span></span><br></pre></td></tr></table></figure></p>
+<p> 关闭防火墙、selinux，添加定时同步时间计划任务：</p>
+<figure class="highlight lsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">sed -i 's/SELINUX=.*/SELINUX=disabled/' /etc/selinux/config</span><br><span class="line">setenforce <span class="number">0</span></span><br><span class="line">systemctl stop firewalld</span><br><span class="line">systemctl disable firewalld</span><br><span class="line"></span><br><span class="line">cat &gt;&gt;/etc/crontab&lt;&lt;<span class="literal">EOF</span></span><br><span class="line">× */<span class="number">1</span> * * * root ntpdate <span class="number">192.168</span><span class="number">.9</span><span class="number">.28</span> &amp;&amp; --systohc</span><br><span class="line"><span class="literal">EOF</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">cd /etc/yum<span class="selector-class">.repos</span><span class="selector-class">.d</span></span><br><span class="line">mv CentOS-Base<span class="selector-class">.repo</span> CentOS-Base<span class="selector-class">.repo</span><span class="selector-class">.bak</span></span><br><span class="line">wget -O /etc/yum<span class="selector-class">.repos</span><span class="selector-class">.d</span>/CentOS-Base<span class="selector-class">.repo</span> http:<span class="comment">//mirrors.aliyun.com/repo/Centos-7.repo</span></span><br><span class="line">yum -y install ntp ntpdate</span><br><span class="line">yum -y install ceph</span><br></pre></td></tr></table></figure>
+<p><strong>在node1(192.168.20.112)上执行:</strong></p>
+<figure class="highlight elixir"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line">wget <span class="symbol">https:</span>/<span class="regexp">/download.ceph.com/rpm</span>-kraken/el7/noarch/ceph-deploy-<span class="number">1.5</span>.<span class="number">37</span>-<span class="number">0</span>.noarch.rpm</span><br><span class="line">yum -y install ceph-deploy-<span class="number">1.5</span>.<span class="number">37</span>-<span class="number">0</span>.noarch.rpm</span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建秘钥，传送到各节点，实现无秘钥登录</span></span><br><span class="line">ssh-keygen</span><br><span class="line">ssh-copy-id h020112</span><br><span class="line">ssh-copy-id h020113</span><br><span class="line">ssh-copy-id h020114</span><br><span class="line"></span><br><span class="line"><span class="comment"># 新建集群，生成配置文件</span></span><br><span class="line">mkdir ceph-cluster &amp;&amp; cd ceph-cluster</span><br><span class="line">ceph-deploy new h020112 h020113 h020114</span><br><span class="line"></span><br><span class="line"><span class="comment">## 修改默认生成的ceph.conf，增加如下配置段：</span></span><br><span class="line"><span class="comment"># 80G志盘</span></span><br><span class="line">osd_journal_size = <span class="number">81920</span> </span><br><span class="line">public_network= <span class="number">192.168</span>.<span class="number">20.0</span>/<span class="number">24</span> </span><br><span class="line"><span class="comment"># 副本pg数为2，默认为3，最小工作size为默认size - (默认size/2) </span></span><br><span class="line">osd pool default size = <span class="number">2</span></span><br><span class="line"><span class="comment"># 官方建议平均每个osd 的pg数量不小于30，即pg num &gt; (osd_num) * 30 / 2(副本数)</span></span><br><span class="line">osd pool default pg num = <span class="number">1024</span></span><br><span class="line">osd pool default pgp num = <span class="number">1024</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 传送ceph.conf</span></span><br><span class="line">ceph-deploy --overwrite-conf config push h020112 h020113 h020114</span><br><span class="line"></span><br><span class="line"><span class="comment"># 若有RuntimeError: bootstrap-mds keyring not found; run 'gatherkeys'报错，则执行如下命令传送key</span></span><br><span class="line">ceph-deploy gatherkeys yh020112 h020113 h020114</span><br><span class="line"></span><br><span class="line"><span class="comment"># 初始化mon节点</span></span><br><span class="line">ceph-deploy mon create-initial</span><br><span class="line">ceph -s <span class="comment"># 查看mon是否添加成功</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># ceph 集群加入OSD</span></span><br><span class="line">cd /etc/ceph <span class="comment"># 一定要进入这个目录下</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 执行如下脚本，志盘和数据盘的对应关系要再三确认</span></span><br><span class="line">[root<span class="variable">@h20112</span> ceph]<span class="comment"># cat add_osd.sh </span></span><br><span class="line"><span class="comment">#!/bin/bash</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> ip <span class="keyword">in</span> <span class="variable">$(</span>cat ~<span class="regexp">/ceph-cluster/cephosd</span>.txt)  </span><br><span class="line"><span class="keyword">do</span></span><br><span class="line">echo ----<span class="variable">$ip</span>-----------;</span><br><span class="line">ceph-deploy --overwrite-conf osd prepare <span class="variable">$ip</span><span class="symbol">:sdd1</span><span class="symbol">:/dev/sdb1</span> <span class="variable">$ip</span><span class="symbol">:sde1</span><span class="symbol">:/dev/sdb2</span> <span class="variable">$ip</span><span class="symbol">:sdf1</span><span class="symbol">:/dev/sdb3</span> <span class="variable">$ip</span><span class="symbol">:sdg1</span><span class="symbol">:/dev/sdb4</span>  <span class="variable">$ip</span><span class="symbol">:sdh1</span><span class="symbol">:/dev/sdb5</span>  <span class="variable">$ip</span><span class="symbol">:sdi1</span><span class="symbol">:/dev/sdb6</span>  \</span><br><span class="line">   <span class="variable">$ip</span><span class="symbol">:sdj1</span><span class="symbol">:/dev/sdc1</span> <span class="variable">$ip</span><span class="symbol">:sdk1</span><span class="symbol">:/dev/sdc2</span> <span class="variable">$ip</span><span class="symbol">:sdl1</span><span class="symbol">:/dev/sdc3</span> <span class="variable">$ip</span><span class="symbol">:sdm1</span><span class="symbol">:/dev/sdc4</span>  <span class="variable">$ip</span><span class="symbol">:sdn1</span><span class="symbol">:/dev/sdc5</span>  <span class="variable">$ip</span><span class="symbol">:sdo1</span><span class="symbol">:/dev/sdc6</span>  <span class="variable">$ip</span><span class="symbol">:sdp1</span><span class="symbol">:/dev/sdc7</span></span><br><span class="line">done</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> ip <span class="keyword">in</span> <span class="variable">$(</span>cat ~<span class="regexp">/ceph-cluster/cephosd</span>.txt)</span><br><span class="line"><span class="keyword">do</span></span><br><span class="line">echo ----<span class="variable">$ip</span>-----------;</span><br><span class="line">ceph-deploy osd activate <span class="variable">$ip</span><span class="symbol">:sdd1</span><span class="symbol">:/dev/sdb1</span> <span class="variable">$ip</span><span class="symbol">:sde1</span><span class="symbol">:/dev/sdb2</span> <span class="variable">$ip</span><span class="symbol">:sdf1</span><span class="symbol">:/dev/sdb3</span> <span class="variable">$ip</span><span class="symbol">:sdg1</span><span class="symbol">:/dev/sdb4</span>  <span class="variable">$ip</span><span class="symbol">:sdh1</span><span class="symbol">:/dev/sdb5</span>  <span class="variable">$ip</span><span class="symbol">:sdi1</span><span class="symbol">:/dev/sdb6</span>  \</span><br><span class="line">   <span class="variable">$ip</span><span class="symbol">:sdj1</span><span class="symbol">:/dev/sdc1</span> <span class="variable">$ip</span><span class="symbol">:sdk1</span><span class="symbol">:/dev/sdc2</span> <span class="variable">$ip</span><span class="symbol">:sdl1</span><span class="symbol">:/dev/sdc3</span> <span class="variable">$ip</span><span class="symbol">:sdm1</span><span class="symbol">:/dev/sdc4</span>  <span class="variable">$ip</span><span class="symbol">:sdn1</span><span class="symbol">:/dev/sdc5</span>  <span class="variable">$ip</span><span class="symbol">:sdo1</span><span class="symbol">:/dev/sdc6</span>  <span class="variable">$ip</span><span class="symbol">:sdp1</span><span class="symbol">:/dev/sdc7</span></span><br><span class="line">done</span><br></pre></td></tr></table></figure>
+<p>查看结果：</p>
+<figure class="highlight dns"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><span class="line">[root@h20112 ceph]# ceph osd tree</span><br><span class="line">ID WEIGHT   TYPE NAME           UP/DOWN REWEIGHT PRIMARY-AFFINITY </span><br><span class="line">-<span class="number">1 34.04288</span> root default                                          </span><br><span class="line">-<span class="number">2 11.34763</span>     host h020112                                   </span><br><span class="line"> <span class="number">0</span>  <span class="number">0.87289</span>         osd.<span class="number">0</span>            up  <span class="number">1.00000</span>          <span class="number">1.00000</span> </span><br><span class="line"> <span class="number">3</span>  <span class="number">0.87289</span>         osd.<span class="number">3</span>            up  <span class="number">1.00000</span>          <span class="number">1.00000</span> </span><br><span class="line"> <span class="number">4</span>  <span class="number">0.87289</span>         osd.<span class="number">4</span>            up  <span class="number">1.00000</span>          <span class="number">1.00000</span> </span><br><span class="line"> <span class="number">5</span>  <span class="number">0.87289</span>         osd.<span class="number">5</span>            up  <span class="number">1.00000</span>          <span class="number">1.00000</span> </span><br><span class="line"> <span class="number">6</span>  <span class="number">0.87289</span>         osd.<span class="number">6</span>            up  <span class="number">1.00000</span>          <span class="number">1.00000</span> </span><br><span class="line"> <span class="number">7</span>  <span class="number">0.87289</span>         osd.<span class="number">7</span>            up  <span class="number">1.00000</span>          <span class="number">1.00000</span> </span><br><span class="line"> <span class="number">8</span>  <span class="number">0.87289</span>         osd.<span class="number">8</span>            up  <span class="number">1.00000</span>          <span class="number">1.00000</span> </span><br><span class="line"> <span class="number">9</span>  <span class="number">0.87289</span>         osd.<span class="number">9</span>            up  <span class="number">1.00000</span>          <span class="number">1.00000</span> </span><br><span class="line"><span class="number">10</span>  <span class="number">0.87289</span>         osd.<span class="number">10</span>           up  <span class="number">1.00000</span>          <span class="number">1.00000</span> </span><br><span class="line"><span class="number">11</span>  <span class="number">0.87289</span>         osd.<span class="number">11</span>           up  <span class="number">1.00000</span>          <span class="number">1.00000</span> </span><br><span class="line"><span class="number">12</span>  <span class="number">0.87289</span>         osd.<span class="number">12</span>           up  <span class="number">1.00000</span>          <span class="number">1.00000</span> </span><br><span class="line"><span class="number">13</span>  <span class="number">0.87289</span>         osd.<span class="number">13</span>           up  <span class="number">1.00000</span>          <span class="number">1.00000</span> </span><br><span class="line"><span class="number">14</span>  <span class="number">0.87289</span>         osd.<span class="number">14</span>           up  <span class="number">1.00000</span>          <span class="number">1.00000</span> </span><br><span class="line">-<span class="number">3 11.34763</span>     host h020113                                   </span><br><span class="line"> <span class="number">1</span>  <span class="number">0.87289</span>         osd.<span class="number">1</span>            up  <span class="number">1.00000</span>          <span class="number">1.00000</span> </span><br><span class="line"><span class="number">15</span>  <span class="number">0.87289</span>         osd.<span class="number">15</span>           up  <span class="number">1.00000</span>          <span class="number">1.00000</span> </span><br><span class="line"><span class="number">16</span>  <span class="number">0.87289</span>         osd.<span class="number">16</span>           up  <span class="number">1.00000</span>          <span class="number">1.00000</span> </span><br><span class="line"><span class="number">17</span>  <span class="number">0.87289</span>         osd.<span class="number">17</span>           up  <span class="number">1.00000</span>          <span class="number">1.00000</span> </span><br><span class="line"><span class="number">18</span>  <span class="number">0.87289</span>         osd.<span class="number">18</span>           up  <span class="number">1.00000</span>          <span class="number">1.00000</span> </span><br><span class="line"><span class="number">19</span>  <span class="number">0.87289</span>         osd.<span class="number">19</span>           up  <span class="number">1.00000</span>          <span class="number">1.00000</span> </span><br><span class="line"><span class="number">20</span>  <span class="number">0.87289</span>         osd.<span class="number">20</span>           up  <span class="number">1.00000</span>          <span class="number">1.00000</span> </span><br><span class="line"><span class="number">21</span>  <span class="number">0.87289</span>         osd.<span class="number">21</span>           up  <span class="number">1.00000</span>          <span class="number">1.00000</span> </span><br><span class="line"><span class="number">22</span>  <span class="number">0.87289</span>         osd.<span class="number">22</span>           up  <span class="number">1.00000</span>          <span class="number">1.00000</span> </span><br><span class="line"><span class="number">23</span>  <span class="number">0.87289</span>         osd.<span class="number">23</span>           up  <span class="number">1.00000</span>          <span class="number">1.00000</span> </span><br><span class="line"><span class="number">24</span>  <span class="number">0.87289</span>         osd.<span class="number">24</span>           up  <span class="number">1.00000</span>          <span class="number">1.00000</span> </span><br><span class="line"><span class="number">25</span>  <span class="number">0.87289</span>         osd.<span class="number">25</span>           up  <span class="number">1.00000</span>          <span class="number">1.00000</span> </span><br><span class="line"><span class="number">26</span>  <span class="number">0.87289</span>         osd.<span class="number">26</span>           up  <span class="number">1.00000</span>          <span class="number">1.00000</span> </span><br><span class="line">-<span class="number">4 11.34763</span>     host h020114                                   </span><br><span class="line"> <span class="number">2</span>  <span class="number">0.87289</span>         osd.<span class="number">2</span>            up  <span class="number">1.00000</span>          <span class="number">1.00000</span> </span><br><span class="line"><span class="number">27</span>  <span class="number">0.87289</span>         osd.<span class="number">27</span>           up  <span class="number">1.00000</span>          <span class="number">1.00000</span> </span><br><span class="line"><span class="number">28</span>  <span class="number">0.87289</span>         osd.<span class="number">28</span>           up  <span class="number">1.00000</span>          <span class="number">1.00000</span> </span><br><span class="line"><span class="number">29</span>  <span class="number">0.87289</span>         osd.<span class="number">29</span>           up  <span class="number">1.00000</span>          <span class="number">1.00000</span> </span><br><span class="line"><span class="number">30</span>  <span class="number">0.87289</span>         osd.<span class="number">30</span>           up  <span class="number">1.00000</span>          <span class="number">1.00000</span> </span><br><span class="line"><span class="number">31</span>  <span class="number">0.87289</span>         osd.<span class="number">31</span>           up  <span class="number">1.00000</span>          <span class="number">1.00000</span> </span><br><span class="line"><span class="number">32</span>  <span class="number">0.87289</span>         osd.<span class="number">32</span>           up  <span class="number">1.00000</span>          <span class="number">1.00000</span> </span><br><span class="line"><span class="number">33</span>  <span class="number">0.87289</span>         osd.<span class="number">33</span>           up  <span class="number">1.00000</span>          <span class="number">1.00000</span> </span><br><span class="line"><span class="number">34</span>  <span class="number">0.87289</span>         osd.<span class="number">34</span>           up  <span class="number">1.00000</span>          <span class="number">1.00000</span> </span><br><span class="line"><span class="number">35</span>  <span class="number">0.87289</span>         osd.<span class="number">35</span>           up  <span class="number">1.00000</span>          <span class="number">1.00000</span> </span><br><span class="line"><span class="number">36</span>  <span class="number">0.87289</span>         osd.<span class="number">36</span>           up  <span class="number">1.00000</span>          <span class="number">1.00000</span> </span><br><span class="line"><span class="number">37</span>  <span class="number">0.87289</span>         osd.<span class="number">37</span>           up  <span class="number">1.00000</span>          <span class="number">1.00000</span> </span><br><span class="line"><span class="number">38</span>  <span class="number">0.87289</span>         osd.<span class="number">38</span>           up  <span class="number">1.00000</span>          <span class="number">1.00000</span> </span><br><span class="line"></span><br><span class="line">[root@h20112 ceph]# ceph -s</span><br><span class="line">    cluster <span class="number">6661d</span>89d-<span class="number">5895</span>-<span class="number">4</span>bcb-<span class="number">9</span>b11-<span class="number">9400638</span>afc85</span><br><span class="line">     health HEALTH_OK</span><br><span class="line">     monmap e1: <span class="number">3</span> mons at &#123;h<span class="number">020112=192.168</span>.<span class="number">20.112:6789</span>/<span class="number">0</span>,h<span class="number">020113=192.168</span>.<span class="number">20.113:6789</span>/<span class="number">0</span>,h<span class="number">020114=192.168</span>.<span class="number">20.114:6789</span>/<span class="number">0</span>&#125;</span><br><span class="line">            election epoch <span class="number">6</span>, quorum <span class="number">0</span>,<span class="number">1</span>,<span class="number">2</span> h020112,h020113,h020114</span><br><span class="line">     osdmap e199: <span class="number">39</span> osds: <span class="number">39</span> up, <span class="number">39</span> in</span><br><span class="line">            flags sortbitwise,require_jewel_osds</span><br><span class="line">      pgmap v497: <span class="number">1024</span> pgs, <span class="number">1</span> pools, <span class="number">0</span> bytes data, <span class="number">0</span> objects</span><br><span class="line">            <span class="number">4385</span> MB used, <span class="number">34854</span> GB / <span class="number">34858</span> GB avail</span><br><span class="line">                <span class="number">1024</span> active+clean</span><br><span class="line"></span><br><span class="line"># 若配置文件里指定的pg_num 和 php_num未生效，使用命令指定：</span><br><span class="line">sudo ceph osd pool set rbd pg_num <span class="number">1024</span></span><br><span class="line">sudo ceph osd pool set rbd pgp_num <span class="number">1024</span></span><br></pre></td></tr></table></figure>
+<h2 id="自定义crush分布式调度规则："><a href="#自定义crush分布式调度规则：" class="headerlink" title="自定义crush分布式调度规则："></a>自定义crush分布式调度规则：</h2><p>ceph一共有如下层级的管理单位，从上到下层级依次提升，可以灵活地按照物理的逻辑粒度，将osd关联到不同的主机、机位、机架、pdu、机房、区域等管理单位，每一层级的整体权重值等于该层级下所有OSD的权重之和。</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">type 0 osd</span><br><span class="line">type 1 host</span><br><span class="line">type 2 chassis</span><br><span class="line">type 3 rack</span><br><span class="line">type 4 row</span><br><span class="line">type 5 pdu</span><br><span class="line">type 6 pod</span><br><span class="line">type 7 room</span><br><span class="line">type 8 datacenter</span><br><span class="line">type 9 region</span><br><span class="line">type 10 root</span><br></pre></td></tr></table></figure>
+<p><strong>自定义crush视图:</strong><br>这里只写操作方法，不作实施，本次操作的环境硬盘数目、硬盘规格、主机位置均一致，暂时不作crush调整</p>
+<figure class="highlight smali"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">ceph osd crush<span class="built_in"> add-bucket </span>hnc root <span class="comment">#添加root层级名为hnc的bucket</span></span><br><span class="line">ceph osd crush<span class="built_in"> add-bucket </span>rack0 rack  <span class="comment">#添加rack层级名为rack0的bucket</span></span><br><span class="line">ceph osd crush<span class="built_in"> add-bucket </span>rack1 rack  <span class="comment">#添加rack层级名为rack1的bucket</span></span><br><span class="line">ceph osd crush<span class="built_in"> add-bucket </span>rack2 rack  <span class="comment">#添加rack层级名为rack2的bucket</span></span><br><span class="line">ceph osd crush<span class="built_in"> move </span>rack0 root=hnc  <span class="comment">#将rack0移入hnc之下</span></span><br><span class="line">ceph osd crush<span class="built_in"> move </span>rack0 root=hnc  <span class="comment">#将rack1移入hnc之下</span></span><br><span class="line">ceph osd crush<span class="built_in"> move </span>rack0 root=hnc  <span class="comment">#将rack2移入hnc之下</span></span><br><span class="line">ceph ods crush<span class="built_in"> move </span>h020112 rack=rack0  <span class="comment">#将host h020112移入rack0层级下</span></span><br><span class="line">ceph ods crush<span class="built_in"> move </span>h020113 rack=rack1  <span class="comment">#将host h020113移入rack1层级下</span></span><br><span class="line">ceph ods crush<span class="built_in"> move </span>h020114 rack=rack2  <span class="comment">#将host h020114移入rack2层级下</span></span><br><span class="line"></span><br><span class="line">ceph osd getcrushmap -o map_old    导出map</span><br><span class="line">crushtool -d map_old -o map_old.txt  转化成可编辑格式</span><br><span class="line"></span><br><span class="line">crushtool -c map_new.txt -o map_new  还原为map</span><br><span class="line">ceph osd setcrushmap -i map_new     将map导入ceph</span><br></pre></td></tr></table></figure>
+<p>修改配置文件,防止ceph自动更新crushmap<br><figure class="highlight crystal"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">echo ‘osd_crush_update_on_start = <span class="literal">false</span>‘ &gt;&gt; <span class="regexp">/etc/ceph</span><span class="regexp">/ceph.conf</span></span><br><span class="line"><span class="regexp">/etc</span><span class="regexp">/init.d/ceph</span> restart</span><br></pre></td></tr></table></figure></p>
+<p>使用如下样例crash（map_new.txt）配置:</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br></pre></td><td class="code"><pre><span class="line">--------------------------------------</span><br><span class="line"><span class="comment"># begin crush map</span></span><br><span class="line">tunable choose_local_tries 0</span><br><span class="line">tunable choose_local_fallback_tries 0</span><br><span class="line">tunable choose_total_tries 50</span><br><span class="line">tunable chooseleaf_descend_once 1</span><br><span class="line">tunable straw_calc_version 1</span><br><span class="line"></span><br><span class="line"><span class="comment"># devices</span></span><br><span class="line">device 0 osd.0</span><br><span class="line">device 1 osd.1</span><br><span class="line">device 2 osd.2</span><br><span class="line">device 3 osd.3</span><br><span class="line">device 4 osd.4</span><br><span class="line">device 5 osd.5</span><br><span class="line">device 6 osd.6</span><br><span class="line">device 7 osd.7</span><br><span class="line">device 8 osd.8</span><br><span class="line">device 9 osd.9</span><br><span class="line">device 10 osd.10</span><br><span class="line">device 11 osd.11</span><br><span class="line"></span><br><span class="line"><span class="comment"># types</span></span><br><span class="line">type 0 osd</span><br><span class="line">type 1 host</span><br><span class="line">type 2 chassis</span><br><span class="line">type 3 rack</span><br><span class="line">type 4 row</span><br><span class="line">type 5 pdu</span><br><span class="line">type 6 pod</span><br><span class="line">type 7 room</span><br><span class="line">type 8 datacenter</span><br><span class="line">type 9 region</span><br><span class="line">type 10 root</span><br><span class="line"></span><br><span class="line"><span class="comment"># buckets</span></span><br><span class="line">root<span class="built_in"> default </span>&#123;</span><br><span class="line">	id -1		# <span class="keyword">do</span> <span class="keyword">not</span> change unnecessarily</span><br><span class="line">	# weight 0.000</span><br><span class="line">	alg straw</span><br><span class="line">	hash 0	# rjenkins1</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 权重值一般根据磁盘容量(基数)与性能(倍率)调整，例如设置1T为1.00，2T为2.00，hdd倍数为1，ssd倍数为2</span></span><br><span class="line">host h020112 &#123;</span><br><span class="line">	id -2		# <span class="keyword">do</span> <span class="keyword">not</span> change unnecessarily</span><br><span class="line">	# weight 0.000</span><br><span class="line">	alg straw</span><br><span class="line">	hash 0	# rjenkins1</span><br><span class="line">	item osd.0 weight 2.000</span><br><span class="line">	item osd.1 weight 2.000</span><br><span class="line">	item osd.2 weight 2.000</span><br><span class="line">	item osd.3 weight 2.000</span><br><span class="line">	# 需写出全部osd，这里省略不写这么多了</span><br><span class="line">&#125;</span><br><span class="line">host h020113 &#123;</span><br><span class="line">	id -3		# <span class="keyword">do</span> <span class="keyword">not</span> change unnecessarily</span><br><span class="line">	# weight 0.000</span><br><span class="line">	alg straw</span><br><span class="line">	hash 0	# rjenkins1</span><br><span class="line">	item osd.4 weight 2.000</span><br><span class="line">	item osd.5 weight 2.000</span><br><span class="line">	item osd.6 weight 2.000</span><br><span class="line">	item osd.7 weight 2.000</span><br><span class="line">&#125;</span><br><span class="line">host h020114 &#123;</span><br><span class="line">	id -4		# <span class="keyword">do</span> <span class="keyword">not</span> change unnecessarily</span><br><span class="line">	# weight 0.000</span><br><span class="line">	alg straw</span><br><span class="line">	hash 0	# rjenkins1</span><br><span class="line">	item osd.8 weight  2.000 </span><br><span class="line">	item osd.9 weight  2.000  </span><br><span class="line">	item osd.10 weight 2.000  </span><br><span class="line">	item osd.11 weight 2.000  </span><br><span class="line">&#125;</span><br><span class="line">rack rack0 &#123;</span><br><span class="line">	id -6		# <span class="keyword">do</span> <span class="keyword">not</span> change unnecessarily</span><br><span class="line">	# weight 0.000</span><br><span class="line">	alg straw</span><br><span class="line">	hash 0	# rjenkins1</span><br><span class="line">	item h020112 weight 8.000</span><br><span class="line">&#125;</span><br><span class="line">rack rack1 &#123;</span><br><span class="line">	id -7		# <span class="keyword">do</span> <span class="keyword">not</span> change unnecessarily</span><br><span class="line">	# weight 0.000</span><br><span class="line">	alg straw</span><br><span class="line">	hash 0	# rjenkins1</span><br><span class="line">	item h020113 weight 8.000</span><br><span class="line">&#125;</span><br><span class="line">rack rack2 &#123;</span><br><span class="line">	id -8		# <span class="keyword">do</span> <span class="keyword">not</span> change unnecessarily</span><br><span class="line">	# weight 0.000</span><br><span class="line">	alg straw</span><br><span class="line">	hash 0	# rjenkins1</span><br><span class="line">	item h020114 weight 8.000</span><br><span class="line">&#125;</span><br><span class="line">root hnc &#123;</span><br><span class="line">	id -5		# <span class="keyword">do</span> <span class="keyword">not</span> change unnecessarily</span><br><span class="line">	# weight 0.000</span><br><span class="line">	alg straw</span><br><span class="line">	hash 0	# rjenkins1</span><br><span class="line">	item rack0 weight 8.000</span><br><span class="line">	item rack1 weight 8.000</span><br><span class="line">	item rack2 weight 8.000</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># rules</span></span><br><span class="line">rule replicated_ruleset &#123;                         #规则集的命名，创建pool时可以指定rule集</span><br><span class="line">	ruleset 0                                     #rules集的编号，顺序编即可</span><br><span class="line"><span class="built_in">	type </span>replicated                               #定义pool类型为replicated(还有esurecode模式)</span><br><span class="line">	min_size 1                                    #pool中最小指定的副本数量不能小1</span><br><span class="line">	max_size 10                                   #pool中最大指定的副本数量不能大于10</span><br><span class="line">	<span class="keyword">step</span> take hnc                             #定义pg查找副本的入口点</span><br><span class="line">	<span class="keyword">step</span> chooseleaf firstn 0<span class="built_in"> type </span>rack            #选叶子节点、深度优先、隔离rack</span><br><span class="line">	<span class="keyword">step</span> emit</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment"># end crush map</span></span><br></pre></td></tr></table></figure>
+<p>将修改后的crushmap编译并且注入集群中</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">crushtool -c map_new.txt -o map_new</span><br><span class="line">ceph osd setcrushmap -i map_new</span><br><span class="line">ceph osd tree</span><br><span class="line">ceph osd crush rm<span class="built_in"> default </span> # 删除默认crush map</span><br><span class="line">systemctl stop ceph\*.service ceph\*.target  #关闭所有服务</span><br><span class="line">systemctl start ceph.target   #启动服务</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div id="reward-container">
+  <div>Thank you for your accept. mua！</div>
+  <button id="reward-button" disable="enable" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+
+    
+      
+      
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/reward/wechatpay.png" alt="丨ywq丨 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+      
+      
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/reward/alipay.png" alt="丨ywq丨 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        
+
+
+
+
+  
+
+
+
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>丨ywq丨</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    
+    <a href="https://www.ipyker.com/2018/09/11/Ceph集群生产环境安装部署.html" title="Ceph集群生产环境安装部署">https://www.ipyker.com/2018/09/11/Ceph集群生产环境安装部署.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li>
+</ul>
+
+      </div>
+    
+    <div>
+      
+        <div>
+    
+        <div style="text-align:center;color: #ccc;font-size:16px;">-------------本文结束<i class="fa fa-heart"></i>感谢您的阅读-------------</div>
+    
+</div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Kubernetes/" rel="tag"><i class="fa fa-tag"></i> Kubernetes</a>
+          
+            <a href="/tags/Ceph/" rel="tag"><i class="fa fa-tag"></i> Ceph</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/08/23/nginx配置根据参数转发.html" rel="next" title="nginx配置根据参数转发">
+                <i class="fa fa-chevron-left"></i> nginx配置根据参数转发
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/09/15/cephfs调优-性能测试-监控-常用命令.html" rel="prev" title="cephfs调优 & 性能测试 & 监控 & 常用命令">
+                cephfs调优 & 性能测试 & 监控 & 常用命令 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC80NDM5Mi8yMDkyNA=="></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="丨ywq丨">
+            
+              <p class="site-author-name" itemprop="name">丨ywq丨</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives">
+                
+                    <span class="site-state-item-count">74</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                      <a href="/tags">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">15</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/yinwenqin" title="GitHub &rarr; https://github.com/yinwenqin" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://blog.csdn.net/ywq935" title="CSDN &rarr; https://blog.csdn.net/ywq935" rel="noopener" target="_blank"><i class="fa fa-fw fa-globe"></i>CSDN</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-book"></i>
+                推荐阅读
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.upweto.top/gitbooks/useKubernetes/" title="http://blog.upweto.top/gitbooks/useKubernetes/" rel="noopener" target="_blank">kubernetes使用指南</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.upweto.top/gitbooks/kubeSourceCodeNote/" title="http://blog.upweto.top/gitbooks/kubeSourceCodeNote/" rel="noopener" target="_blank">kubernetes源码笔记</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#null"><span class="nav-number">1.</span> <span class="nav-text"> </span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">2.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#一、配置规划："><span class="nav-number">3.</span> <span class="nav-text">一、配置规划：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#二、部署"><span class="nav-number">4.</span> <span class="nav-text">二、部署</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#自定义crush分布式调度规则："><span class="nav-number">5.</span> <span class="nav-text">自定义crush分布式调度规则：</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" style=" text-align:center;">&copy; 2017 – <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ywq</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"> 站点字数合计:</i>
+    </span>
+    
+    <span title="站点总字数">583k</span>
+  
+  
+</div>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+<div class="run_time" style=" text-align:center;">
+  <span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
+  <script>
+    var now = new Date(); 
+    function createtime() { 
+        var grt= new Date("08/23/2018 10:00:00");//此处修改你的建站时间或者网站上线时间 
+        now.setTime(now.getTime()+250); 
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days); 
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours); 
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum); 
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;} 
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum); 
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;} 
+        document.getElementById("timeDate").innerHTML = "本站已安全运行 "+dnum+" 天 "; 
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒"; 
+    } 
+    setInterval("createtime()",250);
+  </script>
+</div>
+
+        
+<div class="busuanzi-count" style=" text-align:center;">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-user"></i>
+    </span>
+    <span class="site-uv" title="总访客量">
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span> 人
+    </span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+  
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-eye"></i>
+    </span>
+    <span class="site-pv" title="总访问量">
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span> 次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+  
+    
+    
+      
+    
+  
+  <script color="black" opacity="0.7" zindex="-1" count="140" src="//cdn.jsdelivr.net/gh/theme-next/theme-next-canvas-nest@1.0.0/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+  
+  
+  <script id="ribbon" size="300" alpha="0.1" zindex="-1" src="/lib/canvas-ribbon/canvas-ribbon.js"></script>
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/fancybox/source/jquery.fancybox.pack.js"></script>
+
+
+  
+
+
+  <script src="/js/utils.js?v=7.1.1"></script>
+
+  <script src="/js/motion.js?v=7.1.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/schemes/muse.js?v=7.1.1"></script>
+
+
+
+
+  
+  <script src="/js/scrollspy.js?v=7.1.1"></script>
+<script src="/js/post-details.js?v=7.1.1"></script>
+
+
+
+  
+
+
+  <script src="/js/next-boot.js?v=7.1.1"></script>
+
+
+  
+
+  
+
+  
+  
+  
+
+  
+
+  
+  
+  
+
+
+  
+
+
+  
+    <script>
+  window.livereOptions = {
+    refer: '2018/09/11/Ceph集群生产环境安装部署.html'
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+</script>
+
+  
+
+
+  
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url).replace(/\/{2,}/g, '/');
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x"></i></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x"></i></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+  
+  <script src="/lib/bookmark/bookmark.min.js?v=1.0"></script>
+  <script>
+  
+    bookmark.scrollToMark('auto', "#更多");
+  
+  </script>
+
+
+  
+
+  
+
+  
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/koharu.model.json"},"display":{"position":"left","width":250,"height":500},"mobile":{"show":false},"react":{"opacity":0.7},"log":false});</script></body>
+</html>
+<!-- 页面点击小红心 -->
+<script type="text/javascript" src="/js/src/clicklove.js"></script>

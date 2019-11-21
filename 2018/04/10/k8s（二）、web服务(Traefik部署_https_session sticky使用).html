@@ -1,0 +1,1596 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-CN">
+
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link rel="stylesheet" href="/lib/pace/pace-theme-bounce.min.css?v=1.0.2">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link rel="stylesheet" href="/lib/fancybox/source/jquery.fancybox.css">
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+    
+      
+    
+
+    
+  
+
+  
+
+  
+
+  
+    
+      
+    
+
+    
+  
+
+  
+    
+    
+    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic|Roboto Slab:300,300italic,400,400italic,700,700italic|Roboto Mono:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext">
+  
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.1.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.1.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.1.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.1.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.1.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '7.1.1',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":true,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: true,
+    fancybox: true,
+    fastclick: true,
+    lazyload: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"shrinkIn","post_header":"slideLeftIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideDownIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <script>
+  (function(i,s,o,g,r,a,m){i["DaoVoiceObject"]=r;i[r]=i[r]||function(){(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;a.charset="utf-8";m.parentNode.insertBefore(a,m)})(window,document,"script",('https:' == document.location.protocol ? 'https:' : 'http:') + "//widget.daovoice.io/widget/0f81ff2f.js","daovoice")
+  daovoice('init', {
+      app_id: "bd399fce"
+    });
+  daovoice('update');
+  </script>
+
+  <meta name="description" content="前言在上文完成k8s集群搭建的基础上k8s（一）、1.9.0高可用集群本地离线部署记录，承接上文，本文简单介绍一下k8s对外暴露服务 拓扑图： 一、k8s对外暴露服务方式介绍1.Load Blance目前已经有很多主流的公有云平台已经都提供基于k8s服务的组件，工作的原理本质上是k8s的服务向云平台申请一个负载均衡器来对外服务。因此这种方式只适合在云平台内部使用，这里略过. 2.Nodeport针">
+<meta name="keywords" content="Kubernetes">
+<meta property="og:type" content="article">
+<meta property="og:title" content="k8s（二）、对外服务(Traefik部署&#x2F;https&#x2F;session sticky使用)">
+<meta property="og:url" content="https://www.ipyker.com/2018/04/10/k8s（二）、web服务(Traefik部署_https_session sticky使用).html">
+<meta property="og:site_name" content="随笔漫谈">
+<meta property="og:description" content="前言在上文完成k8s集群搭建的基础上k8s（一）、1.9.0高可用集群本地离线部署记录，承接上文，本文简单介绍一下k8s对外暴露服务 拓扑图： 一、k8s对外暴露服务方式介绍1.Load Blance目前已经有很多主流的公有云平台已经都提供基于k8s服务的组件，工作的原理本质上是k8s的服务向云平台申请一个负载均衡器来对外服务。因此这种方式只适合在云平台内部使用，这里略过. 2.Nodeport针">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://mycloudn.kokoerp.com/20180410223001170.jpg">
+<meta property="og:image" content="http://mycloudn.kokoerp.com/20180410223136806.jpg">
+<meta property="og:image" content="http://mycloudn.kokoerp.com/20180410193538553.jpg">
+<meta property="og:image" content="http://mycloudn.kokoerp.com/20180410193557864.jpg">
+<meta property="og:image" content="http://mycloudn.kokoerp.com/20180410193759397.jpg">
+<meta property="og:image" content="http://mycloudn.kokoerp.com/20180411091136500.jpg">
+<meta property="og:image" content="http://mycloudn.kokoerp.com/20180410200217685.jpg">
+<meta property="og:image" content="http://mycloudn.kokoerp.com/20180410200225787.jpg">
+<meta property="og:image" content="http://mycloudn.kokoerp.com/20180410200234163.jpg">
+<meta property="og:image" content="http://mycloudn.kokoerp.com/20180410203346759.jpg">
+<meta property="og:image" content="http://mycloudn.kokoerp.com/201804102034034.jpg">
+<meta property="og:image" content="http://mycloudn.kokoerp.com/20190124090246398.png">
+<meta property="og:image" content="http://mycloudn.kokoerp.com/20190124085932914.png">
+<meta property="og:image" content="http://mycloudn.kokoerp.com/20190124090409924.png">
+<meta property="og:image" content="http://mycloudn.kokoerp.com/20181110161536188.png">
+<meta property="og:image" content="http://mycloudn.kokoerp.com/20181110161734543.png">
+<meta property="og:updated_time" content="2019-11-21T07:48:40.139Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="k8s（二）、对外服务(Traefik部署&#x2F;https&#x2F;session sticky使用)">
+<meta name="twitter:description" content="前言在上文完成k8s集群搭建的基础上k8s（一）、1.9.0高可用集群本地离线部署记录，承接上文，本文简单介绍一下k8s对外暴露服务 拓扑图： 一、k8s对外暴露服务方式介绍1.Load Blance目前已经有很多主流的公有云平台已经都提供基于k8s服务的组件，工作的原理本质上是k8s的服务向云平台申请一个负载均衡器来对外服务。因此这种方式只适合在云平台内部使用，这里略过. 2.Nodeport针">
+<meta name="twitter:image" content="http://mycloudn.kokoerp.com/20180410223001170.jpg">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="随笔漫谈" type="application/atom+xml">
+
+
+
+  
+  
+  <link rel="canonical" href="https://www.ipyker.com/2018/04/10/k8s（二）、web服务(Traefik部署_https_session sticky使用)">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>k8s（二）、对外服务(Traefik部署/https/session sticky使用) | 随笔漫谈</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+ 
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">随笔漫谈</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-book">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/gitbooks/" rel="section"><i class="menu-item-icon fa fa-fw fa-book"></i> <br>book</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-互动">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/guestbook/" rel="section"><i class="menu-item-icon fa fa-fw fa-comments"></i> <br>互动</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.ipyker.com/2018/04/10/k8s（二）、web服务(Traefik部署_https_session sticky使用).html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="丨ywq丨">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随笔漫谈">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">k8s（二）、对外服务(Traefik部署/https/session sticky使用)
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-04-10 22:33:43" itemprop="dateCreated datePublished" datetime="2018-04-10T22:33:43+08:00">2018-04-10</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-11-21 15:48:40" itemprop="dateModified" datetime="2019-11-21T15:48:40+08:00">2019-11-21</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+            <div class="post-symbolscount">
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">本文字数：</span>
+                
+                <span title="本文字数">16k</span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">14 分钟</span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>在上文完成k8s集群搭建的基础上<a href="https://blog.csdn.net/ywq935/article/details/79856469" target="_blank" rel="noopener">k8s（一）、1.9.0高可用集群本地离线部署记录</a>，承接上文，本文简单介绍一下k8s对外暴露服务</p>
+<p>拓扑图：<br><img src="http://mycloudn.kokoerp.com/20180410223001170.jpg" alt="这里写图片描述"></p>
+<h2 id="一、k8s对外暴露服务方式介绍"><a href="#一、k8s对外暴露服务方式介绍" class="headerlink" title="一、k8s对外暴露服务方式介绍"></a>一、k8s对外暴露服务方式介绍</h2><h3 id="1-Load-Blance"><a href="#1-Load-Blance" class="headerlink" title="1.Load Blance"></a>1.Load Blance</h3><pre><code>目前已经有很多主流的公有云平台已经都提供基于k8s服务的组件，工作的原理本质上是k8s的服务向云平台申请一个负载均衡器来对外服务。因此这种方式只适合在云平台内部使用，这里略过.
+</code></pre><h3 id="2-Nodeport"><a href="#2-Nodeport" class="headerlink" title="2.Nodeport"></a>2.Nodeport</h3><pre><code>针对某一个k8s service，k8s集群内的每一个node都将暴露node的一个指定接口，来为此service提供服务。此方式要求每一个node都提供一个端口，即使此node上没有承载有该service 的pod服务载体，因此此方式会带来一定资源的浪费和管理不便。
+</code></pre><h3 id="3-Ingress"><a href="#3-Ingress" class="headerlink" title="3.Ingress"></a>3.Ingress</h3><pre><code>Ingress注入方式，有三个组件，来协同完成对外服务的过程：
+1.reverse proxy LB
+2.ingress controller
+3.k8s Ingress组件
+</code></pre><h4 id="1-reverse-proxy-LB"><a href="#1-reverse-proxy-LB" class="headerlink" title="1.reverse proxy LB"></a>1.reverse proxy LB</h4><pre><code>将服务请求反向代理至后端服务对应的node上，node收到后再由kube-proxy将请求转交给endpoint pod.
+</code></pre><h4 id="2-ingress-controller"><a href="#2-ingress-controller" class="headerlink" title="2.ingress controller"></a>2.ingress controller</h4><pre><code>监控apiserver上的svc关联关系的变化，若svc关联发生变化（例如svc后端对应的pods发生变化），则动态地获取变化，更新前面反向代理的配置文件和热重载。
+</code></pre><h4 id="3-k8s-ingress"><a href="#3-k8s-ingress" class="headerlink" title="3.k8s ingress"></a>3.k8s ingress</h4><pre><code>k8s的一种资源类型，可以基于访问的虚拟主机、字段等进行区别路由映射到后端不同的k8s service上，ingress controller要实时监控每个ingress对象上指定的service来保证LB配置文件的热更新
+</code></pre><p>​<br>​    在本文，采用traefik作为ingress工具演示。</p>
+<p><strong>###     traefik：</strong><br>    由于微服务架构以及 Docker 、 kubernetes 编排工具最近才开始流行，因此常用的反向代理服务器 nginx并未提供对k8s ingress的支持，所以Ingress Controller 这个中间件的存在就是用来做 kubernetes 和前端LB来做衔接的；Ingress Controller工作的方式是读取k8s ingress，通过与k8s api交互实时监控service，当serivce映射关系变化时，能重写 nginx 配置和热更新。traefik的出现简化了这个流程，traefik本身是一个轻量级的reverse proxy LB，并且它原生支持跟 kubernetes API 交互，感知后端变化，因此traefik可以取代上面的1、2组件，简化结构。</p>
+<p> <strong>traefik官方介绍图：</strong><br>    <img src="http://mycloudn.kokoerp.com/20180410223136806.jpg" alt="这里写图片描述"></p>
+<h2 id="二、服务部署"><a href="#二、服务部署" class="headerlink" title="二、服务部署"></a>二、服务部署</h2><p>首先来部署一组简单的nginx应用容器。<br>准备好yaml文件：</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-attr">[root@171 nginx]</span># <span class="selector-tag">ls</span></span><br><span class="line"><span class="selector-tag">nginx-deploy</span><span class="selector-class">.yaml</span>  <span class="selector-tag">nginx_ingress</span><span class="selector-class">.yaml</span>  <span class="selector-tag">nginx_service</span><span class="selector-class">.yaml</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">[root@171</span> <span class="string">nginx]#</span> <span class="string">cat</span> <span class="string">nginx-deploy.yaml</span> </span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">extensions/v1beta1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Deployment</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  annotations:</span></span><br><span class="line">    <span class="string">deployment.kubernetes.io/revision:</span> <span class="string">"2"</span></span><br><span class="line"><span class="attr">  creationTimestamp:</span> <span class="number">2018</span><span class="bullet">-04</span><span class="bullet">-09</span><span class="attr">T04:02:02Z</span></span><br><span class="line"><span class="attr">  generation:</span> <span class="number">4</span></span><br><span class="line"><span class="attr">  labels:</span></span><br><span class="line"><span class="attr">    app:</span> <span class="string">nginx</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">nginx-deploy</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">default</span></span><br><span class="line"><span class="attr">  resourceVersion:</span> <span class="string">"111504"</span></span><br><span class="line"><span class="attr">  selfLink:</span> <span class="string">/apis/extensions/v1beta1/namespaces/default/deployments/nginx-deploy</span></span><br><span class="line"><span class="attr">  uid:</span> <span class="string">c28090c0-3baa-11e8-b75a-000c29858eab</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  replicas:</span> <span class="number">2</span></span><br><span class="line"><span class="attr">  selector:</span></span><br><span class="line"><span class="attr">    matchLabels:</span></span><br><span class="line"><span class="attr">      app:</span> <span class="string">nginx</span></span><br><span class="line"><span class="attr">  strategy:</span></span><br><span class="line"><span class="attr">    rollingUpdate:</span></span><br><span class="line"><span class="attr">      maxSurge:</span> <span class="number">1</span></span><br><span class="line"><span class="attr">      maxUnavailable:</span> <span class="number">1</span></span><br><span class="line"><span class="attr">    type:</span> <span class="string">RollingUpdate</span></span><br><span class="line"><span class="attr">  template:</span></span><br><span class="line"><span class="attr">    metadata:</span></span><br><span class="line"><span class="attr">      creationTimestamp:</span> <span class="literal">null</span></span><br><span class="line"><span class="attr">      labels:</span></span><br><span class="line"><span class="attr">        app:</span> <span class="string">nginx</span></span><br><span class="line"><span class="attr">    spec:</span></span><br><span class="line"><span class="attr">      containers:</span></span><br><span class="line"><span class="attr">      - image:</span> <span class="attr">nginx:1.9.1</span></span><br><span class="line"><span class="attr">        imagePullPolicy:</span> <span class="string">IfNotPresent</span></span><br><span class="line"><span class="attr">        name:</span> <span class="string">nginx</span></span><br><span class="line"><span class="attr">        ports:</span></span><br><span class="line"><span class="attr">        - containerPort:</span> <span class="number">80</span></span><br><span class="line"><span class="attr">          protocol:</span> <span class="string">TCP</span></span><br><span class="line"><span class="attr">        resources:</span> <span class="string">&#123;&#125;</span></span><br><span class="line"><span class="attr">        terminationMessagePath:</span> <span class="string">/dev/termination-log</span></span><br><span class="line"><span class="attr">        terminationMessagePolicy:</span> <span class="string">File</span></span><br><span class="line"><span class="attr">      dnsPolicy:</span> <span class="string">ClusterFirst</span></span><br><span class="line"><span class="attr">      restartPolicy:</span> <span class="string">Always</span></span><br><span class="line"><span class="attr">      schedulerName:</span> <span class="string">default-scheduler</span></span><br><span class="line"><span class="attr">      securityContext:</span> <span class="string">&#123;&#125;</span></span><br><span class="line"><span class="attr">      terminationGracePeriodSeconds:</span> <span class="number">30</span></span><br><span class="line"><span class="attr">status:</span></span><br><span class="line"><span class="attr">  availableReplicas:</span> <span class="number">2</span></span><br><span class="line"><span class="attr">  conditions:</span></span><br><span class="line"><span class="attr">  - lastTransitionTime:</span> <span class="number">2018</span><span class="bullet">-04</span><span class="bullet">-09</span><span class="attr">T04:57:27Z</span></span><br><span class="line"><span class="attr">    lastUpdateTime:</span> <span class="number">2018</span><span class="bullet">-04</span><span class="bullet">-09</span><span class="attr">T04:57:27Z</span></span><br><span class="line"><span class="attr">    message:</span> <span class="string">Deployment</span> <span class="string">has</span> <span class="string">minimum</span> <span class="string">availability.</span></span><br><span class="line"><span class="attr">    reason:</span> <span class="string">MinimumReplicasAvailable</span></span><br><span class="line"><span class="attr">    status:</span> <span class="string">"True"</span></span><br><span class="line"><span class="attr">    type:</span> <span class="string">Available</span></span><br><span class="line"><span class="attr">  observedGeneration:</span> <span class="number">4</span></span><br><span class="line"><span class="attr">  readyReplicas:</span> <span class="number">2</span></span><br><span class="line"><span class="attr">  replicas:</span> <span class="number">2</span></span><br><span class="line"><span class="attr">  updatedReplicas:</span> <span class="number">2</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight dts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">[root@<span class="number">171</span> nginx]<span class="meta"># cat nginx_service.yaml </span></span><br><span class="line"><span class="symbol">apiVersion:</span> v1</span><br><span class="line"><span class="symbol">kind:</span> Service</span><br><span class="line"><span class="symbol">metadata:</span></span><br><span class="line"><span class="symbol">  creationTimestamp:</span> <span class="number">2018</span><span class="number">-04</span><span class="number">-09</span>T11:<span class="number">34</span>:<span class="number">09</span>Z</span><br><span class="line"><span class="symbol">  labels:</span></span><br><span class="line"><span class="symbol">    run:</span> nginx</span><br><span class="line"><span class="symbol">  name:</span> nginx</span><br><span class="line"><span class="symbol">  namespace:</span> default</span><br><span class="line"><span class="symbol">  resourceVersion:</span> <span class="string">"140236"</span></span><br><span class="line"><span class="symbol">  selfLink:</span> <span class="meta-keyword">/api/</span>v1<span class="meta-keyword">/namespaces/</span>default<span class="meta-keyword">/services/</span>nginx</span><br><span class="line"><span class="symbol">  uid:</span> eb57a21b<span class="number">-3</span>be9<span class="number">-11e8</span>-b75a<span class="number">-000</span>c29858eab</span><br><span class="line"><span class="symbol">spec:</span></span><br><span class="line"><span class="symbol">  clusterIP:</span> <span class="number">10.99</span><span class="number">.59</span><span class="number">.56</span></span><br><span class="line"><span class="symbol">  ports:</span></span><br><span class="line">  - port: <span class="number">80</span></span><br><span class="line"><span class="symbol">    protocol:</span> TCP</span><br><span class="line"><span class="symbol">    targetPort:</span> <span class="number">80</span></span><br><span class="line"><span class="symbol">  selector:</span></span><br><span class="line"><span class="symbol">    app:</span> nginx</span><br><span class="line"><span class="symbol">  sessionAffinity:</span> None</span><br><span class="line"><span class="symbol">  type:</span> ClusterIP</span><br><span class="line"><span class="symbol">status:</span></span><br><span class="line"><span class="symbol">  loadBalancer:</span> &#123;&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight dts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">[root@<span class="number">171</span> nginx]<span class="meta"># cat nginx_ingress.yaml </span></span><br><span class="line"><span class="symbol">apiVersion:</span> extensions/v1beta1</span><br><span class="line"><span class="symbol">kind:</span> Ingress</span><br><span class="line"><span class="symbol">metadata:</span></span><br><span class="line"><span class="symbol">  creationTimestamp:</span> <span class="number">2018</span><span class="number">-04</span><span class="number">-09</span>T11:<span class="number">39</span>:<span class="number">48</span>Z</span><br><span class="line"><span class="symbol">  generation:</span> <span class="number">1</span></span><br><span class="line"><span class="symbol">  name:</span> test</span><br><span class="line"><span class="symbol">  namespace:</span> default</span><br><span class="line"><span class="symbol">  resourceVersion:</span> <span class="string">"140644"</span></span><br><span class="line"><span class="symbol">  selfLink:</span> <span class="meta-keyword">/apis/</span>extensions<span class="meta-keyword">/v1beta1/</span>namespaces<span class="meta-keyword">/default/</span>ingresses/test</span><br><span class="line"><span class="symbol">  uid:</span> b54bbda8<span class="number">-3</span>bea<span class="number">-11e8</span>-b75a<span class="number">-000</span>c29858eab</span><br><span class="line"><span class="symbol">spec:</span></span><br><span class="line"><span class="symbol">  rules:</span></span><br><span class="line">  - host: test.nginx.com</span><br><span class="line"><span class="symbol">    http:</span></span><br><span class="line"><span class="symbol">      paths:</span></span><br><span class="line">      - backend:</span><br><span class="line"><span class="symbol">          serviceName:</span> nginx</span><br><span class="line"><span class="symbol">          servicePort:</span> <span class="number">80</span></span><br><span class="line"><span class="symbol">status:</span></span><br><span class="line"><span class="symbol">  loadBalancer:</span> &#123;&#125;</span><br></pre></td></tr></table></figure>
+<p>创建nginx的deploy、svc、ing资源，使用–record命令后面可以看到revision记录：</p>
+<figure class="highlight livecodeserver"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">kubectl <span class="built_in">create</span> -f nginx-deploy.yaml <span class="comment">--record</span></span><br><span class="line">kubectl <span class="built_in">create</span> -f nginx-service.yaml <span class="comment">--record</span></span><br><span class="line">kubectl <span class="built_in">create</span> -f nginx-ingress.yaml <span class="comment">--record</span></span><br></pre></td></tr></table></figure>
+<p>过1分钟后查看状态：</p>
+<figure class="highlight lsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">[root@<span class="number">171</span> nginx]# kubectl get pods -o wide | grep nginx</span><br><span class="line">nginx-deploy<span class="number">-5964</span>dfd755-b2xj5   <span class="number">1</span>/<span class="number">1</span>       Running   <span class="number">2</span>          <span class="number">1</span>d        <span class="number">10.244</span><span class="number">.0</span><span class="number">.16</span>   <span class="number">170</span></span><br><span class="line">nginx-deploy<span class="number">-5964</span>dfd755-v6tdq   <span class="number">1</span>/<span class="number">1</span>       Running   <span class="number">1</span>          <span class="number">4</span>h        <span class="number">10.244</span><span class="number">.0</span><span class="number">.17</span>   <span class="number">170</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">[root@<span class="number">171</span> nginx]# kubectl get ing | grep nginx</span><br><span class="line">test         test.nginx.com             <span class="number">80</span>        <span class="number">23</span>h</span><br><span class="line"></span><br><span class="line">[root@<span class="number">171</span> nginx]# kubectl get svc | grep nginx</span><br><span class="line">nginx        ClusterIP   <span class="number">10.99</span><span class="number">.59</span><span class="number">.56</span>   &lt;none&gt;        <span class="number">80</span>/TCP    <span class="number">23</span>h</span><br></pre></td></tr></table></figure>
+<p>在本地curl pod ip和service 的clusterIP测试：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br></pre></td><td class="code"><pre><span class="line">[root@171 nginx]# curl http://10.244.0.16</span><br><span class="line"><span class="meta">&lt;!DOCTYPE html&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">title</span>&gt;</span>Welcome to nginx!<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">style</span>&gt;</span><span class="undefined"></span></span><br><span class="line"><span class="undefined">    body &#123;</span></span><br><span class="line"><span class="undefined">        width: 35em;</span></span><br><span class="line"><span class="undefined">        margin: 0 auto;</span></span><br><span class="line"><span class="undefined">        font-family: Tahoma, Verdana, Arial, sans-serif;</span></span><br><span class="line"><span class="undefined">    &#125;</span></span><br><span class="line"><span class="undefined"></span><span class="tag">&lt;/<span class="name">style</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">h1</span>&gt;</span>Welcome to nginx!<span class="tag">&lt;/<span class="name">h1</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">p</span>&gt;</span>If you see this page, the nginx web server is successfully installed and</span><br><span class="line">working. Further configuration is required.<span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">p</span>&gt;</span>For online documentation and support please refer to</span><br><span class="line"><span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">"http://nginx.org/"</span>&gt;</span>nginx.org<span class="tag">&lt;/<span class="name">a</span>&gt;</span>.<span class="tag">&lt;<span class="name">br</span>/&gt;</span></span><br><span class="line">Commercial support is available at</span><br><span class="line"><span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">"http://nginx.com/"</span>&gt;</span>nginx.com<span class="tag">&lt;/<span class="name">a</span>&gt;</span>.<span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">p</span>&gt;</span><span class="tag">&lt;<span class="name">em</span>&gt;</span>Thank you for using nginx.<span class="tag">&lt;/<span class="name">em</span>&gt;</span><span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">[root@171 nginx]# curl http://10.244.0.17</span><br><span class="line"><span class="meta">&lt;!DOCTYPE html&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">title</span>&gt;</span>Welcome to nginx!<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">style</span>&gt;</span><span class="undefined"></span></span><br><span class="line"><span class="undefined">    body &#123;</span></span><br><span class="line"><span class="undefined">        width: 35em;</span></span><br><span class="line"><span class="undefined">        margin: 0 auto;</span></span><br><span class="line"><span class="undefined">        font-family: Tahoma, Verdana, Arial, sans-serif;</span></span><br><span class="line"><span class="undefined">    &#125;</span></span><br><span class="line"><span class="undefined"></span><span class="tag">&lt;/<span class="name">style</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">h1</span>&gt;</span>Welcome to nginx!<span class="tag">&lt;/<span class="name">h1</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">p</span>&gt;</span>If you see this page, the nginx web server is successfully installed and</span><br><span class="line">working. Further configuration is required.<span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">p</span>&gt;</span>For online documentation and support please refer to</span><br><span class="line"><span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">"http://nginx.org/"</span>&gt;</span>nginx.org<span class="tag">&lt;/<span class="name">a</span>&gt;</span>.<span class="tag">&lt;<span class="name">br</span>/&gt;</span></span><br><span class="line">Commercial support is available at</span><br><span class="line"><span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">"http://nginx.com/"</span>&gt;</span>nginx.com<span class="tag">&lt;/<span class="name">a</span>&gt;</span>.<span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">p</span>&gt;</span><span class="tag">&lt;<span class="name">em</span>&gt;</span>Thank you for using nginx.<span class="tag">&lt;/<span class="name">em</span>&gt;</span><span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">[root@171 nginx]# curl http://10.99.59.56</span><br><span class="line"><span class="meta">&lt;!DOCTYPE html&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">title</span>&gt;</span>Welcome to nginx!<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">style</span>&gt;</span><span class="undefined"></span></span><br><span class="line"><span class="undefined">    body &#123;</span></span><br><span class="line"><span class="undefined">        width: 35em;</span></span><br><span class="line"><span class="undefined">        margin: 0 auto;</span></span><br><span class="line"><span class="undefined">        font-family: Tahoma, Verdana, Arial, sans-serif;</span></span><br><span class="line"><span class="undefined">    &#125;</span></span><br><span class="line"><span class="undefined"></span><span class="tag">&lt;/<span class="name">style</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">h1</span>&gt;</span>Welcome to nginx!<span class="tag">&lt;/<span class="name">h1</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">p</span>&gt;</span>If you see this page, the nginx web server is successfully installed and</span><br><span class="line">working. Further configuration is required.<span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">p</span>&gt;</span>For online documentation and support please refer to</span><br><span class="line"><span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">"http://nginx.org/"</span>&gt;</span>nginx.org<span class="tag">&lt;/<span class="name">a</span>&gt;</span>.<span class="tag">&lt;<span class="name">br</span>/&gt;</span></span><br><span class="line">Commercial support is available at</span><br><span class="line"><span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">"http://nginx.com/"</span>&gt;</span>nginx.com<span class="tag">&lt;/<span class="name">a</span>&gt;</span>.<span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">p</span>&gt;</span><span class="tag">&lt;<span class="name">em</span>&gt;</span>Thank you for using nginx.<span class="tag">&lt;/<span class="name">em</span>&gt;</span><span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>nginx资源已经创建好了，但是目前只能在本地和集群内访问，集群外部无法访问，需要把网络路由打通</p>
+<h2 id="三、网络配置"><a href="#三、网络配置" class="headerlink" title="三、网络配置"></a>三、网络配置</h2><p><strong>1.vmware网络配置：(无网络限制这一步可跳过)</strong><br>在公司的电脑上搭的wmware虚拟机，公司网络上网认证限制外网，单人只允许使用单IP访问外网，因此虚拟机为了访问外网，使用的是NAT模式转接的物理机的网络，vmware NAT方式虚拟机通信配置：<br>首先，每台vm都要配置：<br><img src="http://mycloudn.kokoerp.com/20180410193538553.jpg" alt="这里写图片描述"><br>vmware–编辑–虚拟网络编辑器：<br><img src="http://mycloudn.kokoerp.com/20180410193557864.jpg" alt="这里写图片描述"><br><img src="http://mycloudn.kokoerp.com/20180410193759397.jpg" alt="这里写图片描述"></p>
+<p>为了直接访问vm网段，在windows物理机上配置路由：<br>打开cmd，输入：</p>
+<figure class="highlight lsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">route add <span class="number">192.168</span><span class="number">.0</span><span class="number">.0</span> MASK <span class="number">255.255</span><span class="number">.255</span><span class="number">.0</span>  <span class="number">192.168</span><span class="number">.0</span><span class="number">.1</span> IF <span class="number">9</span></span><br></pre></td></tr></table></figure>
+<p>IF是接口编号，可以使用route print查看自己电脑上vmnet8网卡对应的网卡接口编号<br>打开windows网络共享中心，找到物理网卡，右键–属性–共享，勾选开启网络连接共享（类似linux内核设置开启IP forward转发）：<br><img src="http://mycloudn.kokoerp.com/20180411091136500.jpg" alt="这里写图片描述"></p>
+<p><strong>2.k8s服务网段、pods网段路由，dns配置：</strong><br>步骤1是只是打通了外部到vm之间的网络，如果没有网络限制，vm跟外部在同一网段的可以跳过上面的步骤1。</p>
+<p>步骤2是外部添加k8s的服务网段、pods网段：<br>windows cmd添加<br><figure class="highlight lsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">route add <span class="number">10.96</span><span class="number">.0</span><span class="number">.0</span>  MASK <span class="number">255.240</span><span class="number">.0</span><span class="number">.0</span>  <span class="number">192.168</span><span class="number">.0</span><span class="number">.169</span> IF <span class="number">9</span></span><br><span class="line">route add <span class="number">10.244</span><span class="number">.0</span><span class="number">.0</span> MASK <span class="number">255.255</span><span class="number">.0</span><span class="number">.0</span>  <span class="number">192.168</span><span class="number">.0</span><span class="number">.169</span> IF <span class="number">9</span></span><br></pre></td></tr></table></figure></p>
+<p>windows添加dns记录：<br>C:\Windows\System32\drivers\etc\hosts打开编辑，添加dns记录：<br><figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">192<span class="selector-class">.168</span><span class="selector-class">.0</span><span class="selector-class">.169</span>       <span class="selector-tag">test</span><span class="selector-class">.nginx</span><span class="selector-class">.com</span></span><br><span class="line">192<span class="selector-class">.168</span><span class="selector-class">.0</span><span class="selector-class">.169</span>       <span class="selector-tag">ui</span><span class="selector-class">.traefik</span><span class="selector-class">.com</span></span><br></pre></td></tr></table></figure></p>
+<p>打开浏览器测试访问pod ip、服务的cluster ip：<br><img src="http://mycloudn.kokoerp.com/20180410200217685.jpg" alt="这里写图片描述"><br><img src="http://mycloudn.kokoerp.com/20180410200225787.jpg" alt="这里写图片描述"><br><img src="http://mycloudn.kokoerp.com/20180410200234163.jpg" alt="这里写图片描述"><br>可以直接访问！<br>下面开始部署traefik，通过虚拟主机名访问.</p>
+<h2 id="四、traefik部署"><a href="#四、traefik部署" class="headerlink" title="四、traefik部署"></a>四、traefik部署</h2><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">[root@171</span> <span class="string">traefik]#</span> <span class="string">ls</span></span><br><span class="line"><span class="string">traefik-ds.yaml</span>  <span class="string">traefik_ingress.yaml</span>  <span class="string">traefik-rbac.yaml</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="string">[root@171</span> <span class="string">traefik]#</span> <span class="string">cat</span> <span class="string">traefik-rbac.yaml</span> </span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">ClusterRole</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">rbac.authorization.k8s.io/v1beta1</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">traefik-ingress-controller</span></span><br><span class="line"><span class="attr">rules:</span></span><br><span class="line"><span class="attr">  - apiGroups:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">""</span></span><br><span class="line"><span class="attr">    resources:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">services</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">endpoints</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">secrets</span></span><br><span class="line"><span class="attr">    verbs:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">get</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">list</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">watch</span></span><br><span class="line"><span class="attr">  - apiGroups:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">extensions</span></span><br><span class="line"><span class="attr">    resources:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">ingresses</span></span><br><span class="line"><span class="attr">    verbs:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">get</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">list</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">watch</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">ClusterRoleBinding</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">rbac.authorization.k8s.io/v1beta1</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">traefik-ingress-controller</span></span><br><span class="line"><span class="attr">roleRef:</span></span><br><span class="line"><span class="attr">  apiGroup:</span> <span class="string">rbac.authorization.k8s.io</span></span><br><span class="line"><span class="attr">  kind:</span> <span class="string">ClusterRole</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">traefik-ingress-controller</span></span><br><span class="line"><span class="attr">subjects:</span></span><br><span class="line"><span class="attr">- kind:</span> <span class="string">ServiceAccount</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">traefik-ingress-controller</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">kube-system</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="string">[root@171</span> <span class="string">traefik]#</span> <span class="string">cat</span> <span class="string">traefik-ds.yaml</span> </span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">ServiceAccount</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">traefik-ingress-controller</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">kube-system</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">DaemonSet</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">extensions/v1beta1</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">traefik-ingress-controller</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">kube-system</span></span><br><span class="line"><span class="attr">  labels:</span></span><br><span class="line"><span class="attr">    k8s-app:</span> <span class="string">traefik-ingress-lb</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  template:</span></span><br><span class="line"><span class="attr">    metadata:</span></span><br><span class="line"><span class="attr">      labels:</span></span><br><span class="line"><span class="attr">        k8s-app:</span> <span class="string">traefik-ingress-lb</span></span><br><span class="line"><span class="attr">        name:</span> <span class="string">traefik-ingress-lb</span></span><br><span class="line"><span class="attr">    spec:</span></span><br><span class="line"><span class="attr">      serviceAccountName:</span> <span class="string">traefik-ingress-controller</span></span><br><span class="line"><span class="attr">      terminationGracePeriodSeconds:</span> <span class="number">60</span></span><br><span class="line"><span class="attr">      hostNetwork:</span> <span class="literal">true</span></span><br><span class="line"><span class="attr">      containers:</span></span><br><span class="line"><span class="attr">      - image:</span> <span class="string">traefik</span></span><br><span class="line"><span class="attr">        name:</span> <span class="string">traefik-ingress-lb</span></span><br><span class="line"><span class="attr">        ports:</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">http</span></span><br><span class="line"><span class="attr">          containerPort:</span> <span class="number">80</span></span><br><span class="line"><span class="attr">          hostPort:</span> <span class="number">80</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">admin</span></span><br><span class="line"><span class="attr">          containerPort:</span> <span class="number">8080</span></span><br><span class="line"><span class="attr">        securityContext:</span></span><br><span class="line"><span class="attr">          capabilities:</span></span><br><span class="line"><span class="attr">            drop:</span></span><br><span class="line"><span class="bullet">            -</span> <span class="string">ALL</span></span><br><span class="line"><span class="attr">            add:</span></span><br><span class="line"><span class="bullet">            -</span> <span class="string">NET_BIND_SERVICE</span></span><br><span class="line"><span class="attr">        args:</span></span><br><span class="line"><span class="bullet">        -</span> <span class="bullet">--api</span></span><br><span class="line"><span class="bullet">        -</span> <span class="bullet">--kubernetes</span></span><br><span class="line"><span class="bullet">        -</span> <span class="bullet">--logLevel=INFO</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Service</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">traefik-ingress-service</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">kube-system</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  selector:</span></span><br><span class="line"><span class="attr">    k8s-app:</span> <span class="string">traefik-ingress-lb</span></span><br><span class="line"><span class="attr">  ports:</span></span><br><span class="line"><span class="attr">    - protocol:</span> <span class="string">TCP</span></span><br><span class="line"><span class="attr">      port:</span> <span class="number">80</span></span><br><span class="line"><span class="attr">      name:</span> <span class="string">web</span></span><br><span class="line"><span class="attr">    - protocol:</span> <span class="string">TCP</span></span><br><span class="line"><span class="attr">      port:</span> <span class="number">8080</span></span><br><span class="line"><span class="attr">      name:</span> <span class="string">admin</span></span><br><span class="line"><span class="attr">  type:</span> <span class="string">NodePort</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="string">[root@171</span> <span class="string">traefik]#</span> <span class="string">cat</span> <span class="string">traefik_ingress.yaml</span> </span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">extensions/v1beta1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Ingress</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  creationTimestamp:</span> <span class="number">2018</span><span class="bullet">-04</span><span class="bullet">-09</span><span class="attr">T11:39:48Z</span></span><br><span class="line"><span class="attr">  generation:</span> <span class="number">1</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">traefik-ui</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">default</span></span><br><span class="line"><span class="attr">  resourceVersion:</span> <span class="string">"140644"</span></span><br><span class="line"><span class="attr">  selfLink:</span> <span class="string">/apis/extensions/v1beta1/namespaces/default/ingresses/test</span></span><br><span class="line"><span class="attr">  uid:</span> <span class="string">b54bbda8-3bea-11e8-b75a-000c29858eab</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  rules:</span></span><br><span class="line"><span class="attr">  - host:</span> <span class="string">ui.traefik.com</span></span><br><span class="line"><span class="attr">    http:</span></span><br><span class="line"><span class="attr">      paths:</span></span><br><span class="line"><span class="attr">      - backend:</span></span><br><span class="line"><span class="attr">          serviceName:</span> <span class="string">traefik-ingress-service</span></span><br><span class="line"><span class="attr">          servicePort:</span> <span class="number">80</span></span><br><span class="line"><span class="attr">status:</span></span><br><span class="line"><span class="attr">  loadBalancer:</span> <span class="string">&#123;&#125;</span></span><br></pre></td></tr></table></figure>
+<p>创建资源：</p>
+<figure class="highlight livecodeserver"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">kubectl <span class="built_in">create</span> -f traefik-rbac.yaml <span class="comment">--record</span></span><br><span class="line">kubectl <span class="built_in">create</span> -f traefik-ds.yaml <span class="comment">--record</span></span><br><span class="line">kubectl <span class="built_in">create</span> -f traefik-ingress.yaml <span class="comment">--record</span></span><br></pre></td></tr></table></figure>
+<p>1分钟后查看创建情况：</p>
+<figure class="highlight lsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">[root@<span class="number">171</span> traefik]# kubectl get pods -o wide -n kube-system| grep trae</span><br><span class="line">traefik-ingress-controller<span class="number">-8</span>lht4       <span class="number">1</span>/<span class="number">1</span>       Running   <span class="number">0</span>          <span class="number">3</span>h        <span class="number">192.168</span><span class="number">.0</span><span class="number">.171</span>   <span class="number">171</span></span><br><span class="line">traefik-ingress-controller-ddvws       <span class="number">1</span>/<span class="number">1</span>       Running   <span class="number">0</span>          <span class="number">3</span>h        <span class="number">192.168</span><span class="number">.0</span><span class="number">.170</span>   <span class="number">170</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">[root@<span class="number">171</span> traefik]# kubectl get ds  -n kube-system| grep trae</span><br><span class="line">traefik-ingress-controller   <span class="number">2</span>         <span class="number">2</span>         <span class="number">2</span>         <span class="number">2</span>            <span class="number">2</span>           &lt;none&gt;          <span class="number">3</span>h</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">[root@<span class="number">171</span> traefik]# kubectl get ing </span><br><span class="line">NAME         HOSTS            ADDRESS   PORTS     AGE</span><br><span class="line">test         test.nginx.com             <span class="number">80</span>        <span class="number">1</span>d</span><br><span class="line">traefik-ui   ui.traefik.com             <span class="number">80</span>        <span class="number">3</span>h</span><br></pre></td></tr></table></figure>
+<p><strong>打开浏览器测试：</strong><br><img src="http://mycloudn.kokoerp.com/20180410203346759.jpg" alt="这里写图片描述"><br><img src="http://mycloudn.kokoerp.com/201804102034034.jpg" alt="这里写图片描述"></p>
+<h2 id="开启https"><a href="#开启https" class="headerlink" title="开启https"></a>开启https</h2><p>提前准备好证书和key:<br><figure class="highlight elixir"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">root<span class="variable">@h001238</span><span class="symbol">:~/traefik/ssl</span><span class="comment"># ls</span></span><br><span class="line">cert.crt  cert.key</span><br></pre></td></tr></table></figure></p>
+<p>创建secret保存https证书:<br><figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl create<span class="built_in"> secret </span>generic traefik-cert <span class="attribute">--from-file</span>=./cert.crt <span class="attribute">--from-file</span>=./cert.key -n kube-system</span><br></pre></td></tr></table></figure></p>
+<p>编辑traefik配置文件:</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># vim traefik.toml</span></span><br><span class="line">insecureSkipVerify = <span class="literal">true</span></span><br><span class="line">defaultEntryPoints = [<span class="string">"http"</span>,<span class="string">"https"</span>]</span><br><span class="line">[entryPoints]</span><br><span class="line">  [entryPoints.http]</span><br><span class="line"> <span class="built_in"> address </span>= <span class="string">":80"</span></span><br><span class="line">    entryPoint = <span class="string">"https"</span></span><br><span class="line">  [entryPoints.https]</span><br><span class="line"> <span class="built_in"> address </span>= <span class="string">":443"</span></span><br><span class="line">    [entryPoints.https.tls]</span><br><span class="line">      [[entryPoints.https.tls.certificates]]</span><br><span class="line">      certFile = <span class="string">"/opt/conf/k8s/ssl/cert.crt"</span></span><br><span class="line">      keyFile = <span class="string">"/opt/conf/k8s/ssl/cert.key"</span></span><br></pre></td></tr></table></figure>
+<p>创建ConfigMap:</p>
+<figure class="highlight n1ql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl <span class="keyword">create</span> configmap traefik-conf --<span class="keyword">from</span>-file=traefik.toml -n kube-<span class="keyword">system</span></span><br></pre></td></tr></table></figure>
+<p>修改DaemonSet部署文件,apply部署后直接删除原traefik pod进行配置更新.:<br><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">kind:</span> <span class="string">DaemonSet</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">extensions/v1beta1</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">traefik-ingress-controller</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">kube-system</span></span><br><span class="line"><span class="attr">  labels:</span></span><br><span class="line"><span class="attr">    k8s-app:</span> <span class="string">traefik-ingress-lb</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  template:</span></span><br><span class="line"><span class="attr">    metadata:</span></span><br><span class="line"><span class="attr">      labels:</span></span><br><span class="line"><span class="attr">        k8s-app:</span> <span class="string">traefik-ingress-lb</span></span><br><span class="line"><span class="attr">        name:</span> <span class="string">traefik-ingress-lb</span></span><br><span class="line"><span class="attr">    spec:</span></span><br><span class="line"><span class="attr">      serviceAccountName:</span> <span class="string">traefik-ingress-controller</span></span><br><span class="line"><span class="attr">      terminationGracePeriodSeconds:</span> <span class="number">60</span></span><br><span class="line"><span class="attr">      hostNetwork:</span> <span class="literal">true</span></span><br><span class="line"><span class="attr">      volumes:</span></span><br><span class="line"><span class="attr">      - name:</span> <span class="string">ssl</span></span><br><span class="line"><span class="attr">        secret:</span></span><br><span class="line"><span class="attr">          secretName:</span> <span class="string">traefik-cert</span></span><br><span class="line"><span class="attr">      - name:</span> <span class="string">config</span></span><br><span class="line"><span class="attr">        configMap:</span></span><br><span class="line"><span class="attr">          name:</span> <span class="string">traefik-conf</span></span><br><span class="line"><span class="attr">      containers:</span></span><br><span class="line"><span class="attr">      - image:</span> <span class="string">traefik</span></span><br><span class="line"><span class="attr">        name:</span> <span class="string">traefik-ingress-lb</span></span><br><span class="line"><span class="attr">        volumeMounts:</span></span><br><span class="line"><span class="attr">        - mountPath:</span> <span class="string">"/opt/conf/k8s/ssl"</span></span><br><span class="line"><span class="attr">          name:</span> <span class="string">"ssl"</span></span><br><span class="line"><span class="attr">        - mountPath:</span> <span class="string">"/opt/conf/k8s/conf"</span></span><br><span class="line"><span class="attr">          name:</span> <span class="string">"config"</span></span><br><span class="line"><span class="attr">        ports:</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">http</span></span><br><span class="line"><span class="attr">          containerPort:</span> <span class="number">80</span></span><br><span class="line"><span class="attr">          hostPort:</span> <span class="number">80</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">admin</span></span><br><span class="line"><span class="attr">          containerPort:</span> <span class="number">8080</span></span><br><span class="line"><span class="attr">        securityContext:</span></span><br><span class="line"><span class="attr">          capabilities:</span></span><br><span class="line"><span class="attr">            drop:</span></span><br><span class="line"><span class="bullet">            -</span> <span class="string">ALL</span></span><br><span class="line"><span class="attr">            add:</span></span><br><span class="line"><span class="bullet">            -</span> <span class="string">NET_BIND_SERVICE</span></span><br><span class="line"><span class="attr">        args:</span></span><br><span class="line"><span class="bullet">        -</span> <span class="bullet">--api</span></span><br><span class="line"><span class="bullet">        -</span> <span class="bullet">--kubernetes</span></span><br><span class="line"><span class="bullet">        -</span> <span class="bullet">--logLevel=INFO</span></span><br><span class="line"><span class="bullet">        -</span> <span class="bullet">--configFile=/opt/conf/k8s/conf/traefik.toml</span></span><br></pre></td></tr></table></figure></p>
+<p>查看更新后node上的端口监听:<br><figure class="highlight elixir"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">root<span class="variable">@h001238</span><span class="symbol">:~/traefik</span><span class="comment"># ss -tnlp | grep trae</span></span><br><span class="line">LISTEN     <span class="number">0</span>      <span class="number">128</span>         ::<span class="symbol">:</span><span class="number">8080</span>                    ::<span class="symbol">:*</span>                   <span class="symbol">users:</span>((<span class="string">"traefik"</span>,pid=<span class="number">18337</span>,fd=<span class="number">6</span>))</span><br><span class="line">LISTEN     <span class="number">0</span>      <span class="number">128</span>         ::<span class="symbol">:</span><span class="number">80</span>                      ::<span class="symbol">:*</span>                   <span class="symbol">users:</span>((<span class="string">"traefik"</span>,pid=<span class="number">18337</span>,fd=<span class="number">3</span>))</span><br><span class="line">LISTEN     <span class="number">0</span>      <span class="number">128</span>         ::<span class="symbol">:</span><span class="number">443</span>                     ::<span class="symbol">:*</span>                   <span class="symbol">users:</span>((<span class="string">"traefik"</span>,pid=<span class="number">18337</span>,fd=<span class="number">5</span>))</span><br></pre></td></tr></table></figure></p>
+<hr>
+<h2 id="开启session-sticky"><a href="#开启session-sticky" class="headerlink" title="开启session sticky"></a>开启session sticky</h2><p>Traefik支持session sticky, 仅需添加一些简单的配置。有两种方法，一种是在traefik端配置文件中修改，一种是在svc端添加注解。<br>第一种：<br>在traefik配置文件中顶格添加如下几行，为backend1这个后端开启session sticky。这种方式需要traefik频繁重载配置文件，不适用于实际场景，所以这里不作演示了:</p>
+<figure class="highlight cs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[<span class="meta">backends</span>]</span><br><span class="line">  [<span class="meta">backends.backend1</span>]</span><br><span class="line">    <span class="meta"># Enable sticky session</span></span><br><span class="line">    [<span class="meta">backends.backend1.loadbalancer.stickiness</span>]</span><br></pre></td></tr></table></figure>
+<p>完整ConfigMap如下<br><figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">apiVersion: v1</span><br><span class="line">data:</span><br><span class="line">  traefik.toml: |</span><br><span class="line">    insecureSkipVerify = <span class="literal">true</span></span><br><span class="line">    defaultEntryPoints = [<span class="string">"http"</span>,<span class="string">"https"</span>]</span><br><span class="line">    [entryPoints]</span><br><span class="line">      [entryPoints.http]</span><br><span class="line">     <span class="built_in"> address </span>= <span class="string">":80"</span></span><br><span class="line">        entryPoint = <span class="string">"https"</span></span><br><span class="line">      [entryPoints.https]</span><br><span class="line">     <span class="built_in"> address </span>= <span class="string">":443"</span></span><br><span class="line">        [entryPoints.https.tls]</span><br><span class="line">          [[entryPoints.https.tls.certificates]]</span><br><span class="line">          certFile = <span class="string">"/opt/conf/k8s/ssl/kokoerp.crt"</span></span><br><span class="line">          keyFile = <span class="string">"/opt/conf/k8s/ssl/214417797960145.key"</span></span><br><span class="line">    [metrics]</span><br><span class="line">      [metrics.prometheus]</span><br><span class="line">        entryPoint = <span class="string">"traefik"</span></span><br><span class="line">        buckets = [0.1,0.3,1.2,5.0]</span><br><span class="line">    [backends]</span><br><span class="line">      [backends.backend1]</span><br><span class="line">        # <span class="builtin-name">Enable</span> sticky session</span><br><span class="line">        [backends.backend1.loadbalancer.stickiness]</span><br><span class="line">kind: ConfigMap</span><br><span class="line">metadata:</span><br><span class="line">  creationTimestamp: 2018-10-18T07:58:57Z</span><br><span class="line">  name: traefik-conf</span><br><span class="line">  namespace: kube-system</span><br></pre></td></tr></table></figure></p>
+<p>第二种：在需要添加session sticky功能的service资源上添加注解如下:</p>
+<figure class="highlight less"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">annotations</span>:</span><br><span class="line">  traefik.ingress.kubernetes.io/<span class="attribute">affinity</span>: <span class="string">"true"</span></span><br><span class="line">  # 可选，可以自定义</span><br><span class="line">  traefik.ingress.kubernetes.io/<span class="attribute">session-cookie-name</span>: backend</span><br></pre></td></tr></table></figure>
+<p>完成添加注解配置后即可实现该svc绑定的ingress的域名的session sticky功能。</p>
+<p><strong>这里使用prometheus举例</strong><br>将prometheus的deployment的replicas设置数量为2，生成两个pod后端实例：<br><img src="http://mycloudn.kokoerp.com/20190124090246398.png" alt="在这里插入图片描述"><br>在prometheus的service上添加上方列出的annotation注解后，浏览器访问prometheus，即可看到traefik会为会话添加cookies，key为刚指定的值backend，value默认为后端pod实例：<br><img src="http://mycloudn.kokoerp.com/20190124085932914.png" alt="在这里插入图片描述"><br>重复刷新，backend值不会改变，手动清除此cookies后，再次刷新：<br><img src="http://mycloudn.kokoerp.com/20190124090409924.png" alt="在这里插入图片描述"></p>
+<h4 id="session-sticky配置完成"><a href="#session-sticky配置完成" class="headerlink" title="session sticky配置完成"></a>session sticky配置完成</h4><p>更为详细的会话滞黏配置说明请参考官方文档：<br><a href="https://docs.traefik.io/basics/#sticky-sessions" target="_blank" rel="noopener">配置文件</a><br><a href="https://docs.traefik.io/configuration/backends/kubernetes/#global-default-backend-ingresses" target="_blank" rel="noopener">Service注解</a></p>
+<hr>
+<h4 id="11-10补充"><a href="#11-10补充" class="headerlink" title="11.10补充"></a>11.10补充</h4><h4 id="prometheus-traefik-监控"><a href="#prometheus-traefik-监控" class="headerlink" title="prometheus + traefik 监控"></a>prometheus + traefik 监控</h4><p>traefik配置添加metric段:</p>
+<figure class="highlight lsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[metrics]</span><br><span class="line">  [metrics.prometheus]</span><br><span class="line">    entryPoint = <span class="string">"traefik"</span></span><br><span class="line">    buckets = [<span class="number">0.1</span>,<span class="number">0.3</span>,<span class="number">1.2</span>,<span class="number">5.0</span>]</span><br></pre></td></tr></table></figure>
+<p>更新configmap后重启traefik-ingress-lb容器.</p>
+<p>在prometheus中添加job:</p>
+<figure class="highlight haml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">-<span class="ruby"> <span class="symbol">job_name:</span> <span class="string">'traefik'</span></span></span><br><span class="line"><span class="ruby">  <span class="symbol">scrape_interval:</span> <span class="number">5</span>s</span></span><br><span class="line"><span class="ruby">  <span class="symbol">static_configs:</span> </span></span><br><span class="line"><span class="ruby">    - <span class="symbol">targets:</span> [<span class="string">'traefik-ui'</span>]  <span class="comment">#填服务名或任意node IP+指定ui端口</span></span></span><br></pre></td></tr></table></figure>
+<p>更新configmap后重启prometheus容器.</p>
+<p>在prometheus-target中可以看到新job的状态:<br><img src="http://mycloudn.kokoerp.com/20181110161536188.png" alt="在这里插入图片描述"></p>
+<p>在grafana中导入id为2870的模板,新版本的traefik metrics名称发生了一些小变化,因此默认模板获取不到数据,需自行对照job target详情页修改一下模板,熟悉prometheus和grafana的话也可以进行一些自定义修改::<br><img src="http://mycloudn.kokoerp.com/20181110161734543.png" alt="在这里插入图片描述"></p>
+<p>Prometheus/grafana相关知识及使用可以参考专栏内的其他文章</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>k8s的各种功能组件、名词概念、资源类型（pod/svc/ds/rs/ingress/configmap/role….）、工作流程  等颇为复杂，理解起来不太容易，需要花时间阅读官方文档，因为k8s更新很快，有一些新功能或者即将淘汰的旧功能，官方的中文文档更新不太及时，建议直接阅读英文文档。</p>
+<p>另外这里为了方便展示，用的windows查看效果，用linux curl工具测试是一样的，且网络的限制，使用的是vmware的NAT，需要多配置一步物理机网络到vm网络之间打通，再使用静态路由让k8s内部集群网络进行通信。有时间回家里电脑尝试下GNS3模拟路由器，搭建外部bgp，发布到集群bgp内部。</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div id="reward-container">
+  <div>Thank you for your accept. mua！</div>
+  <button id="reward-button" disable="enable" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+
+    
+      
+      
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/reward/wechatpay.png" alt="丨ywq丨 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+      
+      
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/reward/alipay.png" alt="丨ywq丨 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        
+
+
+
+
+  
+
+
+
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>丨ywq丨</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    
+    <a href="https://www.ipyker.com/2018/04/10/k8s（二）、web服务(Traefik部署_https_session sticky使用).html" title="k8s（二）、对外服务(Traefik部署/https/session sticky使用)">https://www.ipyker.com/2018/04/10/k8s（二）、web服务(Traefik部署_https_session sticky使用).html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li>
+</ul>
+
+      </div>
+    
+    <div>
+      
+        <div>
+    
+        <div style="text-align:center;color: #ccc;font-size:16px;">-------------本文结束<i class="fa fa-heart"></i>感谢您的阅读-------------</div>
+    
+</div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Kubernetes/" rel="tag"><i class="fa fa-tag"></i> Kubernetes</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/04/08/k8s（一）、1.9.0高可用集群本地离线部署记录.html" rel="next" title="k8s（一）、 1.9.0高可用集群本地离线部署记录">
+                <i class="fa fa-chevron-left"></i> k8s（一）、 1.9.0高可用集群本地离线部署记录
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/04/27/docker、k8s常用命令速查及k8s restful api接口.html" rel="prev" title="docker、k8s常用命令速查及k8s restful api接口">
+                docker、k8s常用命令速查及k8s restful api接口 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC80NDM5Mi8yMDkyNA=="></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="丨ywq丨">
+            
+              <p class="site-author-name" itemprop="name">丨ywq丨</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives">
+                
+                    <span class="site-state-item-count">74</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                      <a href="/tags">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">15</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/yinwenqin" title="GitHub &rarr; https://github.com/yinwenqin" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://blog.csdn.net/ywq935" title="CSDN &rarr; https://blog.csdn.net/ywq935" rel="noopener" target="_blank"><i class="fa fa-fw fa-globe"></i>CSDN</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-book"></i>
+                推荐阅读
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.upweto.top/gitbooks/useKubernetes/" title="http://blog.upweto.top/gitbooks/useKubernetes/" rel="noopener" target="_blank">kubernetes使用指南</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.upweto.top/gitbooks/kubeSourceCodeNote/" title="http://blog.upweto.top/gitbooks/kubeSourceCodeNote/" rel="noopener" target="_blank">kubernetes源码笔记</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#一、k8s对外暴露服务方式介绍"><span class="nav-number">2.</span> <span class="nav-text">一、k8s对外暴露服务方式介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Load-Blance"><span class="nav-number">2.1.</span> <span class="nav-text">1.Load Blance</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Nodeport"><span class="nav-number">2.2.</span> <span class="nav-text">2.Nodeport</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-Ingress"><span class="nav-number">2.3.</span> <span class="nav-text">3.Ingress</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-reverse-proxy-LB"><span class="nav-number">2.3.1.</span> <span class="nav-text">1.reverse proxy LB</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-ingress-controller"><span class="nav-number">2.3.2.</span> <span class="nav-text">2.ingress controller</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-k8s-ingress"><span class="nav-number">2.3.3.</span> <span class="nav-text">3.k8s ingress</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#二、服务部署"><span class="nav-number">3.</span> <span class="nav-text">二、服务部署</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#三、网络配置"><span class="nav-number">4.</span> <span class="nav-text">三、网络配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#四、traefik部署"><span class="nav-number">5.</span> <span class="nav-text">四、traefik部署</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#开启https"><span class="nav-number">6.</span> <span class="nav-text">开启https</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#开启session-sticky"><span class="nav-number">7.</span> <span class="nav-text">开启session sticky</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#session-sticky配置完成"><span class="nav-number">7.0.1.</span> <span class="nav-text">session sticky配置完成</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#11-10补充"><span class="nav-number">7.0.2.</span> <span class="nav-text">11.10补充</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#prometheus-traefik-监控"><span class="nav-number">7.0.3.</span> <span class="nav-text">prometheus + traefik 监控</span></a></li></ol></li></ol><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">8.</span> <span class="nav-text">总结</span></a></li></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" style=" text-align:center;">&copy; 2017 – <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ywq</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"> 站点字数合计:</i>
+    </span>
+    
+    <span title="站点总字数">583k</span>
+  
+  
+</div>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+<div class="run_time" style=" text-align:center;">
+  <span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
+  <script>
+    var now = new Date(); 
+    function createtime() { 
+        var grt= new Date("08/23/2018 10:00:00");//此处修改你的建站时间或者网站上线时间 
+        now.setTime(now.getTime()+250); 
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days); 
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours); 
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum); 
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;} 
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum); 
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;} 
+        document.getElementById("timeDate").innerHTML = "本站已安全运行 "+dnum+" 天 "; 
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒"; 
+    } 
+    setInterval("createtime()",250);
+  </script>
+</div>
+
+        
+<div class="busuanzi-count" style=" text-align:center;">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-user"></i>
+    </span>
+    <span class="site-uv" title="总访客量">
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span> 人
+    </span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+  
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-eye"></i>
+    </span>
+    <span class="site-pv" title="总访问量">
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span> 次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+  
+    
+    
+      
+    
+  
+  <script color="black" opacity="0.7" zindex="-1" count="140" src="//cdn.jsdelivr.net/gh/theme-next/theme-next-canvas-nest@1.0.0/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+  
+  
+  <script id="ribbon" size="300" alpha="0.1" zindex="-1" src="/lib/canvas-ribbon/canvas-ribbon.js"></script>
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/fancybox/source/jquery.fancybox.pack.js"></script>
+
+
+  
+
+
+  <script src="/js/utils.js?v=7.1.1"></script>
+
+  <script src="/js/motion.js?v=7.1.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/schemes/muse.js?v=7.1.1"></script>
+
+
+
+
+  
+  <script src="/js/scrollspy.js?v=7.1.1"></script>
+<script src="/js/post-details.js?v=7.1.1"></script>
+
+
+
+  
+
+
+  <script src="/js/next-boot.js?v=7.1.1"></script>
+
+
+  
+
+  
+
+  
+  
+  
+
+  
+
+  
+  
+  
+
+
+  
+
+
+  
+    <script>
+  window.livereOptions = {
+    refer: '2018/04/10/k8s（二）、web服务(Traefik部署_https_session sticky使用).html'
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+</script>
+
+  
+
+
+  
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url).replace(/\/{2,}/g, '/');
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x"></i></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x"></i></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+  
+  <script src="/lib/bookmark/bookmark.min.js?v=1.0"></script>
+  <script>
+  
+    bookmark.scrollToMark('auto', "#更多");
+  
+  </script>
+
+
+  
+
+  
+
+  
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/koharu.model.json"},"display":{"position":"left","width":250,"height":500},"mobile":{"show":false},"react":{"opacity":0.7},"log":false});</script></body>
+</html>
+<!-- 页面点击小红心 -->
+<script type="text/javascript" src="/js/src/clicklove.js"></script>

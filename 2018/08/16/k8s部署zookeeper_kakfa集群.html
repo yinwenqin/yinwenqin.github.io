@@ -1,0 +1,1547 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-CN">
+
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link rel="stylesheet" href="/lib/pace/pace-theme-bounce.min.css?v=1.0.2">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link rel="stylesheet" href="/lib/fancybox/source/jquery.fancybox.css">
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+    
+      
+    
+
+    
+  
+
+  
+
+  
+
+  
+    
+      
+    
+
+    
+  
+
+  
+    
+    
+    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic|Roboto Slab:300,300italic,400,400italic,700,700italic|Roboto Mono:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext">
+  
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.1.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.1.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.1.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.1.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.1.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '7.1.1',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":true,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: true,
+    fancybox: true,
+    fastclick: true,
+    lazyload: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"shrinkIn","post_header":"slideLeftIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideDownIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <script>
+  (function(i,s,o,g,r,a,m){i["DaoVoiceObject"]=r;i[r]=i[r]||function(){(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;a.charset="utf-8";m.parentNode.insertBefore(a,m)})(window,document,"script",('https:' == document.location.protocol ? 'https:' : 'http:') + "//widget.daovoice.io/widget/0f81ff2f.js","daovoice")
+  daovoice('init', {
+      app_id: "bd399fce"
+    });
+  daovoice('update');
+  </script>
+
+  <meta name="description" content="一、部署ZK集群问题：在制作好zk的docker镜像后，测试docker直接运行起3个实例，zk集群选举建立都是正常的，但是，通过k8s部署后，发现zk集群选举无论如何都不能成功，各种google都无法解决，弃用自制镜像，改用docker官方的镜像，问题依旧。最终通过headless service这一方式完美解决，在此记录一下解决过程。 首先，贴一下manifest.yaml文件，整合成了一个">
+<meta name="keywords" content="Kubernetes">
+<meta property="og:type" content="article">
+<meta property="og:title" content="k8s部署zookeeper&#x2F;kakfa集群">
+<meta property="og:url" content="https://www.ipyker.com/2018/08/16/k8s部署zookeeper_kakfa集群.html">
+<meta property="og:site_name" content="随笔漫谈">
+<meta property="og:description" content="一、部署ZK集群问题：在制作好zk的docker镜像后，测试docker直接运行起3个实例，zk集群选举建立都是正常的，但是，通过k8s部署后，发现zk集群选举无论如何都不能成功，各种google都无法解决，弃用自制镜像，改用docker官方的镜像，问题依旧。最终通过headless service这一方式完美解决，在此记录一下解决过程。 首先，贴一下manifest.yaml文件，整合成了一个">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-11-21T07:48:40.136Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="k8s部署zookeeper&#x2F;kakfa集群">
+<meta name="twitter:description" content="一、部署ZK集群问题：在制作好zk的docker镜像后，测试docker直接运行起3个实例，zk集群选举建立都是正常的，但是，通过k8s部署后，发现zk集群选举无论如何都不能成功，各种google都无法解决，弃用自制镜像，改用docker官方的镜像，问题依旧。最终通过headless service这一方式完美解决，在此记录一下解决过程。 首先，贴一下manifest.yaml文件，整合成了一个">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="随笔漫谈" type="application/atom+xml">
+
+
+
+  
+  
+  <link rel="canonical" href="https://www.ipyker.com/2018/08/16/k8s部署zookeeper_kakfa集群">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>k8s部署zookeeper/kakfa集群 | 随笔漫谈</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+ 
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">随笔漫谈</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-book">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/gitbooks/" rel="section"><i class="menu-item-icon fa fa-fw fa-book"></i> <br>book</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-互动">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/guestbook/" rel="section"><i class="menu-item-icon fa fa-fw fa-comments"></i> <br>互动</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.ipyker.com/2018/08/16/k8s部署zookeeper_kakfa集群.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="丨ywq丨">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随笔漫谈">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">k8s部署zookeeper/kakfa集群
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-08-16 20:28:46" itemprop="dateCreated datePublished" datetime="2018-08-16T20:28:46+08:00">2018-08-16</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-11-21 15:48:40" itemprop="dateModified" datetime="2019-11-21T15:48:40+08:00">2019-11-21</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+            <div class="post-symbolscount">
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">本文字数：</span>
+                
+                <span title="本文字数">18k</span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">17 分钟</span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id><a href="#" class="headerlink" title=" "></a> </h2><h2 id="一、部署ZK集群"><a href="#一、部署ZK集群" class="headerlink" title="一、部署ZK集群"></a>一、部署ZK集群</h2><p><strong>问题：</strong><br>在制作好zk的docker镜像后，测试docker直接运行起3个实例，zk集群选举建立都是正常的，但是，通过k8s部署后，发现zk集群选举无论如何都不能成功，各种google都无法解决，弃用自制镜像，改用docker官方的镜像，问题依旧。最终通过headless service这一方式完美解决，在此记录一下解决过程。</p>
+<p>首先，贴一下manifest.yaml文件，整合成了一个完整的yaml文件，基于官方的zk docker镜像：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Deployment</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">extensions/v1beta1</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">ykszktest-n1</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  replicas:</span> <span class="number">1</span></span><br><span class="line"><span class="attr">  selector:</span></span><br><span class="line"><span class="attr">    matchLabels:</span></span><br><span class="line"><span class="attr">      app:</span> <span class="string">ykszktest-n1</span></span><br><span class="line"><span class="attr">  template:</span></span><br><span class="line"><span class="attr">    metadata:</span></span><br><span class="line"><span class="attr">      labels:</span></span><br><span class="line"><span class="attr">        app:</span> <span class="string">ykszktest-n1</span></span><br><span class="line"><span class="attr">    spec:</span></span><br><span class="line"><span class="attr">      hostname:</span> <span class="string">ykszktest-n1</span></span><br><span class="line"><span class="attr">      volumes:</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">ykszktest-data</span></span><br><span class="line"><span class="attr">          hostPath:</span> </span><br><span class="line"><span class="attr">            path:</span> <span class="string">/data/ykszktest-cluster/ykszktest-data-n1</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">ykszktest-logs</span></span><br><span class="line"><span class="attr">          hostPath:</span> </span><br><span class="line"><span class="attr">            path:</span> <span class="string">/data/ykszktest-cluster/ykszktest-logs-n1</span></span><br><span class="line"><span class="attr">      dnsPolicy:</span> <span class="string">ClusterFirst</span></span><br><span class="line"><span class="attr">      containers:</span></span><br><span class="line"><span class="attr">      - name:</span> <span class="string">ykszktest-n1</span></span><br><span class="line"><span class="attr">        image:</span> <span class="attr">zookeeper:3.4.10</span></span><br><span class="line"><span class="attr">        imagePullPolicy:</span> <span class="string">Always</span></span><br><span class="line"><span class="attr">        volumeMounts:</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">ykszktest-data</span></span><br><span class="line"><span class="attr">          readOnly:</span> <span class="literal">false</span></span><br><span class="line"><span class="attr">          mountPath:</span> <span class="string">"/data/ykszktest-data"</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">ykszktest-logs</span></span><br><span class="line"><span class="attr">          readOnly:</span> <span class="literal">false</span></span><br><span class="line"><span class="attr">          mountPath:</span> <span class="string">"/data/ykszktest-logs"</span></span><br><span class="line"><span class="attr">        ports:</span></span><br><span class="line"><span class="attr">        - containerPort:</span> <span class="number">2181</span></span><br><span class="line"><span class="attr">        - containerPort:</span> <span class="number">2888</span></span><br><span class="line"><span class="attr">        - containerPort:</span> <span class="number">3888</span></span><br><span class="line">        <span class="comment">#command: ['tail', '-f', '/etc/hosts']  </span></span><br><span class="line"><span class="attr">        env:</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">ZOO_MY_ID</span></span><br><span class="line"><span class="attr">          value:</span> <span class="string">"1"</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">ZOO_SERVERS</span></span><br><span class="line"><span class="attr">          value:</span> <span class="string">server.1=ykszktest-n1:2888:3888</span> <span class="string">server.2=ykszktest-n2:2888:3888</span> <span class="string">server.3=ykszktest-n3:2888:3888</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">ZOO_DATA_DIR</span></span><br><span class="line"><span class="attr">          value:</span> <span class="string">'/data/ykszktest-data'</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">ZOO_DATA_LOG_DIR</span></span><br><span class="line"><span class="attr">          value:</span> <span class="string">'/data/ykszktest-logs'</span>  </span><br><span class="line"></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Deployment</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">extensions/v1beta1</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">ykszktest-n2</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  replicas:</span> <span class="number">1</span></span><br><span class="line"><span class="attr">  selector:</span></span><br><span class="line"><span class="attr">    matchLabels:</span></span><br><span class="line"><span class="attr">      app:</span> <span class="string">ykszktest-n2</span></span><br><span class="line"><span class="attr">  template:</span></span><br><span class="line"><span class="attr">    metadata:</span></span><br><span class="line"><span class="attr">      labels:</span></span><br><span class="line"><span class="attr">        app:</span> <span class="string">ykszktest-n2</span></span><br><span class="line"><span class="attr">    spec:</span></span><br><span class="line"><span class="attr">      hostname:</span> <span class="string">ykszktest-n2</span></span><br><span class="line"><span class="attr">      volumes:</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">ykszktest-data</span></span><br><span class="line"><span class="attr">          hostPath:</span> </span><br><span class="line"><span class="attr">            path:</span> <span class="string">/data/ykszktest-cluster/ykszktest-data-n2</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">ykszktest-logs</span></span><br><span class="line"><span class="attr">          hostPath:</span> </span><br><span class="line"><span class="attr">            path:</span> <span class="string">/data/ykszktest-cluster/ykszktest-logs-n2</span></span><br><span class="line"><span class="attr">      dnsPolicy:</span> <span class="string">ClusterFirst</span></span><br><span class="line"><span class="attr">      containers:</span></span><br><span class="line"><span class="attr">      - name:</span> <span class="string">ykszktest-n2</span></span><br><span class="line"><span class="attr">        image:</span> <span class="attr">zookeeper:3.4.10</span></span><br><span class="line"><span class="attr">        imagePullPolicy:</span> <span class="string">Always</span></span><br><span class="line"><span class="attr">        volumeMounts:</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">ykszktest-data</span></span><br><span class="line"><span class="attr">          readOnly:</span> <span class="literal">false</span></span><br><span class="line"><span class="attr">          mountPath:</span> <span class="string">"/data/ykszktest-data"</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">ykszktest-logs</span></span><br><span class="line"><span class="attr">          readOnly:</span> <span class="literal">false</span></span><br><span class="line"><span class="attr">          mountPath:</span> <span class="string">"/data/ykszktest-logs"</span></span><br><span class="line"><span class="attr">        ports:</span></span><br><span class="line"><span class="attr">        - containerPort:</span> <span class="number">2181</span></span><br><span class="line"><span class="attr">        - containerPort:</span> <span class="number">2888</span></span><br><span class="line"><span class="attr">        - containerPort:</span> <span class="number">3888</span></span><br><span class="line">        <span class="comment">#command: ['tail', '-f', '/etc/hosts']  </span></span><br><span class="line"><span class="attr">        env:</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">ZOO_MY_ID</span></span><br><span class="line"><span class="attr">          value:</span> <span class="string">"2"</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">ZOO_SERVERS</span></span><br><span class="line"><span class="attr">          value:</span> <span class="string">server.1=ykszktest-n1:2888:3888</span> <span class="string">server.2=ykszktest-n2:2888:3888</span> <span class="string">server.3=ykszktest-n3:2888:3888</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">ZOO_DATA_DIR</span></span><br><span class="line"><span class="attr">          value:</span> <span class="string">'/data/ykszktest-data'</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">ZOO_DATA_LOG_DIR</span></span><br><span class="line"><span class="attr">          value:</span> <span class="string">'/data/ykszktest-logs'</span>  </span><br><span class="line"></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Deployment</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">extensions/v1beta1</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">ykszktest-n3</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  replicas:</span> <span class="number">1</span></span><br><span class="line"><span class="attr">  selector:</span></span><br><span class="line"><span class="attr">    matchLabels:</span></span><br><span class="line"><span class="attr">      app:</span> <span class="string">ykszktest-n3</span></span><br><span class="line"><span class="attr">  template:</span></span><br><span class="line"><span class="attr">    metadata:</span></span><br><span class="line"><span class="attr">      labels:</span></span><br><span class="line"><span class="attr">        app:</span> <span class="string">ykszktest-n3</span></span><br><span class="line"><span class="attr">    spec:</span></span><br><span class="line"><span class="attr">      hostname:</span> <span class="string">ykszktest-n3</span></span><br><span class="line"><span class="attr">      volumes:</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">ykszktest-data</span></span><br><span class="line"><span class="attr">          hostPath:</span> </span><br><span class="line"><span class="attr">            path:</span> <span class="string">/data/ykszktest-cluster/ykszktest-data-n3</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">ykszktest-logs</span></span><br><span class="line"><span class="attr">          hostPath:</span> </span><br><span class="line"><span class="attr">            path:</span> <span class="string">/data/ykszktest-cluster/ykszktest-logs-n3</span></span><br><span class="line"><span class="attr">      dnsPolicy:</span> <span class="string">ClusterFirst</span></span><br><span class="line"><span class="attr">      containers:</span></span><br><span class="line"><span class="attr">      - name:</span> <span class="string">ykszktest-n3</span></span><br><span class="line"><span class="attr">        image:</span> <span class="attr">zookeeper:3.4.10</span></span><br><span class="line"><span class="attr">        imagePullPolicy:</span> <span class="string">Always</span></span><br><span class="line"><span class="attr">        volumeMounts:</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">ykszktest-data</span></span><br><span class="line"><span class="attr">          readOnly:</span> <span class="literal">false</span></span><br><span class="line"><span class="attr">          mountPath:</span> <span class="string">"/data/ykszktest-data"</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">ykszktest-logs</span></span><br><span class="line"><span class="attr">          readOnly:</span> <span class="literal">false</span></span><br><span class="line"><span class="attr">          mountPath:</span> <span class="string">"/data/ykszktest-logs"</span></span><br><span class="line"><span class="attr">        ports:</span></span><br><span class="line"><span class="attr">        - containerPort:</span> <span class="number">2181</span></span><br><span class="line"><span class="attr">        - containerPort:</span> <span class="number">2888</span></span><br><span class="line"><span class="attr">        - containerPort:</span> <span class="number">3888</span></span><br><span class="line">        <span class="comment">#command: ['tail', '-f', '/etc/hosts']  </span></span><br><span class="line"><span class="attr">        env:</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">ZOO_MY_ID</span></span><br><span class="line"><span class="attr">          value:</span> <span class="string">"3"</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">ZOO_SERVERS</span></span><br><span class="line"><span class="attr">          value:</span> <span class="string">server.1=ykszktest-n1:2888:3888</span> <span class="string">server.2=ykszktest-n2:2888:3888</span> <span class="string">server.3=ykszktest-n3:2888:3888</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">ZOO_DATA_DIR</span></span><br><span class="line"><span class="attr">          value:</span> <span class="string">'/data/ykszktest-data'</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">ZOO_DATA_LOG_DIR</span></span><br><span class="line"><span class="attr">          value:</span> <span class="string">'/data/ykszktest-logs'</span> </span><br><span class="line"></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Service</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  labels:</span></span><br><span class="line"><span class="attr">    app:</span> <span class="string">ykszktest-n1</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">ykszktest-n1</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">default</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  ports:</span></span><br><span class="line"><span class="attr">  - port:</span> <span class="number">2181</span></span><br><span class="line"><span class="attr">    protocol:</span> <span class="string">TCP</span></span><br><span class="line"><span class="attr">    targetPort:</span> <span class="number">2181</span></span><br><span class="line"><span class="attr">    name:</span> <span class="string">client</span></span><br><span class="line"><span class="attr">  - port:</span> <span class="number">2888</span></span><br><span class="line"><span class="attr">    protocol:</span> <span class="string">TCP</span></span><br><span class="line"><span class="attr">    targetPort:</span> <span class="number">2888</span></span><br><span class="line"><span class="attr">    name:</span> <span class="string">leader</span></span><br><span class="line"><span class="attr">  - port:</span> <span class="number">3888</span></span><br><span class="line"><span class="attr">    protocol:</span> <span class="string">TCP</span></span><br><span class="line"><span class="attr">    targetPort:</span> <span class="number">3888</span></span><br><span class="line"><span class="attr">    name:</span> <span class="string">leader-election</span></span><br><span class="line"><span class="attr">  selector:</span></span><br><span class="line"><span class="attr">    app:</span> <span class="string">ykszktest-n1</span></span><br><span class="line"><span class="attr">  sessionAffinity:</span> <span class="string">None</span></span><br><span class="line"><span class="attr">  type:</span> <span class="string">ClusterIP</span></span><br><span class="line"></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Service</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  labels:</span></span><br><span class="line"><span class="attr">    app:</span> <span class="string">ykszktest-n2</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">ykszktest-n2</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">default</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  ports:</span></span><br><span class="line"><span class="attr">  - port:</span> <span class="number">2181</span></span><br><span class="line"><span class="attr">    protocol:</span> <span class="string">TCP</span></span><br><span class="line"><span class="attr">    targetPort:</span> <span class="number">2181</span></span><br><span class="line"><span class="attr">    name:</span> <span class="string">client</span></span><br><span class="line"><span class="attr">  - port:</span> <span class="number">2888</span></span><br><span class="line"><span class="attr">    protocol:</span> <span class="string">TCP</span></span><br><span class="line"><span class="attr">    targetPort:</span> <span class="number">2888</span></span><br><span class="line"><span class="attr">    name:</span> <span class="string">leader</span></span><br><span class="line"><span class="attr">  - port:</span> <span class="number">3888</span></span><br><span class="line"><span class="attr">    protocol:</span> <span class="string">TCP</span></span><br><span class="line"><span class="attr">    targetPort:</span> <span class="number">3888</span></span><br><span class="line"><span class="attr">    name:</span> <span class="string">leader-election</span></span><br><span class="line"><span class="attr">  selector:</span></span><br><span class="line"><span class="attr">    app:</span> <span class="string">ykszktest-n2</span></span><br><span class="line"><span class="attr">  sessionAffinity:</span> <span class="string">None</span></span><br><span class="line"><span class="attr">  type:</span> <span class="string">ClusterIP</span></span><br><span class="line"></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Service</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  labels:</span></span><br><span class="line"><span class="attr">    app:</span> <span class="string">ykszktest-n3</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">ykszktest-n3</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">default</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  ports:</span></span><br><span class="line"><span class="attr">  - port:</span> <span class="number">2181</span></span><br><span class="line"><span class="attr">    protocol:</span> <span class="string">TCP</span></span><br><span class="line"><span class="attr">    targetPort:</span> <span class="number">2181</span></span><br><span class="line"><span class="attr">    name:</span> <span class="string">client</span></span><br><span class="line"><span class="attr">  - port:</span> <span class="number">2888</span></span><br><span class="line"><span class="attr">    protocol:</span> <span class="string">TCP</span></span><br><span class="line"><span class="attr">    targetPort:</span> <span class="number">2888</span></span><br><span class="line"><span class="attr">    name:</span> <span class="string">leader</span></span><br><span class="line"><span class="attr">  - port:</span> <span class="number">3888</span></span><br><span class="line"><span class="attr">    protocol:</span> <span class="string">TCP</span></span><br><span class="line"><span class="attr">    targetPort:</span> <span class="number">3888</span></span><br><span class="line"><span class="attr">    name:</span> <span class="string">leader-election</span></span><br><span class="line"><span class="attr">  selector:</span></span><br><span class="line"><span class="attr">    app:</span> <span class="string">ykszktest-n3</span></span><br><span class="line"><span class="attr">  sessionAffinity:</span> <span class="string">None</span></span><br><span class="line"><span class="attr">  type:</span> <span class="string">ClusterIP</span></span><br></pre></td></tr></table></figure>
+<p>报错1：</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Socket<span class="built_in"> connection </span>established <span class="keyword">to</span> localhost/127.0.0.1:2181, initiating session ClientCnxn<span class="variable">$SendThread</span>@1158] - Unable <span class="keyword">to</span> read additional data <span class="keyword">from</span><span class="built_in"> server </span>sessionid 0x0, likely<span class="built_in"> server </span>has closed socket, closing socket conn</span><br></pre></td></tr></table></figure>
+<p>原因：zk peer不通，查看发现是svc未关联上endpoint，导致流量无法到达zk peer。</p>
+<p>报错2：<br><figure class="highlight less"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">2018-08-16</span> <span class="selector-tag">11</span><span class="selector-pseudo">:46</span><span class="selector-pseudo">:38</span>,<span class="selector-tag">158</span> <span class="selector-attr">[myid:2]</span> <span class="selector-tag">-</span> <span class="selector-tag">WARN</span>  <span class="selector-attr">[SendWorker:1:QuorumCnxManager$SendWorker@732]</span> <span class="selector-tag">-</span> <span class="selector-tag">Exception</span> <span class="keyword">when</span> using <span class="attribute">channel</span>: for id <span class="number">1</span> my id = <span class="number">2</span> error = java.net.<span class="attribute">SocketException</span>: Broken pipe</span><br><span class="line"><span class="number">2018</span>-<span class="number">08</span>-<span class="number">16</span> <span class="number">11</span>:<span class="number">46</span>:<span class="number">38</span>,<span class="number">159</span> [<span class="attribute">myid</span>:<span class="number">2</span>] - WARN  [<span class="attribute">RecvWorker</span>:<span class="number">1</span>:QuorumCnxManager$RecvWorker<span class="variable">@813</span>] - Interrupting SendWorker</span><br><span class="line"><span class="number">2018</span>-<span class="number">08</span>-<span class="number">16</span> <span class="number">11</span>:<span class="number">46</span>:<span class="number">38</span>,<span class="number">166</span> [<span class="attribute">myid</span>:<span class="number">2</span>] - WARN  [<span class="attribute">SendWorker</span>:<span class="number">1</span>:QuorumCnxManager$SendWorker<span class="variable">@736</span>] - Send worker leaving thread</span><br><span class="line"><span class="number">2018</span>-<span class="number">08</span>-<span class="number">16</span> <span class="number">11</span>:<span class="number">47</span>:<span class="number">38</span>,<span class="number">157</span> [<span class="attribute">myid</span>:<span class="number">2</span>] - INFO  [QuorumPeer[myid=<span class="number">2</span>]/<span class="number">0.0</span>.<span class="number">0.0</span>:<span class="number">2181</span>:FastLeaderElection<span class="variable">@852</span>] - Notification time <span class="attribute">out</span>: <span class="number">60000</span></span><br><span class="line"><span class="number">2018</span>-<span class="number">08</span>-<span class="number">16</span> <span class="number">11</span>:<span class="number">47</span>:<span class="number">38</span>,<span class="number">260</span> [<span class="attribute">myid</span>:<span class="number">2</span>] - WARN  [<span class="attribute">RecvWorker</span>:<span class="number">1</span>:QuorumCnxManager$RecvWorker<span class="variable">@810</span>] - Connection broken for id <span class="number">1</span>, my id = <span class="number">2</span>, error = </span><br><span class="line">java.io.EOFException</span><br></pre></td></tr></table></figure></p>
+<p>google出来通常的排查思路：<br>1.检查myid内的序号与本地的server.{ID}是否匹配<br>2.检查data目录是否有权限，是否正常生成pid文件<br>3.将本地对应的service.{ID}的IP配置为0.0.0.0<br>4./etc/hosts修改本地dns 条目localhost指向0.0.0.0</p>
+<p>以上方法全部无效。</p>
+<p>测试发现，如果直接以docker的形式运行，并配置好相应的环境变量后，依次启动zk服务，选举很快就完成，集群建立成功，为什么用k8s部署就会出现<strong>net.SocketException</strong>的报错呢，若为网络问题，可是在pod内通过svc ClusterIP检查zk peer的工作端口、选举端口、leader端口都是通的，难道是因为zk的选举交互过程不能使用经过kube-proxy转换过的svc IP而必须使用pod的local IP？</p>
+<p>抱着以上猜测，手动将zoo.cfg内的配置文件的server实例的名称从svc-name改成了当前的POD IP，其余保持不变：</p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">###修改前</span></span><br><span class="line"><span class="attr">tickTime</span>=<span class="number">2000</span></span><br><span class="line"><span class="attr">initLimit</span>=<span class="number">10</span></span><br><span class="line"><span class="attr">syncLimit</span>=<span class="number">5</span></span><br><span class="line"><span class="attr">dataDir</span>=/opt/zookeeper-<span class="number">3.4</span>.<span class="number">9</span>/data</span><br><span class="line"><span class="attr">clientPort</span>=<span class="number">2181</span></span><br><span class="line"><span class="attr">server.1</span>=ykszktest-n1:<span class="number">2888</span>:<span class="number">3888</span></span><br><span class="line"><span class="attr">server.2</span>=ykszktest-n1:<span class="number">2888</span>:<span class="number">3888</span></span><br><span class="line"><span class="attr">server.3</span>=ykszktest-n1:<span class="number">2888</span>:<span class="number">3888</span></span><br><span class="line"></span><br><span class="line"><span class="comment">###修改后</span></span><br><span class="line"><span class="attr">tickTime</span>=<span class="number">2000</span></span><br><span class="line"><span class="attr">initLimit</span>=<span class="number">10</span></span><br><span class="line"><span class="attr">syncLimit</span>=<span class="number">5</span></span><br><span class="line"><span class="attr">dataDir</span>=/opt/zookeeper-<span class="number">3.4</span>.<span class="number">9</span>/data</span><br><span class="line"><span class="attr">clientPort</span>=<span class="number">2181</span></span><br><span class="line"><span class="attr">server.1</span>=<span class="number">10.100</span>.<span class="number">2.65</span>:<span class="number">2888</span>:<span class="number">3888</span></span><br><span class="line"><span class="attr">server.2</span>=<span class="number">10.100</span>.<span class="number">0.71</span>:<span class="number">2888</span>:<span class="number">3888</span></span><br><span class="line"><span class="attr">server.3</span>=<span class="number">10.100</span>.<span class="number">0.70</span>:<span class="number">2888</span>:<span class="number">3888</span></span><br></pre></td></tr></table></figure>
+<p>再次重启zk服务，果然，选举完成，zk集群建立成功。</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">~/mytest/zk# kubectl exec -it ykszktest-n2-566c5cd4db-zhvvr bash</span><br><span class="line"></span><br><span class="line">bash-4.3# bin/zkServer.sh status</span><br><span class="line">ZooKeeper JMX enabled by default</span><br><span class="line">Using config: /conf/zoo.cfg</span><br><span class="line">Mode: follower</span><br></pre></td></tr></table></figure>
+<p><strong>思考：</strong><br>svc的意义本身是为了防止Pod IP变化带来的不稳定性，因此通过svc在控制层面以标签的形式，在数据层面以ipvs (新版) | iptables (旧版)的形式，将流量转发给endpoint pod实例，以实现服务依赖对于pod IP的解耦，但是如果zk的集群建立只能以pod IP的方式进行，那将带来诸多不确定性与不稳定的因素。有没有什么办法可以既使用上层的svc，又不经过转换流量直接转发的pod呢？</p>
+<p>答案是有。google了一圈，发现了service的一种独特的工作方式：<strong>headless service</strong><br>配置这种工作方式很简单，将svc的ClusterIP指定为None即可：</p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Service<span class="selector-class">.spec</span><span class="selector-class">.clusterIP</span>: None</span><br></pre></td></tr></table></figure>
+<p>经过这样配置后，kube-proxy只是单纯地转发流量，不再进行转换，同时集群dns的A记录不再指向svc IP，而直接指向后端的pod IP，但endpoints controller仍然会在API中创建Endpoints的记录。当然，不再代理流量的同时，svc的负载均衡的功能也同时失去了。在本处场景下，zk本身就是以集群的方式工作，有自己内部的负载均衡算法，因此也无需svc这一层来做LB.</p>
+<p>修改完成之后的3个svc实例：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Service</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  labels:</span></span><br><span class="line"><span class="attr">    app:</span> <span class="string">ykszktest-n1</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">ykszktest-n1</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">default</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  clusterIP:</span> <span class="string">None</span></span><br><span class="line"><span class="attr">  ports:</span></span><br><span class="line"><span class="attr">  - port:</span> <span class="number">2181</span></span><br><span class="line"><span class="attr">    protocol:</span> <span class="string">TCP</span></span><br><span class="line"><span class="attr">    targetPort:</span> <span class="number">2181</span></span><br><span class="line"><span class="attr">    name:</span> <span class="string">client</span></span><br><span class="line"><span class="attr">  - port:</span> <span class="number">2888</span></span><br><span class="line"><span class="attr">    protocol:</span> <span class="string">TCP</span></span><br><span class="line"><span class="attr">    targetPort:</span> <span class="number">2888</span></span><br><span class="line"><span class="attr">    name:</span> <span class="string">leader</span></span><br><span class="line"><span class="attr">  - port:</span> <span class="number">3888</span></span><br><span class="line"><span class="attr">    protocol:</span> <span class="string">TCP</span></span><br><span class="line"><span class="attr">    targetPort:</span> <span class="number">3888</span></span><br><span class="line"><span class="attr">    name:</span> <span class="string">leader-election</span></span><br><span class="line"><span class="attr">  selector:</span></span><br><span class="line"><span class="attr">    app:</span> <span class="string">ykszktest-n1</span></span><br><span class="line"><span class="attr">  sessionAffinity:</span> <span class="string">None</span></span><br><span class="line"><span class="attr">  type:</span> <span class="string">ClusterIP</span></span><br><span class="line"></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Service</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  labels:</span></span><br><span class="line"><span class="attr">    app:</span> <span class="string">ykszktest-n2</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">ykszktest-n2</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">default</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  clusterIP:</span> <span class="string">None</span></span><br><span class="line"><span class="attr">  ports:</span></span><br><span class="line"><span class="attr">  - port:</span> <span class="number">2181</span></span><br><span class="line"><span class="attr">    protocol:</span> <span class="string">TCP</span></span><br><span class="line"><span class="attr">    targetPort:</span> <span class="number">2181</span></span><br><span class="line"><span class="attr">    name:</span> <span class="string">client</span></span><br><span class="line"><span class="attr">  - port:</span> <span class="number">2888</span></span><br><span class="line"><span class="attr">    protocol:</span> <span class="string">TCP</span></span><br><span class="line"><span class="attr">    targetPort:</span> <span class="number">2888</span></span><br><span class="line"><span class="attr">    name:</span> <span class="string">leader</span></span><br><span class="line"><span class="attr">  - port:</span> <span class="number">3888</span></span><br><span class="line"><span class="attr">    protocol:</span> <span class="string">TCP</span></span><br><span class="line"><span class="attr">    targetPort:</span> <span class="number">3888</span></span><br><span class="line"><span class="attr">    name:</span> <span class="string">leader-election</span></span><br><span class="line"><span class="attr">  selector:</span></span><br><span class="line"><span class="attr">    app:</span> <span class="string">ykszktest-n2</span></span><br><span class="line"><span class="attr">  sessionAffinity:</span> <span class="string">None</span></span><br><span class="line"><span class="attr">  type:</span> <span class="string">ClusterIP</span></span><br><span class="line"></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Service</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  labels:</span></span><br><span class="line"><span class="attr">    app:</span> <span class="string">ykszktest-n3</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">ykszktest-n3</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">default</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  clusterIP:</span> <span class="string">None</span></span><br><span class="line"><span class="attr">  ports:</span></span><br><span class="line"><span class="attr">  - port:</span> <span class="number">2181</span></span><br><span class="line"><span class="attr">    protocol:</span> <span class="string">TCP</span></span><br><span class="line"><span class="attr">    targetPort:</span> <span class="number">2181</span></span><br><span class="line"><span class="attr">    name:</span> <span class="string">client</span></span><br><span class="line"><span class="attr">  - port:</span> <span class="number">2888</span></span><br><span class="line"><span class="attr">    protocol:</span> <span class="string">TCP</span></span><br><span class="line"><span class="attr">    targetPort:</span> <span class="number">2888</span></span><br><span class="line"><span class="attr">    name:</span> <span class="string">leader</span></span><br><span class="line"><span class="attr">  - port:</span> <span class="number">3888</span></span><br><span class="line"><span class="attr">    protocol:</span> <span class="string">TCP</span></span><br><span class="line"><span class="attr">    targetPort:</span> <span class="number">3888</span></span><br><span class="line"><span class="attr">    name:</span> <span class="string">leader-election</span></span><br><span class="line"><span class="attr">  selector:</span></span><br><span class="line"><span class="attr">    app:</span> <span class="string">ykszktest-n3</span></span><br><span class="line"><span class="attr">  sessionAffinity:</span> <span class="string">None</span></span><br><span class="line"><span class="attr">  type:</span> <span class="string">ClusterIP</span></span><br></pre></td></tr></table></figure>
+<p>最后，重新部署yaml文件，进入pod内检查结果，部署成功：</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">bash-4.3# bin/zkServer.sh status</span><br><span class="line">ZooKeeper JMX enabled by default</span><br><span class="line">Using config: /conf/zoo.cfg</span><br><span class="line">Mode: leader</span><br></pre></td></tr></table></figure>
+<h2 id="二、部署kafka集群"><a href="#二、部署kafka集群" class="headerlink" title="二、部署kafka集群"></a>二、部署kafka集群</h2><p>使用star数量最高的镜像<code>wurstmeister/kafka:1.0.1</code>：</p>
+<figure class="highlight elixir"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">root<span class="variable">@yksv001238</span><span class="symbol">:~/test/kafka</span><span class="comment"># docker search kafka</span></span><br><span class="line">NAME                             DESCRIPTION                                     STARS     OFFICIAL   AUTOMATED</span><br><span class="line">wurstmeister/kafka               Multi-Broker Apache Kafka Image                 <span class="number">654</span>                  [OK]</span><br></pre></td></tr></table></figure>
+<p>需要提供的环境变量如下，根据节点修改相应变量:<br><figure class="highlight less"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">env</span>:</span><br><span class="line">  # broker ID,必须要有,各节点不能一致</span><br><span class="line">- <span class="attribute">name</span>: KAFKA_BROKER_ID   </span><br><span class="line">  <span class="attribute">value</span>: <span class="string">"1"</span></span><br><span class="line">  # 必须要有,zk集群</span><br><span class="line">- <span class="attribute">name</span>: KAFKA_ZOOKEEPER_CONNECT</span><br><span class="line">  <span class="attribute">value</span>: <span class="attribute">ykszktest-n1</span>:<span class="number">2181</span>,<span class="attribute">ykszktest-n2</span>:<span class="number">2181</span>,<span class="attribute">ykszktest-n3</span>:<span class="number">2181</span>/kafka</span><br><span class="line">  # 必须要有,kafka工作端口</span><br><span class="line">- <span class="attribute">name</span>: KAFKA_ADVERTISED_PORT</span><br><span class="line">  <span class="attribute">value</span>: <span class="string">"9092"</span></span><br><span class="line">  # 可选</span><br><span class="line">- <span class="attribute">name</span>: KAFKA_ADVERTISED_HOST_NAME</span><br><span class="line">  <span class="attribute">value</span>: ykskafkatest-n1</span><br><span class="line">  # 可选 </span><br><span class="line">- <span class="attribute">name</span>: KAFKA_HEAP_OPTS</span><br><span class="line">  <span class="attribute">value</span>: <span class="string">"-Xmx4G -Xms4G"</span></span><br><span class="line">  # JMX相关，可选</span><br><span class="line">- <span class="attribute">name</span>: KAFKA_JMX_OPTS</span><br><span class="line">  <span class="attribute">value</span>: <span class="string">"-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=127.0.0.1 -Dcom.sun.management.jmxremote.rmi.port=1099"</span></span><br><span class="line">  # JMX相关，可选</span><br><span class="line">- <span class="attribute">name</span>: JMX_PORT</span><br><span class="line">  <span class="attribute">value</span>: <span class="string">"1099"</span></span><br></pre></td></tr></table></figure></p>
+<p>数据和志通过hostpath方式挂载出来。完整manifest yaml文件如下：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br><span class="line">235</span><br><span class="line">236</span><br><span class="line">237</span><br><span class="line">238</span><br><span class="line">239</span><br><span class="line">240</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Deployment</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">extensions/v1beta1</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">ykskafkatest-n1</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  replicas:</span> <span class="number">1</span></span><br><span class="line"><span class="attr">  selector:</span></span><br><span class="line"><span class="attr">    matchLabels:</span></span><br><span class="line"><span class="attr">      app:</span> <span class="string">ykskafkatest-n1</span></span><br><span class="line"><span class="attr">  template:</span></span><br><span class="line"><span class="attr">    metadata:</span></span><br><span class="line"><span class="attr">      labels:</span></span><br><span class="line"><span class="attr">        app:</span> <span class="string">ykskafkatest-n1</span></span><br><span class="line"><span class="attr">    spec:</span></span><br><span class="line"><span class="attr">      hostname:</span> <span class="string">ykskafkatest-n1</span></span><br><span class="line"><span class="attr">      volumes:</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">ykskafkatest-data</span></span><br><span class="line"><span class="attr">          hostPath:</span> </span><br><span class="line"><span class="attr">            path:</span> <span class="string">/data/ykskafkatest-cluster/ykskafkatest-data-n1</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">ykskafkatest-logs</span></span><br><span class="line"><span class="attr">          hostPath:</span> </span><br><span class="line"><span class="attr">            path:</span> <span class="string">/data/ykskafkatest-cluster/ykskafkatest-logs-n1</span></span><br><span class="line"><span class="attr">      dnsPolicy:</span> <span class="string">ClusterFirst</span></span><br><span class="line"><span class="attr">      containers:</span></span><br><span class="line"><span class="attr">      - name:</span> <span class="string">ykskafkatest-n1</span></span><br><span class="line"><span class="attr">        image:</span> <span class="string">wurstmeister/kafka:1.0.1</span></span><br><span class="line"><span class="attr">        imagePullPolicy:</span> <span class="string">Always</span></span><br><span class="line"><span class="attr">        volumeMounts:</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">ykskafkatest-data</span></span><br><span class="line"><span class="attr">          readOnly:</span> <span class="literal">false</span></span><br><span class="line"><span class="attr">          mountPath:</span> <span class="string">"/kafka"</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">ykskafkatest-logs</span></span><br><span class="line"><span class="attr">          readOnly:</span> <span class="literal">false</span></span><br><span class="line"><span class="attr">          mountPath:</span> <span class="string">"/opt/kafka/logs"</span></span><br><span class="line"><span class="attr">        ports:</span></span><br><span class="line"><span class="attr">        - containerPort:</span> <span class="number">9092</span></span><br><span class="line"><span class="attr">        - containerPort:</span> <span class="number">1099</span></span><br><span class="line"><span class="attr">        env:</span></span><br><span class="line">          <span class="comment"># broker ID,必须要有,各节点不能一致</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">KAFKA_BROKER_ID</span></span><br><span class="line"><span class="attr">          value:</span> <span class="string">"1"</span></span><br><span class="line">          <span class="comment"># 必须要有,zk集群</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">KAFKA_ZOOKEEPER_CONNECT</span></span><br><span class="line"><span class="attr">          value:</span> <span class="attr">ykszktest-n1:2181,ykszktest-n2:2181,ykszktest-n3:2181/kafka</span></span><br><span class="line">          <span class="comment"># 必须要有,kafka工作端口</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">KAFKA_ADVERTISED_PORT</span></span><br><span class="line"><span class="attr">          value:</span> <span class="string">"9092"</span></span><br><span class="line">          <span class="comment"># 可选</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">KAFKA_ADVERTISED_HOST_NAME</span></span><br><span class="line"><span class="attr">          value:</span> <span class="string">ykskafkatest-n1</span></span><br><span class="line">          <span class="comment"># 可选 </span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">KAFKA_HEAP_OPTS</span></span><br><span class="line"><span class="attr">          value:</span> <span class="string">"-Xmx4G -Xms4G"</span> </span><br><span class="line">          <span class="comment"># JMX相关，可选</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">KAFKA_JMX_OPTS</span></span><br><span class="line"><span class="attr">          value:</span> <span class="string">"-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=127.0.0.1 -Dcom.sun.management.jmxremote.rmi.port=1099"</span></span><br><span class="line">          <span class="comment"># JMX相关，可选</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">JMX_PORT</span></span><br><span class="line"><span class="attr">          value:</span> <span class="string">"1099"</span></span><br><span class="line"></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Deployment</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">extensions/v1beta1</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">ykskafkatest-n2</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  replicas:</span> <span class="number">1</span></span><br><span class="line"><span class="attr">  selector:</span></span><br><span class="line"><span class="attr">    matchLabels:</span></span><br><span class="line"><span class="attr">      app:</span> <span class="string">ykskafkatest-n2</span></span><br><span class="line"><span class="attr">  template:</span></span><br><span class="line"><span class="attr">    metadata:</span></span><br><span class="line"><span class="attr">      labels:</span></span><br><span class="line"><span class="attr">        app:</span> <span class="string">ykskafkatest-n2</span></span><br><span class="line"><span class="attr">    spec:</span></span><br><span class="line"><span class="attr">      hostname:</span> <span class="string">ykskafkatest-n2</span></span><br><span class="line"><span class="attr">      volumes:</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">ykskafkatest-data</span></span><br><span class="line"><span class="attr">          hostPath:</span> </span><br><span class="line"><span class="attr">            path:</span> <span class="string">/data/ykskafkatest-cluster/ykskafkatest-data-n2</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">ykskafkatest-logs</span></span><br><span class="line"><span class="attr">          hostPath:</span> </span><br><span class="line"><span class="attr">            path:</span> <span class="string">/data/ykskafkatest-cluster/ykskafkatest-logs-n2</span></span><br><span class="line"><span class="attr">      dnsPolicy:</span> <span class="string">ClusterFirst</span></span><br><span class="line"><span class="attr">      containers:</span></span><br><span class="line"><span class="attr">      - name:</span> <span class="string">ykskafkatest-n1</span></span><br><span class="line"><span class="attr">        image:</span> <span class="string">wurstmeister/kafka:1.0.1</span></span><br><span class="line"><span class="attr">        imagePullPolicy:</span> <span class="string">Always</span></span><br><span class="line"><span class="attr">        volumeMounts:</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">ykskafkatest-data</span></span><br><span class="line"><span class="attr">          readOnly:</span> <span class="literal">false</span></span><br><span class="line"><span class="attr">          mountPath:</span> <span class="string">"/kafka"</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">ykskafkatest-logs</span></span><br><span class="line"><span class="attr">          readOnly:</span> <span class="literal">false</span></span><br><span class="line"><span class="attr">          mountPath:</span> <span class="string">"/opt/kafka/logs"</span></span><br><span class="line"><span class="attr">        ports:</span></span><br><span class="line"><span class="attr">        - containerPort:</span> <span class="number">9092</span></span><br><span class="line"><span class="attr">        - containerPort:</span> <span class="number">1099</span></span><br><span class="line"><span class="attr">        env:</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">KAFKA_BROKER_ID</span></span><br><span class="line"><span class="attr">          value:</span> <span class="string">"2"</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">KAFKA_ZOOKEEPER_CONNECT</span></span><br><span class="line"><span class="attr">          value:</span> <span class="attr">ykszktest-n1:2181,ykszktest-n2:2181,ykszktest-n3:2181/kafka</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">KAFKA_ADVERTISED_PORT</span></span><br><span class="line"><span class="attr">          value:</span> <span class="string">"9092"</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">KAFKA_ADVERTISED_HOST_NAME</span></span><br><span class="line"><span class="attr">          value:</span> <span class="string">ykskafkatest-n2</span> </span><br><span class="line"><span class="attr">        - name:</span> <span class="string">KAFKA_HEAP_OPTS</span></span><br><span class="line"><span class="attr">          value:</span> <span class="string">"-Xmx4G -Xms4G"</span> </span><br><span class="line"><span class="attr">        - name:</span> <span class="string">KAFKA_JMX_OPTS</span></span><br><span class="line"><span class="attr">          value:</span> <span class="string">"-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=127.0.0.1 -Dcom.sun.management.jmxremote.rmi.port=1099"</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">JMX_PORT</span></span><br><span class="line"><span class="attr">          value:</span> <span class="string">"1099"</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Deployment</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">extensions/v1beta1</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">ykskafkatest-n3</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  replicas:</span> <span class="number">1</span></span><br><span class="line"><span class="attr">  selector:</span></span><br><span class="line"><span class="attr">    matchLabels:</span></span><br><span class="line"><span class="attr">      app:</span> <span class="string">ykskafkatest-n3</span></span><br><span class="line"><span class="attr">  template:</span></span><br><span class="line"><span class="attr">    metadata:</span></span><br><span class="line"><span class="attr">      labels:</span></span><br><span class="line"><span class="attr">        app:</span> <span class="string">ykskafkatest-n3</span></span><br><span class="line"><span class="attr">    spec:</span></span><br><span class="line"><span class="attr">      hostname:</span> <span class="string">ykskafkatest-n3</span></span><br><span class="line"><span class="attr">      volumes:</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">ykskafkatest-data</span></span><br><span class="line"><span class="attr">          hostPath:</span> </span><br><span class="line"><span class="attr">            path:</span> <span class="string">/data/ykskafkatest-cluster/ykskafkatest-data-n3</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">ykskafkatest-logs</span></span><br><span class="line"><span class="attr">          hostPath:</span> </span><br><span class="line"><span class="attr">            path:</span> <span class="string">/data/ykskafkatest-cluster/ykskafkatest-logs-n3</span></span><br><span class="line"><span class="attr">      dnsPolicy:</span> <span class="string">ClusterFirst</span></span><br><span class="line"><span class="attr">      containers:</span></span><br><span class="line"><span class="attr">      - name:</span> <span class="string">ykskafkatest-n1</span></span><br><span class="line"><span class="attr">        image:</span> <span class="string">wurstmeister/kafka:1.0.1</span></span><br><span class="line"><span class="attr">        imagePullPolicy:</span> <span class="string">Always</span></span><br><span class="line"><span class="attr">        volumeMounts:</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">ykskafkatest-data</span></span><br><span class="line"><span class="attr">          readOnly:</span> <span class="literal">false</span></span><br><span class="line"><span class="attr">          mountPath:</span> <span class="string">"/kafka"</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">ykskafkatest-logs</span></span><br><span class="line"><span class="attr">          readOnly:</span> <span class="literal">false</span></span><br><span class="line"><span class="attr">          mountPath:</span> <span class="string">"/opt/kafka/logs"</span></span><br><span class="line"><span class="attr">        ports:</span></span><br><span class="line"><span class="attr">        - containerPort:</span> <span class="number">9092</span></span><br><span class="line"><span class="attr">        - containerPort:</span> <span class="number">1099</span></span><br><span class="line"><span class="attr">        env:</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">KAFKA_BROKER_ID</span></span><br><span class="line"><span class="attr">          value:</span> <span class="string">"3"</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">KAFKA_ZOOKEEPER_CONNECT</span></span><br><span class="line"><span class="attr">          value:</span> <span class="attr">ykszktest-n1:2181,ykszktest-n2:2181,ykszktest-n3:2181/kafka</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">KAFKA_ADVERTISED_PORT</span></span><br><span class="line"><span class="attr">          value:</span> <span class="string">"9092"</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">KAFKA_ADVERTISED_HOST_NAME</span></span><br><span class="line"><span class="attr">          value:</span> <span class="string">ykskafkatest-n3</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">KAFKA_HEAP_OPTS</span></span><br><span class="line"><span class="attr">          value:</span> <span class="string">"-Xmx4G -Xms4G"</span> </span><br><span class="line"><span class="attr">        - name:</span> <span class="string">KAFKA_JMX_OPTS</span></span><br><span class="line"><span class="attr">          value:</span> <span class="string">"-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=127.0.0.1 -Dcom.sun.management.jmxremote.rmi.port=1099"</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">JMX_PORT</span></span><br><span class="line"><span class="attr">          value:</span> <span class="string">"1099"</span></span><br><span class="line"></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Service</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  labels:</span></span><br><span class="line"><span class="attr">    app:</span> <span class="string">ykskafkatest-n1</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">ykskafkatest-n1</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">default</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  clusterIP:</span> <span class="string">None</span></span><br><span class="line"><span class="attr">  ports:</span></span><br><span class="line"><span class="attr">  - port:</span> <span class="number">9092</span></span><br><span class="line"><span class="attr">    protocol:</span> <span class="string">TCP</span></span><br><span class="line"><span class="attr">    targetPort:</span> <span class="number">9092</span></span><br><span class="line"><span class="attr">    name:</span> <span class="string">kafka</span></span><br><span class="line"><span class="attr">  - port:</span> <span class="number">1099</span></span><br><span class="line"><span class="attr">    protocol:</span> <span class="string">TCP</span></span><br><span class="line"><span class="attr">    targetPort:</span> <span class="number">1099</span></span><br><span class="line"><span class="attr">    name:</span> <span class="string">jmx</span></span><br><span class="line"><span class="attr">  selector:</span></span><br><span class="line"><span class="attr">    app:</span> <span class="string">ykskafkatest-n1</span></span><br><span class="line"><span class="attr">  sessionAffinity:</span> <span class="string">None</span></span><br><span class="line"><span class="attr">  type:</span> <span class="string">ClusterIP</span></span><br><span class="line"></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Service</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  labels:</span></span><br><span class="line"><span class="attr">    app:</span> <span class="string">ykskafkatest-n2</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">ykskafkatest-n2</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">default</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  clusterIP:</span> <span class="string">None</span></span><br><span class="line"><span class="attr">  ports:</span></span><br><span class="line"><span class="attr">  - port:</span> <span class="number">9092</span></span><br><span class="line"><span class="attr">    protocol:</span> <span class="string">TCP</span></span><br><span class="line"><span class="attr">    targetPort:</span> <span class="number">9092</span></span><br><span class="line"><span class="attr">    name:</span> <span class="string">kafka</span></span><br><span class="line"><span class="attr">  - port:</span> <span class="number">1099</span></span><br><span class="line"><span class="attr">    protocol:</span> <span class="string">TCP</span></span><br><span class="line"><span class="attr">    targetPort:</span> <span class="number">1099</span></span><br><span class="line"><span class="attr">    name:</span> <span class="string">jmx</span></span><br><span class="line"><span class="attr">  selector:</span></span><br><span class="line"><span class="attr">    app:</span> <span class="string">ykskafkatest-n2</span></span><br><span class="line"><span class="attr">  sessionAffinity:</span> <span class="string">None</span></span><br><span class="line"><span class="attr">  type:</span> <span class="string">ClusterIP</span></span><br><span class="line"></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Service</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  labels:</span></span><br><span class="line"><span class="attr">    app:</span> <span class="string">ykskafkatest-n3</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">ykskafkatest-n3</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">default</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  clusterIP:</span> <span class="string">None</span></span><br><span class="line"><span class="attr">  selector:</span></span><br><span class="line"><span class="attr">  ports:</span></span><br><span class="line"><span class="attr">  - port:</span> <span class="number">9092</span></span><br><span class="line"><span class="attr">    protocol:</span> <span class="string">TCP</span></span><br><span class="line"><span class="attr">    targetPort:</span> <span class="number">9092</span></span><br><span class="line"><span class="attr">    name:</span> <span class="string">kafka</span></span><br><span class="line"><span class="attr">  - port:</span> <span class="number">1099</span></span><br><span class="line"><span class="attr">    protocol:</span> <span class="string">TCP</span></span><br><span class="line"><span class="attr">    targetPort:</span> <span class="number">1099</span></span><br><span class="line"><span class="attr">    name:</span> <span class="string">jmx</span></span><br><span class="line"><span class="attr">  selector:</span></span><br><span class="line"><span class="attr">    app:</span> <span class="string">ykskafkatest-n3</span></span><br><span class="line"><span class="attr">  sessionAffinity:</span> <span class="string">None</span></span><br><span class="line"><span class="attr">  type:</span> <span class="string">ClusterIP</span></span><br></pre></td></tr></table></figure>
+<p>部署完成后，查看pod状态：</p>
+<figure class="highlight x86asm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="symbol">root@yksv001238:</span>~/<span class="keyword">test</span>/kafka# kubectl get pods -o wide | grep kafka</span><br><span class="line">ykskafkatest-n1-5b78b89fb-srnft       <span class="number">1</span>/<span class="number">1</span>       Running             <span class="number">0</span>          <span class="number">2h</span>        <span class="number">10.100</span><span class="meta">.1</span><span class="meta">.45</span>    yksv001239</span><br><span class="line">ykskafkatest-n2-5f57ccb9c4-9ghsd      <span class="number">1</span>/<span class="number">1</span>       Running             <span class="number">0</span>          <span class="number">2h</span>        <span class="number">10.100</span><span class="meta">.0</span><span class="meta">.93</span>    yksv001238</span><br><span class="line">ykskafkatest-n3-66ccfcbd96-dg2ch      <span class="number">1</span>/<span class="number">1</span>       Running             <span class="number">0</span>          6m        <span class="number">10.100</span><span class="meta">.1</span><span class="meta">.49</span>    yksv001239</span><br></pre></td></tr></table></figure>
+<p>分别进入两台kafka容器内，分别使用消费者/生产者脚本进行测试，能正常生产/消费消息，则kafka集群部署成功：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> n1</span></span><br><span class="line">bash-4.4# kafka-topics.sh --create \</span><br><span class="line"><span class="meta">&gt;</span><span class="bash">  --topic <span class="built_in">test</span> \</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash">  --zookeeper ykszktest-n1:2181,ykszktest-n2:2181,ykszktest-n3:2181/kafka \</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash">  --partitions 3 \</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash">  --replication-factor 2</span></span><br><span class="line">Created topic "test2".</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 在n1 开启生产者，输入数据，可以在消费者端接收到数据</span></span><br><span class="line">bash-4.4# kafka-console-producer.sh --topic test2 --broker-list localhost:9092</span><br><span class="line"><span class="meta">&gt;</span><span class="bash">hello world?</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash">hello world!</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> n2 开启消费者，接收到数据</span></span><br><span class="line">bash-4.4# kafka-console-consumer.sh --topic test2 --bootstrap-server localhost:9092</span><br><span class="line"><span class="meta">&gt;</span><span class="bash">hello world?</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash">hello world!</span></span><br></pre></td></tr></table></figure>
+<p>注意：<br>直接进入容器内运行kafka-console-consumer.sh或者kafka-console-producer.sh会报错：</p>
+<figure class="highlight subunit"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">Error: </span>JMX connector server communication error: service:jmx:rmi://9dcb21ce1644:1099</span><br></pre></td></tr></table></figure>
+<p>这是因为这两个脚本在运行时会执行<code>/opt/kafka_2.12-1.0.1/bin/kafka-run-class.sh</code>脚本，这个脚本在启动时会获取JMX_PORT环境变量并运行一个带有jmx的jvm，这时就会与系统当前的jmx端口冲突，因此，可以使用<code>unset  JMX_PORT</code>取消环境变量解决这个问题。</p>
+<p>详情参考：<br><a href="https://github.com/wurstmeister/kafka-docker/wiki#why-do-kafka-tools-fail-when-jmx-is-enabled" target="_blank" rel="noopener">https://github.com/wurstmeister/kafka-docker/wiki#why-do-kafka-tools-fail-when-jmx-is-enabled</a></p>
+<p><strong>Problem</strong>: Tools such as kafka-topics.sh and kafka-console-producer.sh fail when JMX is enabled. This is caused because of the JMX_PORT environment variable. The Kafka helper script /opt/kafka/bin/kafka-run-class.sh will try to invoke the required command in a new JVM with JMX bound to the specified port. As the broker JVM that is already running in the container has this port bound, the process fails and exits with error.</p>
+<p><strong>Solution</strong>: Although we’d recommend not running operation tools inside of your running brokers, this may sometimes be desirable when performing local development and testing.</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div id="reward-container">
+  <div>Thank you for your accept. mua！</div>
+  <button id="reward-button" disable="enable" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+
+    
+      
+      
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/reward/wechatpay.png" alt="丨ywq丨 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+      
+      
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/reward/alipay.png" alt="丨ywq丨 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        
+
+
+
+
+  
+
+
+
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>丨ywq丨</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    
+    <a href="https://www.ipyker.com/2018/08/16/k8s部署zookeeper_kakfa集群.html" title="k8s部署zookeeper/kakfa集群">https://www.ipyker.com/2018/08/16/k8s部署zookeeper_kakfa集群.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li>
+</ul>
+
+      </div>
+    
+    <div>
+      
+        <div>
+    
+        <div style="text-align:center;color: #ccc;font-size:16px;">-------------本文结束<i class="fa fa-heart"></i>感谢您的阅读-------------</div>
+    
+</div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Kubernetes/" rel="tag"><i class="fa fa-tag"></i> Kubernetes</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/08/02/k8s(十)、微服务--istio1.0抢鲜测试.html" rel="next" title="k8s(十)、微服务--istio1.0抢鲜测试">
+                <i class="fa fa-chevron-left"></i> k8s(十)、微服务--istio1.0抢鲜测试
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/08/23/nginx配置根据参数转发.html" rel="prev" title="nginx配置根据参数转发">
+                nginx配置根据参数转发 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC80NDM5Mi8yMDkyNA=="></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="丨ywq丨">
+            
+              <p class="site-author-name" itemprop="name">丨ywq丨</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives">
+                
+                    <span class="site-state-item-count">74</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                      <a href="/tags">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">15</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/yinwenqin" title="GitHub &rarr; https://github.com/yinwenqin" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://blog.csdn.net/ywq935" title="CSDN &rarr; https://blog.csdn.net/ywq935" rel="noopener" target="_blank"><i class="fa fa-fw fa-globe"></i>CSDN</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-book"></i>
+                推荐阅读
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.upweto.top/gitbooks/useKubernetes/" title="http://blog.upweto.top/gitbooks/useKubernetes/" rel="noopener" target="_blank">kubernetes使用指南</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.upweto.top/gitbooks/kubeSourceCodeNote/" title="http://blog.upweto.top/gitbooks/kubeSourceCodeNote/" rel="noopener" target="_blank">kubernetes源码笔记</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#null"><span class="nav-number">1.</span> <span class="nav-text"> </span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#一、部署ZK集群"><span class="nav-number">2.</span> <span class="nav-text">一、部署ZK集群</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#二、部署kafka集群"><span class="nav-number">3.</span> <span class="nav-text">二、部署kafka集群</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" style=" text-align:center;">&copy; 2017 – <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ywq</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"> 站点字数合计:</i>
+    </span>
+    
+    <span title="站点总字数">583k</span>
+  
+  
+</div>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+<div class="run_time" style=" text-align:center;">
+  <span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
+  <script>
+    var now = new Date(); 
+    function createtime() { 
+        var grt= new Date("08/23/2018 10:00:00");//此处修改你的建站时间或者网站上线时间 
+        now.setTime(now.getTime()+250); 
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days); 
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours); 
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum); 
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;} 
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum); 
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;} 
+        document.getElementById("timeDate").innerHTML = "本站已安全运行 "+dnum+" 天 "; 
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒"; 
+    } 
+    setInterval("createtime()",250);
+  </script>
+</div>
+
+        
+<div class="busuanzi-count" style=" text-align:center;">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-user"></i>
+    </span>
+    <span class="site-uv" title="总访客量">
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span> 人
+    </span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+  
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-eye"></i>
+    </span>
+    <span class="site-pv" title="总访问量">
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span> 次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+  
+    
+    
+      
+    
+  
+  <script color="black" opacity="0.7" zindex="-1" count="140" src="//cdn.jsdelivr.net/gh/theme-next/theme-next-canvas-nest@1.0.0/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+  
+  
+  <script id="ribbon" size="300" alpha="0.1" zindex="-1" src="/lib/canvas-ribbon/canvas-ribbon.js"></script>
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/fancybox/source/jquery.fancybox.pack.js"></script>
+
+
+  
+
+
+  <script src="/js/utils.js?v=7.1.1"></script>
+
+  <script src="/js/motion.js?v=7.1.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/schemes/muse.js?v=7.1.1"></script>
+
+
+
+
+  
+  <script src="/js/scrollspy.js?v=7.1.1"></script>
+<script src="/js/post-details.js?v=7.1.1"></script>
+
+
+
+  
+
+
+  <script src="/js/next-boot.js?v=7.1.1"></script>
+
+
+  
+
+  
+
+  
+  
+  
+
+  
+
+  
+  
+  
+
+
+  
+
+
+  
+    <script>
+  window.livereOptions = {
+    refer: '2018/08/16/k8s部署zookeeper_kakfa集群.html'
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+</script>
+
+  
+
+
+  
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url).replace(/\/{2,}/g, '/');
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x"></i></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x"></i></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+  
+  <script src="/lib/bookmark/bookmark.min.js?v=1.0"></script>
+  <script>
+  
+    bookmark.scrollToMark('auto', "#更多");
+  
+  </script>
+
+
+  
+
+  
+
+  
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/koharu.model.json"},"display":{"position":"left","width":250,"height":500},"mobile":{"show":false},"react":{"opacity":0.7},"log":false});</script></body>
+</html>
+<!-- 页面点击小红心 -->
+<script type="text/javascript" src="/js/src/clicklove.js"></script>

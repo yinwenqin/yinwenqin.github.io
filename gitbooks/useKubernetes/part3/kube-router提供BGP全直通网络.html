@@ -1,0 +1,1177 @@
+
+<!DOCTYPE HTML>
+<html lang="zh-hans" >
+    <head>
+        <meta charset="UTF-8">
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <title>3.2. Kube-router BGP全直通网络 · Kubernetes生态圈使用</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="description" content="">
+        <meta name="generator" content="GitBook 3.2.3">
+        <meta name="author" content="ywq">
+        
+        
+    
+    <link rel="stylesheet" href="../gitbook/style.css">
+
+    
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-anchors/plugin.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-expandable-chapters/expandable-chapters.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-splitter/splitter.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-back-to-top-button/plugin.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-highlight/website.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-search/search.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-fontsettings/website.css">
+                
+            
+        
+
+    
+
+    
+        
+    
+
+        
+    
+    
+    <meta name="HandheldFriendly" content="true"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="../gitbook/images/apple-touch-icon-precomposed-152.png">
+    <link rel="shortcut icon" href="../gitbook/images/favicon.ico" type="image/x-icon">
+
+    
+    <link rel="next" href="kube-router工作模式抓包分析.html" />
+    
+    
+    <link rel="prev" href="Traefik提供ingress-http服务.html" />
+    
+
+    </head>
+    <body>
+        
+<div class="book">
+    <div class="book-summary">
+        
+            
+<div id="book-search-input" role="search">
+    <input type="text" placeholder="输入并搜索" />
+</div>
+
+            
+                <nav role="navigation">
+                
+
+
+<ul class="summary">
+    
+    
+
+    
+
+    
+        
+        <li class="header">Part 1-写在前面</li>
+        
+        
+    
+        <li class="chapter " data-level="1.1" data-path="../">
+            
+                <a href="../">
+            
+                    
+                    1. 总览篇
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Part 2-集群相关</li>
+        
+        
+    
+        <li class="chapter " data-level="2.1" data-path="../part2/">
+            
+                <a href="../part2/">
+            
+                    
+                    2. 集群相关
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="2.1.1" data-path="../part2/v1.9.0高可用集群本地离线部署记录.html">
+            
+                <a href="../part2/v1.9.0高可用集群本地离线部署记录.html">
+            
+                    
+                    2.1. v1.9.0高可用集群部署
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.1.2" data-path="../part2/v1.14多master集群部署.html">
+            
+                <a href="../part2/v1.14多master集群部署.html">
+            
+                    
+                    2.2. v1.14.3高可用集群部署
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.1.3" data-path="../part2/Kubernetes中的Pause容器.html">
+            
+                <a href="../part2/Kubernetes中的Pause容器.html">
+            
+                    
+                    2.3. Kubernetes中的Pause容器
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.1.4" data-path="../part2/RBAC权限控制.html">
+            
+                <a href="../part2/RBAC权限控制.html">
+            
+                    
+                    2.4. RBAC权限控制
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.1.5" data-path="../part2/docker-k8s常用命令速查及rest-api.html">
+            
+                <a href="../part2/docker-k8s常用命令速查及rest-api.html">
+            
+                    
+                    2.5. 常用命令与rest-api速查
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.1.6" data-path="../part2/Kubernetes各组件参数配置优化建议.html">
+            
+                <a href="../part2/Kubernetes各组件参数配置优化建议.html">
+            
+                    
+                    2.6. Kubernetes各组件参数配置优化建议
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Part 3-网络与服务</li>
+        
+        
+    
+        <li class="chapter " data-level="3.1" data-path="./">
+            
+                <a href="./">
+            
+                    
+                    3. 网络与服务
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="3.1.1" data-path="Traefik提供ingress-http服务.html">
+            
+                <a href="Traefik提供ingress-http服务.html">
+            
+                    
+                    3.1. Traefik 提供ingress http服务
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter active" data-level="3.1.2" data-path="kube-router提供BGP全直通网络.html">
+            
+                <a href="kube-router提供BGP全直通网络.html">
+            
+                    
+                    3.2. Kube-router BGP全直通网络
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.1.3" data-path="kube-router工作模式抓包分析.html">
+            
+                <a href="kube-router工作模式抓包分析.html">
+            
+                    
+                    3.3. Kube-router ipvs Service模式抓包分析
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.1.4" data-path="VXLAN和Flannel.html">
+            
+                <a href="VXLAN和Flannel.html">
+            
+                    
+                    3.4. VXLAN和Flannel
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Part 4-监控</li>
+        
+        
+    
+        <li class="chapter " data-level="4.1" data-path="../part4/">
+            
+                <a href="../part4/">
+            
+                    
+                    4. Prometheus监控
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="4.1.1" data-path="../part4/监控--Prometheus部署篇.html">
+            
+                <a href="../part4/监控--Prometheus部署篇.html">
+            
+                    
+                    4.1. Prometheus部署篇
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="4.1.2" data-path="../part4/监控--Prometheus扩展篇（mysqld-exporter、服务发现、监控项、联邦、relabel）.html">
+            
+                <a href="../part4/监控--Prometheus扩展篇（mysqld-exporter、服务发现、监控项、联邦、relabel）.html">
+            
+                    
+                    4.2. Prometheus扩展篇
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="4.1.3" data-path="../part4/监控--Prometheus告警篇（告警消息对接钉钉接口）.html">
+            
+                <a href="../part4/监控--Prometheus告警篇（告警消息对接钉钉接口）.html">
+            
+                    
+                    4.3. Prometheus告警篇
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Part 5-分布式存储Ceph</li>
+        
+        
+    
+        <li class="chapter " data-level="5.1" data-path="../part5/">
+            
+                <a href="../part5/">
+            
+                    
+                    5. Ceph存储
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="5.1.1" data-path="../part5/Ceph集群生产环境安装部署.html">
+            
+                <a href="../part5/Ceph集群生产环境安装部署.html">
+            
+                    
+                    5.1. Ceph部署篇
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.1.2" data-path="../part5/cephfs调优-性能测试-监控-常用命令.html">
+            
+                <a href="../part5/cephfs调优-性能测试-监控-常用命令.html">
+            
+                    
+                    5.2. Ceph性能调优
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.1.3" data-path="../part5/分布式存储Cephfs使用.html">
+            
+                <a href="../part5/分布式存储Cephfs使用.html">
+            
+                    
+                    5.3. Cephfs在k8s中使用
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.1.4" data-path="../part5/分布式存储Ceph-RBD使用.html">
+            
+                <a href="../part5/分布式存储Ceph-RBD使用.html">
+            
+                    
+                    5.4. Ceph RBD在k8s中使用
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.1.5" data-path="../part5/Cephfs-CephRBD在k8s中的适用场景讨论及数据库性能压测.html">
+            
+                <a href="../part5/Cephfs-CephRBD在k8s中的适用场景讨论及数据库性能压测.html">
+            
+                    
+                    5.5. Ceph在k8s中的综合场景应用及数据库OLTP性能压测
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Part 6-微服务框架Istio</li>
+        
+        
+    
+        <li class="chapter " data-level="6.1" data-path="../part6/">
+            
+                <a href="../part6/">
+            
+                    
+                    6. Istio微服务框架
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="6.1.1" data-path="../part6/微服务框架istio安装测试.html">
+            
+                <a href="../part6/微服务框架istio安装测试.html">
+            
+                    
+                    6.1. istio安装测试
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="6.1.2" data-path="../part6/微服务框架istio流量策略控制.html">
+            
+                <a href="../part6/微服务框架istio流量策略控制.html">
+            
+                    
+                    6.2. istio流量策略控制
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="6.1.3" data-path="../part6/微服务框架istio服务可视化与监控.html">
+            
+                <a href="../part6/微服务框架istio服务可视化与监控.html">
+            
+                    
+                    6.3. istio服务可视化与监控
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="6.1.4" data-path="../part6/微服务--istio1.0抢鲜测试.html">
+            
+                <a href="../part6/微服务--istio1.0抢鲜测试.html">
+            
+                    
+                    6.4. istio v1.0 抢鲜测试
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Part 7-周边生态</li>
+        
+        
+    
+        <li class="chapter " data-level="7.1" data-path="../part7/">
+            
+                <a href="../part7/">
+            
+                    
+                    7. 周边生态
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="7.1.1" data-path="../part7/Docker-registry仓库历史镜像批量清理.html">
+            
+                <a href="../part7/Docker-registry仓库历史镜像批量清理.html">
+            
+                    
+                    7.1. Docker-registry历史镜像批量清理.md
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="7.1.2" data-path="../part7/企业级docker仓库Harbor在kubernetes上搭建使用.html">
+            
+                <a href="../part7/企业级docker仓库Harbor在kubernetes上搭建使用.html">
+            
+                    
+                    7.2. Harbor部署使用
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Part 8-问题记录</li>
+        
+        
+    
+        <li class="chapter " data-level="8.1" data-path="../part8/">
+            
+                <a href="../part8/">
+            
+                    
+                    8. 问题记录
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="8.1.1" data-path="../part8/Kubernetes部署问题记录.html">
+            
+                <a href="../part8/Kubernetes部署问题记录.html">
+            
+                    
+                    8.1. 集群部署问题记录
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="8.1.2" data-path="../part8/Service-ipvs模式间断性TCP连接故障排查.html">
+            
+                <a href="../part8/Service-ipvs模式间断性TCP连接故障排查.html">
+            
+                    
+                    8.2. Service ipvs模式间断性TCP连接故障排查
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="8.1.3" data-path="../part8/kubeadm证书-etcd证书过期紧急处理.html">
+            
+                <a href="../part8/kubeadm证书-etcd证书过期紧急处理.html">
+            
+                    
+                    8.3. kubeadm证书-etcd证书过期紧急处理
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="8.1.4" data-path="../part8/Kubernetes-Pod无法终结问题排查.html">
+            
+                <a href="../part8/Kubernetes-Pod无法终结问题排查.html">
+            
+                    
+                    8.4. Kubernetes-Pod无法终结问题排查
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+
+    <li class="divider"></li>
+
+    <li>
+        <a href="https://www.gitbook.com" target="blank" class="gitbook-link">
+            本书使用 GitBook 发布
+        </a>
+    </li>
+</ul>
+
+
+                </nav>
+            
+        
+    </div>
+
+    <div class="book-body">
+        
+            <div class="body-inner">
+                
+                    
+
+<div class="book-header" role="navigation">
+    
+
+    <!-- Title -->
+    <h1>
+        <i class="fa fa-circle-o-notch fa-spin"></i>
+        <a href=".." >3.2. Kube-router BGP全直通网络</a>
+    </h1>
+</div>
+
+
+
+
+                    <div class="page-wrapper" tabindex="-1" role="main">
+                        <div class="page-inner">
+                            
+<div id="book-search-results">
+    <div class="search-noresults">
+    
+                                <section class="normal markdown-section">
+                                
+                                <h2 id=""><a name="" class="plugin-anchor" href="#"><i class="fa fa-link" aria-hidden="true"></i></a> </h2>
+<h2 id="&#x524D;&#x8A00;"><a name="&#x524D;&#x8A00;" class="plugin-anchor" href="#&#x524D;&#x8A00;"><i class="fa fa-link" aria-hidden="true"></i></a>&#x524D;&#x8A00;</h2>
+<p>&#x4E0A;&#x4E00;&#x7BC7;&#x8BB2;&#x5230;&#xFF0C;k8s&#x4F7F;&#x7528;traefik&#x4EE3;&#x7406;&#x96C6;&#x7FA4;&#x5185;&#x90E8;&#x670D;&#x52A1;&#xFF0C;&#x7075;&#x6D3B;&#x5730;&#x6CE8;&#x5165;&#x4EE3;&#x7406;&#x914D;&#x7F6E;&#x7684;&#x65B9;&#x5F0F;&#xFF0C;&#x63D0;&#x4F9B;&#x5BF9;&#x5916;&#x670D;&#x52A1;&#xFF08;&#x53C2;&#x8003;&#xFF1A;<a href="https://blog.csdn.net/ywq935/article/details/79886793" target="_blank">k8s&#xFF08;&#x4E8C;&#xFF09;&#x3001;&#x5BF9;&#x5916;&#x670D;&#x52A1;</a>&#xFF09;&#x3002;&#x5728;&#x672C;&#x7BC7;&#xFF0C;&#x4F7F;&#x7528;gns3&#x601D;&#x79D1;&#x6A21;&#x62DF;&#x5668;IOU&#xFF0C;&#x642D;&#x5EFA;BGP&#x7F51;&#x7EDC;&#x73AF;&#x5883;&#xFF0C;&#x901A;&#x8FC7;vmware&#x6865;&#x63A5;&#x7684;&#x65B9;&#x5F0F;&#xFF0C;&#x76F4;&#x63A5;&#x5BF9;&#x63A5;&#x865A;&#x62DF;&#x673A;&#x5185;&#x7684;k8s&#x96C6;&#x7FA4;&#xFF0C;&#x4E0E;&#x96C6;&#x7FA4;&#x5185;&#x90E8;BGP&#x7F51;&#x7EDC;&#x5B9E;&#x73B0;&#x4E92;&#x901A;&#x3002;</p>
+<h2 id="&#x62D3;&#x6251;&#x56FE;&#xFF1A;"><a name="&#x62D3;&#x6251;&#x56FE;&#xFF1A;" class="plugin-anchor" href="#&#x62D3;&#x6251;&#x56FE;&#xFF1A;"><i class="fa fa-link" aria-hidden="true"></i></a>&#x62D3;&#x6251;&#x56FE;&#xFF1A;</h2>
+<p><img src="http://mycloudn.kokoerp.com/20180513121948148.jpg" alt="&#x8FD9;&#x91CC;&#x5199;&#x56FE;&#x7247;&#x63CF;&#x8FF0;"></p>
+<p>1.&#x8DEF;&#x7531;&#x5668;&#x914D;&#x7F6E;
+-</p>
+<pre><code>####router1&#xFF1A;
+IOU1#show running-config 
+
+interface Ethernet0/0
+ ip address 192.168.0.101 255.255.255.0
+ vrrp 1 ip 192.168.0.100
+
+router bgp 64513
+ bgp log-neighbor-changes
+ neighbor 192.168.0.102 remote-as 64513
+ neighbor 192.168.0.170 remote-as 64512
+ neighbor 192.168.0.171 remote-as 64512
+ maximum-paths 2
+ no auto-summary
+
+
+###router2&#xFF1A;
+IOU2#show running-config 
+interface Ethernet0/0
+ ip address 192.168.0.102 255.255.255.0
+ vrrp 1 ip 192.168.0.100
+ vrrp 1 priority 100
+
+router bgp 64513
+ bgp log-neighbor-changes
+ neighbor 192.168.0.101 remote-as 64513
+ neighbor 192.168.0.170 remote-as 64512
+ neighbor 192.168.0.171 remote-as 64512
+ maximum-paths 2
+ no auto-summary
+</code></pre><h2 id="2kube-route&#x914D;&#x7F6E;&#xFF1A;"><a name="2kube-route&#x914D;&#x7F6E;&#xFF1A;" class="plugin-anchor" href="#2kube-route&#x914D;&#x7F6E;&#xFF1A;"><i class="fa fa-link" aria-hidden="true"></i></a>2.kube-route&#x914D;&#x7F6E;&#xFF1A;</h2>
+<p>k8s&#x96C6;&#x7FA4;&#x642D;&#x5EFA;&#x6B65;&#x9AA4;&#x89C1;<a href="https://blog.csdn.net/ywq935/article/details/79856469" target="_blank">k8s&#xFF08;&#x4E00;&#xFF09;&#x3001; 1.9.0&#x9AD8;&#x53EF;&#x7528;&#x96C6;&#x7FA4;&#x672C;&#x5730;&#x79BB;&#x7EBF;&#x90E8;&#x7F72;&#x8BB0;&#x5F55;</a>
+&#x5728;&#x6B64;&#x524D;&#x914D;&#x7F6E;&#x597D;&#x7684;kube-route&#x7684;yaml&#x914D;&#x7F6E;&#x6587;&#x4EF6;&#x4E2D;&#xFF0C;&#x9700;&#x6DFB;&#x52A0;&#x5982;&#x4E0B;&#x51E0;&#x9879;&#x53C2;&#x6570;&#xFF0C;&#x5206;&#x522B;&#x6307;&#x5B9A;&#x672C;&#x5730;bgp as&#xFF0C;&#x5BF9;&#x7B49;&#x4F53;as&#x3001;ip&#x7B49;&#x3002;</p>
+<pre><code> - --advertise-cluster-ip=true   #&#x5BA3;&#x544A;&#x96C6;&#x7FA4;IP
+ - --advertise-external-ip=true  #&#x5BA3;&#x544A;svc&#x5916;&#x90E8;ip&#xFF0C;&#x5982;&#x679C;svc&#x6307;&#x5B9A;&#x4E86;external-ip&#x5219;&#x751F;&#x6548;
+ - --cluster-asn=64512           #&#x6307;&#x5B9A;&#x672C;&#x5730;&#x96C6;&#x7FA4;bgp as&#x53F7;
+ - --peer-router-ips=192.168.0.100 #&#x6307;&#x5B9A;&#x5BF9;&#x7B49;&#x4F53;ip&#xFF0C;&#x8FD9;&#x91CC;&#x53EF;&#x4EE5;&#x5199;&#x591A;&#x4E2A;&#xFF0C;&#x4EE5;&apos;,&apos;&#x9694;&#x5F00;&#xFF0C;&#x672C;&#x6B21;&#x5B9E;&#x9A8C;&#x8DEF;&#x7531;&#x5668;&#x914D;&#x7F6E;&#x4E86;vrrp&#xFF0C;&#x6307;&#x5B9A;vip&#x5373;&#x53EF;
+ - --peer-router-asns=64513  #&#x5BF9;&#x7B49;&#x4F53;as&#x53F7;
+</code></pre><p><strong>&#x5B8C;&#x6574;&#x7684;kube-router.yaml&#x6587;&#x4EF6;&#x5982;&#x4E0B;&#xFF1A;</strong></p>
+<pre><code>apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kube-router-cfg
+  namespace: kube-system
+  labels:
+    tier: node
+    k8s-app: kube-router
+data:
+  cni-conf.json: |
+    {
+      &quot;name&quot;:&quot;kubernetes&quot;,
+      &quot;type&quot;:&quot;bridge&quot;,
+      &quot;bridge&quot;:&quot;kube-bridge&quot;,
+      &quot;isDefaultGateway&quot;:true,
+      &quot;ipam&quot;: {
+        &quot;type&quot;:&quot;host-local&quot;
+      }
+    }
+---
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  labels:
+    k8s-app: kube-router
+    tier: node
+  name: kube-router
+  namespace: kube-system
+spec:
+  template:
+    metadata:
+      labels:
+        k8s-app: kube-router
+        tier: node
+      annotations:
+        scheduler.alpha.kubernetes.io/critical-pod: &apos;&apos;
+    spec:
+      serviceAccountName: kube-router
+      serviceAccount: kube-router
+      containers:
+      - name: kube-router
+        image: cloudnativelabs/kube-router
+        imagePullPolicy: Always
+        args:
+        - --run-router=true
+        - --run-firewall=true
+        - --run-service-proxy=true
+        - --advertise-cluster-ip=true
+        - --advertise-external-ip=true
+        - --cluster-asn=64512
+        - --peer-router-ips=192.168.0.100
+        - --peer-router-asns=64513
+        env:
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 20244
+          initialDelaySeconds: 10
+          periodSeconds: 3
+        resources:
+          requests:
+            cpu: 250m
+            memory: 250Mi
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - name: lib-modules
+          mountPath: /lib/modules
+          readOnly: true
+        - name: cni-conf-dir
+          mountPath: /etc/cni/net.d
+        - name: kubeconfig
+          mountPath: /var/lib/kube-router/kubeconfig
+          readOnly: true
+      initContainers:
+      - name: install-cni
+        image: busybox
+        imagePullPolicy: Always
+        command:
+        - /bin/sh
+        - -c
+        - set -e -x;
+          if [ ! -f /etc/cni/net.d/10-kuberouter.conf ]; then
+            TMP=/etc/cni/net.d/.tmp-kuberouter-cfg;
+            cp /etc/kube-router/cni-conf.json ${TMP};
+            mv ${TMP} /etc/cni/net.d/10-kuberouter.conf;
+          fi
+        volumeMounts:
+        - mountPath: /etc/cni/net.d
+          name: cni-conf-dir
+        - mountPath: /etc/kube-router
+          name: kube-router-cfg
+      hostNetwork: true
+      tolerations:
+      - key: CriticalAddonsOnly
+        operator: Exists
+      - effect: NoSchedule
+        key: node-role.kubernetes.io/master
+        operator: Exists
+      volumes:
+      - name: lib-modules
+        hostPath:
+          path: /lib/modules
+      - name: cni-conf-dir
+        hostPath:
+          path: /etc/cni/net.d
+      - name: kube-router-cfg
+        configMap:
+          name: kube-router-cfg
+      - name: kubeconfig
+        hostPath:
+          path: /var/lib/kube-router/kubeconfig
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: kube-router
+  namespace: kube-system
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: kube-router
+  namespace: kube-system
+rules:
+  - apiGroups:
+    - &quot;&quot;
+    resources:
+      - namespaces
+      - pods
+      - services
+      - nodes
+      - endpoints
+    verbs:
+      - list
+      - get
+      - watch
+  - apiGroups:
+    - &quot;networking.k8s.io&quot;
+    resources:
+      - networkpolicies
+    verbs:
+      - list
+      - get
+      - watch
+  - apiGroups:
+    - extensions
+    resources:
+      - networkpolicies
+    verbs:
+      - get
+      - list
+      - watch
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: kube-router
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: kube-router
+subjects:
+- kind: ServiceAccount
+  name: kube-router
+  namespace: kube-system
+</code></pre><p><strong>&#x76F4;&#x63A5;&#x5220;&#x9664;&#x6B64;&#x524D;&#x7684;kube-router&#x914D;&#x7F6E;&#xFF0C;&#x91CD;&#x65B0;create&#x8FD9;&#x4E2A;yaml&#x6587;&#x4EF6;&#x5185;&#x7684;&#x8D44;&#x6E90;&#xFF1A;</strong></p>
+<pre><code>kubectl delete -f kubeadm-kuberouter.yaml  #&#x66F4;&#x65B0;&#x914D;&#x7F6E;&#x53C2;&#x6570;&#x524D;&#x6267;&#x884C;
+kubectl create -f  kubeadm-kuberouter.yaml  #&#x66F4;&#x65B0;&#x914D;&#x7F6E;&#x53C2;&#x6570;&#x540E;&#x6267;&#x884C;
+</code></pre><p><strong>&#x63A5;&#x7740;&#x90E8;&#x7F72;&#x4E00;&#x4E2A;&#x6D4B;&#x8BD5;&#x7528;&#x5F97;nginx&#x7684;pod&#x5B9E;&#x4F8B;&#xFF0C;yaml&#x6587;&#x4EF6;&#x5982;&#x4E0B;</strong></p>
+<pre><code>[root@171 nginx]# cat nginx-deploy.yaml 
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  annotations:
+    deployment.kubernetes.io/revision: &quot;2&quot;
+  creationTimestamp: 2018-04-09T04:02:02Z
+  generation: 4
+  labels:
+    app: nginx
+  name: nginx-deploy
+  namespace: default
+  resourceVersion: &quot;111504&quot;
+  selfLink: /apis/extensions/v1beta1/namespaces/default/deployments/nginx-deploy
+  uid: c28090c0-3baa-11e8-b75a-000c29858eab
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - image: nginx:1.9.1
+        name: nginx
+        ports:
+        - containerPort: 80
+          protocol: TCP
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+</code></pre><p>&#x67E5;&#x770B;podIP&#xFF0C;&#x672C;&#x5730;curl&#x6D4B;&#x8BD5;&#xFF1A;</p>
+<pre><code>[root@171 nginx]# kubectl get pods -o wide 
+NAME                            READY     STATUS    RESTARTS   AGE       IP            NODE
+nginx-deploy-5964dfd755-lv2kb   1/1       Running   0          29m       10.244.1.35   171
+[root@171 nginx]# curl 10.244.1.35
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;title&gt;Welcome to nginx!&lt;/title&gt;
+&lt;style&gt;
+    body {
+        width: 35em;
+        margin: 0 auto;
+        font-family: Tahoma, Verdana, Arial, sans-serif;
+    }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;h1&gt;Welcome to nginx!&lt;/h1&gt;
+&lt;p&gt;If you see this page, the nginx web server is successfully installed and
+working. Further configuration is required.&lt;/p&gt;
+
+&lt;p&gt;For online documentation and support please refer to
+&lt;a href=&quot;http://nginx.org/&quot;&gt;nginx.org&lt;/a&gt;.&lt;br/&gt;
+Commercial support is available at
+&lt;a href=&quot;http://nginx.com/&quot;&gt;nginx.com&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;Thank you for using nginx.&lt;/em&gt;&lt;/p&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+[root@171 nginx]#
+</code></pre><h2 id="3&#x68C0;&#x9A8C;&#x7ED3;&#x679C;"><a name="3&#x68C0;&#x9A8C;&#x7ED3;&#x679C;" class="plugin-anchor" href="#3&#x68C0;&#x9A8C;&#x7ED3;&#x679C;"><i class="fa fa-link" aria-hidden="true"></i></a>3.&#x68C0;&#x9A8C;&#x7ED3;&#x679C;</h2>
+<p><strong>&#x8DEF;&#x7531;&#x5668;&#x67E5;&#x770B;BGP&#x90BB;&#x5C45;&#xFF1A;</strong></p>
+<pre><code>IOU1#show ip bgp summary 
+BGP router identifier 192.168.0.101, local AS number 64513
+BGP table version is 19, main routing table version 19
+4 network entries using 560 bytes of memory
+6 path entries using 480 bytes of memory
+2 multipath network entries and 4 multipath paths
+1/1 BGP path/bestpath attribute entries using 144 bytes of memory
+1 BGP AS-PATH entries using 24 bytes of memory
+0 BGP route-map cache entries using 0 bytes of memory
+0 BGP filter-list cache entries using 0 bytes of memory
+BGP using 1208 total bytes of memory
+BGP activity 5/1 prefixes, 12/6 paths, scan interval 60 secs
+
+Neighbor        V           AS MsgRcvd MsgSent   TblVer  InQ OutQ Up/Down  State/PfxRcd
+192.168.0.102   4        64513     100     106       19    0    0 01:27:20        0
+192.168.0.170   4        64512     107      86       19    0    0 00:37:19        3
+192.168.0.171   4        64512      98      85       19    0    0 00:37:21        3
+IOU1#
+</code></pre><p><strong>&#x8DEF;&#x7531;&#x5668;&#x67E5;&#x770B;BGP&#x8DEF;&#x7531;&#x6761;&#x76EE;&#xFF1A;</strong></p>
+<pre><code>IOU1#show ip route bgp
+Codes: L - local, C - connected, S - static, R - RIP, M - mobile, B - BGP
+       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area 
+       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
+       E1 - OSPF external type 1, E2 - OSPF external type 2
+       i - IS-IS, su - IS-IS summary, L1 - IS-IS level-1, L2 - IS-IS level-2
+       ia - IS-IS inter area, * - candidate default, U - per-user static route
+       o - ODR, P - periodic downloaded static route, H - NHRP, l - LISP
+       a - application route
+       + - replicated route, % - next hop override
+
+Gateway of last resort is 192.168.0.1 to network 0.0.0.0
+
+      10.0.0.0/8 is variably subnetted, 4 subnets, 2 masks
+B        10.96.0.1/32 [20/0] via 192.168.0.171, 00:38:36
+                      [20/0] via 192.168.0.170, 00:38:36
+B        10.96.0.10/32 [20/0] via 192.168.0.171, 00:38:36
+                       [20/0] via 192.168.0.170, 00:38:36
+B        10.244.0.0/24 [20/0] via 192.168.0.170, 00:38:36
+B        10.244.1.0/24 [20/0] via 192.168.0.171, 00:38:39
+</code></pre><p>&#x53EF;&#x4EE5;&#x770B;&#x5230;&#xFF0C;bgp&#x90BB;&#x5C45;&#x5EFA;&#x7ACB;&#x6210;&#x529F;&#xFF0C;k8s&#x96C6;&#x7FA4;&#x5185;&#x90E8;&#x8DEF;&#x7531;&#x5B66;&#x4E60;&#x6210;&#x529F;</p>
+<p><strong>&#x5F00;&#x4E00;&#x53F0;&#x6D4B;&#x8BD5;&#x673A;&#x68C0;&#x67E5;&#xFF1A;</strong>
+&#x6D4B;&#x8BD5;&#x673A;&#x4FEE;&#x6539;&#x9ED8;&#x8BA4;&#x7F51;&#x5173;&#x6307;&#x5411;&#x8DEF;&#x7531;&#x5668;&#xFF0C;&#x6A21;&#x62DF;&#x5916;&#x90E8;&#x7F51;&#x7EDC;&#x73AF;&#x5883;&#x4E2D;&#x7684;&#x4E00;&#x53F0;&#x666E;&#x901A;pc&#xFF1A;</p>
+<pre><code>[root@python ~]# ip route
+default via 192.168.0.100 dev eth3  proto static 
+
+[root@python ~]# curl 10.244.1.35
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;title&gt;Welcome to nginx!&lt;/title&gt;
+&lt;style&gt;
+    body {
+        width: 35em;
+        margin: 0 auto;
+        font-family: Tahoma, Verdana, Arial, sans-serif;
+    }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;h1&gt;Welcome to nginx!&lt;/h1&gt;
+&lt;p&gt;If you see this page, the nginx web server is successfully installed and
+working. Further configuration is required.&lt;/p&gt;
+
+&lt;p&gt;For online documentation and support please refer to
+&lt;a href=&quot;http://nginx.org/&quot;&gt;nginx.org&lt;/a&gt;.&lt;br/&gt;
+Commercial support is available at
+&lt;a href=&quot;http://nginx.com/&quot;&gt;nginx.com&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;Thank you for using nginx.&lt;/em&gt;&lt;/p&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+[root@python ~]#
+</code></pre><p>&#x6D4B;&#x8BD5;&#x6210;&#x529F;&#xFF0C;&#x81F3;&#x6B64;&#xFF0C;&#x96C6;&#x7FA4;&#x5185;&#x90E8;bgp&#x7F51;&#x7EDC;&#xFF0C;&#x548C;&#x5916;&#x90E8;bgp&#x7F51;&#x7EDC;&#x5BF9;&#x63A5;&#x6210;&#x529F;&#xFF01;</p>
+<p>&#x53CB;&#x60C5;&#x63D0;&#x793A;&#xFF1A;&#x522B;&#x5FD8;&#x4E86;&#x4FDD;&#x5B58;&#x8DEF;&#x7531;&#x5668;&#x7684;&#x914D;&#x7F6E;&#x5230;nvram&#x91CC;&#xFF08;<code>copy running-config startup-config</code>&#xFF09;&#xFF0C;&#x5426;&#x5219;&#x91CD;&#x542F;&#x5C31;&#x4E22;&#x914D;&#x7F6E;&#x5566;&#x3002;&#x597D;&#x4E45;&#x6CA1;&#x78B0;&#x7F51;&#x7EDC;&#x8BBE;&#x5907;&#x4E86;&#xFF0C;&#x8FD9;&#x4E2A;&#x832C;&#x7ED9;&#x5FD8;&#x4E86;&#xFF0C;&#x88AB;&#x5751;&#x4E86;&#x4E00;&#x6B21;&#xFF0C;&#x563F;&#x563F;</p>
+<hr>
+<h2 id="9-22&#x8E29;&#x5751;"><a name="9-22&#x8E29;&#x5751;" class="plugin-anchor" href="#9-22&#x8E29;&#x5751;"><i class="fa fa-link" aria-hidden="true"></i></a>9-22&#x8E29;&#x5751;</h2>
+<p>&#x4ECA;&#x65E5;&#x5C1D;&#x8BD5;&#x5728;k8s&#x96C6;&#x7FA4;&#x4E2D;&#x6DFB;&#x52A0;&#x4E0E;&#x539F;&#x96C6;&#x7FA4;node(192.168.9.x/24)&#x4E0D;&#x5728;&#x540C;&#x4E00;&#x4E2A;&#x7F51;&#x6BB5;&#x7684;&#x65B0;node(192.168.20.x/24),&#x521B;&#x5EFA;&#x597D;&#x4E86;&#x4E4B;&#x540E;&#x51FA;&#x73B0;&#x4E86;&#x975E;&#x5E38;&#x5947;&#x602A;&#x7684;&#x73B0;&#x8C61;:&#x65B0;node&#x4E2D;&#x7684;kube-router&#x4E0E;&#x96C6;&#x7FA4;&#x5916;&#x7684;&#x7F51;&#x7EDC;&#x6838;&#x5FC3;&#x8BBE;&#x5907;&#x4E4B;&#x95F4;&#x5EFA;&#x7ACB;&#x7684;peer&#x90BB;&#x5C45;&#x5173;&#x7CFB;&#x4E00;&#x76F4;&#x91CD;&#x590D;&#x5730;&#x5904;&#x4E8E;established ---&gt; idle&#x72B6;&#x6001;&#x9891;&#x7E41;&#x8F6C;&#x53D8;,&#x975E;&#x5E38;&#x7684;&#x4E0D;&#x7A33;&#x5B9A;,&#x5F53;&#x5904;&#x4E8E;established&#x72B6;&#x6001;&#x65F6;,&#x65B0;node&#x4E0E;&#x539F;node&#x95F4;&#x7684;&#x4E22;&#x5305;&#x7387;&#x751A;&#x81F3;&#x8FBE;&#x5230;70%&#x4EE5;&#x4E0A;&#xFF0C;&#x5904;&#x4E8E;idle&#x72B6;&#x6001;&#x65F6;,node&#x95F4;ping&#x5305;&#x6B63;&#x5E38;
+<strong>&#x95EE;&#x9898;&#x622A;&#x56FE;:</strong>
+<img src="http://mycloudn.kokoerp.com/20180922201158479.jpg" alt="&#x5728;&#x8FD9;&#x91CC;&#x63D2;&#x5165;&#x56FE;&#x7247;&#x63CF;&#x8FF0;"></p>
+<p>&#x5728;&#x8FDB;&#x5165;kube-router&#x540E;&#x4F7F;&#x7528;<code>gobgp neighbor</code>&#x67E5;&#x770B;&#x53D1;&#x73B0;&#x65B0;node&#x4E0E;&#x5916;&#x90E8;&#x7F51;&#x7EDC;&#x8BBE;&#x5907;ebgp\&#x539F;node&#x7684;ibgp&#x90BB;&#x5C45;&#x5173;&#x7CFB;&#x4E00;&#x76F4;&#x5904;&#x4E8E;&#x9891;&#x7E41;&#x53D8;&#x5316;&#x7684;&#x72B6;&#x6001;&#x65E0;&#x6CD5;&#x7A33;&#x5B9A;&#x5EFA;&#x7ACB;&#x5173;&#x7CFB;&#xFF0C;&#x767E;&#x601D;&#x4E0D;&#x5F97;&#x5176;&#x89E3;&#xFF0C;&#x6700;&#x540E;&#x7EC8;&#x4E8E;&#x5728;github&#x4E0A;&#x627E;&#x5230;&#x4E86;kube-router&#x552F;&#x4E00;&#x7684;&#x7C7B;&#x4F3C;issue&#xFF0C;&#x9879;&#x76EE;&#x6210;&#x5458;&#x89E3;&#x91CA;&#x5982;&#x4E0B;&#xFF1A;
+<a href="https://github.com/cloudnativelabs/kube-router/issues/221" target="_blank">Github issue&#x94FE;&#x63A5;</a>
+<img src="http://mycloudn.kokoerp.com/2018092220161626.jpg" alt="&#x5728;&#x8FD9;&#x91CC;&#x63D2;&#x5165;&#x56FE;&#x7247;&#x63CF;&#x8FF0;"></p>
+<p>&#x4E2A;&#x4EBA;&#x7406;&#x89E3;&#x662F;:
+kube-router&#x53EA;&#x652F;&#x6301;&#x4E0E;&#x540C;&#x4E00;&#x4E2A;&#x5B50;&#x7F51;&#x7684;node&#x5EFA;&#x7ACB;ibgp&#x5BF9;&#x7B49;&#x4F53;&#x5173;&#x7CFB;&#xFF0C;&#x8DE8;&#x5B50;&#x7F51;&#x7684;&#x8282;&#x70B9;&#x65E0;&#x6CD5;&#x5EFA;&#x7ACB;&#x5BF9;&#x7B49;&#x4F53;&#x90BB;&#x5C45;&#x5173;&#x7CFB;&#xFF1B;&#x540C;&#x65F6;&#xFF0C;ebgp&#x534F;&#x8BAE;&#x7684;ebgp max hop&#x5C5E;&#x6027;&#xFF0C;&#x9ED8;&#x8BA4;&#x503C;&#x4E3A;1&#xFF0C;&#x8DEF;&#x7531;&#x5668;&#x8BBE;&#x5907;&#x4E00;&#x822C;&#x652F;&#x6301;&#x624B;&#x52A8;&#x4FEE;&#x6539;&#x6B64;&#x503C;&#xFF0C;&#x800C;kube-router&#x8F83;&#x65E9;&#x4E4B;&#x524D;&#x7684;&#x7248;&#x672C;&#x4EC5;&#x652F;&#x6301;&#x9ED8;&#x8BA4;&#x503C;1&#xFF0C;&#x65E0;&#x6CD5;&#x624B;&#x52A8;&#x914D;&#x7F6E;&#x6B64;&#x503C;&#xFF0C;&#x56E0;&#x6B64;EBGP&#x90BB;&#x5C45;&#x4E0E;kube-router&#x4E5F;&#x5FC5;&#x987B;&#x5728;&#x540C;&#x4E00;&#x4E2A;&#x5B50;&#x7F51;&#x4E2D;&#xFF0C;&#x540E;&#x9762;&#x7684;&#x7248;&#x672C;&#x5DF2;&#x89E3;&#x51B3;&#x6B64;&#x95EE;&#x9898;&#xFF0C;&#x5347;&#x7EA7;&#x7248;&#x672C;&#x540E;node&#x8DE8;&#x5B50;&#x7F51;&#x5EFA;ebgp&#x90BB;&#x5C45;&#x4E0D;&#x518D;&#x6709;&#x95EE;&#x9898;&#x3002;</p>
+
+                                
+                                </section>
+                            
+    </div>
+    <div class="search-results">
+        <div class="has-results">
+            
+            <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+            <ul class="search-results-list"></ul>
+            
+        </div>
+        <div class="no-results">
+            
+            <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+            
+        </div>
+    </div>
+</div>
+
+                        </div>
+                    </div>
+                
+            </div>
+
+            
+                
+                <a href="Traefik提供ingress-http服务.html" class="navigation navigation-prev " aria-label="Previous page: 3.1. Traefik 提供ingress http服务">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+                
+                
+                <a href="kube-router工作模式抓包分析.html" class="navigation navigation-next " aria-label="Next page: 3.3. Kube-router ipvs Service模式抓包分析">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+                
+            
+        
+    </div>
+
+    <script>
+        var gitbook = gitbook || [];
+        gitbook.push(function() {
+            gitbook.page.hasChanged({"page":{"title":"3.2. Kube-router BGP全直通网络","date":"2018/05/13 12:46:41","tags":["Kubernetes"],"level":"3.1.2","depth":2,"next":{"title":"3.3. Kube-router ipvs Service模式抓包分析","level":"3.1.3","depth":2,"path":"part3/kube-router工作模式抓包分析.md","ref":"part3/kube-router工作模式抓包分析.md","articles":[]},"previous":{"title":"3.1. Traefik 提供ingress http服务","level":"3.1.1","depth":2,"path":"part3/Traefik提供ingress-http服务.md","ref":"./part3/Traefik提供ingress-http服务.md","articles":[]},"dir":"ltr"},"config":{"plugins":["-sharing","anchors","github","expandable-chapters","splitter","back-to-top-button"],"styles":{"website":"./styles/website.css"},"pluginsConfig":{"github":{"url":"https://github.com/yinwenqin/kubeSourceCodeNote"},"splitter":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"back-to-top-button":{},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false},"anchors":{},"expandable-chapters":{}},"theme":"default","author":"ywq","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"Kubernetes生态圈使用","language":"zh-hans","links":{},"gitbook":"3.2.3","description":""},"file":{"path":"part3/kube-router提供BGP全直通网络.md","mtime":"2019-11-21T07:58:03.008Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2019-11-21T08:49:48.491Z"},"basePath":"..","book":{"language":""}});
+        });
+    </script>
+</div>
+
+        
+    <script src="../gitbook/gitbook.js"></script>
+    <script src="../gitbook/theme.js"></script>
+    
+        
+        <script src="../gitbook/gitbook-plugin-github/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-expandable-chapters/expandable-chapters.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-splitter/splitter.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-back-to-top-button/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search/search-engine.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search/search.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-lunr/lunr.min.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-lunr/search-lunr.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-fontsettings/fontsettings.js"></script>
+        
+    
+
+    </body>
+</html>
+

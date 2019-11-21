@@ -1,0 +1,1551 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-CN">
+
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link rel="stylesheet" href="/lib/pace/pace-theme-bounce.min.css?v=1.0.2">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link rel="stylesheet" href="/lib/fancybox/source/jquery.fancybox.css">
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+    
+      
+    
+
+    
+  
+
+  
+
+  
+
+  
+    
+      
+    
+
+    
+  
+
+  
+    
+    
+    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic|Roboto Slab:300,300italic,400,400italic,700,700italic|Roboto Mono:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext">
+  
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.1.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.1.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.1.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.1.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.1.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '7.1.1',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":true,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: true,
+    fancybox: true,
+    fastclick: true,
+    lazyload: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"shrinkIn","post_header":"slideLeftIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideDownIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <script>
+  (function(i,s,o,g,r,a,m){i["DaoVoiceObject"]=r;i[r]=i[r]||function(){(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;a.charset="utf-8";m.parentNode.insertBefore(a,m)})(window,document,"script",('https:' == document.location.protocol ? 'https:' : 'http:') + "//widget.daovoice.io/widget/0f81ff2f.js","daovoice")
+  daovoice('init', {
+      app_id: "bd399fce"
+    });
+  daovoice('update');
+  </script>
+
+  <meta name="description" content="问题阶段(一):用户反应某个redis使用卡顿，连接该redis服务使用的是svc代理，即ipvs snat的方式，ipvsadm -L发现，VIP收到的6379端口的数据包，会以rr的方式分别转发到pod的80 6379端口上，相当于会有50%的丢包，不卡才怪： 1234# ipvsadm | grep -2 10.108.152.210TCP  10.108.152.210:6379 rr">
+<meta name="keywords" content="Kubernetes,Network">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kubernetes踩坑(二): Service IP(LVS)间断性TCP连接故障排查">
+<meta property="og:url" content="https://www.ipyker.com/2018/12/11/Kubernetes踩坑(二)_ Service IP(LVS)间断性TCP连接故障排查.html">
+<meta property="og:site_name" content="随笔漫谈">
+<meta property="og:description" content="问题阶段(一):用户反应某个redis使用卡顿，连接该redis服务使用的是svc代理，即ipvs snat的方式，ipvsadm -L发现，VIP收到的6379端口的数据包，会以rr的方式分别转发到pod的80 6379端口上，相当于会有50%的丢包，不卡才怪： 1234# ipvsadm | grep -2 10.108.152.210TCP  10.108.152.210:6379 rr">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-11-21T07:48:40.094Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Kubernetes踩坑(二): Service IP(LVS)间断性TCP连接故障排查">
+<meta name="twitter:description" content="问题阶段(一):用户反应某个redis使用卡顿，连接该redis服务使用的是svc代理，即ipvs snat的方式，ipvsadm -L发现，VIP收到的6379端口的数据包，会以rr的方式分别转发到pod的80 6379端口上，相当于会有50%的丢包，不卡才怪： 1234# ipvsadm | grep -2 10.108.152.210TCP  10.108.152.210:6379 rr">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="随笔漫谈" type="application/atom+xml">
+
+
+
+  
+  
+  <link rel="canonical" href="https://www.ipyker.com/2018/12/11/Kubernetes踩坑(二)_ Service IP(LVS)间断性TCP连接故障排查">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Kubernetes踩坑(二): Service IP(LVS)间断性TCP连接故障排查 | 随笔漫谈</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+ 
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">随笔漫谈</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-book">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/gitbooks/" rel="section"><i class="menu-item-icon fa fa-fw fa-book"></i> <br>book</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-互动">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/guestbook/" rel="section"><i class="menu-item-icon fa fa-fw fa-comments"></i> <br>互动</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.ipyker.com/2018/12/11/Kubernetes踩坑(二)_ Service IP(LVS)间断性TCP连接故障排查.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="丨ywq丨">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随笔漫谈">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Kubernetes踩坑(二): Service IP(LVS)间断性TCP连接故障排查
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-12-11 11:49:16" itemprop="dateCreated datePublished" datetime="2018-12-11T11:49:16+08:00">2018-12-11</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-11-21 15:48:40" itemprop="dateModified" datetime="2019-11-21T15:48:40+08:00">2019-11-21</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+            <div class="post-symbolscount">
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">本文字数：</span>
+                
+                <span title="本文字数">8k</span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">7 分钟</span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="问题阶段-一"><a href="#问题阶段-一" class="headerlink" title="问题阶段(一):"></a>问题阶段(一):</h2><p>用户反应某个redis使用卡顿，连接该redis服务使用的是svc代理，即ipvs snat的方式，ipvsadm -L发现，VIP收到的6379端口的数据包，会以rr的方式分别转发到pod的80 6379端口上，相当于会有50%的丢包，不卡才怪：</p>
+<figure class="highlight x86asm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"># ipvsadm | grep -<span class="number">2</span> <span class="number">10.108</span><span class="meta">.152</span><span class="meta">.210</span></span><br><span class="line">TCP  <span class="number">10.108</span><span class="meta">.152</span><span class="meta">.210</span>:<span class="number">6379</span> rr</span><br><span class="line">  -&gt; <span class="number">172.26</span><span class="meta">.6</span><span class="meta">.185</span>:http            Masq    <span class="number">1</span>      <span class="number">0</span>          <span class="number">0</span>         </span><br><span class="line">  -&gt; <span class="number">172.26</span><span class="meta">.6</span><span class="meta">.185</span>:<span class="number">6379</span>            Masq    <span class="number">1</span>      <span class="number">3</span>          <span class="number">3</span></span><br></pre></td></tr></table></figure>
+<p>2.检查svc：</p>
+<figure class="highlight dts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="symbol">apiVersion:</span> v1</span><br><span class="line"><span class="symbol">kind:</span> Service</span><br><span class="line"><span class="symbol">metadata:</span></span><br><span class="line"><span class="symbol">  creationTimestamp:</span> <span class="number">2018</span><span class="number">-12</span><span class="number">-06</span>T02:<span class="number">45</span>:<span class="number">49</span>Z</span><br><span class="line"><span class="symbol">  labels:</span></span><br><span class="line"><span class="symbol">    app:</span> skuapi-rds-prod</span><br><span class="line"><span class="symbol">    run:</span> skuapi-rds-prod</span><br><span class="line"><span class="symbol">  name:</span> skuapi-rds-prod</span><br><span class="line"><span class="symbol">  namespace:</span> default</span><br><span class="line"><span class="symbol">  resourceVersion:</span> <span class="string">"41888273"</span></span><br><span class="line"><span class="symbol">  selfLink:</span> <span class="meta-keyword">/api/</span>v1<span class="meta-keyword">/namespaces/</span>default<span class="meta-keyword">/services/</span>skuapi-rds-prod</span><br><span class="line"><span class="symbol">  uid:</span> <span class="number">09e1</span>a61f-f901<span class="number">-11e8</span><span class="number">-878</span>f<span class="number">-141877468256</span></span><br><span class="line"><span class="symbol">spec:</span></span><br><span class="line"><span class="symbol">  clusterIP:</span> <span class="number">10.108</span><span class="number">.152</span><span class="number">.210</span></span><br><span class="line"><span class="symbol">  ports:</span></span><br><span class="line">  - name: redis</span><br><span class="line"><span class="symbol">    port:</span> <span class="number">6379</span></span><br><span class="line"><span class="symbol">    protocol:</span> TCP</span><br><span class="line"><span class="symbol">    targetPort:</span> <span class="number">6379</span></span><br><span class="line"><span class="symbol">  selector:</span></span><br><span class="line"><span class="symbol">    app:</span> skuapi-rds-prod</span><br><span class="line"><span class="symbol">  sessionAffinity:</span> None</span><br><span class="line"><span class="symbol">  type:</span> ClusterIP</span><br></pre></td></tr></table></figure>
+<p>可以看出svc配置没有问题，回忆起此前配置此svc时，一开始失误将port和targetPort设置为了默认值80忘记修改了，后面手动kubectl edit svc修改端口为6379。应该是修改保存之后，原本的targetPort 80<br>依然在ipvs中保留为RIP之一，这应该是一个bug。</p>
+<p>3.解决办法：<br>使用ipvsadm工具删除多余的RIP，或者删除此svc然后重建。</p>
+<figure class="highlight x86asm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"># ipvsadm | grep -<span class="number">2</span> <span class="number">10.108</span><span class="meta">.152</span><span class="meta">.210</span></span><br><span class="line">TCP  <span class="number">10.108</span><span class="meta">.152</span><span class="meta">.210</span>:<span class="number">6379</span> rr</span><br><span class="line">  -&gt; <span class="number">172.26</span><span class="meta">.6</span><span class="meta">.185</span>:<span class="number">6379</span>            Masq    <span class="number">1</span>      <span class="number">4</span>          <span class="number">0</span></span><br></pre></td></tr></table></figure>
+<h2 id="问题阶段-二"><a href="#问题阶段-二" class="headerlink" title="问题阶段(二):"></a>问题阶段(二):</h2><h5 id="现象："><a href="#现象：" class="headerlink" title="现象："></a>现象：</h5><p>有用户反馈svc vip连接经常失败，不限于redis的多个ip有这种情况，于是开始排查</p>
+<h5 id="排查"><a href="#排查" class="headerlink" title="排查:"></a>排查:</h5><p>通过对ipvs和系统的连接状态排查，发现了两个问题:<br>1.发现有大量TIME_WAIT的tcp连接,证明系统连接大多是短连接，查看ipvs tcpfin的等待时间为2分钟，两分钟还是过长，有必要修改短一些，30秒是一个比较合理的值，如果比较繁忙的服务，这个值可以改到更低。<br>2.有不少丢包</p>
+<figure class="highlight coffeescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">[root@p020107 ~]<span class="comment"># ipvsadm -lnc |wc -l</span></span><br><span class="line"><span class="number">23776</span></span><br><span class="line">[root@p020107 ~]<span class="comment"># ipvsadm -lnc |grep TIME_WAIT | wc -l</span></span><br><span class="line"><span class="number">10003</span></span><br><span class="line">[root@p020107 ~]<span class="comment"># ipvsadm -L --timeout </span></span><br><span class="line">Timeout (tcp tcpfin udp): <span class="number">900</span> <span class="number">120</span> <span class="number">300</span></span><br><span class="line"></span><br><span class="line">root@p020107:~<span class="comment"># netstat -s | grep timestamp</span></span><br><span class="line">    <span class="number">17855</span> packets rejects <span class="keyword">in</span> established connections because <span class="keyword">of</span> timestamp</span><br></pre></td></tr></table></figure>
+<p>备注：<br>根据tcp 四次挥手协议，主动发起断开连接请求的的一端(简单理解为客户端)，在其发送断开连接请求开始，其连接的生命周期会经历4个阶段分别是FIN-WAIT1 –&gt; FIN_WAIT2 –&gt; TIME_WAIT –&gt; CLOSE，其中2个FIN-WAIT阶段等待的时间就是内核配置的net.ipv4.tcp_fin_timeout 的值，为了快速跳过前两个FIN-WAIT阶段从而进入TIME_WAIT状态，net.ipv4.tcp_fin_timeout值建议缩短。在进入TIME_WAIT状态后，默认等待2个MSL(Max Segment Lifetime)时间，到达最后一步CLOSE状态，关闭tcp连接释放资源。注意：MSL时间在不同平台一般是30s-2min不等，并且基本都是不可修改的(linux将这一时间值写死在了内核中)。</p>
+<p>那么为什么要等待2*MSL呢？在stackoverflow中找到了一个较为易懂的解释：</p>
+<p><strong>So the TIME_WAIT time is generally set to double the packets maximum age. This value is the maximum age your packets will be allowed to get to before the network discards them.<br>That guarantees that, before you’re allowed to create a connection with the same tuple, all the packets belonging to previous incarnations of that tuple will be dead.</strong></p>
+<p><strong>翻译一下：</strong><br>time_wait时间设计为tcp分片的最大存活时间的两倍，这么设计的原因是，网络是存在延迟的，同时tcp分片在网络传输中可能出现意外，发送端在确认意外(例如到达MSL时间后)后发出数据分片的重传。假如socket连接不经等待直接关闭了，然后再重新打开了一个端口号一致的连接，可能导致新启动的socket连接，接收到了此前销毁关闭的socket连接的数据。因此，设计TIME_WAIT等待时间为2<em>MSL，是为了保证在等待2</em>MSL之后，此前旧socket的数据分片即使还没有到达接收端，也已经在网络传输中过期消逝了，新启动的socket不会接收到此前的旧数据分片。</p>
+<h5 id="优化方式"><a href="#优化方式" class="headerlink" title="优化方式"></a>优化方式</h5><p>优化的思路<br>1.断开连接时加速进入TIME_WAIT状态，以快速提供可用的连接端口<br>2.解决timestamps丢包问题</p>
+<p>查看ipvs设置的各类连接的超时时间，修改默认的tcpfin 2分钟为30秒</p>
+<figure class="highlight autoit"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root<span class="symbol">@p020107</span> ~]<span class="meta"># ipvsadm -L --timeout </span></span><br><span class="line">Timeout (tcp tcpfin udp): <span class="number">900</span> <span class="number">120</span> <span class="number">300</span></span><br><span class="line">[root<span class="symbol">@p020107</span> ~]<span class="meta"># ipvsadm --set 900 30 300</span></span><br><span class="line"></span><br><span class="line">[root<span class="symbol">@p020107</span> ~]<span class="meta"># ipvsadm -L --timeout </span></span><br><span class="line">Timeout (tcp tcpfin udp): <span class="number">900</span> <span class="number">30</span> <span class="number">300</span></span><br></pre></td></tr></table></figure>
+<p><strong>内核参数优化</strong></p>
+<p>添加入/etc/sysctl.conf文件中</p>
+<figure class="highlight nix"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 表示开启重用。允许将TIME-WAIT sockets重新用于新的TCP连接，默认为0，表示关闭；</span></span><br><span class="line">  net.ipv4.<span class="attr">tcp_tw_reuse</span> = <span class="number">1</span></span><br><span class="line"></span><br><span class="line">  <span class="comment"># 表示开启TCP连接中TIME-WAIT sockets的快速回收，默认为0，表示关闭。注意，net.ipv4.tcp_timestamps默认为开启，tcp_tw_recycle此选项也开启后，tcp timestamp机制就会激活，在部分场景下，需要关闭tcp_timestamps功能，见下方此选项的说明。</span></span><br><span class="line">  net.ipv4.<span class="attr">tcp_tw_recycle</span> = <span class="number">1</span></span><br><span class="line"></span><br><span class="line">  <span class="comment"># 修改tcp会话进去fin状态后的等待时间，超时则关闭会话</span></span><br><span class="line">  net.ipv4.<span class="attr">tcp_fin_timeout</span> = <span class="number">30</span></span><br><span class="line"></span><br><span class="line">  <span class="comment"># 处于TIME_WAIT最大的socket数量，默认为180 000，超过这个数目的socket立即被清除</span></span><br><span class="line">  net.ipv4.<span class="attr">tcp_max_tw_buckets=180000</span></span><br><span class="line"></span><br><span class="line">  <span class="comment"># tcp缓存时间戳,RFC1323中描述了，系统缓存每个ip最新的时间戳，后续请求中该ip的tcp包中的时间戳如果小于缓存的时间戳(即非最新的数据包</span></span><br><span class="line">)，即视为无效，相应的数据包会被丢弃，而且是无声的丢弃。在默认情况下，此机制不会有问题，但在nat模式时,不同的ip被转换成同一个ip再去请</span><br><span class="line">求真正的server端，在server端看来，源ip都是相同的，且此时包的时间戳顺序可能不一定保持递增，由此会出现丢包的现象，因此，如果是nat模式工作，建议关闭此选项。</span><br><span class="line">  net.ipv4.<span class="attr">tcp_timestamps</span> = <span class="number">0</span></span><br></pre></td></tr></table></figure>
+<p>这几个参数之间还有一些关联关系，参考此篇文章,写得非常详细:<br><a href="http://www.freeoa.net/osuport/cluster/lvs-inuse-problem-sets_3111.html" target="_blank" rel="noopener">http://www.freeoa.net/osuport/cluster/lvs-inuse-problem-sets_3111.html</a></p>
+<h2 id="问题阶段-三"><a href="#问题阶段-三" class="headerlink" title="问题阶段(三):"></a>问题阶段(三):</h2><h5 id="现象"><a href="#现象" class="headerlink" title="现象"></a>现象</h5><p>完成上面的操作后，TIME_WAIT数量下降到了4位数，丢包数量没有再增加。但是过了一些天之后，再一次出现了偶尔个别VIP无法建立连接的情况。挑选了其中一个VIP 10.111.99.131开始排查<br>client: 192.168.58.36<br>DIP: 10.111.99.131<br>RIP: 172.26.8.17</p>
+<h5 id="开始排查"><a href="#开始排查" class="headerlink" title="开始排查"></a>开始排查</h5><p>三层连接没有问题:</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">ywq@ywq:~$ traceroute 10.111.99.131</span><br><span class="line">traceroute <span class="keyword">to</span> 10.111.99.131 (10.111.99.131), 30 hops max, 60 byte packets</span><br><span class="line"> 1  192.168.58.254 (192.168.58.254)  7.952 ms  8.510 ms  9.131 ms</span><br><span class="line"> 2  10.111.99.131 (10.111.99.131)  0.253 ms  0.243 ms  0.226 ms</span><br><span class="line"></span><br><span class="line">ywq@ywq:~$<span class="built_in"> ping </span>10.111.99.131</span><br><span class="line">PING 10.111.99.131 (10.111.99.131) 56(84) bytes of data.</span><br><span class="line">64 bytes <span class="keyword">from</span> 10.111.99.131: <span class="attribute">icmp_seq</span>=1 <span class="attribute">ttl</span>=63 <span class="attribute">time</span>=0.296 ms</span><br><span class="line">64 bytes <span class="keyword">from</span> 10.111.99.131: <span class="attribute">icmp_seq</span>=2 <span class="attribute">ttl</span>=63 <span class="attribute">time</span>=0.318 ms</span><br><span class="line">^C</span><br><span class="line">--- 10.111.99.131<span class="built_in"> ping </span>statistics ---</span><br><span class="line">2 packets transmitted, 2 received, 0% packet loss, time 1020ms</span><br><span class="line">rtt min/avg/max/mdev = 0.296/0.307/0.318/0.011 ms</span><br></pre></td></tr></table></figure>
+<p>tcp连接无法建立</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ywq@ywq:~$ telnet 10.111.99.131 80</span><br><span class="line">Trying 10.111.99.131<span class="built_in">..</span>.</span><br><span class="line">telnet: Unable <span class="keyword">to</span> connect <span class="keyword">to</span> remote host:<span class="built_in"> Connection </span>timeout</span><br></pre></td></tr></table></figure>
+<p>在lvs diretor server上查看连接状态：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@p020107 ~]<span class="comment"># ipvsadm -lnc | grep 58.36</span></span><br><span class="line">TCP 00:59  TIME_WAIT   192.168.9.13:58236 10.97.85.43:80     172.26.5.209:80</span><br><span class="line">TCP 00:48  SYN_RECV    192.168.58.36:57964 10.111.99.131:80   172.26.8.17:80</span><br><span class="line">TCP 00:48  SYN_RECV    192.168.58.36:57963 10.111.99.131:80   172.26.8.17:80</span><br><span class="line">TCP 00:48  SYN_RECV    192.168.58.36:57965 10.111.99.131:80   172.26.8.17:80</span><br></pre></td></tr></table></figure>
+<p>发现tcp连接状态为SYN_RECV状态，那么根据三次握手协定，再结合lvs的工作流程，说明LVS server接收到了clien的syn包,向client回复了syn+ack然后进入了SYN_RECV状态，同时direct server会向后端的real server发起建立连接的请求。既然现在direct server能与client端交互，那么当前的问题应该在于：<br><strong>direct Server和real Server之间没有正常地进行数据包交互或者出现了丢包，查阅了很多资料，rp_filter这一内核参数可能导致这一问题。</strong></p>
+<p>来看一下官方关于这一参数的解释:</p>
+<figure class="highlight applescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">rp_filter - INTEGER</span><br><span class="line">	<span class="number">0</span> - No source validation.</span><br><span class="line">	<span class="number">1</span> - Strict mode <span class="keyword">as</span> defined <span class="keyword">in</span> RFC3704 Strict Reverse Path</span><br><span class="line">	    Each incoming packet <span class="keyword">is</span> tested <span class="keyword">against</span> <span class="keyword">the</span> FIB <span class="keyword">and</span> <span class="keyword">if</span> <span class="keyword">the</span> interface</span><br><span class="line">	    <span class="keyword">is</span> <span class="keyword">not</span> <span class="keyword">the</span> best <span class="built_in">reverse</span> path <span class="keyword">the</span> packet check will fail.</span><br><span class="line">	    By default failed packets are discarded.</span><br><span class="line">	<span class="number">2</span> - Loose mode <span class="keyword">as</span> defined <span class="keyword">in</span> RFC3704 Loose Reverse Path</span><br><span class="line">	    Each incoming packet's source address <span class="keyword">is</span> also tested <span class="keyword">against</span> <span class="keyword">the</span> FIB</span><br><span class="line">	    <span class="keyword">and</span> <span class="keyword">if</span> <span class="keyword">the</span> source address <span class="keyword">is</span> <span class="keyword">not</span> reachable via any interface</span><br><span class="line">	    <span class="keyword">the</span> packet check will fail.</span><br><span class="line"></span><br><span class="line">	Current recommended practice <span class="keyword">in</span> RFC3704 <span class="keyword">is</span> <span class="keyword">to</span> enable strict mode</span><br><span class="line">	<span class="keyword">to</span> prevent IP spoofing <span class="keyword">from</span> DDos attacks. If using asymmetric routing</span><br><span class="line">	<span class="keyword">or</span> other complicated routing, <span class="keyword">then</span> loose mode <span class="keyword">is</span> recommended.</span><br><span class="line"></span><br><span class="line">	The max value <span class="keyword">from</span> conf/&#123;all,interface&#125;/rp_filter <span class="keyword">is</span> used</span><br><span class="line">	when doing source validation <span class="keyword">on</span> <span class="keyword">the</span> &#123;interface&#125;.</span><br><span class="line"></span><br><span class="line">	Default value <span class="keyword">is</span> <span class="number">0.</span> Note <span class="keyword">that</span> <span class="keyword">some</span> distributions enable <span class="keyword">it</span></span><br><span class="line">	<span class="keyword">in</span> startup scripts.</span><br></pre></td></tr></table></figure>
+<p><strong>简单解释一下:</strong><br>0:表示不开启源检测<br>1:严格模式，根据数据包的源，通过查FIB表(Forward Information Table,可以理解为路由表)，检查数据包进入端口是同时也是出端口，以视为最佳路径，如果不符合最佳路径，则丢弃数据包<br>2:松散模式,检查数据包的来源，查FIB表，如果通过任意端口都无法到达此源，则丢包</p>
+<p><strong>结合使用场景来说:</strong><br>在LVS (nat)+k8s的工作场景下，LVS Server送往Real Server的包可能走的tunnel接口，而Real Server通过tunnel接口收到包后，查路由表发现回包要走物理eth/bond之类接口，如果rp_filter开启了严格模式，会导致网络异常状况</p>
+<h5 id="检查每一台kube-node的网卡配置参数-发现centos7-4的几台node默认确实开启了rp-filter，ubuntu大部分则没有"><a href="#检查每一台kube-node的网卡配置参数-发现centos7-4的几台node默认确实开启了rp-filter，ubuntu大部分则没有" class="headerlink" title="检查每一台kube node的网卡配置参数,发现centos7.4的几台node默认确实开启了rp_filter，ubuntu大部分则没有:"></a>检查每一台kube node的网卡配置参数,发现centos7.4的几台node默认确实开启了rp_filter，ubuntu大部分则没有:</h5><figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 容器内的veth网卡可忽略，因为容器本身只有一块对外的网卡</span></span><br><span class="line"><span class="section">[root@p020114 ~]</span><span class="comment"># sysctl -a | grep rp_filter | grep -v 'veth'</span></span><br><span class="line"><span class="attr">net.ipv4.conf.all.rp_filter</span> = <span class="number">1</span></span><br><span class="line"><span class="attr">net.ipv4.conf.bond0.rp_filter</span> = <span class="number">1</span></span><br><span class="line"><span class="attr">net.ipv4.conf.default.rp_filter</span> = <span class="number">0</span></span><br><span class="line"><span class="attr">net.ipv4.conf.docker0.rp_filter</span> = <span class="number">2</span></span><br><span class="line"><span class="attr">net.ipv4.conf.dummy0.rp_filter</span> = <span class="number">0</span></span><br><span class="line"><span class="attr">net.ipv4.conf.em1.rp_filter</span> = <span class="number">1</span></span><br><span class="line"><span class="attr">net.ipv4.conf.em2.rp_filter</span> = <span class="number">1</span></span><br><span class="line"><span class="attr">net.ipv4.conf.em3.rp_filter</span> = <span class="number">1</span></span><br><span class="line"><span class="attr">net.ipv4.conf.em4.rp_filter</span> = <span class="number">1</span></span><br><span class="line"><span class="attr">net.ipv4.conf.kube-bridge.rp_filter</span> = <span class="number">0</span></span><br><span class="line"><span class="attr">net.ipv4.conf.kube-dummy-if.rp_filter</span> = <span class="number">0</span></span><br><span class="line"><span class="attr">net.ipv4.conf.lo.rp_filter</span> = <span class="number">0</span></span><br><span class="line"><span class="attr">net.ipv4.conf.tun-192168926.rp_filter</span> = <span class="number">1</span></span><br><span class="line"><span class="attr">net.ipv4.conf.tun-192168927.rp_filter</span> = <span class="number">1</span></span><br><span class="line"><span class="attr">net.ipv4.conf.tun-192168928.rp_filter</span> = <span class="number">1</span></span><br><span class="line"><span class="attr">net.ipv4.conf.tun-192168929.rp_filter</span> = <span class="number">1</span></span><br><span class="line"><span class="attr">net.ipv4.conf.tunl0.rp_filter</span> = <span class="number">0</span></span><br></pre></td></tr></table></figure>
+<p>关闭此功能</p>
+<figure class="highlight stata"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">echo "</span><br><span class="line"><span class="keyword">net</span>.ipv4.<span class="keyword">conf</span>.all.rp_filter = 0</span><br><span class="line"><span class="keyword">net</span>.ipv4.<span class="keyword">conf</span>.bond0.rp_filter = 0</span><br><span class="line"><span class="keyword">net</span>.ipv4.<span class="keyword">conf</span>.default.rp_filter = 0</span><br><span class="line"><span class="keyword">net</span>.ipv4.<span class="keyword">conf</span>.docker0.rp_filter = 2</span><br><span class="line"><span class="keyword">net</span>.ipv4.<span class="keyword">conf</span>.dummy0.rp_filter = 0</span><br><span class="line"><span class="keyword">net</span>.ipv4.<span class="keyword">conf</span>.em1.rp_filter = 0</span><br><span class="line"><span class="keyword">net</span>.ipv4.<span class="keyword">conf</span>.em2.rp_filter = 0</span><br><span class="line"><span class="keyword">net</span>.ipv4.<span class="keyword">conf</span>.em3.rp_filter = 0</span><br><span class="line"><span class="keyword">net</span>.ipv4.<span class="keyword">conf</span>.em4.rp_filter = 0</span><br><span class="line"><span class="keyword">net</span>.ipv4.<span class="keyword">conf</span>.kube-bridge.rp_filter = 0</span><br><span class="line"><span class="keyword">net</span>.ipv4.<span class="keyword">conf</span>.kube-dummy-<span class="keyword">if</span>.rp_filter = 0</span><br><span class="line"><span class="keyword">net</span>.ipv4.<span class="keyword">conf</span>.lo.rp_filter = 0</span><br><span class="line"><span class="keyword">net</span>.ipv4.<span class="keyword">conf</span>.tun-192168926.rp_filter = 0</span><br><span class="line"><span class="keyword">net</span>.ipv4.<span class="keyword">conf</span>.tun-192168927.rp_filter = 0</span><br><span class="line"><span class="keyword">net</span>.ipv4.<span class="keyword">conf</span>.tun-192168928.rp_filter = 0</span><br><span class="line"><span class="keyword">net</span>.ipv4.<span class="keyword">conf</span>.tun-192168929.rp_filter = 0</span><br><span class="line"><span class="keyword">net</span>.ipv4.<span class="keyword">conf</span>.tunl0.rp_filter = 0</span><br><span class="line">" &gt;&gt; /etc/sysctl.<span class="keyword">conf</span></span><br></pre></td></tr></table></figure>
+<p>加载生效</p>
+<figure class="highlight ebnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">sysctl -p</span></span><br></pre></td></tr></table></figure>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>VIP偶尔无法建立TCP连接的问题已解决，一个星期过去了没有再复现，继续观察ing.</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div id="reward-container">
+  <div>Thank you for your accept. mua！</div>
+  <button id="reward-button" disable="enable" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+
+    
+      
+      
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/reward/wechatpay.png" alt="丨ywq丨 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+      
+      
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/reward/alipay.png" alt="丨ywq丨 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        
+
+
+
+
+  
+
+
+
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>丨ywq丨</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    
+    <a href="https://www.ipyker.com/2018/12/11/Kubernetes踩坑(二)_ Service IP(LVS)间断性TCP连接故障排查.html" title="Kubernetes踩坑(二): Service IP(LVS)间断性TCP连接故障排查">https://www.ipyker.com/2018/12/11/Kubernetes踩坑(二)_ Service IP(LVS)间断性TCP连接故障排查.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li>
+</ul>
+
+      </div>
+    
+    <div>
+      
+        <div>
+    
+        <div style="text-align:center;color: #ccc;font-size:16px;">-------------本文结束<i class="fa fa-heart"></i>感谢您的阅读-------------</div>
+    
+</div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Kubernetes/" rel="tag"><i class="fa fa-tag"></i> Kubernetes</a>
+          
+            <a href="/tags/Network/" rel="tag"><i class="fa fa-tag"></i> Network</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/12/06/k8s(十四)、RBAC权限控制.html" rel="next" title="k8s(十四)、RBAC权限控制">
+                <i class="fa fa-chevron-left"></i> k8s(十四)、RBAC权限控制
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/01/21/Python子线程异常捕获-Python自定义优化线程池.html" rel="prev" title="Python子线程异常捕获 & Python自定义优化线程池">
+                Python子线程异常捕获 & Python自定义优化线程池 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC80NDM5Mi8yMDkyNA=="></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="丨ywq丨">
+            
+              <p class="site-author-name" itemprop="name">丨ywq丨</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives">
+                
+                    <span class="site-state-item-count">74</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                      <a href="/tags">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">15</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/yinwenqin" title="GitHub &rarr; https://github.com/yinwenqin" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://blog.csdn.net/ywq935" title="CSDN &rarr; https://blog.csdn.net/ywq935" rel="noopener" target="_blank"><i class="fa fa-fw fa-globe"></i>CSDN</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-book"></i>
+                推荐阅读
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.upweto.top/gitbooks/useKubernetes/" title="http://blog.upweto.top/gitbooks/useKubernetes/" rel="noopener" target="_blank">kubernetes使用指南</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.upweto.top/gitbooks/kubeSourceCodeNote/" title="http://blog.upweto.top/gitbooks/kubeSourceCodeNote/" rel="noopener" target="_blank">kubernetes源码笔记</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#问题阶段-一"><span class="nav-number">1.</span> <span class="nav-text">问题阶段(一):</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#问题阶段-二"><span class="nav-number">2.</span> <span class="nav-text">问题阶段(二):</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#现象："><span class="nav-number">2.0.0.1.</span> <span class="nav-text">现象：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#排查"><span class="nav-number">2.0.0.2.</span> <span class="nav-text">排查:</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#优化方式"><span class="nav-number">2.0.0.3.</span> <span class="nav-text">优化方式</span></a></li></ol></li></ol><li class="nav-item nav-level-2"><a class="nav-link" href="#问题阶段-三"><span class="nav-number">3.</span> <span class="nav-text">问题阶段(三):</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#现象"><span class="nav-number">3.0.0.1.</span> <span class="nav-text">现象</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#开始排查"><span class="nav-number">3.0.0.2.</span> <span class="nav-text">开始排查</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#检查每一台kube-node的网卡配置参数-发现centos7-4的几台node默认确实开启了rp-filter，ubuntu大部分则没有"><span class="nav-number">3.0.0.3.</span> <span class="nav-text">检查每一台kube node的网卡配置参数,发现centos7.4的几台node默认确实开启了rp_filter，ubuntu大部分则没有:</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">4.</span> <span class="nav-text">总结</span></a></li></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" style=" text-align:center;">&copy; 2017 – <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ywq</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"> 站点字数合计:</i>
+    </span>
+    
+    <span title="站点总字数">583k</span>
+  
+  
+</div>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+<div class="run_time" style=" text-align:center;">
+  <span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
+  <script>
+    var now = new Date(); 
+    function createtime() { 
+        var grt= new Date("08/23/2018 10:00:00");//此处修改你的建站时间或者网站上线时间 
+        now.setTime(now.getTime()+250); 
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days); 
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours); 
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum); 
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;} 
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum); 
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;} 
+        document.getElementById("timeDate").innerHTML = "本站已安全运行 "+dnum+" 天 "; 
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒"; 
+    } 
+    setInterval("createtime()",250);
+  </script>
+</div>
+
+        
+<div class="busuanzi-count" style=" text-align:center;">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-user"></i>
+    </span>
+    <span class="site-uv" title="总访客量">
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span> 人
+    </span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+  
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-eye"></i>
+    </span>
+    <span class="site-pv" title="总访问量">
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span> 次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+  
+    
+    
+      
+    
+  
+  <script color="black" opacity="0.7" zindex="-1" count="140" src="//cdn.jsdelivr.net/gh/theme-next/theme-next-canvas-nest@1.0.0/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+  
+  
+  <script id="ribbon" size="300" alpha="0.1" zindex="-1" src="/lib/canvas-ribbon/canvas-ribbon.js"></script>
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/fancybox/source/jquery.fancybox.pack.js"></script>
+
+
+  
+
+
+  <script src="/js/utils.js?v=7.1.1"></script>
+
+  <script src="/js/motion.js?v=7.1.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/schemes/muse.js?v=7.1.1"></script>
+
+
+
+
+  
+  <script src="/js/scrollspy.js?v=7.1.1"></script>
+<script src="/js/post-details.js?v=7.1.1"></script>
+
+
+
+  
+
+
+  <script src="/js/next-boot.js?v=7.1.1"></script>
+
+
+  
+
+  
+
+  
+  
+  
+
+  
+
+  
+  
+  
+
+
+  
+
+
+  
+    <script>
+  window.livereOptions = {
+    refer: '2018/12/11/Kubernetes踩坑(二)_ Service IP(LVS)间断性TCP连接故障排查.html'
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+</script>
+
+  
+
+
+  
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url).replace(/\/{2,}/g, '/');
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x"></i></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x"></i></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+  
+  <script src="/lib/bookmark/bookmark.min.js?v=1.0"></script>
+  <script>
+  
+    bookmark.scrollToMark('auto', "#更多");
+  
+  </script>
+
+
+  
+
+  
+
+  
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/koharu.model.json"},"display":{"position":"left","width":250,"height":500},"mobile":{"show":false},"react":{"opacity":0.7},"log":false});</script></body>
+</html>
+<!-- 页面点击小红心 -->
+<script type="text/javascript" src="/js/src/clicklove.js"></script>

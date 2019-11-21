@@ -1,0 +1,937 @@
+
+<!DOCTYPE HTML>
+<html lang="zh-hans" >
+    <head>
+        <meta charset="UTF-8">
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <title>8.3. kubeadm证书-etcd证书过期紧急处理 · Kubernetes生态圈使用</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="description" content="">
+        <meta name="generator" content="GitBook 3.2.3">
+        <meta name="author" content="ywq">
+        
+        
+    
+    <link rel="stylesheet" href="../gitbook/style.css">
+
+    
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-anchors/plugin.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-expandable-chapters/expandable-chapters.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-splitter/splitter.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-back-to-top-button/plugin.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-highlight/website.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-search/search.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-fontsettings/website.css">
+                
+            
+        
+
+    
+
+    
+        
+    
+
+        
+    
+    
+    <meta name="HandheldFriendly" content="true"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="../gitbook/images/apple-touch-icon-precomposed-152.png">
+    <link rel="shortcut icon" href="../gitbook/images/favicon.ico" type="image/x-icon">
+
+    
+    <link rel="next" href="Kubernetes-Pod无法终结问题排查.html" />
+    
+    
+    <link rel="prev" href="Service-ipvs模式间断性TCP连接故障排查.html" />
+    
+
+    </head>
+    <body>
+        
+<div class="book">
+    <div class="book-summary">
+        
+            
+<div id="book-search-input" role="search">
+    <input type="text" placeholder="输入并搜索" />
+</div>
+
+            
+                <nav role="navigation">
+                
+
+
+<ul class="summary">
+    
+    
+
+    
+
+    
+        
+        <li class="header">Part 1-写在前面</li>
+        
+        
+    
+        <li class="chapter " data-level="1.1" data-path="../">
+            
+                <a href="../">
+            
+                    
+                    1. 总览篇
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Part 2-集群相关</li>
+        
+        
+    
+        <li class="chapter " data-level="2.1" data-path="../part2/">
+            
+                <a href="../part2/">
+            
+                    
+                    2. 集群相关
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="2.1.1" data-path="../part2/v1.9.0高可用集群本地离线部署记录.html">
+            
+                <a href="../part2/v1.9.0高可用集群本地离线部署记录.html">
+            
+                    
+                    2.1. v1.9.0高可用集群部署
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.1.2" data-path="../part2/v1.14多master集群部署.html">
+            
+                <a href="../part2/v1.14多master集群部署.html">
+            
+                    
+                    2.2. v1.14.3高可用集群部署
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.1.3" data-path="../part2/Kubernetes中的Pause容器.html">
+            
+                <a href="../part2/Kubernetes中的Pause容器.html">
+            
+                    
+                    2.3. Kubernetes中的Pause容器
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.1.4" data-path="../part2/RBAC权限控制.html">
+            
+                <a href="../part2/RBAC权限控制.html">
+            
+                    
+                    2.4. RBAC权限控制
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.1.5" data-path="../part2/docker-k8s常用命令速查及rest-api.html">
+            
+                <a href="../part2/docker-k8s常用命令速查及rest-api.html">
+            
+                    
+                    2.5. 常用命令与rest-api速查
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.1.6" data-path="../part2/Kubernetes各组件参数配置优化建议.html">
+            
+                <a href="../part2/Kubernetes各组件参数配置优化建议.html">
+            
+                    
+                    2.6. Kubernetes各组件参数配置优化建议
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Part 3-网络与服务</li>
+        
+        
+    
+        <li class="chapter " data-level="3.1" data-path="../part3/">
+            
+                <a href="../part3/">
+            
+                    
+                    3. 网络与服务
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="3.1.1" data-path="../part3/Traefik提供ingress-http服务.html">
+            
+                <a href="../part3/Traefik提供ingress-http服务.html">
+            
+                    
+                    3.1. Traefik 提供ingress http服务
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.1.2" data-path="../part3/kube-router提供BGP全直通网络.html">
+            
+                <a href="../part3/kube-router提供BGP全直通网络.html">
+            
+                    
+                    3.2. Kube-router BGP全直通网络
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.1.3" data-path="../part3/kube-router工作模式抓包分析.html">
+            
+                <a href="../part3/kube-router工作模式抓包分析.html">
+            
+                    
+                    3.3. Kube-router ipvs Service模式抓包分析
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.1.4" data-path="../part3/VXLAN和Flannel.html">
+            
+                <a href="../part3/VXLAN和Flannel.html">
+            
+                    
+                    3.4. VXLAN和Flannel
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Part 4-监控</li>
+        
+        
+    
+        <li class="chapter " data-level="4.1" data-path="../part4/">
+            
+                <a href="../part4/">
+            
+                    
+                    4. Prometheus监控
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="4.1.1" data-path="../part4/监控--Prometheus部署篇.html">
+            
+                <a href="../part4/监控--Prometheus部署篇.html">
+            
+                    
+                    4.1. Prometheus部署篇
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="4.1.2" data-path="../part4/监控--Prometheus扩展篇（mysqld-exporter、服务发现、监控项、联邦、relabel）.html">
+            
+                <a href="../part4/监控--Prometheus扩展篇（mysqld-exporter、服务发现、监控项、联邦、relabel）.html">
+            
+                    
+                    4.2. Prometheus扩展篇
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="4.1.3" data-path="../part4/监控--Prometheus告警篇（告警消息对接钉钉接口）.html">
+            
+                <a href="../part4/监控--Prometheus告警篇（告警消息对接钉钉接口）.html">
+            
+                    
+                    4.3. Prometheus告警篇
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Part 5-分布式存储Ceph</li>
+        
+        
+    
+        <li class="chapter " data-level="5.1" data-path="../part5/">
+            
+                <a href="../part5/">
+            
+                    
+                    5. Ceph存储
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="5.1.1" data-path="../part5/Ceph集群生产环境安装部署.html">
+            
+                <a href="../part5/Ceph集群生产环境安装部署.html">
+            
+                    
+                    5.1. Ceph部署篇
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.1.2" data-path="../part5/cephfs调优-性能测试-监控-常用命令.html">
+            
+                <a href="../part5/cephfs调优-性能测试-监控-常用命令.html">
+            
+                    
+                    5.2. Ceph性能调优
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.1.3" data-path="../part5/分布式存储Cephfs使用.html">
+            
+                <a href="../part5/分布式存储Cephfs使用.html">
+            
+                    
+                    5.3. Cephfs在k8s中使用
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.1.4" data-path="../part5/分布式存储Ceph-RBD使用.html">
+            
+                <a href="../part5/分布式存储Ceph-RBD使用.html">
+            
+                    
+                    5.4. Ceph RBD在k8s中使用
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.1.5" data-path="../part5/Cephfs-CephRBD在k8s中的适用场景讨论及数据库性能压测.html">
+            
+                <a href="../part5/Cephfs-CephRBD在k8s中的适用场景讨论及数据库性能压测.html">
+            
+                    
+                    5.5. Ceph在k8s中的综合场景应用及数据库OLTP性能压测
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Part 6-微服务框架Istio</li>
+        
+        
+    
+        <li class="chapter " data-level="6.1" data-path="../part6/">
+            
+                <a href="../part6/">
+            
+                    
+                    6. Istio微服务框架
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="6.1.1" data-path="../part6/微服务框架istio安装测试.html">
+            
+                <a href="../part6/微服务框架istio安装测试.html">
+            
+                    
+                    6.1. istio安装测试
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="6.1.2" data-path="../part6/微服务框架istio流量策略控制.html">
+            
+                <a href="../part6/微服务框架istio流量策略控制.html">
+            
+                    
+                    6.2. istio流量策略控制
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="6.1.3" data-path="../part6/微服务框架istio服务可视化与监控.html">
+            
+                <a href="../part6/微服务框架istio服务可视化与监控.html">
+            
+                    
+                    6.3. istio服务可视化与监控
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="6.1.4" data-path="../part6/微服务--istio1.0抢鲜测试.html">
+            
+                <a href="../part6/微服务--istio1.0抢鲜测试.html">
+            
+                    
+                    6.4. istio v1.0 抢鲜测试
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Part 7-周边生态</li>
+        
+        
+    
+        <li class="chapter " data-level="7.1" data-path="../part7/">
+            
+                <a href="../part7/">
+            
+                    
+                    7. 周边生态
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="7.1.1" data-path="../part7/Docker-registry仓库历史镜像批量清理.html">
+            
+                <a href="../part7/Docker-registry仓库历史镜像批量清理.html">
+            
+                    
+                    7.1. Docker-registry历史镜像批量清理.md
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="7.1.2" data-path="../part7/企业级docker仓库Harbor在kubernetes上搭建使用.html">
+            
+                <a href="../part7/企业级docker仓库Harbor在kubernetes上搭建使用.html">
+            
+                    
+                    7.2. Harbor部署使用
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Part 8-问题记录</li>
+        
+        
+    
+        <li class="chapter " data-level="8.1" data-path="./">
+            
+                <a href="./">
+            
+                    
+                    8. 问题记录
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="8.1.1" data-path="Kubernetes部署问题记录.html">
+            
+                <a href="Kubernetes部署问题记录.html">
+            
+                    
+                    8.1. 集群部署问题记录
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="8.1.2" data-path="Service-ipvs模式间断性TCP连接故障排查.html">
+            
+                <a href="Service-ipvs模式间断性TCP连接故障排查.html">
+            
+                    
+                    8.2. Service ipvs模式间断性TCP连接故障排查
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter active" data-level="8.1.3" data-path="kubeadm证书-etcd证书过期紧急处理.html">
+            
+                <a href="kubeadm证书-etcd证书过期紧急处理.html">
+            
+                    
+                    8.3. kubeadm证书-etcd证书过期紧急处理
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="8.1.4" data-path="Kubernetes-Pod无法终结问题排查.html">
+            
+                <a href="Kubernetes-Pod无法终结问题排查.html">
+            
+                    
+                    8.4. Kubernetes-Pod无法终结问题排查
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+
+    <li class="divider"></li>
+
+    <li>
+        <a href="https://www.gitbook.com" target="blank" class="gitbook-link">
+            本书使用 GitBook 发布
+        </a>
+    </li>
+</ul>
+
+
+                </nav>
+            
+        
+    </div>
+
+    <div class="book-body">
+        
+            <div class="body-inner">
+                
+                    
+
+<div class="book-header" role="navigation">
+    
+
+    <!-- Title -->
+    <h1>
+        <i class="fa fa-circle-o-notch fa-spin"></i>
+        <a href=".." >8.3. kubeadm证书-etcd证书过期紧急处理</a>
+    </h1>
+</div>
+
+
+
+
+                    <div class="page-wrapper" tabindex="-1" role="main">
+                        <div class="page-inner">
+                            
+<div id="book-search-results">
+    <div class="search-noresults">
+    
+                                <section class="normal markdown-section">
+                                
+                                <h2 id="&#x6545;&#x969C;&#x73B0;&#x8C61;"><a name="&#x6545;&#x969C;&#x73B0;&#x8C61;" class="plugin-anchor" href="#&#x6545;&#x969C;&#x73B0;&#x8C61;"><i class="fa fa-link" aria-hidden="true"></i></a>&#x6545;&#x969C;&#x73B0;&#x8C61;</h2>
+<p>&#x4F7F;&#x7528;kubeadm&#x90E8;&#x7F72;&#x7684;&#x96C6;&#x7FA4;&#xFF0C;&#x5728;&#x8FD0;&#x884C;&#x4E86;&#x4E00;&#x5E74;&#x4E4B;&#x540E;&#x7684;&#x4ECA;&#x5929;&#xFF0C;&#x51FA;&#x73B0;k8s api&#x65E0;&#x6CD5;&#x8C03;&#x53D6;&#x7684;&#x73B0;&#x8C61;&#xFF0C;&#x4F7F;&#x7528;kubectl&#x547D;&#x4EE4;&#x83B7;&#x53D6;&#x8D44;&#x6E90;&#x5747;&#x8FD4;&#x56DE;&#x5982;&#x4E0B;&#x62A5;&#x9519;:</p>
+<pre><code>Unable to connect to the server: x509: certificate has expired or is not yet valid
+</code></pre><h2 id="&#x6545;&#x969C;&#x6392;&#x67E5;"><a name="&#x6545;&#x969C;&#x6392;&#x67E5;" class="plugin-anchor" href="#&#x6545;&#x969C;&#x6392;&#x67E5;"><i class="fa fa-link" aria-hidden="true"></i></a>&#x6545;&#x969C;&#x6392;&#x67E5;</h2>
+<p>&#x67E5;&#x770B;apiserver.crt&#x8BC1;&#x4E66;&#x7684;&#x7B7E;&#x7F72;&#x671F;&#x548C;&#x8FC7;&#x671F;&#x671F;&#xFF1A;</p>
+<pre><code>root@9027:/etc/etcd/ssl# openssl x509 -in /etc/kubernetes/pki/apiserver.crt -noout -text |grep &apos; Not &apos;
+            Not Before: Mar  8 03:49:29 2018 GMT
+            Not After : Mar  7 05:44:27 2020 GMT
+</code></pre><p>&#x53D1;&#x73B0;&#x6070;&#x597D;&#x521A;&#x5230;&#x8FC7;&#x671F;&#x65E5;&#x671F;&#xFF0C;&#x53BB;github&#x67E5;&#x8BE2;&#x624D;&#x5F97;&#x77E5;kubeadm&#x9ED8;&#x8BA4;&#x7684;&#x8BC1;&#x4E66;&#x7B7E;&#x7F72;&#x8FC7;&#x671F;&#x65F6;&#x95F4;&#x4E3A;1&#x5E74;&#xFF0C;&#x5927;&#x5751;&#xFF01;google&#x627E;&#x5230;&#x65B9;&#x6CD5;&#x8BF4;&#x53EF;&#x4EE5;&#x901A;&#x8FC7;&#x4FEE;&#x6539;kubeadm&#x6E90;&#x4EE3;&#x7801;&#x8C03;&#x6574;&#x8BC1;&#x4E66;&#x7B7E;&#x7F72;&#x7684;&#x8FC7;&#x671F;&#x65F6;&#x95F4;&#x7136;&#x540E;&#x91CD;&#x65B0;&#x7F16;&#x8BD1;&#xFF0C;&#x5373;&#x53EF;&#x9884;&#x9632;&#x8FD9;&#x4E2A;&#x95EE;&#x9898;&#x3002;&#x4F46;&#x662F;&#x73B0;&#x5728;&#x8BC1;&#x4E66;&#x8FC7;&#x671F;&#x7684;&#x95EE;&#x9898;&#x5DF2;&#x7ECF;&#x53D1;&#x751F;&#x4E86;&#xFF0C;&#x53EA;&#x80FD;&#x901A;&#x8FC7;&#x66F4;&#x6362;&#x8BC1;&#x4E66;&#x7684;&#x529E;&#x6CD5;&#x89E3;&#x51B3;&#xFF0C;&#x5728;github&#x4E0A;&#x6709;&#x8BE6;&#x7EC6;&#x7684;&#x8BF4;&#x660E;&#xFF0C;issue&#x94FE;&#x63A5;&#x5982;&#x4E0B;:
+<a href="https://github.com/kubernetes/kubeadm/issues/581" target="_blank">https://github.com/kubernetes/kubeadm/issues/581</a></p>
+<h4 id="&#x5F00;&#x59CB;&#x66FF;&#x6362;apiserver&#x8BC1;&#x4E66;"><a name="&#x5F00;&#x59CB;&#x66FF;&#x6362;apiserver&#x8BC1;&#x4E66;" class="plugin-anchor" href="#&#x5F00;&#x59CB;&#x66FF;&#x6362;apiserver&#x8BC1;&#x4E66;"><i class="fa fa-link" aria-hidden="true"></i></a>&#x5F00;&#x59CB;&#x66FF;&#x6362;apiserver&#x8BC1;&#x4E66;</h4>
+<p>&#x8FDB;&#x5165;master&#x8282;&#x70B9;</p>
+<pre><code>cd /etc/kubernetes
+# &#x5907;&#x4EFD;&#x8BC1;&#x4E66;&#x548C;&#x914D;&#x7F6E;
+mkdir ./pki_bak
+mkdir ./conf_bak
+mv pki/apiserver* ./pki_bak/
+mv pki/front-proxy-client.* ./pki_bak/
+ mv ./admin.conf ./conf_bak/
+ mv ./kubelet.conf ./conf_bak/
+ mv ./controller-manager.conf ./conf_bak/
+ mv ./scheduler.conf ./conf_bak/
+
+# &#x521B;&#x5EFA;&#x8BC1;&#x4E66;
+kubeadm alpha phase certs apiserver --apiserver-advertise-address ${MASTER_API_SERVER_IP}
+kubeadm alpha phase certs apiserver-kubelet-client
+kubeadm alpha phase certs front-proxy-client
+
+# &#x751F;&#x6210;&#x65B0;&#x914D;&#x7F6E;&#x6587;&#x4EF6;
+kubeadm alpha phase kubeconfig all --apiserver-advertise-address ${MASTER_API_SERVER_IP}
+
+# &#x5C06;&#x65B0;&#x751F;&#x6210;&#x7684;admin&#x914D;&#x7F6E;&#x6587;&#x4EF6;&#x8986;&#x76D6;&#x6389;&#x539F;&#x672C;&#x7684;admin&#x6587;&#x4EF6;
+mv $HOME/.kube/config $HOME/.kube/config.old
+cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+chown $(id -u):$(id -g) $HOME/.kube/config
+sudo chmod 777 $HOME/.kube/config
+</code></pre><p>&#x5B8C;&#x6210;&#x4E0A;&#x65B9;&#x64CD;&#x4F5C;&#x540E;&#xFF0C;docker restart&#x91CD;&#x542F;kube-apiserver,kube-controller,kube-scheduler&#x8FD9;3&#x4E2A;&#x5BB9;&#x5668;</p>
+<p>&#x67E5;&#x770B;&#x8BC1;&#x4E66;&#x7684;&#x8FC7;&#x671F;&#x65F6;&#x95F4;:</p>
+<pre><code>root@009027:~# openssl x509 -in /etc/kubernetes/pki/apiserver.crt -noout -text |grep &apos; Not &apos;
+            Not Before: Mar  8 03:49:29 2018 GMT
+            Not After : Mar  7 05:44:27 2020 GMT
+</code></pre><p>&#x53EF;&#x4EE5;&#x770B;&#x5230;&#x8BC1;&#x4E66;&#x6709;&#x6548;&#x671F;&#x5EF6;&#x957F;&#x4E86;&#x4E00;/</p>
+<p>&#x5982;&#x679C;&#x6709;&#x591A;&#x53F0;master&#x8282;&#x70B9;&#xFF0C;&#x5148;&#x4EFF;&#x7167;&#x4E0A;&#x65B9;&#x5C06;&#x8BC1;&#x4E66;&#x6587;&#x4EF6;&#x548C;&#x914D;&#x7F6E;&#x6587;&#x4EF6;&#x8FDB;&#x884C;&#x5907;&#x4EFD;&#xFF0C;&#x7136;&#x540E;&#x5C06;&#x8FD9;&#x4E00;&#x53F0;&#x914D;&#x7F6E;&#x5B8C;&#x6210;&#x7684;master&#x4E0A;&#x7684;&#x8BC1;&#x4E66;&#x548C;&#x914D;&#x7F6E;scp&#x8FC7;&#x53BB;:</p>
+<pre><code>scp pki/* root@${other_master}:/etc/kubernetes/pki/
+scp admin.conf kubelet.conf controller-manager.conf scheduler.conf root@${other_master}:/etc/kubernetes/
+</code></pre><p>scp&#x5B8C;&#x6210;&#x540E;&#x8BB0;&#x5F97;&#x91CD;&#x542F;&#x76F8;&#x5E94;master&#x4E0A;&#x7684;3&#x4E2A;kubernetes&#x7EC4;&#x4EF6;&#x5BB9;&#x5668;&#x3002;</p>
+<h3 id="&#x9A8C;&#x8BC1;"><a name="&#x9A8C;&#x8BC1;" class="plugin-anchor" href="#&#x9A8C;&#x8BC1;"><i class="fa fa-link" aria-hidden="true"></i></a>&#x9A8C;&#x8BC1;</h3>
+<p>kubectl&#x547D;&#x4EE4;&#x53D1;&#x73B0;&#x8FD8;&#x662F;&#x65E0;&#x6CD5;&#x67E5;&#x770B;&#x8D44;&#x6E90;&#xFF0C;&#x68C0;&#x67E5;apiserver&#x7684;&#x5FD7;: kubectl logs ${api-server_container_id} </p>
+<pre><code>I0308 06:26:52.956024       1 serve.go:89] Serving securely on [::]:6443
+I0308 06:26:52.956168       1 available_controller.go:262] Starting AvailableConditionController
+I0308 06:26:52.956180       1 apiservice_controller.go:112] Starting APIServiceRegistrationController
+I0308 06:26:52.956244       1 cache.go:32] Waiting for caches to sync for APIServiceRegistrationController controller
+E0308 06:26:52.956279       1 cache.go:35] Unable to sync caches for APIServiceRegistrationController controller
+I0308 06:26:52.956291       1 apiservice_controller.go:116] Shutting down APIServiceRegistrationController
+I0308 06:26:52.956325       1 crd_finalizer.go:242] Starting CRDFinalizer
+I0308 06:26:52.956195       1 cache.go:32] Waiting for caches to sync for AvailableConditionController controller
+I0308 06:26:52.956342       1 crd_finalizer.go:246] Shutting down CRDFinalizer
+I0308 06:26:52.956363       1 customresource_discovery_controller.go:152] Starting DiscoveryController
+E0308 06:26:52.956376       1 customresource_discovery_controller.go:155] timed out waiting for caches to sync
+I0308 06:26:52.956392       1 naming_controller.go:274] Starting NamingConditionController
+E0308 06:26:52.956399       1 cache.go:35] Unable to sync caches for AvailableConditionController controller
+I0308 06:26:52.956403       1 naming_controller.go:278] Shutting down NamingConditionController
+I0308 06:26:52.956435       1 controller.go:84] Starting OpenAPI AggregationController
+I0308 06:26:52.956457       1 controller.go:90] Shutting down OpenAPI AggregationController
+I0308 06:26:52.956476       1 crdregistration_controller.go:110] Starting crd-autoregister controller
+I0308 06:26:52.956487       1 controller_utils.go:1019] Waiting for caches to sync for crd-autoregister controller
+E0308 06:26:52.956504       1 controller_utils.go:1022] Unable to sync caches for crd-autoregister controller
+I0308 06:26:52.957364       1 customresource_discovery_controller.go:156] Shutting down DiscoveryController
+I0308 06:26:52.958437       1 available_controller.go:266] Shutting down AvailableConditionController
+I0308 06:26:52.959508       1 crdregistration_controller.go:115] Shutting down crd-autoregister controller
+</code></pre><p>&#x53D1;&#x73B0;kube-apiserver&#x5BB9;&#x5668;&#x65E0;&#x6CD5;&#x6B63;&#x5E38;&#x542F;&#x52A8;&#xFF0C;&#x6000;&#x7591;&#x662F;&#x8BC1;&#x4E66;&#x914D;&#x7F6E;&#x8FC7;&#x7A0B;&#x4E2D;&#x51FA;&#x9519;&#xFF0C;&#x91CD;&#x590D;&#x4E86;&#x5982;&#x4E0A;&#x6B65;&#x9AA4;&#x591A;&#x6B21;&#xFF0C;&#x53D1;&#x73B0;&#x95EE;&#x9898;&#x4F9D;&#x65E7;&#x3002;etcd&#x548C;kubeadm&#x662F;&#x540C;&#x4E00;&#x65F6;&#x95F4;&#x90E8;&#x7F72;&#x7684;&#xFF0C;&#x8FD9;&#x4E2A;&#x65F6;&#x5019;&#x8003;&#x8651;etcd&#x662F;&#x5426;&#x6709;&#x95EE;&#x9898;</p>
+<h2 id="etcd&#x8BC1;&#x4E66;&#x8FC7;&#x671F;&#x5904;&#x7406;"><a name="etcd&#x8BC1;&#x4E66;&#x8FC7;&#x671F;&#x5904;&#x7406;" class="plugin-anchor" href="#etcd&#x8BC1;&#x4E66;&#x8FC7;&#x671F;&#x5904;&#x7406;"><i class="fa fa-link" aria-hidden="true"></i></a>etcd&#x8BC1;&#x4E66;&#x8FC7;&#x671F;&#x5904;&#x7406;</h2>
+<p>&#x68C0;&#x67E5;etcd&#x7684;&#x8BC1;&#x4E66;&#xFF0C;&#x53D1;&#x73B0;etcd&#x540C;&#x6837;&#x4E5F;&#x8FC7;&#x671F;&#x4E86;&#xFF1A;</p>
+<pre><code>root@yksp009027:/etc/etcd/ssl# openssl x509 -in etcd.pem -noout -text |grep &apos; Not &apos;
+            Not Before: Mar  7 00:59:00 2018 GMT
+            Not After : Mar  7 00:59:00 2019 GMT
+</code></pre><p>&#x67E5;&#x770B;&#x6B64;&#x524D;&#x90E8;&#x7F72;&#x7684;&#x65F6;&#x5019;&#x914D;&#x7F6E;etcd&#x7684;ca&#x914D;&#x7F6E;&#x6587;&#x4EF6;&#xFF0C;&#x53D1;&#x73B0;&#x6307;&#x5B9A;&#x7684;&#x8BC1;&#x4E66;&#x7B7E;&#x7F72;&#x8FC7;&#x671F;&#x65F6;&#x95F4;&#x5C45;&#x7136;&#x662F;1/&#xFF08;8760h&#xFF09;&#x3002;&#x3002;&#x592A;&#x5751;&#x4E86;&#xFF01;(&#x4E0D;&#x6E05;&#x695A;&#x8BC1;&#x4E66;&#x751F;&#x6210;&#x4EE5;&#x53CA;etcd&#x5B89;&#x88C5;&#x6D41;&#x7A0B;&#x7684;&#xFF0C;&#x53EF;&#x4EE5;&#x53C2;&#x8003;&#x6B64;&#x524D;&#x7684;&#x6587;&#x7AE0;&#xFF1A;<a href="https://blog.csdn.net/ywq935/article/details/80109090" target="_blank">&#x90E8;&#x7F72;&#x7BC7;</a>)</p>
+<pre><code>root@009027:~/ssl# cat config.json
+{
+&quot;signing&quot;: {
+    &quot;default&quot;: {
+      &quot;expiry&quot;: &quot;8760h&quot;
+      },
+    &quot;profiles&quot;: {
+      &quot;kubernetes&quot;: {
+        &quot;usages&quot;: [
+            &quot;signing&quot;,
+            &quot;key encipherment&quot;,
+            &quot;server auth&quot;,
+            &quot;client auth&quot;
+        ],
+        &quot;expiry&quot;: &quot;8760h&quot;
+      }
+    }
+}
+}
+</code></pre><p>&#x5C45;&#x7136;&#x548C;kubeadm&#x751F;&#x4EA7;&#x7684;api-server&#x8BC1;&#x4E66;&#x5728;&#x540C;&#x4E00;&#x65F6;&#x95F4;&#x8FC7;&#x671F;&#x4E86;&#xFF0C;&#x4E24;&#x4E2A;&#x5751;&#x8FDE;&#x5728;&#x4E00;&#x8D77;&#xFF0C;&#x7B80;&#x76F4;&#x9632;&#x4E0D;&#x80DC;&#x9632;&#xFF01;</p>
+<p>&#x77E5;&#x9053;&#x95EE;&#x9898;&#x6240;&#x5728;&#x4E86;&#xFF0C;&#x90A3;&#x4E48;&#x73B0;&#x5728;&#x5F00;&#x59CB;&#x66FF;&#x6362;etcd&#x7684;&#x8BC1;&#x4E66;&#xFF1A;</p>
+<p>&#x9996;&#x5148;&#x5907;&#x4EFD;etcd&#x6570;&#x636E;:</p>
+<pre><code>cd /var/lib
+tar -zvcf etcd.tar.gz etcd/
+</code></pre><p>&#x4FEE;&#x6539;ca&#x914D;&#x7F6E;&#x6587;&#x4EF6;&#xFF0C;&#x5C06;&#x9ED8;&#x8BA4;&#x8BC1;&#x4E66;&#x7B7E;&#x7F72;&#x8FC7;&#x671F;&#x65F6;&#x95F4;&#x4FEE;&#x6539;&#x4E3A;10/:</p>
+<pre><code>
+root@009027:~/ssl# cat config.json
+{
+&quot;signing&quot;: {
+    &quot;default&quot;: {
+      &quot;expiry&quot;: &quot;87600h&quot;
+      },
+    &quot;profiles&quot;: {
+      &quot;kubernetes&quot;: {
+        &quot;usages&quot;: [
+            &quot;signing&quot;,
+            &quot;key encipherment&quot;,
+            &quot;server auth&quot;,
+            &quot;client auth&quot;
+        ],
+        &quot;expiry&quot;: &quot;87600h&quot;
+      }
+    }
+}
+}
+</code></pre><p>&#x751F;&#x6210;&#x65B0;&#x7684;&#x8BC1;&#x4E66;:</p>
+<pre><code>#&#x5220;&#x9664;&#x8FC7;&#x671F;&#x8BC1;&#x4E66;
+rm -f /etc/etcd/ssl/*
+
+# &#x521B;&#x5EFA;&#x65B0;&#x8BC1;&#x4E66;
+cfssl gencert -ca=ca.pem   -ca-key=ca-key.pem   -config=config.json   -profile=kubernetes etcd-csr.json | cfssljson -bare etcd
+cp etcd.pem etcd-key.pem  ca.pem /etc/etcd/ssl/
+
+# &#x67E5;&#x770B;&#x65B0;&#x8BC1;&#x4E66;
+root@009027:/etc/etcd/ssl# openssl x509 -in etcd.pem -noout -text |grep &apos; Not &apos;
+            Not Before: Mar  8 06:59:00 2019 GMT
+            Not After : Mar  5 06:59:00 2029 GMT
+
+#&#x62F7;&#x8D1D;&#x5230;&#x5176;&#x4ED6;etcd&#x8282;&#x70B9;
+scp -r /etc/etcd/ssl root@${other_node}:/etc/etcd/
+
+# &#x91CD;&#x542F;etcd&#x670D;&#x52A1;(&#x8BB0;&#x4F4F;&#xFF0C;&#x8981;3&#x4E2A;&#x8282;&#x70B9;&#x4E00;&#x8D77;&#x91CD;&#x542F;&#xFF0C;&#x4E0D;&#x7136;&#x4F1A;hang&#x4F4F;)
+systemctl restart etcd
+</code></pre><h2 id="&#x5904;&#x7406;&#x7ED3;&#x679C;"><a name="&#x5904;&#x7406;&#x7ED3;&#x679C;" class="plugin-anchor" href="#&#x5904;&#x7406;&#x7ED3;&#x679C;"><i class="fa fa-link" aria-hidden="true"></i></a>&#x5904;&#x7406;&#x7ED3;&#x679C;</h2>
+<p>etcd&#x8BC1;&#x4E66;&#x66F4;&#x6362;&#x5B8C;&#x6BD5;&#x540E;&#xFF0C;&#x518D;&#x6B21;&#x5C1D;&#x8BD5;&#x91CD;&#x542F;apiserver&#x7684;&#x5BB9;&#x5668;&#xFF0C;&#x542F;&#x52A8;&#x6210;&#x529F;&#xFF0C;&#x96C6;&#x7FA4;api-server&#x6062;&#x590D;,&#x6545;&#x969C;&#x89E3;&#x51B3;&#x3002;&#x8FDE;&#x7EED;2&#x4E2A;&#x8BC1;&#x4E66;&#x8FC7;&#x671F;&#xFF0C;&#x4E00;&#x5751;&#x63A5;&#x4E00;&#x5751;&#xFF0C;&#x5361;&#x5728;apiserver&#x4E00;&#x76F4;&#x65E0;&#x6CD5;&#x6062;&#x590D;&#x7684;&#x65F6;&#x5019;&#xFF0C;&#x4E00;&#x5EA6;&#x6709;&#x4E9B;&#x6050;&#x614C;&#xFF0C;&#x62C5;&#x5FC3;&#x6574;&#x4E2A;&#x96C6;&#x7FA4;&#x7531;&#x6B64;&#x5D29;&#x6E83;&#x6570;&#x636E;&#x4E22;&#x5931;&#xFF0C;&#x8FD8;&#x5728;&#x540E;&#x9762;&#x987A;&#x5229;&#x89E3;&#x51B3;&#x3002;&#x5728;&#x90E8;&#x7F72;&#x4E4B;&#x521D;&#x6CA1;&#x6709;&#x6CE8;&#x610F;&#x5230;&#x8FD9;&#x4E9B;&#x7EC6;&#x8282;&#x95EE;&#x9898;&#xFF0C;&#x4F8B;&#x5982;&#x5F88;&#x660E;&#x663E;&#x7684;&#x662F;etcd&#x8BC1;&#x4E66;&#x7684;&#x7B7E;&#x7F72;ca&#x914D;&#x7F6E;&#x7684;&#x8D85;&#x65F6;&#x65F6;&#x95F4;&#x5C45;&#x7136;&#x53EA;&#x6709;1/&#xFF0C;&#x624D;&#x5BFC;&#x81F4;&#x540E;&#x9762;&#x624D;&#x8E29;&#x4E86;&#x8FD9;&#x4E9B;&#x5751;&#x3002;&#x5E73;&#x65F6;&#x4E5F;&#x8981;&#x53CA;&#x65F6;&#x5907;&#x4EFD;&#x91CD;&#x8981;&#x6570;&#x636E;&#xFF0C;&#x8981;&#x591A;&#x591A;&#x8003;&#x8651;&#x6781;&#x7AEF;&#x60C5;&#x51B5;&#x4E0B;&#x7684;&#x670D;&#x52A1;&#x6062;&#x590D;&#x65B9;&#x6848;&#x3002;</p>
+
+                                
+                                </section>
+                            
+    </div>
+    <div class="search-results">
+        <div class="has-results">
+            
+            <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+            <ul class="search-results-list"></ul>
+            
+        </div>
+        <div class="no-results">
+            
+            <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+            
+        </div>
+    </div>
+</div>
+
+                        </div>
+                    </div>
+                
+            </div>
+
+            
+                
+                <a href="Service-ipvs模式间断性TCP连接故障排查.html" class="navigation navigation-prev " aria-label="Previous page: 8.2. Service ipvs模式间断性TCP连接故障排查">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+                
+                
+                <a href="Kubernetes-Pod无法终结问题排查.html" class="navigation navigation-next " aria-label="Next page: 8.4. Kubernetes-Pod无法终结问题排查">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+                
+            
+        
+    </div>
+
+    <script>
+        var gitbook = gitbook || [];
+        gitbook.push(function() {
+            gitbook.page.hasChanged({"page":{"title":"8.3. kubeadm证书-etcd证书过期紧急处理","date":"2019/03/08 17:47:36","tags":["Kubernetes"],"level":"8.1.3","depth":2,"next":{"title":"8.4. Kubernetes-Pod无法终结问题排查","level":"8.1.4","depth":2,"path":"part8/Kubernetes-Pod无法终结问题排查.md","ref":"./part8/Kubernetes-Pod无法终结问题排查.md","articles":[]},"previous":{"title":"8.2. Service ipvs模式间断性TCP连接故障排查","level":"8.1.2","depth":2,"path":"part8/Service-ipvs模式间断性TCP连接故障排查.md","ref":"./part8/Service-ipvs模式间断性TCP连接故障排查.md","articles":[]},"dir":"ltr"},"config":{"plugins":["-sharing","anchors","github","expandable-chapters","splitter","back-to-top-button"],"styles":{"website":"./styles/website.css"},"pluginsConfig":{"github":{"url":"https://github.com/yinwenqin/kubeSourceCodeNote"},"splitter":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"back-to-top-button":{},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false},"anchors":{},"expandable-chapters":{}},"theme":"default","author":"ywq","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"Kubernetes生态圈使用","language":"zh-hans","links":{},"gitbook":"3.2.3","description":""},"file":{"path":"part8/kubeadm证书-etcd证书过期紧急处理.md","mtime":"2019-11-21T07:58:03.723Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2019-11-21T08:49:48.491Z"},"basePath":"..","book":{"language":""}});
+        });
+    </script>
+</div>
+
+        
+    <script src="../gitbook/gitbook.js"></script>
+    <script src="../gitbook/theme.js"></script>
+    
+        
+        <script src="../gitbook/gitbook-plugin-github/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-expandable-chapters/expandable-chapters.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-splitter/splitter.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-back-to-top-button/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search/search-engine.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search/search.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-lunr/lunr.min.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-lunr/search-lunr.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-fontsettings/fontsettings.js"></script>
+        
+    
+
+    </body>
+</html>
+

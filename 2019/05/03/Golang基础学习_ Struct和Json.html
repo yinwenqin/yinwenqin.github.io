@@ -1,0 +1,1529 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-CN">
+
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link rel="stylesheet" href="/lib/pace/pace-theme-bounce.min.css?v=1.0.2">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link rel="stylesheet" href="/lib/fancybox/source/jquery.fancybox.css">
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+    
+      
+    
+
+    
+  
+
+  
+
+  
+
+  
+    
+      
+    
+
+    
+  
+
+  
+    
+    
+    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic|Roboto Slab:300,300italic,400,400italic,700,700italic|Roboto Mono:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext">
+  
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.1.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.1.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.1.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.1.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.1.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '7.1.1',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":true,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: true,
+    fancybox: true,
+    fastclick: true,
+    lazyload: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"shrinkIn","post_header":"slideLeftIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideDownIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <script>
+  (function(i,s,o,g,r,a,m){i["DaoVoiceObject"]=r;i[r]=i[r]||function(){(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;a.charset="utf-8";m.parentNode.insertBefore(a,m)})(window,document,"script",('https:' == document.location.protocol ? 'https:' : 'http:') + "//widget.daovoice.io/widget/0f81ff2f.js","daovoice")
+  daovoice('init', {
+      app_id: "bd399fce"
+    });
+  daovoice('update');
+  </script>
+
+  <meta name="description" content="前言结构体是将多个任意类型的命名变量组合在一起的聚合数据类型，通过结构体，可以多维度/方面的聚合逻辑数据，形成一个整体，其中的这些命名变量叫做结构体的成员。 Struct声明：12345678910// 声明一个结构体类型type Employee struct &amp;#123;	ID        int	Name      string	Address   string	DoB       str">
+<meta name="keywords" content="Golang">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Golang基础学习: Struct和Json">
+<meta property="og:url" content="https://www.ipyker.com/2019/05/03/Golang基础学习_ Struct和Json.html">
+<meta property="og:site_name" content="随笔漫谈">
+<meta property="og:description" content="前言结构体是将多个任意类型的命名变量组合在一起的聚合数据类型，通过结构体，可以多维度/方面的聚合逻辑数据，形成一个整体，其中的这些命名变量叫做结构体的成员。 Struct声明：12345678910// 声明一个结构体类型type Employee struct &amp;#123;	ID        int	Name      string	Address   string	DoB       str">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-11-21T07:48:40.091Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Golang基础学习: Struct和Json">
+<meta name="twitter:description" content="前言结构体是将多个任意类型的命名变量组合在一起的聚合数据类型，通过结构体，可以多维度/方面的聚合逻辑数据，形成一个整体，其中的这些命名变量叫做结构体的成员。 Struct声明：12345678910// 声明一个结构体类型type Employee struct &amp;#123;	ID        int	Name      string	Address   string	DoB       str">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="随笔漫谈" type="application/atom+xml">
+
+
+
+  
+  
+  <link rel="canonical" href="https://www.ipyker.com/2019/05/03/Golang基础学习_ Struct和Json">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Golang基础学习: Struct和Json | 随笔漫谈</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+ 
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">随笔漫谈</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-book">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/gitbooks/" rel="section"><i class="menu-item-icon fa fa-fw fa-book"></i> <br>book</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-互动">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/guestbook/" rel="section"><i class="menu-item-icon fa fa-fw fa-comments"></i> <br>互动</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.ipyker.com/2019/05/03/Golang基础学习_ Struct和Json.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="丨ywq丨">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随笔漫谈">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Golang基础学习: Struct和Json
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-05-03 15:38:49" itemprop="dateCreated datePublished" datetime="2019-05-03T15:38:49+08:00">2019-05-03</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-11-21 15:48:40" itemprop="dateModified" datetime="2019-11-21T15:48:40+08:00">2019-11-21</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+            <div class="post-symbolscount">
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">本文字数：</span>
+                
+                <span title="本文字数">12k</span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">10 分钟</span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>结构体是将多个任意类型的命名变量组合在一起的聚合数据类型，通过结构体，可以多维度/方面的聚合逻辑数据，形成一个整体，其中的这些命名变量叫做结构体的成员。</p>
+<h2 id="Struct"><a href="#Struct" class="headerlink" title="Struct"></a>Struct</h2><h5 id="声明："><a href="#声明：" class="headerlink" title="声明："></a>声明：</h5><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 声明一个结构体类型</span></span><br><span class="line">type Employee <span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">	ID        <span class="keyword">int</span></span><br><span class="line">	Name      <span class="built_in">string</span></span><br><span class="line">	Address   <span class="built_in">string</span></span><br><span class="line">	DoB       <span class="built_in">string</span></span><br><span class="line">	Position  <span class="built_in">string</span></span><br><span class="line">	Salary    <span class="keyword">int</span></span><br><span class="line">	ManagerID <span class="keyword">int</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>结构体成员(变量名称)推荐使用大写字母开头，目的是为了方便与json进行转换，具体说明可以看后面的部分。</p>
+<h5 id="简单使用"><a href="#简单使用" class="headerlink" title="简单使用"></a>简单使用</h5><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 声明结构体类型的实例，三种方式,前两种声明的都是指针,后面一种是直接生产对象本身，初始属性值都是零值:</span></span><br><span class="line"><span class="keyword">var</span> bob *Employee = <span class="built_in">new</span>(Employee)  <span class="comment">// &amp;&#123;0     0 0&#125;</span></span><br><span class="line"><span class="keyword">var</span> claier *Employee = &amp;Employee&#123;&#125; <span class="comment">// &amp;&#123;0     0 0&#125;</span></span><br><span class="line"><span class="keyword">var</span> alice Employee                 <span class="comment">// &#123;0     0 0&#125;</span></span><br><span class="line">fmt.Println(bob, claier, alice)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 访问和赋值</span></span><br><span class="line">alice.Salary = <span class="number">3000</span></span><br><span class="line">fmt.Println(alice, alice.Salary) <span class="comment">// &#123;0     3000 0&#125; 3000</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 通过指针访问和赋值</span></span><br><span class="line">position := &amp;bob.Position</span><br><span class="line">*position = <span class="string">"Senior"</span></span><br><span class="line">fmt.Println(bob) <span class="comment">// &amp;&#123;0    Senior 0 0&#125;</span></span><br><span class="line"></span><br><span class="line">c := &amp;claier</span><br><span class="line">(*c).Name = <span class="string">"claier"</span></span><br><span class="line">fmt.Println(*c) <span class="comment">// &amp;&#123;0 alice   Senior 3000 0&#125;</span></span><br></pre></td></tr></table></figure>
+<h5 id="构造和比较"><a href="#构造和比较" class="headerlink" title="构造和比较"></a>构造和比较</h5><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">	构造函数:</span></span><br><span class="line"><span class="comment">		struct结构体默认没有构造函数，需要自己写一个</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"></span><br><span class="line">   <span class="function"><span class="keyword">func</span> <span class="title">NewEmployee</span><span class="params">(id <span class="keyword">int</span>, name <span class="keyword">string</span>)</span> *<span class="title">Employee</span></span> &#123;</span><br><span class="line">   	<span class="keyword">return</span> &amp;Employee&#123;ID: id, Name: name&#125;</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">david := NewEmployee(<span class="number">4</span>, <span class="string">"david"</span>)</span><br><span class="line">fmt.Println(*david) <span class="comment">// &#123;4 david    0 0&#125;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">	struct之间的比较</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="comment">// struct是可以直接进行比较的，编译不会报错。此前学习过，map的key必须是可以直接比较的类型，因此struct可以作为map的key</span></span><br><span class="line">fmt.Println(alice == *bob) <span class="comment">// false</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> url <span class="keyword">struct</span> &#123;</span><br><span class="line">	host <span class="keyword">string</span></span><br><span class="line">	port <span class="keyword">int</span></span><br><span class="line">&#125;</span><br><span class="line">pageViews := <span class="built_in">make</span>(<span class="keyword">map</span>[url]<span class="keyword">int</span>)</span><br><span class="line">pageViews[url&#123;<span class="string">"www.baidu.com"</span>, <span class="number">443</span>&#125;]++</span><br></pre></td></tr></table></figure>
+<h5 id="结构体嵌套"><a href="#结构体嵌套" class="headerlink" title="结构体嵌套"></a>结构体嵌套</h5><figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">									struct嵌套</span></span><br><span class="line"><span class="comment">	struct支持多层嵌套，且可以将一个命名结构体当做另一个结构体的匿名成员使用,下面举一个例子：</span></span><br><span class="line"><span class="comment">	层级关系为: 学生 -&gt; 班级 -&gt; 年级 -&gt; 学校</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="comment">// 基本用法</span></span><br><span class="line"></span><br><span class="line">type School struct &#123;</span><br><span class="line">	name string</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">type Grade struct &#123;</span><br><span class="line">	level  int</span><br><span class="line">	school School</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">type Classes struct &#123;</span><br><span class="line">	grade Grade</span><br><span class="line">	id    int</span><br><span class="line">&#125;</span><br><span class="line">type Student struct &#123;</span><br><span class="line">	name    string</span><br><span class="line">	age     int</span><br><span class="line">	classes Classes</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="selector-tag">var</span> xiaoming Student</span><br><span class="line">xiaoming<span class="selector-class">.name</span> = <span class="string">"xiaoming"</span></span><br><span class="line">xiaoming<span class="selector-class">.classes</span><span class="selector-class">.grade</span><span class="selector-class">.school</span><span class="selector-class">.name</span> = <span class="string">"NO.1 School"</span></span><br><span class="line">xiaoming<span class="selector-class">.classes</span><span class="selector-class">.grade</span><span class="selector-class">.level</span> = <span class="number">3</span></span><br><span class="line">xiaoming<span class="selector-class">.classes</span><span class="selector-class">.id</span> = <span class="number">2</span></span><br><span class="line">xiaoming<span class="selector-class">.age</span> = <span class="number">8</span></span><br><span class="line">fmt.Println(xiaoming) <span class="comment">// &#123;xiaoming 8 &#123;&#123;3 &#123;NO.1 School&#125;&#125; 2&#125;&#125;</span></span><br></pre></td></tr></table></figure>
+<h5 id="匿名结构体嵌套"><a href="#匿名结构体嵌套" class="headerlink" title="匿名结构体嵌套"></a>匿名结构体嵌套</h5><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">匿名结构体嵌套：</span></span><br><span class="line"><span class="comment">	匿名用法,结构体内的不带名称的结构体成员，该成员必须是其他类型的对象或指针。使用匿名成员时，可以以穿透的方式给属性赋值，即当前结构体不包含该 \n</span></span><br><span class="line"><span class="comment">	属性名时，则往向上层级的结构体上查找该属性名，最近的匹配属性将获得赋值(最近原则)。例如下方，xiaoli.name的值赋给了Student2.name， 而 \n</span></span><br><span class="line"><span class="comment">	xiaoli.classes.grade.school.name，则可以通过xiaoli.School.name来赋值。</span></span><br><span class="line"><span class="comment">虽然是比直接用法简化了一些，但感觉层次还是不够清晰，谨慎使用。</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> Grade2 <span class="keyword">struct</span> &#123;</span><br><span class="line">	level <span class="keyword">int</span></span><br><span class="line">	School</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> Classes2 <span class="keyword">struct</span> &#123;</span><br><span class="line">	Grade2</span><br><span class="line">	id <span class="keyword">int</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">type</span> Student2 <span class="keyword">struct</span> &#123;</span><br><span class="line">	name <span class="keyword">string</span></span><br><span class="line">	age  <span class="keyword">int</span></span><br><span class="line">	Classes2</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> xiaoli Student2</span><br><span class="line">xiaoli.name = <span class="string">"xiaoli"</span></span><br><span class="line">xiaoli.School.name = <span class="string">"NO.2 School"</span> <span class="comment">// 等价于上面的 xiaoli.classes.grade.school.name</span></span><br><span class="line">xiaoli.level = <span class="number">4</span>                   <span class="comment">// 等价于上面的 xiaoli.classes.grade.level</span></span><br><span class="line">xiaoli.id = <span class="number">3</span>                      <span class="comment">// 等价于上面的 xiaoli.classes.id</span></span><br><span class="line">xiaoli.age = <span class="number">9</span></span><br><span class="line">fmt.Println(xiaoli) <span class="comment">// &#123;xiaoli 9 &#123;&#123;4 &#123;NO.2 School&#125;&#125; 3&#125;&#125;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 匿名结构体赋值</span></span><br><span class="line">xiaohong := Student2&#123;<span class="string">"xiaohong"</span>, <span class="number">11</span>, Classes2&#123;Grade2&#123;<span class="number">5</span>, School&#123;<span class="string">"NO.2 School"</span>&#125;&#125;, <span class="number">4</span>&#125;&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 等价于上方</span></span><br><span class="line">xiaotian := Student2&#123;</span><br><span class="line">	<span class="string">"xiaotian"</span>,</span><br><span class="line">	<span class="number">12</span>,</span><br><span class="line">	Classes2&#123;</span><br><span class="line">		Grade2&#123;</span><br><span class="line">			<span class="number">6</span>,</span><br><span class="line">			School&#123;</span><br><span class="line">				<span class="string">"NO.2 School"</span>,</span><br><span class="line">			&#125;,</span><br><span class="line">		&#125;,</span><br><span class="line">		<span class="number">5</span>,</span><br><span class="line">	&#125;,</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">fmt.Println(xiaohong) <span class="comment">// &#123;xiaohong 11 &#123;&#123;5 &#123;NO.2 School&#125;&#125; 4&#125;&#125;</span></span><br><span class="line">fmt.Println(xiaotian) <span class="comment">// &#123;xiaotian 12 &#123;&#123;6 &#123;NO.2 School&#125;&#125; 5&#125;&#125;</span></span><br></pre></td></tr></table></figure>
+<h2 id="JSON"><a href="#JSON" class="headerlink" title="JSON"></a>JSON</h2><p>Json是非常常见的数据接收和发送的格式化标准，其逻辑结构与struct非常相似，go提供标准库encoding/json来支持对json数据的处理和转换操作。<br>下面举例说明struct和json之间的转换：</p>
+<h5 id="struct-gt-json序列化"><a href="#struct-gt-json序列化" class="headerlink" title="struct =&gt; json序列化"></a>struct =&gt; json序列化</h5><figure class="highlight armasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="symbol">type</span> <span class="keyword">Movie </span><span class="keyword">struct </span>&#123;</span><br><span class="line">	Name  <span class="keyword">string</span></span><br><span class="line"><span class="keyword">	</span>Year  int</span><br><span class="line">	actor []<span class="keyword">string</span></span><br><span class="line"><span class="keyword">&#125;</span></span><br><span class="line"><span class="keyword"></span></span><br><span class="line"><span class="keyword">var </span><span class="keyword">movies </span>= []<span class="keyword">Movie&#123;</span></span><br><span class="line"><span class="keyword">	</span>&#123;Name: <span class="string">"movie1"</span>, Year: <span class="number">1999</span>, actor: []<span class="keyword">string&#123;"zhangsan", </span><span class="string">"lisi"</span>&#125;&#125;,</span><br><span class="line">	&#123;Name: <span class="string">"movie2"</span>, Year: <span class="number">2000</span>, actor: []<span class="keyword">string&#123;"wangwu", </span><span class="string">"zhaoliu"</span>&#125;&#125;,</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="symbol">data</span>, err := json.<span class="keyword">Marshal(movies)</span></span><br><span class="line"><span class="keyword">if </span>err != nil &#123;</span><br><span class="line">	fmt.Println(<span class="string">"Json parse error"</span>)</span><br><span class="line">	return</span><br><span class="line">&#125;</span><br><span class="line"><span class="symbol">fmt.Println</span>(<span class="keyword">movies) </span>     // [&#123;<span class="keyword">movie1 </span><span class="number">1999</span> [zhangsan lisi]&#125; &#123;<span class="keyword">movie2 </span><span class="number">2000</span> [wangwu zhaoliu]&#125;]</span><br><span class="line"><span class="symbol">fmt.Printf</span>(<span class="string">"%s\n"</span>, <span class="meta">data</span>) // [&#123;<span class="string">"Name"</span>:<span class="string">"movie1"</span>,<span class="string">"Year"</span>:<span class="number">1999</span>&#125;,&#123;<span class="string">"Name"</span>:<span class="string">"movie2"</span>,<span class="string">"Year"</span>:<span class="number">2000</span>&#125;]</span><br><span class="line">//这里的打印结果可以看出一个问题: actor属性并没有体现出来，这是因为JSON在处理<span class="keyword">struct转换的时候，只会处理属性名为大写的属性，小写的直接跳过不处理。</span></span><br></pre></td></tr></table></figure>
+<p>上面这个例子中，json序列化时会忽略小写开头的结构体成员，如果想要在json处理时显示成员为小写或别名，可以显示地为其添加标签：</p>
+<figure class="highlight armasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="symbol">type</span> <span class="keyword">Movie2 </span><span class="keyword">struct </span>&#123;</span><br><span class="line">	Name  <span class="keyword">string</span></span><br><span class="line"><span class="keyword">	</span>Year  int</span><br><span class="line">	Actor []<span class="keyword">string </span>`json:<span class="string">"actor"</span>`</span><br><span class="line">&#125;</span><br><span class="line"><span class="symbol">var</span> <span class="keyword">movies2 </span>= []<span class="keyword">Movie2&#123;</span></span><br><span class="line"><span class="keyword">	</span>&#123;Name: <span class="string">"movie1"</span>, Year: <span class="number">1999</span>, Actor: []<span class="keyword">string&#123;"zhangsan", </span><span class="string">"lisi"</span>&#125;&#125;,</span><br><span class="line">	&#123;Name: <span class="string">"movie2"</span>, Year: <span class="number">2000</span>, Actor: []<span class="keyword">string&#123;"wangwu", </span><span class="string">"zhaoliu"</span>&#125;&#125;,</span><br><span class="line">&#125;</span><br><span class="line"><span class="symbol">data2</span>, _ := json.<span class="keyword">Marshal(movies2)</span></span><br><span class="line"><span class="keyword">fmt.Printf("%s\n", </span>data2) // [&#123;<span class="string">"Name"</span>:<span class="string">"movie1"</span>,<span class="string">"Year"</span>:<span class="number">1999</span>,<span class="string">"actor"</span>:[<span class="string">"zhangsan"</span>,<span class="string">"lisi"</span>]&#125;,&#123;<span class="string">"Name"</span>:<span class="string">"movie2"</span>,<span class="string">"Year"</span>:<span class="number">2000</span>,<span class="string">"actor"</span>:[<span class="string">"wangwu"</span>,<span class="string">"zhaoliu"</span>]&#125;]</span><br></pre></td></tr></table></figure>
+<p>这时输出的成员<strong>actor</strong>就是小写了，同理，标签这里也可以写为别名。注意:<code>json:&quot;actor&quot;</code>，冒号中间不要有空格。</p>
+<h5 id="json-gt-struct反序列化"><a href="#json-gt-struct反序列化" class="headerlink" title="json =&gt; struct反序列化"></a>json =&gt; struct反序列化</h5><figure class="highlight armasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">   // 沿用上面例子的变量和结构体</span><br><span class="line">//var <span class="keyword">movies3 </span><span class="keyword">Movie2</span></span><br><span class="line"><span class="keyword">// </span>这里犯了一个错误，导致运行报错.记一笔:</span><br><span class="line">// 将变量定义为<span class="keyword">Movie2结构体类型之后去接收这里的data2的json反序列化数据时，报错:json: </span>cannot unmarshal array into Go value of type main.<span class="keyword">Movie2</span></span><br><span class="line"><span class="keyword">// </span>原因为: 当json串处理之后的结果是数组类型的时候,不能直接赋值给<span class="keyword">struct类型的值,因此，这里定义的movies3变量应该是[]Movie2的slice类型。go语言之中类型必须严格匹配，注意!</span></span><br><span class="line"><span class="keyword">// </span>另外，除了这里的unmarshal方式之外，还有一种json.Decoder的方式可以依次从字节流里逐个解码多个json对象，这个在后面的例子json_template.go中做解释。</span><br><span class="line"></span><br><span class="line"><span class="symbol">var</span> <span class="keyword">movies3 </span>[]<span class="keyword">Movie2</span></span><br><span class="line"><span class="keyword"> </span>  </span><br><span class="line"><span class="symbol">err2</span> := json.Unmarshal(data2, &amp;<span class="keyword">movies3)</span></span><br><span class="line"><span class="keyword">if </span>err2 != nil &#123;</span><br><span class="line">	fmt.Println(<span class="string">"Json parse error"</span>, err2)</span><br><span class="line">&#125;</span><br><span class="line"><span class="symbol">fmt.Printf</span>(<span class="string">"%v\n"</span>, <span class="keyword">movies3) </span>// [&#123;<span class="keyword">movie1 </span><span class="number">1999</span> [zhangsan lisi]&#125; &#123;<span class="keyword">movie2 </span><span class="number">2000</span> [wangwu zhaoliu]&#125;]</span><br><span class="line"><span class="symbol">fmt.Println</span>(<span class="keyword">movies3[0].Year) </span>     // <span class="number">1999</span></span><br></pre></td></tr></table></figure>
+<p>这里没注意踩了一个坑，data2在序列化之前是<code>[]Movie2</code>的slice结构，在声明了一个Movie2 struct类型的变量指针去接收json反序列化的数据时抛出了异常，这里应该同样使用<code>[]Movie2</code>的slice类型变量.</p>
+<p><strong>这里使用的Unmarshal方法适用的对象为已经在单个或已内存中的json对象，而涉及文件(socket/http等)读取的byte流json数据，则适合使用另一种反序列化方式json.Decoder(),这种方式不会一次把字节流读取进内存中，而是会逐个读取，适用于这些场景。</strong></p>
+<h5 id="使用举例"><a href="#使用举例" class="headerlink" title="使用举例"></a>使用举例</h5><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">通过Github issue api获取到json数据并解析为go struct的demo</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">"encoding/json"</span></span><br><span class="line">	<span class="string">"fmt"</span></span><br><span class="line">	<span class="string">"log"</span></span><br><span class="line">	<span class="string">"net/http"</span></span><br><span class="line">	<span class="string">"net/url"</span></span><br><span class="line">	<span class="string">"os"</span></span><br><span class="line">	<span class="string">"strings"</span></span><br><span class="line">	<span class="string">"time"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> IssueURL = <span class="string">"https://api.github.com/search/issues"</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> IssuesSearchResult <span class="keyword">struct</span> &#123;</span><br><span class="line">	TotalCount <span class="keyword">int</span> <span class="string">`json:"total_count"`</span></span><br><span class="line">	Items      []*Issue</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> Issue <span class="keyword">struct</span> &#123;</span><br><span class="line">	Number   <span class="keyword">int</span></span><br><span class="line">	HTMLURL  <span class="keyword">string</span> <span class="string">`json:"html_url"`</span></span><br><span class="line">	Title    <span class="keyword">string</span></span><br><span class="line">	State    <span class="keyword">string</span></span><br><span class="line">	User     *User</span><br><span class="line">	CreateAt time.Time <span class="string">`json:"created_at"`</span></span><br><span class="line">	Body     <span class="keyword">string</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> User <span class="keyword">struct</span> &#123;</span><br><span class="line">	Login   <span class="keyword">string</span></span><br><span class="line">	HTMLURL <span class="keyword">string</span> <span class="string">`json:"html_url"`</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">SearchIssues</span><span class="params">(terms []<span class="keyword">string</span>)</span> <span class="params">(*IssuesSearchResult, error)</span></span> &#123;</span><br><span class="line">	q := url.QueryEscape(strings.Join(terms, <span class="string">" "</span>)) <span class="comment">// slice组合为字符串</span></span><br><span class="line">	resp, err := http.Get(IssueURL + <span class="string">"?q="</span> + q)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> resp.StatusCode != http.StatusOK &#123;</span><br><span class="line">		resp.Body.Close()</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">var</span> result IssuesSearchResult</span><br><span class="line">	<span class="comment">// 使用json.NewDecoder().decode()方法来解码整个字节流,这里不使用unmarshal方法了，unmarshal方法只能解码单个对象。</span></span><br><span class="line">	<span class="keyword">if</span> err := json.NewDecoder(resp.Body).Decode(&amp;result); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		resp.Body.Close()</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">	&#125;</span><br><span class="line">	resp.Body.Close()</span><br><span class="line">	<span class="keyword">return</span> &amp;result, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	res, err := SearchIssues(os.Args[<span class="number">1</span>:]) <span class="comment">// 运行命令为: go run ./json_template.go repo:golang/go is:open json decoder  后方为参数,可以组合为url去浏览器打开对比</span></span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		log.Fatal(err)</span><br><span class="line">	&#125;</span><br><span class="line">	fmt.Println(res.Items[<span class="number">0</span>].Title)</span><br><span class="line">	fmt.Printf(<span class="string">"%d issues: \n"</span>, res.TotalCount)</span><br><span class="line">	<span class="keyword">for</span> _, item := <span class="keyword">range</span> res.Items &#123;</span><br><span class="line">		fmt.Printf(</span><br><span class="line">			<span class="string">"IssueID: #%d\tTime: %s\tUser: %s\tTitle: %s\n"</span>, item.Number, item.CreateAt, item.User.Login, item.Title)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>运行结果：</p>
+<figure class="highlight less"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">encoding</span>/<span class="selector-tag">json</span>: <span class="selector-tag">second</span> <span class="selector-tag">decode</span> <span class="selector-tag">after</span> <span class="selector-tag">error</span> <span class="selector-tag">impossible</span></span><br><span class="line"><span class="selector-tag">35</span> <span class="selector-tag">issues</span>: </span><br><span class="line"><span class="selector-tag">IssueID</span>: <span class="selector-id">#31701</span> <span class="selector-tag">Time</span>: <span class="selector-tag">2019-04-26</span> <span class="selector-tag">20</span><span class="selector-pseudo">:50</span><span class="selector-pseudo">:17</span> +<span class="selector-tag">0000</span> <span class="selector-tag">UTC</span>     <span class="selector-tag">User</span>: <span class="selector-tag">lr1980</span>    <span class="selector-tag">Title</span>: <span class="selector-tag">encoding</span>/<span class="selector-tag">json</span>: <span class="selector-tag">second</span> <span class="selector-tag">decode</span> <span class="selector-tag">after</span> <span class="selector-tag">error</span> <span class="selector-tag">impossible</span></span><br><span class="line"><span class="selector-tag">IssueID</span>: <span class="selector-id">#31789</span> <span class="selector-tag">Time</span>: <span class="selector-tag">2019-05-01</span> <span class="selector-tag">18</span><span class="selector-pseudo">:30</span><span class="selector-pseudo">:06</span> +<span class="selector-tag">0000</span> <span class="selector-tag">UTC</span>     <span class="selector-tag">User</span>: <span class="selector-tag">mgritter</span>  <span class="selector-tag">Title</span>: <span class="selector-tag">encoding</span>/<span class="selector-tag">json</span>: <span class="selector-tag">provide</span> <span class="selector-tag">a</span> <span class="selector-tag">way</span> <span class="selector-tag">to</span> <span class="selector-tag">limit</span> <span class="selector-tag">recursion</span> <span class="selector-tag">depth</span></span><br><span class="line"><span class="selector-tag">IssueID</span>: <span class="selector-id">#29688</span> <span class="selector-tag">Time</span>: <span class="selector-tag">2019-01-11</span> <span class="selector-tag">17</span><span class="selector-pseudo">:07</span><span class="selector-pseudo">:05</span> +<span class="selector-tag">0000</span> <span class="selector-tag">UTC</span>     <span class="selector-tag">User</span>: <span class="selector-tag">sheerun</span>   <span class="selector-tag">Title</span>: <span class="selector-tag">proposal</span>: <span class="selector-tag">encoding</span>/<span class="selector-tag">json</span>: <span class="selector-tag">add</span> <span class="selector-tag">InputOffset</span> <span class="selector-tag">to</span> <span class="selector-tag">json</span> <span class="selector-tag">decoder</span></span><br><span class="line"><span class="selector-tag">IssueID</span>: <span class="selector-id">#29686</span> <span class="selector-tag">Time</span>: <span class="selector-tag">2019-01-11</span> <span class="selector-tag">16</span><span class="selector-pseudo">:38</span><span class="selector-pseudo">:04</span> +<span class="selector-tag">0000</span> <span class="selector-tag">UTC</span>     <span class="selector-tag">User</span>: <span class="selector-tag">sheerun</span>   <span class="selector-tag">Title</span>: <span class="selector-tag">json</span>: <span class="selector-tag">Add</span> <span class="selector-tag">InputOffset</span> <span class="selector-tag">for</span> <span class="selector-tag">stream</span> <span class="selector-tag">byte</span> <span class="selector-tag">offset</span> <span class="selector-tag">access</span></span><br><span class="line"><span class="selector-tag">IssueID</span>: <span class="selector-id">#28923</span> <span class="selector-tag">Time</span>: <span class="selector-tag">2018-11-22</span> <span class="selector-tag">13</span><span class="selector-pseudo">:50</span><span class="selector-pseudo">:18</span> +<span class="selector-tag">0000</span> <span class="selector-tag">UTC</span>     <span class="selector-tag">User</span>: <span class="selector-tag">mvdan</span>     <span class="selector-tag">Title</span>: <span class="selector-tag">encoding</span>/<span class="selector-tag">json</span>: <span class="selector-tag">speed</span> <span class="selector-tag">up</span> <span class="selector-tag">the</span> <span class="selector-tag">decoding</span> <span class="selector-tag">scanner</span></span><br><span class="line"><span class="selector-tag">IssueID</span>: <span class="selector-id">#11046</span> <span class="selector-tag">Time</span>: <span class="selector-tag">2015-06-03</span> <span class="selector-tag">19</span><span class="selector-pseudo">:25</span><span class="selector-pseudo">:08</span> +<span class="selector-tag">0000</span> <span class="selector-tag">UTC</span>     <span class="selector-tag">User</span>: <span class="selector-tag">kurin</span>     <span class="selector-tag">Title</span>: <span class="selector-tag">encoding</span>/<span class="selector-tag">json</span>: <span class="selector-tag">Decoder</span> <span class="selector-tag">internally</span> <span class="selector-tag">buffers</span> <span class="selector-tag">full</span> <span class="selector-tag">input</span></span><br><span class="line"><span class="selector-tag">IssueID</span>: <span class="selector-id">#29035</span> <span class="selector-tag">Time</span>: <span class="selector-tag">2018-11-30</span> <span class="selector-tag">11</span><span class="selector-pseudo">:21</span><span class="selector-pseudo">:31</span> +<span class="selector-tag">0000</span> <span class="selector-tag">UTC</span>     <span class="selector-tag">User</span>: <span class="selector-tag">jaswdr</span>    <span class="selector-tag">Title</span>: <span class="selector-tag">proposal</span>: <span class="selector-tag">encoding</span>/<span class="selector-tag">json</span>: <span class="selector-tag">add</span> <span class="selector-tag">error</span> <span class="selector-tag">var</span> <span class="selector-tag">to</span> <span class="selector-tag">compare</span>  <span class="selector-tag">the</span> <span class="selector-tag">returned</span> <span class="selector-tag">error</span> <span class="keyword">when</span> using json.Decoder.DisallowUnknownFields()</span><br><span class="line"><span class="attribute">IssueID</span>: <span class="number">#30301</span> <span class="attribute">Time</span>: <span class="number">2019</span>-<span class="number">02</span>-<span class="number">18</span> <span class="number">19</span>:<span class="number">49</span>:<span class="number">27</span> +<span class="number">0000</span> UTC     <span class="attribute">User</span>: zelch     <span class="attribute">Title</span>: encoding/<span class="attribute">xml</span>: option to treat unknown fields as an error</span><br><span class="line"><span class="attribute">IssueID</span>: <span class="number">#30701</span> <span class="attribute">Time</span>: <span class="number">2019</span>-<span class="number">03</span>-<span class="number">09</span> <span class="number">12</span>:<span class="number">16</span>:<span class="number">34</span> +<span class="number">0000</span> UTC     <span class="attribute">User</span>: LouAdrien <span class="attribute">Title</span>: encoding/<span class="attribute">json</span>: ignore tag <span class="string">"-"</span> <span class="keyword">not</span> working on embedded sub structure <span class="keyword">when</span> decoding</span><br><span class="line"><span class="attribute">IssueID</span>: <span class="number">#12001</span> <span class="attribute">Time</span>: <span class="number">2015</span>-<span class="number">08</span>-<span class="number">03</span> <span class="number">19</span>:<span class="number">14</span>:<span class="number">17</span> +<span class="number">0000</span> UTC     <span class="attribute">User</span>: lukescott <span class="attribute">Title</span>: encoding/<span class="attribute">json</span>: Marshaler/Unmarshaler <span class="keyword">not</span> stream friendly</span><br><span class="line"><span class="attribute">IssueID</span>: <span class="number">#16212</span> <span class="attribute">Time</span>: <span class="number">2016</span>-<span class="number">06</span>-<span class="number">29</span> <span class="number">16</span>:<span class="number">07</span>:<span class="number">36</span> +<span class="number">0000</span> UTC     <span class="attribute">User</span>: josharian <span class="attribute">Title</span>: encoding/<span class="attribute">json</span>: do all reflect work before decoding</span><br><span class="line"><span class="attribute">IssueID</span>: <span class="number">#28143</span> <span class="attribute">Time</span>: <span class="number">2018</span>-<span class="number">10</span>-<span class="number">11</span> <span class="number">07</span>:<span class="number">08</span>:<span class="number">25</span> +<span class="number">0000</span> UTC     <span class="attribute">User</span>: Carpetsmoker      <span class="attribute">Title</span>: <span class="attribute">proposal</span>: encoding/<span class="attribute">json</span>: add <span class="string">"readonly"</span> tag</span><br><span class="line"><span class="attribute">IssueID</span>: <span class="number">#26946</span> <span class="attribute">Time</span>: <span class="number">2018</span>-<span class="number">08</span>-<span class="number">12</span> <span class="number">18</span>:<span class="number">19</span>:<span class="number">01</span> +<span class="number">0000</span> UTC     <span class="attribute">User</span>: deuill    <span class="attribute">Title</span>: encoding/<span class="attribute">json</span>: clarify what happens <span class="keyword">when</span> unmarshaling into a non-empty interface&#123;&#125;</span><br><span class="line"><span class="attribute">IssueID</span>: <span class="number">#5901</span>  <span class="attribute">Time</span>: <span class="number">2013</span>-<span class="number">07</span>-<span class="number">17</span> <span class="number">16</span>:<span class="number">39</span>:<span class="number">15</span> +<span class="number">0000</span> UTC     <span class="attribute">User</span>: rsc       <span class="attribute">Title</span>: encoding/<span class="attribute">json</span>: allow override type marshaling</span><br><span class="line"><span class="attribute">IssueID</span>: <span class="number">#27179</span> <span class="attribute">Time</span>: <span class="number">2018</span>-<span class="number">08</span>-<span class="number">23</span> <span class="number">18</span>:<span class="number">21</span>:<span class="number">32</span> +<span class="number">0000</span> UTC     <span class="attribute">User</span>: lavalamp  <span class="attribute">Title</span>: encoding/<span class="attribute">json</span>: no way to preserve the order of map keys</span><br><span class="line"><span class="attribute">IssueID</span>: <span class="number">#21823</span> <span class="attribute">Time</span>: <span class="number">2017</span>-<span class="number">09</span>-<span class="number">09</span> <span class="number">21</span>:<span class="number">43</span>:<span class="number">31</span> +<span class="number">0000</span> UTC     <span class="attribute">User</span>: <span class="number">243083</span>df  <span class="attribute">Title</span>: encoding/<span class="attribute">xml</span>: very low performance in xml parser</span><br><span class="line"><span class="attribute">IssueID</span>: <span class="number">#22752</span> <span class="attribute">Time</span>: <span class="number">2017</span>-<span class="number">11</span>-<span class="number">15</span> <span class="number">23</span>:<span class="number">46</span>:<span class="number">13</span> +<span class="number">0000</span> UTC     <span class="attribute">User</span>: buyology  <span class="attribute">Title</span>: <span class="attribute">proposal</span>: encoding/<span class="attribute">json</span>: add access to the underlying data causing UnmarshalTypeError</span><br><span class="line"><span class="attribute">IssueID</span>: <span class="number">#14750</span> <span class="attribute">Time</span>: <span class="number">2016</span>-<span class="number">03</span>-<span class="number">10</span> <span class="number">13</span>:<span class="number">04</span>:<span class="number">44</span> +<span class="number">0000</span> UTC     <span class="attribute">User</span>: cyberphone        <span class="attribute">Title</span>: encoding/<span class="attribute">json</span>: parser ignores the case of member names</span><br><span class="line"><span class="attribute">IssueID</span>: <span class="number">#20754</span> <span class="attribute">Time</span>: <span class="number">2017</span>-<span class="number">06</span>-<span class="number">22</span> <span class="number">14</span>:<span class="number">19</span>:<span class="number">31</span> +<span class="number">0000</span> UTC     <span class="attribute">User</span>: rsc       <span class="attribute">Title</span>: encoding/<span class="attribute">xml</span>: unmarshal only processes first XML element</span><br><span class="line"><span class="attribute">IssueID</span>: <span class="number">#28189</span> <span class="attribute">Time</span>: <span class="number">2018</span>-<span class="number">10</span>-<span class="number">13</span> <span class="number">16</span>:<span class="number">22</span>:<span class="number">53</span> +<span class="number">0000</span> UTC     <span class="attribute">User</span>: adnsv     <span class="attribute">Title</span>: encoding/<span class="attribute">json</span>: confusing errors when unmarshaling custom types</span><br><span class="line"><span class="attribute">IssueID</span>: <span class="number">#7213</span>  <span class="attribute">Time</span>: <span class="number">2014</span>-<span class="number">01</span>-<span class="number">27</span> <span class="number">00</span>:<span class="number">23</span>:<span class="number">01</span> +<span class="number">0000</span> UTC     <span class="attribute">User</span>: davecheney        <span class="attribute">Title</span>: cmd/<span class="attribute">compile</span>: escape analysis oddity</span><br><span class="line"><span class="attribute">IssueID</span>: <span class="number">#7872</span>  <span class="attribute">Time</span>: <span class="number">2014</span>-<span class="number">04</span>-<span class="number">26</span> <span class="number">17</span>:<span class="number">47</span>:<span class="number">25</span> +<span class="number">0000</span> UTC     <span class="attribute">User</span>: extemporalgenome  <span class="attribute">Title</span>: encoding/<span class="attribute">json</span>: Encoder internally buffers full output</span><br><span class="line"><span class="attribute">IssueID</span>: <span class="number">#20528</span> <span class="attribute">Time</span>: <span class="number">2017</span>-<span class="number">05</span>-<span class="number">30</span> <span class="number">11</span>:<span class="number">45</span>:<span class="number">14</span> +<span class="number">0000</span> UTC     <span class="attribute">User</span>: jvshahid  <span class="attribute">Title</span>: net/<span class="attribute">http</span>: connection reuse does not work happily with normal use of json package</span><br><span class="line"><span class="attribute">IssueID</span>: <span class="number">#17609</span> <span class="attribute">Time</span>: <span class="number">2016</span>-<span class="number">10</span>-<span class="number">26</span> <span class="number">16</span>:<span class="number">07</span>:<span class="number">27</span> +<span class="number">0000</span> UTC     <span class="attribute">User</span>: nathanjsweet      <span class="attribute">Title</span>: encoding/<span class="attribute">json</span>: ambiguous fields are marshalled</span><br><span class="line"><span class="attribute">IssueID</span>: <span class="number">#19636</span> <span class="attribute">Time</span>: <span class="number">2017</span>-<span class="number">03</span>-<span class="number">21</span> <span class="number">12</span>:<span class="number">25</span>:<span class="number">10</span> +<span class="number">0000</span> UTC     <span class="attribute">User</span>: josselin-c        <span class="attribute">Title</span>: encoding/<span class="attribute">base64</span>: decoding is slow</span><br><span class="line"><span class="attribute">IssueID</span>: <span class="number">#22816</span> <span class="attribute">Time</span>: <span class="number">2017</span>-<span class="number">11</span>-<span class="number">20</span> <span class="number">13</span>:<span class="number">12</span>:<span class="number">06</span> +<span class="number">0000</span> UTC     <span class="attribute">User</span>: ganelon13 <span class="attribute">Title</span>: encoding/<span class="attribute">json</span>: include field name in unmarshal error messages when extracting time.Time</span><br><span class="line"><span class="attribute">IssueID</span>: <span class="number">#21092</span> <span class="attribute">Time</span>: <span class="number">2017</span>-<span class="number">07</span>-<span class="number">19</span> <span class="number">23</span>:<span class="number">11</span>:<span class="number">40</span> +<span class="number">0000</span> UTC     <span class="attribute">User</span>: trotha01  <span class="attribute">Title</span>: encoding/<span class="attribute">json</span>: unmarshal into slice reuses element data between len and cap</span><br><span class="line"><span class="attribute">IssueID</span>: <span class="number">#28941</span> <span class="attribute">Time</span>: <span class="number">2018</span>-<span class="number">11</span>-<span class="number">25</span> <span class="number">14</span>:<span class="number">06</span>:<span class="number">38</span> +<span class="number">0000</span> UTC     <span class="attribute">User</span>: mvdan     <span class="attribute">Title</span>: cmd/<span class="attribute">compile</span>: teach prove about slice expressions</span><br><span class="line"><span class="attribute">IssueID</span>: <span class="number">#15808</span> <span class="attribute">Time</span>: <span class="number">2016</span>-<span class="number">05</span>-<span class="number">24</span> <span class="number">02</span>:<span class="number">13</span>:<span class="number">10</span> +<span class="number">0000</span> UTC     <span class="attribute">User</span>: randall77 <span class="attribute">Title</span>: cmd/<span class="attribute">compile</span>: loads/constants not lifted out of loop</span><br><span class="line"><span class="attribute">IssueID</span>: <span class="number">#28952</span> <span class="attribute">Time</span>: <span class="number">2018</span>-<span class="number">11</span>-<span class="number">26</span> <span class="number">09</span>:<span class="number">59</span>:<span class="number">26</span> +<span class="number">0000</span> UTC     <span class="attribute">User</span>: mvdan     <span class="attribute">Title</span>: cmd/<span class="attribute">compile</span>: consider teaching prove about unexported integer fields</span><br></pre></td></tr></table></figure>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>Golang结构体有许多特性，且与json结合紧密，日后会经常用到，需要熟练掌握。</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div id="reward-container">
+  <div>Thank you for your accept. mua！</div>
+  <button id="reward-button" disable="enable" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+
+    
+      
+      
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/reward/wechatpay.png" alt="丨ywq丨 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+      
+      
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/reward/alipay.png" alt="丨ywq丨 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        
+
+
+
+
+  
+
+
+
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>丨ywq丨</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    
+    <a href="https://www.ipyker.com/2019/05/03/Golang基础学习_ Struct和Json.html" title="Golang基础学习: Struct和Json">https://www.ipyker.com/2019/05/03/Golang基础学习_ Struct和Json.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li>
+</ul>
+
+      </div>
+    
+    <div>
+      
+        <div>
+    
+        <div style="text-align:center;color: #ccc;font-size:16px;">-------------本文结束<i class="fa fa-heart"></i>感谢您的阅读-------------</div>
+    
+</div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Golang/" rel="tag"><i class="fa fa-tag"></i> Golang</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/04/27/Golang基础学习_ array和slice对比和使用.html" rel="next" title="Golang基础学习: array和slice对比和使用">
+                <i class="fa fa-chevron-left"></i> Golang基础学习: array和slice对比和使用
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/06/10/linux TCP连接失败(不回复SYN,ACK)问题分析.html" rel="prev" title="inux TCP连接失败(不回复SYN,ACK)问题分析">
+                inux TCP连接失败(不回复SYN,ACK)问题分析 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC80NDM5Mi8yMDkyNA=="></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="丨ywq丨">
+            
+              <p class="site-author-name" itemprop="name">丨ywq丨</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives">
+                
+                    <span class="site-state-item-count">74</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                      <a href="/tags">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">15</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/yinwenqin" title="GitHub &rarr; https://github.com/yinwenqin" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://blog.csdn.net/ywq935" title="CSDN &rarr; https://blog.csdn.net/ywq935" rel="noopener" target="_blank"><i class="fa fa-fw fa-globe"></i>CSDN</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-book"></i>
+                推荐阅读
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.upweto.top/gitbooks/useKubernetes/" title="http://blog.upweto.top/gitbooks/useKubernetes/" rel="noopener" target="_blank">kubernetes使用指南</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.upweto.top/gitbooks/kubeSourceCodeNote/" title="http://blog.upweto.top/gitbooks/kubeSourceCodeNote/" rel="noopener" target="_blank">kubernetes源码笔记</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Struct"><span class="nav-number">2.</span> <span class="nav-text">Struct</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#声明："><span class="nav-number">2.0.0.1.</span> <span class="nav-text">声明：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#简单使用"><span class="nav-number">2.0.0.2.</span> <span class="nav-text">简单使用</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#构造和比较"><span class="nav-number">2.0.0.3.</span> <span class="nav-text">构造和比较</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#结构体嵌套"><span class="nav-number">2.0.0.4.</span> <span class="nav-text">结构体嵌套</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#匿名结构体嵌套"><span class="nav-number">2.0.0.5.</span> <span class="nav-text">匿名结构体嵌套</span></a></li></ol></li></ol><li class="nav-item nav-level-2"><a class="nav-link" href="#JSON"><span class="nav-number">3.</span> <span class="nav-text">JSON</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#struct-gt-json序列化"><span class="nav-number">3.0.0.1.</span> <span class="nav-text">struct =&gt; json序列化</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#json-gt-struct反序列化"><span class="nav-number">3.0.0.2.</span> <span class="nav-text">json =&gt; struct反序列化</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#使用举例"><span class="nav-number">3.0.0.3.</span> <span class="nav-text">使用举例</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">4.</span> <span class="nav-text">总结</span></a></li></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" style=" text-align:center;">&copy; 2017 – <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ywq</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"> 站点字数合计:</i>
+    </span>
+    
+    <span title="站点总字数">583k</span>
+  
+  
+</div>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+<div class="run_time" style=" text-align:center;">
+  <span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
+  <script>
+    var now = new Date(); 
+    function createtime() { 
+        var grt= new Date("08/23/2018 10:00:00");//此处修改你的建站时间或者网站上线时间 
+        now.setTime(now.getTime()+250); 
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days); 
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours); 
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum); 
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;} 
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum); 
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;} 
+        document.getElementById("timeDate").innerHTML = "本站已安全运行 "+dnum+" 天 "; 
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒"; 
+    } 
+    setInterval("createtime()",250);
+  </script>
+</div>
+
+        
+<div class="busuanzi-count" style=" text-align:center;">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-user"></i>
+    </span>
+    <span class="site-uv" title="总访客量">
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span> 人
+    </span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+  
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-eye"></i>
+    </span>
+    <span class="site-pv" title="总访问量">
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span> 次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+  
+    
+    
+      
+    
+  
+  <script color="black" opacity="0.7" zindex="-1" count="140" src="//cdn.jsdelivr.net/gh/theme-next/theme-next-canvas-nest@1.0.0/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+  
+  
+  <script id="ribbon" size="300" alpha="0.1" zindex="-1" src="/lib/canvas-ribbon/canvas-ribbon.js"></script>
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/fancybox/source/jquery.fancybox.pack.js"></script>
+
+
+  
+
+
+  <script src="/js/utils.js?v=7.1.1"></script>
+
+  <script src="/js/motion.js?v=7.1.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/schemes/muse.js?v=7.1.1"></script>
+
+
+
+
+  
+  <script src="/js/scrollspy.js?v=7.1.1"></script>
+<script src="/js/post-details.js?v=7.1.1"></script>
+
+
+
+  
+
+
+  <script src="/js/next-boot.js?v=7.1.1"></script>
+
+
+  
+
+  
+
+  
+  
+  
+
+  
+
+  
+  
+  
+
+
+  
+
+
+  
+    <script>
+  window.livereOptions = {
+    refer: '2019/05/03/Golang基础学习_ Struct和Json.html'
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+</script>
+
+  
+
+
+  
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url).replace(/\/{2,}/g, '/');
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x"></i></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x"></i></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+  
+  <script src="/lib/bookmark/bookmark.min.js?v=1.0"></script>
+  <script>
+  
+    bookmark.scrollToMark('auto', "#更多");
+  
+  </script>
+
+
+  
+
+  
+
+  
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/koharu.model.json"},"display":{"position":"left","width":250,"height":500},"mobile":{"show":false},"react":{"opacity":0.7},"log":false});</script></body>
+</html>
+<!-- 页面点击小红心 -->
+<script type="text/javascript" src="/js/src/clicklove.js"></script>

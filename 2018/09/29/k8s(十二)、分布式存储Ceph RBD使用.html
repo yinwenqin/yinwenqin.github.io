@@ -1,0 +1,1551 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-CN">
+
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link rel="stylesheet" href="/lib/pace/pace-theme-bounce.min.css?v=1.0.2">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link rel="stylesheet" href="/lib/fancybox/source/jquery.fancybox.css">
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+    
+      
+    
+
+    
+  
+
+  
+
+  
+
+  
+    
+      
+    
+
+    
+  
+
+  
+    
+    
+    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic|Roboto Slab:300,300italic,400,400italic,700,700italic|Roboto Mono:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext">
+  
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.1.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.1.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.1.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.1.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.1.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '7.1.1',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":true,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: true,
+    fancybox: true,
+    fastclick: true,
+    lazyload: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"shrinkIn","post_header":"slideLeftIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideDownIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <script>
+  (function(i,s,o,g,r,a,m){i["DaoVoiceObject"]=r;i[r]=i[r]||function(){(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;a.charset="utf-8";m.parentNode.insertBefore(a,m)})(window,document,"script",('https:' == document.location.protocol ? 'https:' : 'http:') + "//widget.daovoice.io/widget/0f81ff2f.js","daovoice")
+  daovoice('init', {
+      app_id: "bd399fce"
+    });
+  daovoice('update');
+  </script>
+
+  <meta name="description" content="前言上篇文章介绍了k8s使用pv/pvc 的方式使用cephfs,k8s(十一)、分布式存储Cephfs使用 Ceph存储有三种存储接口,分别是:对象存储 Ceph Object Gateway块设备 RBD文件系统 CEPHFS Kubernetes支持后两种存储接口,支持的接入模式如下图: 在本篇将测试使用ceph rbd作持久化存储后端 RBD创建测试rbd的使用分为3个步骤:1.服务端/客">
+<meta name="keywords" content="Kubernetes,Ceph">
+<meta property="og:type" content="article">
+<meta property="og:title" content="k8s(十二)、分布式存储Ceph RBD使用">
+<meta property="og:url" content="https://www.ipyker.com/2018/09/29/k8s(十二)、分布式存储Ceph RBD使用.html">
+<meta property="og:site_name" content="随笔漫谈">
+<meta property="og:description" content="前言上篇文章介绍了k8s使用pv/pvc 的方式使用cephfs,k8s(十一)、分布式存储Cephfs使用 Ceph存储有三种存储接口,分别是:对象存储 Ceph Object Gateway块设备 RBD文件系统 CEPHFS Kubernetes支持后两种存储接口,支持的接入模式如下图: 在本篇将测试使用ceph rbd作持久化存储后端 RBD创建测试rbd的使用分为3个步骤:1.服务端/客">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://mycloudn.kokoerp.com/20180929143605145.jpg">
+<meta property="og:image" content="http://mycloudn.kokoerp.com/20181001111034366.jpg">
+<meta property="og:image" content="http://mycloudn.kokoerp.com/20181001111043285.jpg">
+<meta property="og:updated_time" content="2019-11-21T07:48:40.134Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="k8s(十二)、分布式存储Ceph RBD使用">
+<meta name="twitter:description" content="前言上篇文章介绍了k8s使用pv/pvc 的方式使用cephfs,k8s(十一)、分布式存储Cephfs使用 Ceph存储有三种存储接口,分别是:对象存储 Ceph Object Gateway块设备 RBD文件系统 CEPHFS Kubernetes支持后两种存储接口,支持的接入模式如下图: 在本篇将测试使用ceph rbd作持久化存储后端 RBD创建测试rbd的使用分为3个步骤:1.服务端/客">
+<meta name="twitter:image" content="http://mycloudn.kokoerp.com/20180929143605145.jpg">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="随笔漫谈" type="application/atom+xml">
+
+
+
+  
+  
+  <link rel="canonical" href="https://www.ipyker.com/2018/09/29/k8s(十二)、分布式存储Ceph RBD使用">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>k8s(十二)、分布式存储Ceph RBD使用 | 随笔漫谈</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+ 
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">随笔漫谈</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-book">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/gitbooks/" rel="section"><i class="menu-item-icon fa fa-fw fa-book"></i> <br>book</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-互动">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/guestbook/" rel="section"><i class="menu-item-icon fa fa-fw fa-comments"></i> <br>互动</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.ipyker.com/2018/09/29/k8s(十二)、分布式存储Ceph RBD使用.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="丨ywq丨">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随笔漫谈">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">k8s(十二)、分布式存储Ceph RBD使用
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-09-29 17:09:22" itemprop="dateCreated datePublished" datetime="2018-09-29T17:09:22+08:00">2018-09-29</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-11-21 15:48:40" itemprop="dateModified" datetime="2019-11-21T15:48:40+08:00">2019-11-21</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+            <div class="post-symbolscount">
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">本文字数：</span>
+                
+                <span title="本文字数">15k</span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">13 分钟</span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>上篇文章介绍了k8s使用pv/pvc 的方式使用cephfs,<br><a href="https://blog.csdn.net/ywq935/article/details/82716366" target="_blank" rel="noopener">k8s(十一)、分布式存储Cephfs使用</a></p>
+<p><strong>Ceph存储</strong>有三种存储接口,分别是:<br><strong>对象存储 Ceph Object Gateway<br>块设备 RBD<br>文件系统 CEPHFS</strong></p>
+<p>Kubernetes支持后两种存储接口,支持的接入模式如下图:<br><img src="http://mycloudn.kokoerp.com/20180929143605145.jpg" alt="在这里插入图片描述"></p>
+<p><strong>在本篇将测试使用ceph rbd作持久化存储后端</strong></p>
+<h1 id="RBD创建测试"><a href="#RBD创建测试" class="headerlink" title="RBD创建测试"></a>RBD创建测试</h1><p><strong>rbd的使用分为3个步骤:</strong><br>1.服务端/客户端创建块设备image<br>2.客户端将image映射进linux系统内核,内核识别出该块设备后生成dev下的文件标识<br>3.格式化块设备并挂载使用</p>
+<figure class="highlight cs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta"># 创建</span></span><br><span class="line">[<span class="meta">root@h020112 ~</span>]<span class="meta"># rbd create --size 10240000 rbd/test1    #创建指定大小的node</span></span><br><span class="line">[<span class="meta">root@h020112 ~</span>]<span class="meta"># rbd info test1</span></span><br><span class="line">rbd image <span class="string">'test1'</span>:</span><br><span class="line">	size <span class="number">10000</span> GB <span class="keyword">in</span> <span class="number">2560000</span> objects</span><br><span class="line">	order <span class="number">22</span> (<span class="number">4096</span> kB objects)</span><br><span class="line">	block_name_prefix: rbd_data<span class="number">.31e3</span>b6b8b4567</span><br><span class="line">	format: <span class="number">2</span></span><br><span class="line">	features: layering, exclusive-<span class="keyword">lock</span>,<span class="keyword">object</span>-map, fast-diff, deep-flatten</span><br><span class="line">	flags: </span><br><span class="line"></span><br><span class="line"><span class="meta">#映射进内核操作之前,首先查看内核版本,jw版本的ceph默认format为2,默认开启5种特性,2.x及之前的内核版本需手动调整format为1</span></span><br><span class="line">,<span class="number">4.</span>x之前要关闭<span class="keyword">object</span>-map, fast-diff, deep-flatten功能才能成功映射到内核,这里使用的是centos7<span class="number">.4</span>,内核版本<span class="number">3.10</span></span><br><span class="line"></span><br><span class="line">[<span class="meta">root@h020112 ~</span>]<span class="meta"># rbd feature disable test1 object-map fast-diff deep-flatten</span></span><br><span class="line"></span><br><span class="line"><span class="meta"># 映射进内核</span></span><br><span class="line">[<span class="meta">root@h020112 ~</span>]<span class="meta"># rbd map test1</span></span><br><span class="line">[<span class="meta">root@h020112 ~</span>]<span class="meta"># ls /dev/rbd0</span></span><br><span class="line">/dev/rbd0</span><br><span class="line"></span><br><span class="line"><span class="meta">#挂载使用</span></span><br><span class="line">[<span class="meta">root@h020112 ~</span>]<span class="meta"># mkdir /mnt/cephrbd</span></span><br><span class="line">[<span class="meta">root@h020112 ~</span>]<span class="meta">#  mkfs.ext4 -m0 /dev/rbd0</span></span><br><span class="line">[<span class="meta">root@h020112 ~</span>]<span class="meta">#  mount /dev/rbd0 /mnt/cephrbd/</span></span><br></pre></td></tr></table></figure>
+<h1 id="Kubernetes-Dynamic-Pv-使用"><a href="#Kubernetes-Dynamic-Pv-使用" class="headerlink" title="Kubernetes Dynamic Pv 使用"></a>Kubernetes Dynamic Pv 使用</h1><p>首先回顾一下上篇cephfs在k8s中的使用方式:<br><strong>绑定使用流程: pv指定存储类型和接口,pvc绑定pv,pod挂载指定pvc.这种一一对应的方式,即为静态pv</strong><br>例如cephfs的使用流程:<br><img src="http://mycloudn.kokoerp.com/20181001111034366.jpg" alt="在这里插入图片描述"></p>
+<p>那么什么是<strong>动态pv</strong>呢?<br><strong>在现有PV不满足PVC的请求时，可以使用存储分类(StorageClass)，pvc对接sc后,k8s会动态地创建pv,并且向相应的存储后端发出资源申请.<br>描述具体过程为：首先创建sc分类，PVC请求已创建的sc的资源，来自动创建pv,这样就达到动态配置的效果。即通过一个叫 Storage Class的对象由存储系统根据PVC的要求自动创建pv并使用存储资源</strong></p>
+<p> Kubernetes的pv支持rbd,从第一部分测试使用rbd的过程可以看出,存储实际使用的单位是image,首先必须在ceph端创建image,才能创建pv/pvc,再在pod里面挂载使用.这是一个标准的静态pv的绑定使用流程.但是这样的流程就带来了一个弊端,即一个完整的存储资源挂载使用的操作被分割成了两段,一段在ceph端划分rbd image,一段由k8s端绑定pv,这样使得管理的复杂性提高,不利于自动化运维.</p>
+<p>因此,动态pv是一个很好的选择,ceph rbd接口的动态pv的实现流程是这样的:<br><strong>根据pvc及sc的声明,自动生成pv,且向sc指定的ceph后端发出申请自动创建相应大小的rbd image,最终绑定使用</strong></p>
+<p><strong>工作流程图:</strong><br><img src="http://mycloudn.kokoerp.com/20181001111043285.jpg" alt="在这里插入图片描述"></p>
+<p>下面开始演示<br><strong>1.创建secret</strong><br>key获取方式参考上篇文章<br><figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">~/mytest/ceph/rbd# cat ceph-secret-rbd.yaml </span><br><span class="line">apiVersion: v1</span><br><span class="line">kind: Secret</span><br><span class="line">metadata:</span><br><span class="line">  name: ceph-secret-rbd</span><br><span class="line">type: <span class="string">"kubernetes.io/rbd"</span></span><br><span class="line">data:</span><br><span class="line">  key: <span class="attribute">QVFCL3E1ZGIvWFdxS1JBQTUyV0ZCUkxldnRjQzNidTFHZXlVYnc9PQ</span>==</span><br></pre></td></tr></table></figure></p>
+<p><strong>2.创建sc</strong><br><figure class="highlight dts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">~<span class="meta-keyword">/mytest/</span>ceph/rbd<span class="meta"># cat ceph-secret-rbd.yaml</span></span><br><span class="line"><span class="symbol">kind:</span> StorageClass</span><br><span class="line"><span class="symbol">apiVersion:</span> storage.k8s.io/v1</span><br><span class="line"><span class="symbol">metadata:</span></span><br><span class="line"><span class="symbol">  name:</span> cephrbd-test2</span><br><span class="line"><span class="symbol">provisioner:</span> kubernetes.io/rbd</span><br><span class="line"><span class="symbol">reclaimPolicy:</span> Retain</span><br><span class="line"><span class="symbol">parameters:</span></span><br><span class="line"><span class="symbol">  monitors:</span> <span class="number">192.168</span><span class="number">.20</span><span class="number">.112</span>:<span class="number">6789</span>,<span class="number">192.168</span><span class="number">.20</span><span class="number">.113</span>:<span class="number">6789</span>,<span class="number">192.168</span><span class="number">.20</span><span class="number">.114</span>:<span class="number">6789</span></span><br><span class="line"><span class="symbol">  adminId:</span> admin</span><br><span class="line"><span class="symbol">  adminSecretName:</span> ceph-secret-rbd</span><br><span class="line"><span class="symbol">  pool:</span> rbd</span><br><span class="line"><span class="symbol">  userId:</span> admin</span><br><span class="line"><span class="symbol">  userSecretName:</span> ceph-secret-rbd</span><br><span class="line"><span class="symbol">  fsType:</span> ext4</span><br><span class="line"><span class="symbol">  imageFormat:</span> <span class="string">"2"</span></span><br><span class="line"><span class="symbol">  imageFeatures:</span> <span class="string">"layering"</span></span><br></pre></td></tr></table></figure></p>
+<p><strong>创建pvc</strong><br><figure class="highlight dts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">~<span class="meta-keyword">/mytest/</span>ceph/rbd<span class="meta"># cat cephrbd-pvc.yaml </span></span><br><span class="line"><span class="symbol">kind:</span> PersistentVolumeClaim</span><br><span class="line"><span class="symbol">apiVersion:</span> v1</span><br><span class="line"><span class="symbol">metadata:</span></span><br><span class="line"><span class="symbol">  name:</span> cephrbd-pvc2</span><br><span class="line"><span class="symbol">spec:</span></span><br><span class="line"><span class="symbol">  storageClassName:</span> cephrbd-test2</span><br><span class="line"><span class="symbol">  accessModes:</span></span><br><span class="line">    - ReadWriteOnce</span><br><span class="line"><span class="symbol">  resources:</span></span><br><span class="line"><span class="symbol">    requests:</span></span><br><span class="line"><span class="symbol">      storage:</span> <span class="number">20</span>Gi</span><br></pre></td></tr></table></figure></p>
+<p><strong>创建deploy,容器挂载使用创建的pvc</strong></p>
+<figure class="highlight dts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line">:~<span class="meta-keyword">/mytest/</span>ceph/rbd<span class="meta"># cat deptest13dbdm.yaml </span></span><br><span class="line"><span class="symbol">apiVersion:</span> extensions/v1beta1</span><br><span class="line"><span class="symbol">kind:</span> Deployment</span><br><span class="line"><span class="symbol">metadata:</span></span><br><span class="line"><span class="symbol">  labels:</span></span><br><span class="line"><span class="symbol">    app:</span> deptest13dbdm</span><br><span class="line"><span class="symbol">  name:</span> deptest13dbdm</span><br><span class="line"><span class="symbol">  namespace:</span> default</span><br><span class="line"><span class="symbol">spec:</span></span><br><span class="line"><span class="symbol">  replicas:</span> <span class="number">1</span></span><br><span class="line"><span class="symbol">  selector:</span></span><br><span class="line"><span class="symbol">    matchLabels:</span></span><br><span class="line"><span class="symbol">      app:</span> deptest13dbdm</span><br><span class="line"><span class="symbol">  strategy:</span></span><br><span class="line"><span class="symbol">    rollingUpdate:</span></span><br><span class="line"><span class="symbol">      maxSurge:</span> <span class="number">1</span></span><br><span class="line"><span class="symbol">      maxUnavailable:</span> <span class="number">1</span></span><br><span class="line"><span class="symbol">    type:</span> RollingUpdate</span><br><span class="line"><span class="symbol">  template:</span></span><br><span class="line"><span class="symbol">    metadata:</span></span><br><span class="line"><span class="symbol">      labels:</span></span><br><span class="line"><span class="symbol">        app:</span> deptest13dbdm</span><br><span class="line"><span class="symbol">    spec:</span></span><br><span class="line"><span class="symbol">      containers:</span></span><br><span class="line"><span class="symbol">        image:</span> registry.xxx.com:<span class="number">5000</span>/mysql:<span class="number">56</span>v6</span><br><span class="line"><span class="symbol">        imagePullPolicy:</span> Always</span><br><span class="line"><span class="symbol">        name:</span> deptest13dbdm</span><br><span class="line"><span class="symbol">        ports:</span></span><br><span class="line">        - containerPort: <span class="number">3306</span></span><br><span class="line"><span class="symbol">          protocol:</span> TCP</span><br><span class="line"><span class="symbol">        resources:</span></span><br><span class="line"><span class="symbol">          limits:</span></span><br><span class="line"><span class="symbol">            memory:</span> <span class="number">16</span>Gi</span><br><span class="line"><span class="symbol">          requests:</span></span><br><span class="line"><span class="symbol">            memory:</span> <span class="number">512</span>Mi</span><br><span class="line"><span class="symbol">        terminationMessagePath:</span> <span class="meta-keyword">/dev/</span>termination-log</span><br><span class="line"><span class="symbol">        terminationMessagePolicy:</span> File</span><br><span class="line"><span class="symbol">        volumeMounts:</span></span><br><span class="line">        - mountPath: <span class="meta-keyword">/var/</span>lib/mysql</span><br><span class="line"><span class="symbol">          name:</span> datadir</span><br><span class="line"><span class="symbol">          subPath:</span> deptest13dbdm</span><br><span class="line"><span class="symbol">        resources:</span> &#123;&#125;</span><br><span class="line"><span class="symbol">        terminationMessagePath:</span> <span class="meta-keyword">/dev/</span>termination-log</span><br><span class="line"><span class="symbol">        terminationMessagePolicy:</span> File</span><br><span class="line"><span class="symbol">      dnsPolicy:</span> ClusterFirst</span><br><span class="line"><span class="symbol">      restartPolicy:</span> Always</span><br><span class="line"><span class="symbol">      schedulerName:</span> default-scheduler</span><br><span class="line"><span class="symbol">      securityContext:</span> &#123;&#125;</span><br><span class="line"><span class="symbol">      terminationGracePeriodSeconds:</span> <span class="number">30</span></span><br><span class="line"><span class="symbol">      volumes:</span></span><br><span class="line">      - name: datadir</span><br><span class="line"><span class="symbol">        persistentVolumeClaim:</span></span><br><span class="line"><span class="symbol">          claimName:</span> cephrbd-pvc2</span><br></pre></td></tr></table></figure>
+<p><strong>这里会遇到一个大坑:</strong></p>
+<figure class="highlight subunit"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">~# kubectl describe pvc cephrbd-pvc2 </span><br><span class="line">...</span><br><span class="line"><span class="keyword">Error </span>creating rbd image: executable file not found in $PATH</span><br></pre></td></tr></table></figure>
+<p>这是因为kube-controller-manager需要调用rbd客户端api来创建rbd image,集群的每个节点都已经安装ceph-common,但是集群是使用kubeadm部署的,kube-controller-manager组件是以容器方式工作的,内部不包含rbd的执行文件,后面在这个issue里,找到了解决的办法:<br><a href="https://github.com/kubernetes/kubernetes/issues/38923" target="_blank" rel="noopener">Github issue</a><br>使用外部的rbd-provisioner,提供给kube-controller-manager以rbd的执行入口,注意,issue内的demo指定的image版本有bug,不能指定rbd挂载后使用的文件系统格式,需要使用最新的版本demo,项目地址:<a href="https://github.com/kubernetes-incubator/external-storage/tree/master/ceph/rbd/deploy/rbac" target="_blank" rel="noopener">rbd-provisioner</a><br><strong>完整demo yaml文件:</strong><br><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">root@h009027:~/mytest/ceph/rbd/rbd-provisioner#</span> <span class="string">cat</span> <span class="string">rbd-provisioner.yaml</span> </span><br><span class="line"><span class="attr">kind:</span> <span class="string">ClusterRole</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">rbac.authorization.k8s.io/v1</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">rbd-provisioner</span></span><br><span class="line"><span class="attr">rules:</span></span><br><span class="line"><span class="attr">  - apiGroups:</span> <span class="string">[""]</span></span><br><span class="line"><span class="attr">    resources:</span> <span class="string">["persistentvolumes"]</span></span><br><span class="line"><span class="attr">    verbs:</span> <span class="string">["get",</span> <span class="string">"list"</span><span class="string">,</span> <span class="string">"watch"</span><span class="string">,</span> <span class="string">"create"</span><span class="string">,</span> <span class="string">"delete"</span><span class="string">]</span></span><br><span class="line"><span class="attr">  - apiGroups:</span> <span class="string">[""]</span></span><br><span class="line"><span class="attr">    resources:</span> <span class="string">["persistentvolumeclaims"]</span></span><br><span class="line"><span class="attr">    verbs:</span> <span class="string">["get",</span> <span class="string">"list"</span><span class="string">,</span> <span class="string">"watch"</span><span class="string">,</span> <span class="string">"update"</span><span class="string">]</span></span><br><span class="line"><span class="attr">  - apiGroups:</span> <span class="string">["storage.k8s.io"]</span></span><br><span class="line"><span class="attr">    resources:</span> <span class="string">["storageclasses"]</span></span><br><span class="line"><span class="attr">    verbs:</span> <span class="string">["get",</span> <span class="string">"list"</span><span class="string">,</span> <span class="string">"watch"</span><span class="string">]</span></span><br><span class="line"><span class="attr">  - apiGroups:</span> <span class="string">[""]</span></span><br><span class="line"><span class="attr">    resources:</span> <span class="string">["events"]</span></span><br><span class="line"><span class="attr">    verbs:</span> <span class="string">["create",</span> <span class="string">"update"</span><span class="string">,</span> <span class="string">"patch"</span><span class="string">]</span></span><br><span class="line"><span class="attr">  - apiGroups:</span> <span class="string">[""]</span></span><br><span class="line"><span class="attr">    resources:</span> <span class="string">["services"]</span></span><br><span class="line"><span class="attr">    resourceNames:</span> <span class="string">["kube-dns","coredns"]</span></span><br><span class="line"><span class="attr">    verbs:</span> <span class="string">["list",</span> <span class="string">"get"</span><span class="string">]</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">ClusterRoleBinding</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">rbac.authorization.k8s.io/v1</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">rbd-provisioner</span></span><br><span class="line"><span class="attr">subjects:</span></span><br><span class="line"><span class="attr">  - kind:</span> <span class="string">ServiceAccount</span></span><br><span class="line"><span class="attr">    name:</span> <span class="string">rbd-provisioner</span></span><br><span class="line"><span class="attr">    namespace:</span> <span class="string">default</span></span><br><span class="line"><span class="attr">roleRef:</span></span><br><span class="line"><span class="attr">  kind:</span> <span class="string">ClusterRole</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">rbd-provisioner</span></span><br><span class="line"><span class="attr">  apiGroup:</span> <span class="string">rbac.authorization.k8s.io</span></span><br><span class="line"></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">rbac.authorization.k8s.io/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Role</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">rbd-provisioner</span></span><br><span class="line"><span class="attr">rules:</span></span><br><span class="line"><span class="attr">- apiGroups:</span> <span class="string">[""]</span></span><br><span class="line"><span class="attr">  resources:</span> <span class="string">["secrets"]</span></span><br><span class="line"><span class="attr">  verbs:</span> <span class="string">["get"]</span></span><br><span class="line"><span class="attr">- apiGroups:</span> <span class="string">[""]</span></span><br><span class="line"><span class="attr">  resources:</span> <span class="string">["endpoints"]</span></span><br><span class="line"><span class="attr">  verbs:</span> <span class="string">["get",</span> <span class="string">"list"</span><span class="string">,</span> <span class="string">"watch"</span><span class="string">,</span> <span class="string">"create"</span><span class="string">,</span> <span class="string">"update"</span><span class="string">,</span> <span class="string">"patch"</span><span class="string">]</span></span><br><span class="line"></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">rbac.authorization.k8s.io/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">RoleBinding</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">rbd-provisioner</span></span><br><span class="line"><span class="attr">roleRef:</span></span><br><span class="line"><span class="attr">  apiGroup:</span> <span class="string">rbac.authorization.k8s.io</span></span><br><span class="line"><span class="attr">  kind:</span> <span class="string">Role</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">rbd-provisioner</span></span><br><span class="line"><span class="attr">subjects:</span></span><br><span class="line"><span class="attr">- kind:</span> <span class="string">ServiceAccount</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">rbd-provisioner</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">default</span></span><br><span class="line"></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">extensions/v1beta1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Deployment</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">rbd-provisioner</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  replicas:</span> <span class="number">1</span></span><br><span class="line"><span class="attr">  strategy:</span></span><br><span class="line"><span class="attr">    type:</span> <span class="string">Recreate</span></span><br><span class="line"><span class="attr">  template:</span></span><br><span class="line"><span class="attr">    metadata:</span></span><br><span class="line"><span class="attr">      labels:</span></span><br><span class="line"><span class="attr">        app:</span> <span class="string">rbd-provisioner</span></span><br><span class="line"><span class="attr">    spec:</span></span><br><span class="line"><span class="attr">      containers:</span></span><br><span class="line"><span class="attr">      - name:</span> <span class="string">rbd-provisioner</span></span><br><span class="line"><span class="attr">        image:</span> <span class="string">quay.io/external_storage/rbd-provisioner:latest</span></span><br><span class="line"><span class="attr">        env:</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">PROVISIONER_NAME</span></span><br><span class="line"><span class="attr">          value:</span> <span class="string">ceph.com/rbd</span></span><br><span class="line"><span class="attr">      serviceAccount:</span> <span class="string">rbd-provisioner</span></span><br><span class="line"></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">ServiceAccount</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">rbd-provisioner</span></span><br></pre></td></tr></table></figure></p>
+<p>部署完成后,重新创建上方的sc/pv,这个时候,pod就正常运行起来了,查看pvc,可以看到此pvc触发自动生成了一个pv且绑定了此pv,pv绑定的StorageClass则是刚创建的sc:<br><figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># pod</span></span><br><span class="line">~/mytest/ceph/rbd/rbd-provisioner# kubectl <span class="builtin-name">get</span> pods | grep deptest13</span><br><span class="line">deptest13dbdm-c9d5bfb7c-rzzv6                     2/2       Running            0          6h</span><br><span class="line"></span><br><span class="line"><span class="comment"># pvc</span></span><br><span class="line">~/mytest/ceph/rbd/rbd-provisioner# kubectl <span class="builtin-name">get</span> pvc cephrbd-pvc2</span><br><span class="line">NAME           STATUS    VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS    AGE</span><br><span class="line">cephrbd-pvc2   Bound     pvc-d976c2bf-c2fb-11e8-878f-141877468256   20Gi       RWO            cephrbd-test2   23h</span><br><span class="line"></span><br><span class="line"><span class="comment"># 自动创建的pv</span></span><br><span class="line">~/mytest/ceph/rbd/rbd-provisioner# kubectl <span class="builtin-name">get</span> pv pvc-d976c2bf-c2fb-11e8-878f-141877468256</span><br><span class="line">NAME                                       CAPACITY   ACCESS MODES   RECLAIM<span class="built_in"> POLICY </span>  STATUS    CLAIM                  STORAGECLASS    REASON    AGE</span><br><span class="line">pvc-d976c2bf-c2fb-11e8-878f-141877468256   20Gi       RWO            Retain           Bound     default/cephrbd-pvc2   cephrbd-test2             23h</span><br><span class="line"></span><br><span class="line"><span class="comment"># sc</span></span><br><span class="line">~/mytest/ceph/rbd/rbd-provisioner# kubectl <span class="builtin-name">get</span> sc cephrbd-test2</span><br><span class="line">NAME            PROVISIONER    AGE</span><br><span class="line">cephrbd-test2   ceph.com/rbd   23h</span><br></pre></td></tr></table></figure></p>
+<p><strong>再回到ceph节点上看看是否自动创建了rbd image</strong><br><figure class="highlight sqf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">~<span class="meta"># rbd ls</span></span><br><span class="line">kubernetes-dynamic-pvc-d988cfb1-c2fb-<span class="number">11</span>e8-b2df-<span class="number">0</span>a58ac1a084e</span><br><span class="line">test1</span><br><span class="line"></span><br><span class="line">~<span class="meta"># rbd info kubernetes-dynamic-pvc-d988cfb1-c2fb-11e8-b2df-0a58ac1a084e</span></span><br><span class="line">rbd <span class="built_in">image</span> <span class="string">'kubernetes-dynamic-pvc-d988cfb1-c2fb-11e8-b2df-0a58ac1a084e'</span>:</span><br><span class="line">	<span class="built_in">size</span> <span class="number">20480</span> MB <span class="built_in">in</span> <span class="number">5120</span> objects</span><br><span class="line">	order <span class="number">22</span> (<span class="number">4096</span> kB objects)</span><br><span class="line">	block_name_prefix: rbd_data.<span class="number">47</span>d0b6b8b4567</span><br><span class="line">	<span class="built_in">format</span>: <span class="number">2</span></span><br><span class="line">	features: layering</span><br><span class="line">	flags:</span><br></pre></td></tr></table></figure></p>
+<p>可以发现,动态创建pv/rbd成功</p>
+<h1 id="挂载测试"><a href="#挂载测试" class="headerlink" title="挂载测试"></a>挂载测试</h1><p>回顾最上方的kubernetes支持的接入模式截图,rbd是不支持ReadWriteMany的,而k8s的理念是像牲口一样管理你的容器,容器节点有可能随时横向扩展,横向缩减,在节点间漂移,因此,不支持多点挂载的RBD模式,显然不适合做多应用节点之间的共享文件存储,这里进行一次进一步的验证</p>
+<h4 id="多点挂载测试"><a href="#多点挂载测试" class="headerlink" title="多点挂载测试"></a>多点挂载测试</h4><p><strong>创建一个新的deploy,并挂载同一个pvc:</strong><br><figure class="highlight dts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br></pre></td><td class="code"><pre><span class="line">root@h009027:~<span class="meta-keyword">/mytest/</span>ceph/rbd<span class="meta"># cat deptest14dbdm.yaml </span></span><br><span class="line"><span class="symbol">apiVersion:</span> extensions/v1beta1</span><br><span class="line"><span class="symbol">kind:</span> Deployment</span><br><span class="line"><span class="symbol">metadata:</span></span><br><span class="line"><span class="symbol">  annotations:</span></span><br><span class="line">    deployment.kubernetes.io/revision: <span class="string">"4"</span></span><br><span class="line"><span class="symbol">  creationTimestamp:</span> <span class="number">2018</span><span class="number">-09</span><span class="number">-26</span>T07:<span class="number">32</span>:<span class="number">41</span>Z</span><br><span class="line"><span class="symbol">  generation:</span> <span class="number">4</span></span><br><span class="line"><span class="symbol">  labels:</span></span><br><span class="line"><span class="symbol">    app:</span> deptest14dbdm</span><br><span class="line"><span class="symbol">    domain:</span> dev.deptest14dbm.kokoerp.com</span><br><span class="line"><span class="symbol">    nginx_server:</span> <span class="string">""</span></span><br><span class="line"><span class="symbol">  name:</span> deptest14dbdm</span><br><span class="line"><span class="symbol">  namespace:</span> default</span><br><span class="line"><span class="symbol">  resourceVersion:</span> <span class="string">"26647927"</span></span><br><span class="line"><span class="symbol">  selfLink:</span> <span class="meta-keyword">/apis/</span>extensions<span class="meta-keyword">/v1beta1/</span>namespaces<span class="meta-keyword">/default/</span>deployments/deptest14dbdm</span><br><span class="line"><span class="symbol">  uid:</span> <span class="number">5</span>a1a62fe-c15e<span class="number">-11e8</span><span class="number">-878</span>f<span class="number">-141877468256</span></span><br><span class="line"><span class="symbol">spec:</span></span><br><span class="line"><span class="symbol">  replicas:</span> <span class="number">1</span></span><br><span class="line"><span class="symbol">  selector:</span></span><br><span class="line"><span class="symbol">    matchLabels:</span></span><br><span class="line"><span class="symbol">      app:</span> deptest14dbdm</span><br><span class="line"><span class="symbol">  strategy:</span></span><br><span class="line"><span class="symbol">    rollingUpdate:</span></span><br><span class="line"><span class="symbol">      maxSurge:</span> <span class="number">1</span></span><br><span class="line"><span class="symbol">      maxUnavailable:</span> <span class="number">1</span></span><br><span class="line"><span class="symbol">    type:</span> RollingUpdate</span><br><span class="line"><span class="symbol">  template:</span></span><br><span class="line"><span class="symbol">    metadata:</span></span><br><span class="line"><span class="symbol">      creationTimestamp:</span> null</span><br><span class="line"><span class="symbol">      labels:</span></span><br><span class="line"><span class="symbol">        app:</span> deptest14dbdm</span><br><span class="line"><span class="symbol">        domain:</span> dev.deptest14dbm.kokoerp.com</span><br><span class="line"><span class="symbol">        nginx_server:</span> <span class="string">""</span></span><br><span class="line"><span class="symbol">    spec:</span></span><br><span class="line"><span class="symbol">      containers:</span></span><br><span class="line">      - env:</span><br><span class="line">        - name: DB_NAME</span><br><span class="line"><span class="symbol">          value:</span> deptest14dbdm</span><br><span class="line"><span class="symbol">        image:</span> registry.youkeshu.com:<span class="number">5000</span>/mysql:<span class="number">56</span>v6</span><br><span class="line"><span class="symbol">        imagePullPolicy:</span> Always</span><br><span class="line"><span class="symbol">        name:</span> deptest14dbdm</span><br><span class="line"><span class="symbol">        ports:</span></span><br><span class="line">        - containerPort: <span class="number">3306</span></span><br><span class="line"><span class="symbol">          protocol:</span> TCP</span><br><span class="line"><span class="symbol">        resources:</span></span><br><span class="line"><span class="symbol">          limits:</span></span><br><span class="line"><span class="symbol">            memory:</span> <span class="number">16</span>Gi</span><br><span class="line"><span class="symbol">          requests:</span></span><br><span class="line"><span class="symbol">            memory:</span> <span class="number">512</span>Mi</span><br><span class="line"><span class="symbol">        terminationMessagePath:</span> <span class="meta-keyword">/dev/</span>termination-log</span><br><span class="line"><span class="symbol">        terminationMessagePolicy:</span> File</span><br><span class="line"><span class="symbol">        volumeMounts:</span></span><br><span class="line">        - mountPath: <span class="meta-keyword">/var/</span>lib/mysql</span><br><span class="line"><span class="symbol">          name:</span> datadir</span><br><span class="line"><span class="symbol">          subPath:</span> deptest14dbdm</span><br><span class="line">      - env:</span><br><span class="line">        - name: DATA_SOURCE_NAME</span><br><span class="line"><span class="symbol">          value:</span> exporter:<span class="number">6</span>qQidF3F5wNhrLC0@(<span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span>:<span class="number">3306</span>)/</span><br><span class="line"><span class="symbol">        image:</span> registry.youkeshu.com:<span class="number">5000</span>/mysqld-exporter:v0<span class="number">.10</span></span><br><span class="line"><span class="symbol">        imagePullPolicy:</span> Always</span><br><span class="line"><span class="symbol">        name:</span> mysql-exporter</span><br><span class="line"><span class="symbol">        ports:</span></span><br><span class="line">        - containerPort: <span class="number">9104</span></span><br><span class="line"><span class="symbol">          protocol:</span> TCP</span><br><span class="line"><span class="symbol">        resources:</span> &#123;&#125;</span><br><span class="line"><span class="symbol">        terminationMessagePath:</span> <span class="meta-keyword">/dev/</span>termination-log</span><br><span class="line"><span class="symbol">        terminationMessagePolicy:</span> File</span><br><span class="line"><span class="symbol">      dnsPolicy:</span> ClusterFirst</span><br><span class="line"><span class="symbol">      nodeSelector:</span></span><br><span class="line">        <span class="number">192.168</span><span class="number">.20</span><span class="number">.109</span>: <span class="string">""</span></span><br><span class="line"><span class="symbol">      restartPolicy:</span> Always</span><br><span class="line"><span class="symbol">      schedulerName:</span> default-scheduler</span><br><span class="line"><span class="symbol">      securityContext:</span> &#123;&#125;</span><br><span class="line"><span class="symbol">      terminationGracePeriodSeconds:</span> <span class="number">30</span></span><br><span class="line"><span class="symbol">      volumes:</span></span><br><span class="line">      - name: datadir</span><br><span class="line"><span class="symbol">        persistentVolumeClaim:</span></span><br><span class="line"><span class="symbol">          claimName:</span> cephrbd-pvc2</span><br></pre></td></tr></table></figure></p>
+<p><strong>使用nodeselector将此deptest13和deptest14限制在同一个node中:</strong><br><figure class="highlight elixir"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">root<span class="variable">@h009027</span><span class="symbol">:~/mytest/ceph/rbd</span><span class="comment"># kubectl get pods -o wide | grep deptest1[3-4]</span></span><br><span class="line">deptest13dbdm-c9d5bfb7c-rzzv6                     <span class="number">2</span>/<span class="number">2</span>       Running            <span class="number">0</span>          <span class="number">6</span>h        <span class="number">172.26</span>.<span class="number">8.82</span>    h020109</span><br><span class="line">deptest14dbdm-<span class="number">78</span>b8bb7995-q84dk                    <span class="number">2</span>/<span class="number">2</span>       Running            <span class="number">0</span>          <span class="number">2</span>m        <span class="number">172.26</span>.<span class="number">8.84</span>    h020109</span><br></pre></td></tr></table></figure></p>
+<p><strong>不难发现在同一个节点中,是可以支持多个pod共享rbd image运行的,在容器的工作节点上查看mount条目也可以证实这一点:</strong></p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">192.168.20.109:~# mount | grep rbd</span><br><span class="line">/dev/rbd0 on /var/lib/kubelet/plugins/kubernetes.io/rbd/rbd/rbd-image-kubernetes-dynamic-pvc-d988cfb1-c2fb-11e8-b2df-0a58ac1a084e<span class="built_in"> type </span>ext4 (rw,relatime,<span class="attribute">stripe</span>=1024,data=ordered)</span><br><span class="line">/dev/rbd0 on /var/lib/kubelet/pods/68b8e3c5-c38d-11e8-878f-141877468256/volumes/kubernetes.io~rbd/pvc-d976c2bf-c2fb-11e8-878f-141877468256<span class="built_in"> type </span>ext4 (rw,relatime,<span class="attribute">stripe</span>=1024,data=ordered)</span><br><span class="line">/dev/rbd0 on /var/lib/kubelet/pods/1e9b04b1-c3c3-11e8-878f-141877468256/volumes/kubernetes.io~rbd/pvc-d976c2bf-c2fb-11e8-878f-141877468256<span class="built_in"> type </span>ext4 (rw,relatime,<span class="attribute">stripe</span>=1024,data=ordered)</span><br></pre></td></tr></table></figure>
+<p><strong>修改新deploy的nodeselector指向其他的node:</strong><br><figure class="highlight lsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">~/mytest/ceph/rbd# kubectl get pods -o wide| grep deptest14db</span><br><span class="line">deptest14dbdm<span class="number">-78</span>b8bb7995-q84dk                    <span class="number">0</span>/<span class="number">2</span>       Terminating         <span class="number">0</span>          <span class="number">7</span>m        <span class="number">172.26</span><span class="number">.8</span><span class="number">.84</span>    h020109</span><br><span class="line">deptest14dbdm<span class="number">-79</span>fd495579-rkl92                    <span class="number">0</span>/<span class="number">2</span>       ContainerCreating   <span class="number">0</span>          <span class="number">49</span>s       &lt;none&gt;         h009028</span><br><span class="line"></span><br><span class="line"># kubectl describe pod deptest14dbdm<span class="number">-79</span>fd495579-rkl92</span><br><span class="line">...</span><br><span class="line">  Warning  FailedAttachVolume     <span class="number">1</span>m    attachdetach-controller  Multi-Attach error for volume <span class="string">"pvc-d976c2bf-c2fb-11e8-878f-141877468256"</span> Volume is already exclusively attached to one node and can't be attached to another</span><br></pre></td></tr></table></figure></p>
+<p>pod将阻塞在ContainerCreating状态,描述报错很清晰地指出控制器不支持多点挂载此pv.<br>进行下一步测试前先删除此临时新增的deploy</p>
+<h4 id="滚动更新测试"><a href="#滚动更新测试" class="headerlink" title="滚动更新测试"></a>滚动更新测试</h4><p><strong>在deptest13dbdm的deploy文件中指定的更新方式为滚动更新:</strong><br><figure class="highlight dts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="symbol">strategy:</span></span><br><span class="line"><span class="symbol">  rollingUpdate:</span></span><br><span class="line"><span class="symbol">    maxSurge:</span> <span class="number">1</span></span><br><span class="line"><span class="symbol">    maxUnavailable:</span> <span class="number">1</span></span><br><span class="line"><span class="symbol">  type:</span> RollingUpdate</span><br></pre></td></tr></table></figure></p>
+<p><strong>这里我们尝试一下,将正在运行的pod,从一个节点调度到另一个节点,rbd 是否能迁移到新的节点上挂载:</strong></p>
+<figure class="highlight elixir"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 修改nodeselector</span></span><br><span class="line">root<span class="variable">@h009027</span><span class="symbol">:~/mytest/ceph/rbd</span><span class="comment"># kubectl edit deploy deptest13dbdm</span></span><br><span class="line">deployment <span class="string">"deptest13dbdm"</span> edited</span><br><span class="line"></span><br><span class="line"><span class="comment"># 观察pod调度迁移过程</span></span><br><span class="line">root<span class="variable">@h009027</span><span class="symbol">:~/mytest/ceph/rbd</span><span class="comment"># kubectl get pods -o wide| grep deptest13</span></span><br><span class="line">deptest13dbdm-<span class="number">6999</span>f5757c-fk9dp                    <span class="number">0</span>/<span class="number">2</span>       ContainerCreating   <span class="number">0</span>          <span class="number">4</span>s        &lt;none&gt;         h009028</span><br><span class="line">deptest13dbdm-c9d5bfb7c-rzzv6                     <span class="number">2</span>/<span class="number">2</span>       Terminating         <span class="number">0</span>          <span class="number">6</span>h        <span class="number">172.26</span>.<span class="number">8.82</span>    h020109</span><br><span class="line"></span><br><span class="line">root<span class="variable">@h009027</span><span class="symbol">:~/mytest/ceph/rbd</span><span class="comment"># kubectl describe pod deptest13dbdm-6999f5757c-fk9dp </span></span><br><span class="line">...</span><br><span class="line"><span class="symbol">Events:</span></span><br><span class="line">  Type     Reason                 Age                From                 Message</span><br><span class="line">  ----     ------                 ----               ----                 -------</span><br><span class="line">  Normal   Scheduled              <span class="number">2</span>m                 default-scheduler    Successfully assigned deptest13dbdm-<span class="number">6999</span>f5757c-fk9dp to h009028</span><br><span class="line">  Normal   SuccessfulMountVolume  <span class="number">2</span>m                 kubelet, h009028  MountVolume.SetUp succeeded <span class="keyword">for</span> volume <span class="string">"default-token-7q8pq"</span></span><br><span class="line">  Warning  FailedMount            <span class="number">45</span>s                kubelet, h009028  Unable to mount volumes <span class="keyword">for</span> pod <span class="string">"deptest13dbdm-6999f5757c-fk9dp_default(28e9cdd6-c3c5-11e8-878f-141877468256)"</span>: timeout expired waiting <span class="keyword">for</span> volumes to attach/mount <span class="keyword">for</span> pod <span class="string">"default"</span>/<span class="string">"deptest13dbdm-6999f5757c-fk9dp"</span>. list of unattached/unmounted volumes=[datadir]</span><br><span class="line">  Normal   SuccessfulMountVolume  <span class="number">35</span>s (x2 over <span class="number">36</span>s)  kubelet, h009028  MountVolume.SetUp succeeded <span class="keyword">for</span> volume <span class="string">"pvc-d976c2bf-c2fb-11e8-878f-141877468256"</span></span><br><span class="line">  Normal   Pulling                <span class="number">27</span>s                kubelet, h009028  pulling image <span class="string">"registry.youkeshu.com:5000/mysql:56v6"</span></span><br><span class="line">  Normal   Pulled                 <span class="number">27</span>s                kubelet, h009028  Successfully pulled image <span class="string">"registry.youkeshu.com:5000/mysql:56v6"</span></span><br><span class="line">  Normal   Pulling                <span class="number">27</span>s                kubelet, h009028  pulling image <span class="string">"registry.youkeshu.com:5000/mysqld-exporter:v0.10"</span></span><br><span class="line">  Normal   Pulled                 <span class="number">26</span>s                kubelet, h009028  Successfully pulled image <span class="string">"registry.youkeshu.com:5000/mysqld-exporter:v0.10"</span></span><br><span class="line">  Normal   Created                <span class="number">26</span>s                kubelet, h009028  Created container</span><br><span class="line">  Normal   Started                <span class="number">26</span>s                kubelet, h009028  Started container</span><br><span class="line"></span><br><span class="line">root<span class="variable">@h009027</span><span class="symbol">:~/mytest/ceph/rbd</span><span class="comment"># kubectl get pods -o wide| grep deptest13</span></span><br><span class="line">deptest13dbdm-<span class="number">6999</span>f5757c-fk9dp                    <span class="number">2</span>/<span class="number">2</span>       Running            <span class="number">0</span>          <span class="number">3</span>m        <span class="number">172.26</span>.<span class="number">0</span>.<span class="number">87</span>    h009028</span><br><span class="line"></span><br><span class="line"><span class="comment">#在原node上查看内核中映射的rbd image块设备描述文件已消失,挂载已取消</span></span><br><span class="line">root<span class="variable">@h020109</span><span class="symbol">:~/tpcc-mysql</span><span class="comment"># ls /dev/rbd*</span></span><br><span class="line"><span class="symbol">ls:</span> cannot access <span class="string">'/dev/rbd*'</span>: No such file <span class="keyword">or</span> directory</span><br><span class="line">root<span class="variable">@h020109</span><span class="symbol">:~/tpcc-mysql</span><span class="comment"># mount | grep rbd</span></span><br><span class="line">root<span class="variable">@h020109</span><span class="symbol">:~/tpcc-mysql</span><span class="comment">#</span></span><br></pre></td></tr></table></figure>
+<p><strong>可以看出,是可以自动完成在节点间迁移的滚动更新的,整个调度的过程有些漫长,接近3分钟,这是因为其中至少涉及如下几个步骤:</strong><br>1.原pod终结,释放资源<br>2.原node取消挂载rbd,释放内核映射<br>3.新node内核映射rbd image,挂载rbd到文件目录<br>4.创建pod,挂载指定目录</p>
+<p><strong>结论:</strong><br>ceph rbd不支持多节点挂载,支持滚动更新.</p>
+<h2 id="后续"><a href="#后续" class="headerlink" title="后续"></a>后续</h2><p>在完成了使用cephfs和ceph rbd这两种k8s分布式存储的对接方式测试之后,下一篇文章将针对这两种方式进行数据库性能测试及适用场景讨论</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div id="reward-container">
+  <div>Thank you for your accept. mua！</div>
+  <button id="reward-button" disable="enable" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+
+    
+      
+      
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/reward/wechatpay.png" alt="丨ywq丨 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+      
+      
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/reward/alipay.png" alt="丨ywq丨 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        
+
+
+
+
+  
+
+
+
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>丨ywq丨</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    
+    <a href="https://www.ipyker.com/2018/09/29/k8s(十二)、分布式存储Ceph RBD使用.html" title="k8s(十二)、分布式存储Ceph RBD使用">https://www.ipyker.com/2018/09/29/k8s(十二)、分布式存储Ceph RBD使用.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li>
+</ul>
+
+      </div>
+    
+    <div>
+      
+        <div>
+    
+        <div style="text-align:center;color: #ccc;font-size:16px;">-------------本文结束<i class="fa fa-heart"></i>感谢您的阅读-------------</div>
+    
+</div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Kubernetes/" rel="tag"><i class="fa fa-tag"></i> Kubernetes</a>
+          
+            <a href="/tags/Ceph/" rel="tag"><i class="fa fa-tag"></i> Ceph</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/09/16/k8s(十一)、分布式存储Cephfs使用.html" rel="next" title="k8s(十一)、分布式存储Cephfs使用">
+                <i class="fa fa-chevron-left"></i> k8s(十一)、分布式存储Cephfs使用
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/09/29/Cephfs-CephRBD在k8s中的适用场景讨论及数据库性能压测.html" rel="prev" title="Cephfs & Ceph RBD 在k8s中的适用场景讨论及数据库性能压测">
+                Cephfs & Ceph RBD 在k8s中的适用场景讨论及数据库性能压测 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC80NDM5Mi8yMDkyNA=="></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="丨ywq丨">
+            
+              <p class="site-author-name" itemprop="name">丨ywq丨</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives">
+                
+                    <span class="site-state-item-count">74</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                      <a href="/tags">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">15</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/yinwenqin" title="GitHub &rarr; https://github.com/yinwenqin" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://blog.csdn.net/ywq935" title="CSDN &rarr; https://blog.csdn.net/ywq935" rel="noopener" target="_blank"><i class="fa fa-fw fa-globe"></i>CSDN</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-book"></i>
+                推荐阅读
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.upweto.top/gitbooks/useKubernetes/" title="http://blog.upweto.top/gitbooks/useKubernetes/" rel="noopener" target="_blank">kubernetes使用指南</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.upweto.top/gitbooks/kubeSourceCodeNote/" title="http://blog.upweto.top/gitbooks/kubeSourceCodeNote/" rel="noopener" target="_blank">kubernetes源码笔记</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li></ol><li class="nav-item nav-level-1"><a class="nav-link" href="#RBD创建测试"><span class="nav-number"></span> <span class="nav-text">RBD创建测试</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Kubernetes-Dynamic-Pv-使用"><span class="nav-number"></span> <span class="nav-text">Kubernetes Dynamic Pv 使用</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#挂载测试"><span class="nav-number"></span> <span class="nav-text">挂载测试</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#多点挂载测试"><span class="nav-number">0.0.1.</span> <span class="nav-text">多点挂载测试</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#滚动更新测试"><span class="nav-number">0.0.2.</span> <span class="nav-text">滚动更新测试</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#后续"><span class="nav-number">1.</span> <span class="nav-text">后续</span></a></li></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" style=" text-align:center;">&copy; 2017 – <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ywq</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"> 站点字数合计:</i>
+    </span>
+    
+    <span title="站点总字数">583k</span>
+  
+  
+</div>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+<div class="run_time" style=" text-align:center;">
+  <span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
+  <script>
+    var now = new Date(); 
+    function createtime() { 
+        var grt= new Date("08/23/2018 10:00:00");//此处修改你的建站时间或者网站上线时间 
+        now.setTime(now.getTime()+250); 
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days); 
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours); 
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum); 
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;} 
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum); 
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;} 
+        document.getElementById("timeDate").innerHTML = "本站已安全运行 "+dnum+" 天 "; 
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒"; 
+    } 
+    setInterval("createtime()",250);
+  </script>
+</div>
+
+        
+<div class="busuanzi-count" style=" text-align:center;">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-user"></i>
+    </span>
+    <span class="site-uv" title="总访客量">
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span> 人
+    </span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+  
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-eye"></i>
+    </span>
+    <span class="site-pv" title="总访问量">
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span> 次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+  
+    
+    
+      
+    
+  
+  <script color="black" opacity="0.7" zindex="-1" count="140" src="//cdn.jsdelivr.net/gh/theme-next/theme-next-canvas-nest@1.0.0/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+  
+  
+  <script id="ribbon" size="300" alpha="0.1" zindex="-1" src="/lib/canvas-ribbon/canvas-ribbon.js"></script>
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/fancybox/source/jquery.fancybox.pack.js"></script>
+
+
+  
+
+
+  <script src="/js/utils.js?v=7.1.1"></script>
+
+  <script src="/js/motion.js?v=7.1.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/schemes/muse.js?v=7.1.1"></script>
+
+
+
+
+  
+  <script src="/js/scrollspy.js?v=7.1.1"></script>
+<script src="/js/post-details.js?v=7.1.1"></script>
+
+
+
+  
+
+
+  <script src="/js/next-boot.js?v=7.1.1"></script>
+
+
+  
+
+  
+
+  
+  
+  
+
+  
+
+  
+  
+  
+
+
+  
+
+
+  
+    <script>
+  window.livereOptions = {
+    refer: '2018/09/29/k8s(十二)、分布式存储Ceph RBD使用.html'
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+</script>
+
+  
+
+
+  
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url).replace(/\/{2,}/g, '/');
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x"></i></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x"></i></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+  
+  <script src="/lib/bookmark/bookmark.min.js?v=1.0"></script>
+  <script>
+  
+    bookmark.scrollToMark('auto', "#更多");
+  
+  </script>
+
+
+  
+
+  
+
+  
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/koharu.model.json"},"display":{"position":"left","width":250,"height":500},"mobile":{"show":false},"react":{"opacity":0.7},"log":false});</script></body>
+</html>
+<!-- 页面点击小红心 -->
+<script type="text/javascript" src="/js/src/clicklove.js"></script>

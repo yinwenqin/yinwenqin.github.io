@@ -1,0 +1,1542 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-CN">
+
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link rel="stylesheet" href="/lib/pace/pace-theme-bounce.min.css?v=1.0.2">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link rel="stylesheet" href="/lib/fancybox/source/jquery.fancybox.css">
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+    
+      
+    
+
+    
+  
+
+  
+
+  
+
+  
+    
+      
+    
+
+    
+  
+
+  
+    
+    
+    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic|Roboto Slab:300,300italic,400,400italic,700,700italic|Roboto Mono:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext">
+  
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.1.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.1.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.1.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.1.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.1.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '7.1.1',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":true,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: true,
+    fancybox: true,
+    fastclick: true,
+    lazyload: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"shrinkIn","post_header":"slideLeftIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideDownIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <script>
+  (function(i,s,o,g,r,a,m){i["DaoVoiceObject"]=r;i[r]=i[r]||function(){(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;a.charset="utf-8";m.parentNode.insertBefore(a,m)})(window,document,"script",('https:' == document.location.protocol ? 'https:' : 'http:') + "//widget.daovoice.io/widget/0f81ff2f.js","daovoice")
+  daovoice('init', {
+      app_id: "bd399fce"
+    });
+  daovoice('update');
+  </script>
+
+  <meta name="description" content="前言Harbor是Docker镜像仓库管理系统，用于企业级管理容器镜像，支持对接ldap进行权限管理,由VMVare中国团队开发。项目地址:https://github.com/goharbor/harbor/安装方式:1.Docker Compose方式部署:https://github.com/goharbor/harbor/blob/master/docs/installation_gui">
+<meta name="keywords" content="Kubernetes,Docker">
+<meta property="og:type" content="article">
+<meta property="og:title" content="k8s(十三)、企业级docker仓库Harbor在kubernetes上搭建使用">
+<meta property="og:url" content="https://www.ipyker.com/2018/10/24/k8s(十三)、企业级docker仓库Harbor在kubernetes上搭建使用.html">
+<meta property="og:site_name" content="随笔漫谈">
+<meta property="og:description" content="前言Harbor是Docker镜像仓库管理系统，用于企业级管理容器镜像，支持对接ldap进行权限管理,由VMVare中国团队开发。项目地址:https://github.com/goharbor/harbor/安装方式:1.Docker Compose方式部署:https://github.com/goharbor/harbor/blob/master/docs/installation_gui">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://mycloudn.kokoerp.com/20181024170107199.jpg">
+<meta property="og:image" content="http://mycloudn.kokoerp.com/20181024170504541.jpg">
+<meta property="og:updated_time" content="2019-11-21T07:48:40.133Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="k8s(十三)、企业级docker仓库Harbor在kubernetes上搭建使用">
+<meta name="twitter:description" content="前言Harbor是Docker镜像仓库管理系统，用于企业级管理容器镜像，支持对接ldap进行权限管理,由VMVare中国团队开发。项目地址:https://github.com/goharbor/harbor/安装方式:1.Docker Compose方式部署:https://github.com/goharbor/harbor/blob/master/docs/installation_gui">
+<meta name="twitter:image" content="http://mycloudn.kokoerp.com/20181024170107199.jpg">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="随笔漫谈" type="application/atom+xml">
+
+
+
+  
+  
+  <link rel="canonical" href="https://www.ipyker.com/2018/10/24/k8s(十三)、企业级docker仓库Harbor在kubernetes上搭建使用">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>k8s(十三)、企业级docker仓库Harbor在kubernetes上搭建使用 | 随笔漫谈</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+ 
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">随笔漫谈</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-book">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/gitbooks/" rel="section"><i class="menu-item-icon fa fa-fw fa-book"></i> <br>book</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-互动">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/guestbook/" rel="section"><i class="menu-item-icon fa fa-fw fa-comments"></i> <br>互动</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.ipyker.com/2018/10/24/k8s(十三)、企业级docker仓库Harbor在kubernetes上搭建使用.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="丨ywq丨">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随笔漫谈">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">k8s(十三)、企业级docker仓库Harbor在kubernetes上搭建使用
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-10-24 17:05:46" itemprop="dateCreated datePublished" datetime="2018-10-24T17:05:46+08:00">2018-10-24</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-11-21 15:48:40" itemprop="dateModified" datetime="2019-11-21T15:48:40+08:00">2019-11-21</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+            <div class="post-symbolscount">
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">本文字数：</span>
+                
+                <span title="本文字数">14k</span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">13 分钟</span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id><a href="#" class="headerlink" title=" "></a> </h2><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>Harbor是Docker镜像仓库管理系统，用于企业级管理容器镜像，支持对接ldap进行权限管理,由VMVare中国团队开发。<br><strong>项目地址:</strong><br><a href="https://github.com/goharbor/harbor/" target="_blank" rel="noopener">https://github.com/goharbor/harbor/</a><br><strong>安装方式:</strong><br>1.Docker Compose方式部署:<br><a href="https://github.com/goharbor/harbor/blob/master/docs/installation_guide.md" target="_blank" rel="noopener">https://github.com/goharbor/harbor/blob/master/docs/installation_guide.md</a><br>2.通过kubernetes直接部署:<br>新版本已废弃<br>3.通过helm/kubernetes方式部署:<br><a href="https://github.com/goharbor/harbor-helm/blob/master/README.md" target="_blank" rel="noopener">https://github.com/goharbor/harbor-helm/blob/master/README.md</a><br>推荐使用,本文将采用此方式</p>
+<h2 id="Helm安装"><a href="#Helm安装" class="headerlink" title="Helm安装"></a>Helm安装</h2><h4 id="helm简介"><a href="#helm简介" class="headerlink" title="helm简介"></a>helm简介</h4><p>Helm是一个用于Kubernetes的包管理工具,每一个安装包构成一个chart基本单位.想象一下,一个完整的部署,可能包含前端\后端\中间件\DB的部署实例,以及k8s管理对应的secret/configmap/svc/ing/pv/pvc等众多资源类型,在部署管理或者卸载之前,如果逐一编辑管理这些资源的yaml文件,工作量比较庞大且容易疏漏.helm的出现很好的解决了这个问题,使用模板以及变量替换的方式,按需生成部署yaml文件包,并且向kubernetes api发送调度请求,虽然额外地引入了一些学习成本,但对于部署包的管理无疑是带来了很大的便利性的.</p>
+<h4 id="helm组件"><a href="#helm组件" class="headerlink" title="helm组件"></a>helm组件</h4><p><strong>Helm</strong><br>Helm是一个cli客户端，可以完成如下内容：</p>
+<p>1.创建/打包/调试Chart<br>2.创建本地Chart仓库,管理本地和远程Chart仓库<br>3.与Tiller交互并完成Chart的安装，升级，删除，回滚，查看等操作</p>
+<p><strong>Tiller</strong><br>1.监听helm客户端的请求,根据chart生成相应的release<br>2.将release的资源信息发送给kubernetes api,实现资源增删改查.<br>3.追踪release的状态,实现资源的更新/回滚操作</p>
+<p><strong>安装:</strong><br>安装较为简单,参考官方文档,不做复述:<br><a href="https://docs.helm.sh/using_helm/#installing-helm" target="_blank" rel="noopener">https://docs.helm.sh/using_helm/#installing-helm</a></p>
+<h2 id="Harbor安装"><a href="#Harbor安装" class="headerlink" title="Harbor安装"></a>Harbor安装</h2><p>这里采用次新版本的v1.5.3版本</p>
+<figure class="highlight autoit"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">root<span class="symbol">@h1</span>:<span class="meta"># wget https://github.com/goharbor/harbor/archive/v1.5.3.tar.gz</span></span><br><span class="line">root<span class="symbol">@h1</span>:<span class="meta"># tar -xf https://github.com/goharbor/harbor/archive/v1.5.3.tar.gz </span></span><br><span class="line">root<span class="symbol">@h1</span>:<span class="meta"># cd harbor-1.5.3/contrib/helm/harbor/</span></span><br></pre></td></tr></table></figure>
+<p>helm方式安装的harbor默认是https的,因此需要k8s集群ingress网关开启https协议,traefik开启https参考此前文章:<br><a href="https://blog.csdn.net/ywq935/article/details/79886793" target="_blank" rel="noopener">k8s（二）、对外服务</a> </p>
+<h4 id="更新helm-dependency"><a href="#更新helm-dependency" class="headerlink" title="更新helm dependency:"></a>更新helm dependency:</h4><p>harbor的helm部署依赖了postgresql的helm，在官方的安装文档没有明确说明，直接按照官方文档说明安装，就会缺失postgresql的部署，导致helm install failed</p>
+<figure class="highlight ebnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">helm dependency update</span></span><br></pre></td></tr></table></figure>
+<p>修改value.yaml文件,添加pvc持久存储并将相应组件上下文中的volume部分注释打开:</p>
+<figure class="highlight dts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="symbol">mysql:</span></span><br><span class="line"><span class="symbol">  volumes:</span></span><br><span class="line"><span class="symbol">    data:</span></span><br><span class="line"><span class="symbol">    storageClass:</span> <span class="string">"cephrbd"</span></span><br><span class="line"><span class="symbol">    accessMode:</span> ReadWriteOnce</span><br><span class="line">    </span><br><span class="line"><span class="symbol">adminserver:</span></span><br><span class="line"><span class="symbol">  volumes:</span></span><br><span class="line"><span class="symbol">    config:</span></span><br><span class="line"><span class="symbol">    storageClass:</span> <span class="string">"cephrbd"</span></span><br><span class="line"><span class="symbol">    accessMode:</span> ReadWriteOnce</span><br><span class="line"><span class="symbol">    size:</span> <span class="number">1</span>G</span><br><span class="line"></span><br><span class="line"><span class="symbol">registry:</span></span><br><span class="line"><span class="symbol">  volumes:</span></span><br><span class="line"><span class="symbol">    data:</span></span><br><span class="line"><span class="symbol">    storageClass:</span> <span class="string">"cephrbd"</span></span><br><span class="line"><span class="symbol">    accessMode:</span> ReadWriteOnce</span><br><span class="line"><span class="symbol">    size:</span> <span class="number">5</span>G</span><br></pre></td></tr></table></figure>
+<p>完整value.yaml文件如下:</p>
+<figure class="highlight less"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br><span class="line">235</span><br><span class="line">236</span><br><span class="line">237</span><br><span class="line">238</span><br><span class="line">239</span><br><span class="line">240</span><br><span class="line">241</span><br><span class="line">242</span><br><span class="line">243</span><br><span class="line">244</span><br><span class="line">245</span><br><span class="line">246</span><br><span class="line">247</span><br><span class="line">248</span><br><span class="line">249</span><br><span class="line">250</span><br><span class="line">251</span><br><span class="line">252</span><br><span class="line">253</span><br><span class="line">254</span><br><span class="line">255</span><br><span class="line">256</span><br><span class="line">257</span><br><span class="line">258</span><br><span class="line">259</span><br><span class="line">260</span><br><span class="line">261</span><br><span class="line">262</span><br><span class="line">263</span><br><span class="line">264</span><br><span class="line">265</span><br><span class="line">266</span><br><span class="line">267</span><br><span class="line">268</span><br><span class="line">269</span><br><span class="line">270</span><br><span class="line">271</span><br><span class="line">272</span><br><span class="line">273</span><br><span class="line">274</span><br><span class="line">275</span><br><span class="line">276</span><br><span class="line">277</span><br><span class="line">278</span><br><span class="line">279</span><br><span class="line">280</span><br><span class="line">281</span><br><span class="line">282</span><br><span class="line">283</span><br><span class="line">284</span><br><span class="line">285</span><br><span class="line">286</span><br><span class="line">287</span><br><span class="line">288</span><br><span class="line">289</span><br><span class="line">290</span><br><span class="line">291</span><br><span class="line">292</span><br><span class="line">293</span><br><span class="line">294</span><br><span class="line">295</span><br><span class="line">296</span><br><span class="line">297</span><br><span class="line">298</span><br><span class="line">299</span><br><span class="line">300</span><br><span class="line">301</span><br><span class="line">302</span><br><span class="line">303</span><br><span class="line">304</span><br><span class="line">305</span><br><span class="line">306</span><br><span class="line">307</span><br><span class="line">308</span><br><span class="line">309</span><br><span class="line">310</span><br><span class="line">311</span><br><span class="line">312</span><br><span class="line">313</span><br><span class="line">314</span><br><span class="line">315</span><br><span class="line">316</span><br><span class="line">317</span><br><span class="line">318</span><br><span class="line">319</span><br><span class="line">320</span><br><span class="line">321</span><br><span class="line">322</span><br><span class="line">323</span><br><span class="line">324</span><br><span class="line">325</span><br><span class="line">326</span><br><span class="line">327</span><br></pre></td><td class="code"><pre><span class="line"># <span class="selector-tag">Configure</span> <span class="selector-tag">persisten</span> <span class="selector-tag">Volumes</span> <span class="selector-tag">per</span> <span class="selector-tag">application</span></span><br><span class="line">## <span class="selector-tag">Applications</span> <span class="selector-tag">that</span> <span class="selector-tag">require</span> <span class="selector-tag">storage</span> <span class="selector-tag">have</span> <span class="selector-tag">a</span> `<span class="selector-tag">volumes</span>` <span class="selector-tag">definition</span> <span class="selector-tag">which</span> <span class="selector-tag">will</span> <span class="selector-tag">be</span> <span class="selector-tag">used</span></span><br><span class="line">## <span class="keyword">when</span> <span class="built_in">`persistence.enabled`</span> is set to true.</span><br><span class="line">## example</span><br><span class="line"># <span class="attribute">mysql</span>:</span><br><span class="line">#   <span class="attribute">volumes</span>:</span><br><span class="line">#     <span class="attribute">data</span>:</span><br><span class="line">## Persistent Volume Storage Class</span><br><span class="line">## If defined, <span class="attribute">storageClassName</span>: &lt;storageClass&gt;</span><br><span class="line">## If set to <span class="string">"-"</span>, <span class="attribute">storageClassName</span>: <span class="string">""</span>, which disables dynamic provisioning</span><br><span class="line">## If undefined (the default) or set to null, no storageClassName spec is</span><br><span class="line">##   set, choosing the default provisioner.  (gp2 on AWS, standard on</span><br><span class="line">##   GKE, AWS &amp; OpenStack)</span><br><span class="line">##</span><br><span class="line">#     <span class="attribute">storageClass</span>: <span class="string">"-"</span></span><br><span class="line">#     <span class="attribute">accessMode</span>: ReadWriteOnce</span><br><span class="line">#     <span class="attribute">size</span>: <span class="number">1</span>Gi</span><br><span class="line"></span><br><span class="line"><span class="attribute">mysql</span>:</span><br><span class="line">  <span class="attribute">volumes</span>:</span><br><span class="line">    <span class="attribute">data</span>:</span><br><span class="line">    <span class="attribute">storageClass</span>: <span class="string">"cephrbd"</span></span><br><span class="line">    <span class="attribute">accessMode</span>: ReadWriteOnce</span><br><span class="line"><span class="attribute">adminserver</span>:</span><br><span class="line">  <span class="attribute">volumes</span>:</span><br><span class="line">    <span class="attribute">config</span>:</span><br><span class="line">    <span class="attribute">storageClass</span>: <span class="string">"cephrbd"</span></span><br><span class="line">    <span class="attribute">accessMode</span>: ReadWriteOnce</span><br><span class="line">    <span class="attribute">size</span>: <span class="number">1</span>G</span><br><span class="line"></span><br><span class="line"><span class="attribute">registry</span>:</span><br><span class="line">  <span class="attribute">volumes</span>:</span><br><span class="line">    <span class="attribute">data</span>:</span><br><span class="line">    <span class="attribute">storageClass</span>: <span class="string">"cephrbd"</span></span><br><span class="line">    <span class="attribute">accessMode</span>: ReadWriteOnce</span><br><span class="line">    <span class="attribute">size</span>: <span class="number">5</span>G</span><br><span class="line"></span><br><span class="line">## Configure resource requests <span class="keyword">and</span> limits per application</span><br><span class="line">## <span class="attribute">ref</span>: <span class="attribute">http</span>:<span class="comment">//kubernetes.io/docs/user-guide/compute-resources/</span></span><br><span class="line">##</span><br><span class="line"># <span class="attribute">mysql</span>:</span><br><span class="line">#   <span class="attribute">resources</span>:</span><br><span class="line">#     <span class="attribute">requests</span>:</span><br><span class="line">#       <span class="attribute">memory</span>: <span class="number">256</span>Mi</span><br><span class="line">#       <span class="attribute">cpu</span>: <span class="number">100</span>m</span><br><span class="line"></span><br><span class="line"><span class="attribute">persistence</span>:</span><br><span class="line">  <span class="attribute">enabled</span>: true</span><br><span class="line"></span><br><span class="line"># The tag for Harbor docker images.</span><br><span class="line"><span class="attribute">harborImageTag</span>: &amp;harbor_image_tag v1.<span class="number">4.0</span></span><br><span class="line"></span><br><span class="line"># The FQDN for Harbor service.</span><br><span class="line"><span class="attribute">externalDomain</span>: harbor.my.domain</span><br><span class="line"># If set to true, you don't need to set tlsCrt/tlsKey/caCrt, but must add</span><br><span class="line"># Harbor FQDN as insecure-registries for your docker client.</span><br><span class="line"><span class="attribute">insecureRegistry</span>: false</span><br><span class="line">#<span class="attribute">insecureRegistry</span>: true</span><br><span class="line"># The TLS certificate for Harbor. The common name of tlsCrt must match the externalDomain above.</span><br><span class="line"><span class="attribute">tlsCrt</span>: </span><br><span class="line">#<span class="attribute">tlsCrt</span>: root/traefik/ssl/kokoerp.crt</span><br><span class="line"><span class="attribute">tlsKey</span>:</span><br><span class="line">#<span class="attribute">tlsKey</span>: root/traefik/ssl/kokoerp.key</span><br><span class="line"><span class="attribute">caCrt</span>:</span><br><span class="line"></span><br><span class="line"># The secret key used for encryption. Must be a string of <span class="number">16</span> chars.</span><br><span class="line"><span class="attribute">secretKey</span>: <span class="keyword">not</span>-a-secure-key</span><br><span class="line"></span><br><span class="line"># These annotations allow the registry to work behind the nginx</span><br><span class="line"># ingress controller.</span><br><span class="line"><span class="attribute">ingress</span>:</span><br><span class="line">  <span class="attribute">annotations</span>:</span><br><span class="line">    ingress.kubernetes.io/<span class="attribute">ssl-redirect</span>: <span class="string">"true"</span></span><br><span class="line">    ingress.kubernetes.io/<span class="attribute">body-size</span>: <span class="string">"0"</span></span><br><span class="line">    ingress.kubernetes.io/<span class="attribute">proxy-body-size</span>: <span class="string">"0"</span></span><br><span class="line"></span><br><span class="line"><span class="attribute">adminserver</span>:</span><br><span class="line">  <span class="attribute">image</span>:</span><br><span class="line">    <span class="attribute">repository</span>: vmware/harbor-adminserver</span><br><span class="line">    <span class="attribute">tag</span>: *harbor_image_tag</span><br><span class="line">    <span class="attribute">pullPolicy</span>: IfNotPresent</span><br><span class="line">  <span class="attribute">emailHost</span>: <span class="string">"smtp.mydomain.com"</span></span><br><span class="line">  <span class="attribute">emailPort</span>: <span class="string">"25"</span></span><br><span class="line">  <span class="attribute">emailUser</span>: <span class="string">"sample_admin@mydomain.com"</span></span><br><span class="line">  <span class="attribute">emailSsl</span>: <span class="string">"false"</span></span><br><span class="line">  <span class="attribute">emailFrom</span>: <span class="string">"admin &lt;sample_admin@mydomain.com&gt;"</span></span><br><span class="line">  <span class="attribute">emailIdentity</span>: <span class="string">""</span></span><br><span class="line">  <span class="attribute">emailInsecure</span>: <span class="string">"False"</span></span><br><span class="line">  <span class="attribute">emailPwd</span>: <span class="keyword">not</span>-a-secure-password</span><br><span class="line">  <span class="attribute">adminPassword</span>: Harbor12345</span><br><span class="line">  <span class="attribute">authenticationMode</span>: <span class="string">"db_auth"</span></span><br><span class="line">  <span class="attribute">selfRegistration</span>: <span class="string">"on"</span></span><br><span class="line">  <span class="attribute">ldap</span>:</span><br><span class="line">    <span class="attribute">url</span>: <span class="string">"ldaps://ldapserver"</span></span><br><span class="line">    <span class="attribute">searchDN</span>: <span class="string">""</span></span><br><span class="line">    <span class="attribute">baseDN</span>: <span class="string">""</span></span><br><span class="line">    <span class="attribute">filter</span>: <span class="string">"(objectClass=person)"</span></span><br><span class="line">    <span class="attribute">uid</span>: <span class="string">"uid"</span></span><br><span class="line">    <span class="attribute">scope</span>: <span class="string">"2"</span></span><br><span class="line">    <span class="attribute">timeout</span>: <span class="string">"5"</span></span><br><span class="line">    <span class="attribute">verifyCert</span>: <span class="string">"True"</span></span><br><span class="line">  ## Persist data to a persistent volume</span><br><span class="line">  <span class="attribute">volumes</span>:</span><br><span class="line">    <span class="attribute">config</span>:</span><br><span class="line">      <span class="attribute">storageClass</span>: <span class="string">"cephrbd"</span></span><br><span class="line">      <span class="attribute">accessMode</span>: ReadWriteOnce</span><br><span class="line">      <span class="attribute">size</span>: <span class="number">1</span>Gi</span><br><span class="line">  # <span class="attribute">resources</span>:</span><br><span class="line">  #  <span class="attribute">requests</span>:</span><br><span class="line">  #    <span class="attribute">memory</span>: <span class="number">256</span>Mi</span><br><span class="line">  #    <span class="attribute">cpu</span>: <span class="number">100</span>m</span><br><span class="line"></span><br><span class="line">## jobservice</span><br><span class="line">#</span><br><span class="line"><span class="attribute">jobservice</span>:</span><br><span class="line">  <span class="attribute">image</span>:</span><br><span class="line">    <span class="attribute">repository</span>: vmware/harbor-jobservice</span><br><span class="line">    <span class="attribute">tag</span>: *harbor_image_tag</span><br><span class="line">    <span class="attribute">pullPolicy</span>: IfNotPresent</span><br><span class="line">  <span class="attribute">secret</span>: <span class="keyword">not</span>-a-secure-secret</span><br><span class="line"># <span class="attribute">resources</span>:</span><br><span class="line">#   <span class="attribute">requests</span>:</span><br><span class="line">#     <span class="attribute">memory</span>: <span class="number">256</span>Mi</span><br><span class="line">#     <span class="attribute">cpu</span>: <span class="number">100</span>m</span><br><span class="line"></span><br><span class="line">## UI</span><br><span class="line">#</span><br><span class="line"><span class="attribute">ui</span>:</span><br><span class="line">  <span class="attribute">image</span>:</span><br><span class="line">    <span class="attribute">repository</span>: vmware/harbor-ui</span><br><span class="line">    <span class="attribute">tag</span>: *harbor_image_tag</span><br><span class="line">    <span class="attribute">pullPolicy</span>: IfNotPresent</span><br><span class="line">  <span class="attribute">secret</span>: <span class="keyword">not</span>-a-secure-secret</span><br><span class="line">  <span class="attribute">privateKeyPem</span>: |</span><br><span class="line">    -----BEGIN RSA PRIVATE KEY-----</span><br><span class="line">    MIIJKAIBAAKCAgEA4WYbxdrFGG6RnfyYKlHYML3lEqtA9cYWWOynE9BeaEr/cMnM</span><br><span class="line">    bBr1dd91/Nm6RiYhQvTDU2Kc6NejqjdliW5B9xUoVKayri8OU81a8ViXeNgKwCPR</span><br><span class="line">    AiTTla1zoX5DnvoxpO9G3lxyNvTKXc0cw8NjQDAXpaDbzJYLkshCeuyD9bco8R96</span><br><span class="line">    /zrpBEX8tADN3+<span class="number">3</span>yA3fMcZzVXsBm4BTpHJRk/qBpHYEPSHzxyH3iGMNKk3vMUBZz</span><br><span class="line">    e0EYkK8NCA2CuEKMnC3acx9IdRwkx10abGvHQCLRCVY7rGoak+b0oZ99RJIRQ9Iq</span><br><span class="line">    YXsn8fsMBQly6xxvSeY5XuSP7Xb6JKDt3y8Spi4gR1M/<span class="number">5</span>aEzhuOyu201rMna7Rs/</span><br><span class="line">    GPfaKjBlbX0jiLDa7v4zjsBPsPaf/c4uooz3ICLsdukaom+E538R0EiOkXt/wyw2</span><br><span class="line">    <span class="number">2</span>YmaWNCsYlEpke7cVC33e/<span class="number">0</span>dPBq4IHsVflawSF9OWS23ikVAs/n+<span class="number">76</span>KjuucEDmbT</span><br><span class="line">    aKUYAJjvAmZL14j+EKc/CoplhCe6pKhavjmNIOfCSdlreIPBhOVbf1f817wKoSIZ</span><br><span class="line">    qVyCA1AYNkI9RYS00axtJGBGMlKbdQqCNpLL58c6To2awmckIZCEcATKOp++NoGm</span><br><span class="line">    Ib0bhdSasdGB5VCtwZVluN8bLl13zBKoxTGjNlEatUGDRnDAnLdZbXXffjsCAwEA</span><br><span class="line">    AQKCAgBEUigO8/<span class="number">4</span>UJse6xKr3APHv7E94NjKtjMqPT8RhDCLhqAH/lRuClTVb8k0Y</span><br><span class="line">    RILi6oHggsKGDvkS1vJEESCU5LfYBjDAX/r/M0I7gp6TU1AukAXKMdETvkfoMbg/</span><br><span class="line">    <span class="number">9</span>j7W/G152hF4KztvjwmcHyUd7aay+SDh0n1taPm/FzaXfgONwmQFmo40uQ2SfwhX</span><br><span class="line">    I3tD6iMWjASLV4eRfe5w88WpJQ3r5IGYMNuKFF1RcV7MNL3xMHBAwl1kudmRWY4w</span><br><span class="line">    p6+<span class="number">83</span>Gc0m+<span class="number">2</span>AQbY70TkQuRbeUFkIBsWn99yEqXC+<span class="number">7</span>h2us+JLm57iGN1ByQvVnEwL</span><br><span class="line">    Zs7Pl0Hge4leSxeZWhv+aE1R/jm/VdG4dglInuhED0ug8WAJg58IkDYfMKOOALHx</span><br><span class="line">    +<span class="number">0</span>CNHE02XqqUIFwboZJSYTjMYvFL1i14L30FWnqH/<span class="number">0</span>kDs4whXHbnGWhVustsMSK9</span><br><span class="line">    iyIGepuGhMnvtUF1wa/SrBd12qfDj68QHDXsKKbs6eTNYHfn3QL9uisrfMIa5HAt</span><br><span class="line">    nX2YOsAVxg+yvxkWD6n1DU+a/+pAu6iAgiwyxSZiyn6vJUE2zO6pJNbk1kJW6jU3</span><br><span class="line">    A69srtbO4jQn4EM859XYSqdqwXgJL+XJEYNbBcHalmiIOvRg9CCvDSKS7M5rJ0M1</span><br><span class="line">    L7oCzl6EW+zUb4JHkSO7V5uxIZu2sEduw5gofQ3OT9L/qDhDIQKCAQEA8T/<span class="number">8</span>okF2</span><br><span class="line">    Q7SOj3su6KKX6H/ab31SvHECf/oeJtH8ZfLBYL55Yof0pZwq8iXQ26d8cH7FPKBo</span><br><span class="line">    hz0RZ9i2S3bYkzEVCPv9ISFg1NACxL3dU0PMBnmbmg2vPhMzEuQI2JOUu6ILOXEN</span><br><span class="line">    mImvfjZXps/b8OjQgzicH0skBBcbUlXT3a4fF52ktC8FiXgBG9JYg5CsXmfPRxci</span><br><span class="line">    ITa4w4ZLEuECmtJieS0MdKXPLwUVv3e2BlNS6c1JzXyp6EyX/euJ8cCe3n/GHbTY</span><br><span class="line">    <span class="number">2</span>j1OO+xTQfQJVf6S9f2mSzjdHe9KZwWKgyxQ9dZ9Qtho2z/gUN9/UkL52fdljjlw</span><br><span class="line">    ++b/z9Ppcl9K0QKCAQEA7y4Fv8dPFLLnr0R/S7eoAKa0S95xVe97EJHVUhWyOI09</span><br><span class="line">    K9VdZHp6be8W0Yd9h/Ks8Zi4EPRiTTaF3yA3iADwdKFeZt49jGzeM+Gl7Q2Ll98W</span><br><span class="line">    I5gOdJkHSVAP2uK7qSjZ8lPCu4iUYRsae+Psam7Yd6X17RP0M966PlUFj1nnrJjQ</span><br><span class="line">    EN4zeh/m01q9vqebB9C1W/ZiJ6rpt6VVHAcOQQ69F/lKdTif4XCvbMIhIXTYNifk</span><br><span class="line">    <span class="number">1</span>oIv2qTDnfzzv+bgrlvpBJPpPYR0Oc7WoEpyd1Y9IzienLZi8RnujV<span class="comment">//FXEmJ45E</span></span><br><span class="line">    F9GE1HOmoERdEWA1bMYhOO5OfRY1HSMuFMA4+<span class="number">5</span>ojSwKCAQEAmwubio/<span class="number">1</span>uMemw3HQ</span><br><span class="line">    kPRGGsdolDR/<span class="number">4</span>tniWGtfy2UzCDY+r7Vaf8eOpIy8UQmatEBsykO+<span class="number">8</span>RrKcvf9Yrc1</span><br><span class="line">    WUSVJevqb+<span class="number">67</span>HPq9p6fTz6uSPXwZ+KNZLGXVFVjzfxWM1dvrP7eB7TXKHhmG7t9v</span><br><span class="line">    <span class="number">76</span>Yw3SBTObI9LCN3jyVmisDcO+E23E+VVbPOpC260K2b81ocXUPsQ+<span class="number">0</span>LIztu/UIm</span><br><span class="line">    p4hyyxug6+<span class="number">3</span>WznTttXNYKch+<span class="number">9</span>IvCgr5Ly0NuUvw+xpMFAZjgwXBu3BKpN4Ek8YAN</span><br><span class="line">    dhqnkVveCTguErQF78IlGBbIkUr+<span class="number">8</span>TAbKsW4hggEWxV4V17yAnJsEz65bTtldqTj</span><br><span class="line">    qHyzsQKCAQBGhv6g/<span class="number">2</span>d9Rgf1cbBLpns+vel6Wbx3x6c1SptpmgY0kMlR7JeeclM5</span><br><span class="line">    qX/EBzzn4pJGp27XaQi3lfVBxyE41HYTHiZVFQF3L/<span class="number">8</span>Rs18XGKBqBxljI4pXrWwt</span><br><span class="line">    nRMfyy3lAqvJvhM082A1hiV4FMx40fi4x1JON00SIoIusSlzjOI4zdLEtpDdWRza</span><br><span class="line">    g+<span class="number">5</span>hktCvLEbeODfXVJmYUoNXQWldm7f8osDm8eyLMIw5+MCGOgsrZPYgnsD3qxAX</span><br><span class="line">    vSgvFSh5oZaDiA4F2tHe3fQBzhIUyHQ8t4xlz447ZBcozv7L1tKWZWgE0f5mGzgu</span><br><span class="line">    GBqNbh4y1fWj8Plp/ytoTSBgdBIZdukjAoIBAELJPSVFnlf/gv6OWRCHyKxquGjv</span><br><span class="line">    fEn/E8bw5WSqMcj/<span class="number">7</span>wiSJozr0Y8oyWjtWXObliLRQXcEhC8w3lLMjNqnFzQOAI7s</span><br><span class="line">    Oa6BQPigqyXZPXG5GK+V0TlUYvZQn9sfCq4YCxUBNtQ4GHbKKl3FGQL3rJiuFr6G</span><br><span class="line">    fVcetuDFNCiIGYbUF+giJ2cEN3a/Q+<span class="number">7</span>fR6V4xC7VDdL+BqM09wZ6R98G48XzCKKp</span><br><span class="line">    ekNpEfmvJiuk9tFFQwDPWcQ6uyHqesK/Wiweo5nh5y2ZPipwcb0uBoYOQH60NqEL</span><br><span class="line">    <span class="number">6</span>MXRVNdtKujjl1XZkG053Nvcz/YfF6lFjDekwgfd9m49b/s0EGTrl7z9z8Y=</span><br><span class="line">    -----END RSA PRIVATE KEY-----</span><br><span class="line"># <span class="attribute">resources</span>:</span><br><span class="line">#  <span class="attribute">requests</span>:</span><br><span class="line">#    <span class="attribute">memory</span>: <span class="number">256</span>Mi</span><br><span class="line">#    <span class="attribute">cpu</span>: <span class="number">100</span>m</span><br><span class="line"></span><br><span class="line">## MySQL Settings. Currently Harbor does <span class="keyword">not</span> support an external</span><br><span class="line">## MySQL server, only their own image. Until this is fixed, do <span class="keyword">not</span></span><br><span class="line">## Change the settings below.</span><br><span class="line">#</span><br><span class="line"><span class="attribute">mysql</span>:</span><br><span class="line">  <span class="attribute">image</span>:</span><br><span class="line">    <span class="attribute">repository</span>: vmware/harbor-db</span><br><span class="line">    <span class="attribute">tag</span>: *harbor_image_tag</span><br><span class="line">    <span class="attribute">pullPolicy</span>: IfNotPresent</span><br><span class="line">  # If left blank will use the included mysql service name.</span><br><span class="line">  <span class="attribute">host</span>: ~</span><br><span class="line">  <span class="attribute">port</span>: <span class="number">3306</span></span><br><span class="line">  <span class="attribute">user</span>: <span class="string">"root"</span></span><br><span class="line">  <span class="attribute">pass</span>: <span class="string">"registry"</span></span><br><span class="line">  <span class="attribute">database</span>: <span class="string">"registry"</span></span><br><span class="line">  <span class="attribute">volumes</span>:</span><br><span class="line">    <span class="attribute">data</span>:</span><br><span class="line">      <span class="attribute">storageClass</span>: <span class="string">"cephrbd"</span></span><br><span class="line">      <span class="attribute">accessMode</span>: ReadWriteOnce</span><br><span class="line">      <span class="attribute">size</span>: <span class="number">1</span>Gi</span><br><span class="line">  # <span class="attribute">resources</span>:</span><br><span class="line">  #  <span class="attribute">requests</span>:</span><br><span class="line">  #    <span class="attribute">memory</span>: <span class="number">256</span>Mi</span><br><span class="line">  #    <span class="attribute">cpu</span>: <span class="number">100</span>m</span><br><span class="line"></span><br><span class="line"><span class="attribute">registry</span>:</span><br><span class="line">  <span class="attribute">image</span>:</span><br><span class="line">    <span class="attribute">repository</span>: vmware/registry-photon</span><br><span class="line">    <span class="attribute">tag</span>: v2.<span class="number">6.2</span>-v1.<span class="number">4.0</span></span><br><span class="line">    <span class="attribute">pullPolicy</span>: IfNotPresent</span><br><span class="line">  <span class="attribute">httpSecret</span>: <span class="keyword">not</span>-a-secure-secret</span><br><span class="line">  <span class="attribute">logLevel</span>:</span><br><span class="line"># comment out one of the below to use your cloud's object storage.</span><br><span class="line">#  <span class="attribute">objectStorage</span>:</span><br><span class="line">#    <span class="attribute">gcs</span>:</span><br><span class="line">#      <span class="attribute">keyfile</span>: <span class="string">""</span></span><br><span class="line">#      <span class="attribute">bucket</span>: <span class="string">""</span></span><br><span class="line">#      <span class="attribute">chunksize</span>: <span class="string">"5242880"</span></span><br><span class="line">#    <span class="attribute">s3</span>:</span><br><span class="line">#      <span class="attribute">region</span>: <span class="string">""</span></span><br><span class="line">#      <span class="attribute">accesskey</span>: <span class="string">""</span></span><br><span class="line">#      <span class="attribute">secretkey</span>: <span class="string">""</span></span><br><span class="line">#      <span class="attribute">bucket</span>: <span class="string">""</span></span><br><span class="line">#      <span class="attribute">encrypt</span>: <span class="string">"true"</span></span><br><span class="line">#    <span class="attribute">azure</span>:</span><br><span class="line">#      <span class="attribute">accountname</span>: <span class="string">""</span></span><br><span class="line">#      <span class="attribute">accountkey</span>: <span class="string">""</span></span><br><span class="line">#      <span class="attribute">container</span>: <span class="string">""</span></span><br><span class="line">  <span class="attribute">rootCrt</span>: |</span><br><span class="line">    -----BEGIN CERTIFICATE-----</span><br><span class="line">    MIIE0zCCArugAwIBAgIJAIgs3S+hsjhmMA0GCSqGSIb3DQEBCwUAMAAwHhcNMTcx</span><br><span class="line">    MTA5MTcyNzQ5WhcNMjcxMTA3MTcyNzQ5WjAAMIICIjANBgkqhkiG9w0BAQEFAAOC</span><br><span class="line">    Ag8AMIICCgKCAgEA4WYbxdrFGG6RnfyYKlHYML3lEqtA9cYWWOynE9BeaEr/cMnM</span><br><span class="line">    bBr1dd91/Nm6RiYhQvTDU2Kc6NejqjdliW5B9xUoVKayri8OU81a8ViXeNgKwCPR</span><br><span class="line">    AiTTla1zoX5DnvoxpO9G3lxyNvTKXc0cw8NjQDAXpaDbzJYLkshCeuyD9bco8R96</span><br><span class="line">    /zrpBEX8tADN3+<span class="number">3</span>yA3fMcZzVXsBm4BTpHJRk/qBpHYEPSHzxyH3iGMNKk3vMUBZz</span><br><span class="line">    e0EYkK8NCA2CuEKMnC3acx9IdRwkx10abGvHQCLRCVY7rGoak+b0oZ99RJIRQ9Iq</span><br><span class="line">    YXsn8fsMBQly6xxvSeY5XuSP7Xb6JKDt3y8Spi4gR1M/<span class="number">5</span>aEzhuOyu201rMna7Rs/</span><br><span class="line">    GPfaKjBlbX0jiLDa7v4zjsBPsPaf/c4uooz3ICLsdukaom+E538R0EiOkXt/wyw2</span><br><span class="line">    <span class="number">2</span>YmaWNCsYlEpke7cVC33e/<span class="number">0</span>dPBq4IHsVflawSF9OWS23ikVAs/n+<span class="number">76</span>KjuucEDmbT</span><br><span class="line">    aKUYAJjvAmZL14j+EKc/CoplhCe6pKhavjmNIOfCSdlreIPBhOVbf1f817wKoSIZ</span><br><span class="line">    qVyCA1AYNkI9RYS00axtJGBGMlKbdQqCNpLL58c6To2awmckIZCEcATKOp++NoGm</span><br><span class="line">    Ib0bhdSasdGB5VCtwZVluN8bLl13zBKoxTGjNlEatUGDRnDAnLdZbXXffjsCAwEA</span><br><span class="line">    AaNQME4wHQYDVR0OBBYEFCMYYMOL0E/Uyj5wseDfIl7o4ELsMB8GA1UdIwQYMBaA</span><br><span class="line">    FCMYYMOL0E/Uyj5wseDfIl7o4ELsMAwGA1UdEwQFMAMBAf8wDQYJKoZIhvcNAQEL</span><br><span class="line">    BQADggIBABG8fPvrrR+erpwQFuB/<span class="number">56</span>j2i6sO+qoOJPpAMYwkzICrT0eerWAavwoy</span><br><span class="line">    f0UAKN7cUeEJXjIR7s7CogGFijWdaWaQsXUD0zJq5aotLYZLimEc1O0uAmJEsfYC</span><br><span class="line">    v7mG07eU6ge22sSo5hxhVplGt52hnXnT0DdgSRZpq2mvgd9lcopAidM+KHlaasXk</span><br><span class="line">    IecHKM99KX9D8smr0AcQ6M/Ygbf2qjO9YRmpBIjyQWEake4y/<span class="number">4</span>LWm+<span class="number">3</span>+v08ecg4B</span><br><span class="line">    g+iMC0Rw1QcPqgwaGaWu71RtYhyTg7SnAknb5nBcHIbLb0hdLgQTa3ZdtXgqchIi</span><br><span class="line">    GuFlEBmHFZP6bLJORRUQ0ari5wpXIsYfrB4T8PybTzva3OCMlEsMjuysFr9ewhzM</span><br><span class="line">    <span class="number">9</span>UGLiSQNDyKA10J8WwlzbeD0AAW944hW4Dbg6SWv4gAo51T+<span class="number">6</span>AukRdup5y6lfQ5a</span><br><span class="line">    h4Lbo6pzaA369IsJBntvKvia6hUf/SghnbG7pCHX/AEilcgTb13HndF/G+<span class="number">7</span>aZgKR</span><br><span class="line">    mi9qvNRSDsE/BrgZawovp81+j6aL4y6UtXYspHr+SuWsKYsaH7pl5HspNCyJ5vV6</span><br><span class="line">    dpJAwosFBqSEnI333wAunpMYmi/jKHH/j4WqjLnCInp0/wouzYu42l8Pmz591BSp</span><br><span class="line">    Jag500bEBxqI2RLELgMt/bUdjp4N2M7mrxdrN+<span class="number">2579</span>HTzb6Hviu9</span><br><span class="line">    -----END CERTIFICATE-----</span><br><span class="line">  ## Persist data to a persistent volume</span><br><span class="line">  <span class="attribute">volumes</span>:</span><br><span class="line">    <span class="attribute">data</span>:</span><br><span class="line">      <span class="attribute">storageClass</span>: <span class="string">"cephrbd"</span></span><br><span class="line">      <span class="attribute">accessMode</span>: ReadWriteOnce</span><br><span class="line">      <span class="attribute">size</span>: <span class="number">5</span>Gi</span><br><span class="line">  # <span class="attribute">resources</span>:</span><br><span class="line">  #  <span class="attribute">requests</span>:</span><br><span class="line">  #    <span class="attribute">memory</span>: <span class="number">256</span>Mi</span><br><span class="line">  #    <span class="attribute">cpu</span>: <span class="number">100</span>m</span><br><span class="line"></span><br><span class="line"><span class="attribute">clair</span>:</span><br><span class="line">  <span class="attribute">enabled</span>: true</span><br><span class="line">  <span class="attribute">image</span>:</span><br><span class="line">    <span class="attribute">repository</span>: vmware/clair-photon</span><br><span class="line">    <span class="attribute">tag</span>: v2.<span class="number">0.1</span>-v1.<span class="number">4.0</span></span><br><span class="line">    <span class="attribute">pullPolicy</span>: IfNotPresent</span><br><span class="line">## The following needs to match the credentials</span><br><span class="line">## in the <span class="built_in">`postgresql`</span> configuration under the</span><br><span class="line">## <span class="built_in">`postgresql`</span> namespace below.</span><br><span class="line">  <span class="attribute">postgresPassword</span>: <span class="keyword">not</span>-a-secure-password</span><br><span class="line">  <span class="attribute">postgresUser</span>: clair</span><br><span class="line">  <span class="attribute">postgresDatabase</span>: clair</span><br><span class="line"># <span class="attribute">resources</span>:</span><br><span class="line">#  <span class="attribute">requests</span>:</span><br><span class="line">#    <span class="attribute">memory</span>: <span class="number">256</span>Mi</span><br><span class="line">#    <span class="attribute">cpu</span>: <span class="number">100</span>m</span><br><span class="line"># <span class="attribute">pgResources</span>:</span><br><span class="line">#  <span class="attribute">requests</span>:</span><br><span class="line">#    <span class="attribute">memory</span>: <span class="number">256</span>Mi</span><br><span class="line">#    <span class="attribute">cpu</span>: <span class="number">100</span>m</span><br><span class="line">#  <span class="attribute">volumes</span>:</span><br><span class="line">#    <span class="attribute">pgData</span>:</span><br><span class="line">#      <span class="attribute">storageClass</span>: <span class="string">"cephrbd"</span></span><br><span class="line">#      <span class="attribute">accessMode</span>: ReadWriteOnce</span><br><span class="line">#      <span class="attribute">size</span>: <span class="number">1</span>Gi</span><br><span class="line">  # <span class="attribute">resources</span>:</span><br><span class="line">  #  <span class="attribute">requests</span>:</span><br><span class="line">  #    <span class="attribute">memory</span>: <span class="number">256</span>Mi</span><br><span class="line">  #    <span class="attribute">cpu</span>: <span class="number">100</span>m</span><br><span class="line"></span><br><span class="line">## Notary support is <span class="keyword">not</span> yet fully implemented in the Helm Charts</span><br><span class="line">## Enabling it will just break things.</span><br><span class="line">#</span><br><span class="line"><span class="attribute">notary</span>:</span><br><span class="line">  <span class="attribute">enabled</span>: false</span><br><span class="line"></span><br><span class="line">## Settings for postgresql dependency.</span><br><span class="line">## see <span class="attribute">https</span>:<span class="comment">//github.com/kubernetes/charts/tree/master/stable/postgresql</span></span><br><span class="line">## for further configurables.</span><br><span class="line"><span class="attribute">postgresql</span>:</span><br><span class="line">  <span class="attribute">postgresUser</span>: clair</span><br><span class="line">  <span class="attribute">postgresPassword</span>: <span class="keyword">not</span>-a-secure-password</span><br><span class="line">  <span class="attribute">postgresDatabase</span>: clair</span><br><span class="line">  <span class="attribute">persistence</span>:</span><br><span class="line">    # <span class="attribute">enabled</span>: false</span><br><span class="line">    <span class="attribute">enabled</span>: true</span><br><span class="line">    <span class="attribute">storageClass</span>: <span class="string">"cephrbd"</span></span><br><span class="line">    <span class="attribute">accessMode</span>: ReadWriteOnce</span><br><span class="line">    <span class="attribute">size</span>: <span class="number">8</span>Gi</span><br></pre></td></tr></table></figure>
+<h4 id="部署"><a href="#部署" class="headerlink" title="部署:"></a>部署:</h4><figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">helm install . --<span class="builtin-name">debug</span> --name hub --<span class="builtin-name">set</span> <span class="attribute">externalDomain</span>=hub.test.com</span><br></pre></td></tr></table></figure>
+<p>等待一段时间的镜像拉取后,查看pod:<br><figure class="highlight lsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">hub-harbor-adminserver<span class="number">-0</span>                 <span class="number">1</span>/<span class="number">1</span>       Running            <span class="number">1</span>          <span class="number">3</span>h</span><br><span class="line">hub-harbor-clair<span class="number">-6</span>c7d9dcdb7-q4lv4        <span class="number">1</span>/<span class="number">1</span>       Running            <span class="number">2</span>          <span class="number">3</span>h</span><br><span class="line">hub-harbor-jobservice<span class="number">-75</span>f7fbcc9c-ggwp4   <span class="number">1</span>/<span class="number">1</span>       Running            <span class="number">2</span>          <span class="number">3</span>h</span><br><span class="line">hub-harbor-mysql<span class="number">-0</span>                       <span class="number">1</span>/<span class="number">1</span>       Running            <span class="number">0</span>          <span class="number">3</span>h</span><br><span class="line">hub-harbor-registry<span class="number">-0</span>                    <span class="number">1</span>/<span class="number">1</span>       Running            <span class="number">1</span>          <span class="number">3</span>h</span><br><span class="line">hub-harbor-ui<span class="number">-57</span>b4674ff9-kcfq6           <span class="number">1</span>/<span class="number">1</span>       Running            <span class="number">0</span>          <span class="number">3</span>h</span><br><span class="line">hub-postgresql-ccf8d56d5-jg4wq           <span class="number">1</span>/<span class="number">1</span>       Running            <span class="number">1</span>          <span class="number">3</span>h</span><br></pre></td></tr></table></figure></p>
+<p>添加dns,指向ingress gateway(即traefik的node ip):</p>
+<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">echo <span class="string">"192.168.1.238  hub.test.com"</span>  <span class="meta">&gt;&gt; </span>/etc/hosts</span><br></pre></td></tr></table></figure>
+<p>浏览器打开测试,默认登录口令为admin/Harbor12345<br><img src="http://mycloudn.kokoerp.com/20181024170107199.jpg" alt="在这里插入图片描述"><br>可以看到默认有一个公开项目library,尝试往这里推送镜像</p>
+<h4 id="Docker推送测试"><a href="#Docker推送测试" class="headerlink" title="Docker推送测试"></a>Docker推送测试</h4><p>找一台安装了docker的机器,修改docker服务脚本:<br><figure class="highlight clean"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">~# cat /lib/systemd/<span class="keyword">system</span>/docker.service</span><br><span class="line"></span><br><span class="line">#ExecStart=/usr/bin/dockerd -H fd:<span class="comment">//</span></span><br><span class="line">ExecStart=/usr/bin/dockerd  --insecure-registry hub.kokoerp.com</span><br></pre></td></tr></table></figure></p>
+<p>重启docker并登录测试:<br><figure class="highlight elixir"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">~<span class="comment"># systemctl daemon-reload</span></span><br><span class="line">~<span class="comment"># systemctl restart docker</span></span><br><span class="line"></span><br><span class="line">root<span class="variable">@h2</span><span class="symbol">:~</span><span class="comment"># docker login hub.test.com</span></span><br><span class="line">Username (admin): admin</span><br><span class="line"><span class="symbol">Password:</span> </span><br><span class="line">Login Succeeded</span><br></pre></td></tr></table></figure></p>
+<p>推送镜像测试:</p>
+<figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">root@h2:~# docker <span class="keyword">tag</span> busybox hub.test.<span class="keyword">com</span>/library/busybox:test1</span><br><span class="line">root@h2:~# docker push hub.test.<span class="keyword">com</span>/library/busybox:test1</span><br><span class="line">The push refers <span class="keyword">to</span> <span class="keyword">a</span> repository [hub.test.<span class="keyword">com</span>/library/busybox]</span><br><span class="line"><span class="number">8</span>a788232037e: Pushed </span><br><span class="line">test1: diges<span class="variable">t:</span> <span class="built_in">sha256</span>:<span class="number">915</span>f390a8912e16d4beb8689720a17348f3f6d1a7b659697df850ab625ea29d5 size: <span class="number">527</span></span><br></pre></td></tr></table></figure>
+<p>可以看到推送成功</p>
+<h4 id="ldap配置"><a href="#ldap配置" class="headerlink" title="ldap配置:"></a>ldap配置:</h4><p><img src="http://mycloudn.kokoerp.com/20181024170504541.jpg" alt="在这里插入图片描述"></p>
+<p>harbor可以基于企业内部的ldap来获取人员信息,可以在ui上创建非公开项目,将ldap中获取的人员加入项目并赋予相应pull push权限,ui操作界面比较友好,这里就不展示了.</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div id="reward-container">
+  <div>Thank you for your accept. mua！</div>
+  <button id="reward-button" disable="enable" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+
+    
+      
+      
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/reward/wechatpay.png" alt="丨ywq丨 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+      
+      
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/reward/alipay.png" alt="丨ywq丨 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        
+
+
+
+
+  
+
+
+
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>丨ywq丨</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    
+    <a href="https://www.ipyker.com/2018/10/24/k8s(十三)、企业级docker仓库Harbor在kubernetes上搭建使用.html" title="k8s(十三)、企业级docker仓库Harbor在kubernetes上搭建使用">https://www.ipyker.com/2018/10/24/k8s(十三)、企业级docker仓库Harbor在kubernetes上搭建使用.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li>
+</ul>
+
+      </div>
+    
+    <div>
+      
+        <div>
+    
+        <div style="text-align:center;color: #ccc;font-size:16px;">-------------本文结束<i class="fa fa-heart"></i>感谢您的阅读-------------</div>
+    
+</div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Kubernetes/" rel="tag"><i class="fa fa-tag"></i> Kubernetes</a>
+          
+            <a href="/tags/Docker/" rel="tag"><i class="fa fa-tag"></i> Docker</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/09/29/Cephfs-CephRBD在k8s中的适用场景讨论及数据库性能压测.html" rel="next" title="Cephfs & Ceph RBD 在k8s中的适用场景讨论及数据库性能压测">
+                <i class="fa fa-chevron-left"></i> Cephfs & Ceph RBD 在k8s中的适用场景讨论及数据库性能压测
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/11/07/Docker registry仓库历史镜像批量清理.html" rel="prev" title="Docker registry仓库历史镜像批量清理">
+                Docker registry仓库历史镜像批量清理 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC80NDM5Mi8yMDkyNA=="></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="丨ywq丨">
+            
+              <p class="site-author-name" itemprop="name">丨ywq丨</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives">
+                
+                    <span class="site-state-item-count">74</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                      <a href="/tags">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">15</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/yinwenqin" title="GitHub &rarr; https://github.com/yinwenqin" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://blog.csdn.net/ywq935" title="CSDN &rarr; https://blog.csdn.net/ywq935" rel="noopener" target="_blank"><i class="fa fa-fw fa-globe"></i>CSDN</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-book"></i>
+                推荐阅读
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.upweto.top/gitbooks/useKubernetes/" title="http://blog.upweto.top/gitbooks/useKubernetes/" rel="noopener" target="_blank">kubernetes使用指南</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.upweto.top/gitbooks/kubeSourceCodeNote/" title="http://blog.upweto.top/gitbooks/kubeSourceCodeNote/" rel="noopener" target="_blank">kubernetes源码笔记</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#null"><span class="nav-number">1.</span> <span class="nav-text"> </span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">2.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Helm安装"><span class="nav-number">3.</span> <span class="nav-text">Helm安装</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#helm简介"><span class="nav-number">3.0.1.</span> <span class="nav-text">helm简介</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#helm组件"><span class="nav-number">3.0.2.</span> <span class="nav-text">helm组件</span></a></li></ol></li></ol><li class="nav-item nav-level-2"><a class="nav-link" href="#Harbor安装"><span class="nav-number">4.</span> <span class="nav-text">Harbor安装</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#更新helm-dependency"><span class="nav-number">4.0.1.</span> <span class="nav-text">更新helm dependency:</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#部署"><span class="nav-number">4.0.2.</span> <span class="nav-text">部署:</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Docker推送测试"><span class="nav-number">4.0.3.</span> <span class="nav-text">Docker推送测试</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ldap配置"><span class="nav-number">4.0.4.</span> <span class="nav-text">ldap配置:</span></a></li></ol></li></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" style=" text-align:center;">&copy; 2017 – <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ywq</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"> 站点字数合计:</i>
+    </span>
+    
+    <span title="站点总字数">583k</span>
+  
+  
+</div>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+<div class="run_time" style=" text-align:center;">
+  <span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
+  <script>
+    var now = new Date(); 
+    function createtime() { 
+        var grt= new Date("08/23/2018 10:00:00");//此处修改你的建站时间或者网站上线时间 
+        now.setTime(now.getTime()+250); 
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days); 
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours); 
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum); 
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;} 
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum); 
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;} 
+        document.getElementById("timeDate").innerHTML = "本站已安全运行 "+dnum+" 天 "; 
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒"; 
+    } 
+    setInterval("createtime()",250);
+  </script>
+</div>
+
+        
+<div class="busuanzi-count" style=" text-align:center;">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-user"></i>
+    </span>
+    <span class="site-uv" title="总访客量">
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span> 人
+    </span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+  
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-eye"></i>
+    </span>
+    <span class="site-pv" title="总访问量">
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span> 次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+  
+    
+    
+      
+    
+  
+  <script color="black" opacity="0.7" zindex="-1" count="140" src="//cdn.jsdelivr.net/gh/theme-next/theme-next-canvas-nest@1.0.0/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+  
+  
+  <script id="ribbon" size="300" alpha="0.1" zindex="-1" src="/lib/canvas-ribbon/canvas-ribbon.js"></script>
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/fancybox/source/jquery.fancybox.pack.js"></script>
+
+
+  
+
+
+  <script src="/js/utils.js?v=7.1.1"></script>
+
+  <script src="/js/motion.js?v=7.1.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/schemes/muse.js?v=7.1.1"></script>
+
+
+
+
+  
+  <script src="/js/scrollspy.js?v=7.1.1"></script>
+<script src="/js/post-details.js?v=7.1.1"></script>
+
+
+
+  
+
+
+  <script src="/js/next-boot.js?v=7.1.1"></script>
+
+
+  
+
+  
+
+  
+  
+  
+
+  
+
+  
+  
+  
+
+
+  
+
+
+  
+    <script>
+  window.livereOptions = {
+    refer: '2018/10/24/k8s(十三)、企业级docker仓库Harbor在kubernetes上搭建使用.html'
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+</script>
+
+  
+
+
+  
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url).replace(/\/{2,}/g, '/');
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x"></i></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x"></i></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+  
+  <script src="/lib/bookmark/bookmark.min.js?v=1.0"></script>
+  <script>
+  
+    bookmark.scrollToMark('auto', "#更多");
+  
+  </script>
+
+
+  
+
+  
+
+  
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/koharu.model.json"},"display":{"position":"left","width":250,"height":500},"mobile":{"show":false},"react":{"opacity":0.7},"log":false});</script></body>
+</html>
+<!-- 页面点击小红心 -->
+<script type="text/javascript" src="/js/src/clicklove.js"></script>

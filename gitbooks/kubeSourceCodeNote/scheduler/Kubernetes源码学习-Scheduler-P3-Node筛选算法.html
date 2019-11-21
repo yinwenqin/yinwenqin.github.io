@@ -1,0 +1,787 @@
+
+<!DOCTYPE HTML>
+<html lang="zh-hans" >
+    <head>
+        <meta charset="UTF-8">
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <title>2.3. Node筛选算法 · Kubernetes源码学习</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="description" content="">
+        <meta name="generator" content="GitBook 3.2.3">
+        <meta name="author" content="ywq">
+        
+        
+    
+    <link rel="stylesheet" href="../gitbook/style.css">
+
+    
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-anchors/plugin.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-expandable-chapters/expandable-chapters.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-splitter/splitter.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-page-treeview/style.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-back-to-top-button/plugin.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-highlight/website.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-search/search.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-fontsettings/website.css">
+                
+            
+        
+
+    
+
+    
+        
+    
+
+        
+    
+    
+    <meta name="HandheldFriendly" content="true"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="../gitbook/images/apple-touch-icon-precomposed-152.png">
+    <link rel="shortcut icon" href="../gitbook/images/favicon.ico" type="image/x-icon">
+
+    
+    <link rel="next" href="Kubernetes源码学习-Scheduler-P4-Node优先级算法.html" />
+    
+    
+    <link rel="prev" href="Kubernetes源码学习-Scheduler-P2-调度器框架.html" />
+    
+
+    </head>
+    <body>
+        
+<div class="book">
+    <div class="book-summary">
+        
+            
+<div id="book-search-input" role="search">
+    <input type="text" placeholder="输入并搜索" />
+</div>
+
+            
+                <nav role="navigation">
+                
+
+
+<ul class="summary">
+    
+    
+
+    
+
+    
+        
+        <li class="header">Part I-写在前面</li>
+        
+        
+    
+        <li class="chapter " data-level="1.1" data-path="../">
+            
+                <a href="../">
+            
+                    
+                    1. 总览篇
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Part II-核心组件</li>
+        
+        
+    
+        <li class="chapter " data-level="2.1" data-path="./">
+            
+                <a href="./">
+            
+                    
+                    2. Scheduler
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="2.1.1" data-path="Kubernetes源码学习-Scheduler-P1-调度器入口篇.html">
+            
+                <a href="Kubernetes源码学习-Scheduler-P1-调度器入口篇.html">
+            
+                    
+                    2.1. 调度器入口
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.1.2" data-path="Kubernetes源码学习-Scheduler-P2-调度器框架.html">
+            
+                <a href="Kubernetes源码学习-Scheduler-P2-调度器框架.html">
+            
+                    
+                    2.2. 调度器框架
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter active" data-level="2.1.3" data-path="Kubernetes源码学习-Scheduler-P3-Node筛选算法.html">
+            
+                <a href="Kubernetes源码学习-Scheduler-P3-Node筛选算法.html">
+            
+                    
+                    2.3. Node筛选算法
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.1.4" data-path="Kubernetes源码学习-Scheduler-P4-Node优先级算法.html">
+            
+                <a href="Kubernetes源码学习-Scheduler-P4-Node优先级算法.html">
+            
+                    
+                    2.4. Node优先级算法
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.1.5" data-path="Kubernetes源码学习-Scheduler-P5-Pod优先级抢占调度.html">
+            
+                <a href="Kubernetes源码学习-Scheduler-P5-Pod优先级抢占调度.html">
+            
+                    
+                    2.5 Pod优先级调度
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2" >
+            
+                <span>
+            
+                    
+                    [3. Controller]
+            
+                </span>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="2.2.1" >
+            
+                <span>
+            
+                    
+                    [3.1 待补充]
+            
+                </span>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="2.3" >
+            
+                <span>
+            
+                    
+                    [4. ApiServer]
+            
+                </span>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="2.3.1" >
+            
+                <span>
+            
+                    
+                    [4.1 待补充]
+            
+                </span>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="2.4" >
+            
+                <span>
+            
+                    
+                    [5. Kubelet]
+            
+                </span>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="2.4.1" >
+            
+                <span>
+            
+                    
+                    [5.1 待补充]
+            
+                </span>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+
+    <li class="divider"></li>
+
+    <li>
+        <a href="https://www.gitbook.com" target="blank" class="gitbook-link">
+            本书使用 GitBook 发布
+        </a>
+    </li>
+</ul>
+
+
+                </nav>
+            
+        
+    </div>
+
+    <div class="book-body">
+        
+            <div class="body-inner">
+                
+                    
+
+<div class="book-header" role="navigation">
+    
+
+    <!-- Title -->
+    <h1>
+        <i class="fa fa-circle-o-notch fa-spin"></i>
+        <a href=".." >2.3. Node筛选算法</a>
+    </h1>
+</div>
+
+
+
+
+                    <div class="page-wrapper" tabindex="-1" role="main">
+                        <div class="page-inner">
+                            
+<div id="book-search-results">
+    <div class="search-noresults">
+    
+                                <section class="normal markdown-section">
+                                
+                                <div class="treeview__container"><ul>
+<li><div><a href="#p3-node&#x7B5B;&#x9009;&#x7B97;&#x6CD5;">P3-Node&#x7B5B;&#x9009;&#x7B97;&#x6CD5;</a><i class="level__parent level__item level__parent--opened" state="opened" onclick="var curState = this.getAttribute(&apos;state&apos;);var nextState = curState === &apos;opened&apos; ? &apos;hidden&apos; : &apos;opened&apos;;this.setAttribute(&apos;state&apos;, nextState);this.className = this.className.split(curState).join(nextState);var list = this.parentNode.nextElementSibling;if (nextState === &apos;hidden&apos;) {    list.style.display = &apos;none&apos;;} else {    list.style.display = &apos;block&apos;;}"></i></div>
+<ul>
+<li><div><a href="#&#x524D;&#x8A00;">&#x524D;&#x8A00;</a><i></i></div></li>
+<li><div><a href="#&#x6B63;&#x6587;">&#x6B63;&#x6587;</a><i class="level__parent level__item level__parent--opened" state="opened" onclick="var curState = this.getAttribute(&apos;state&apos;);var nextState = curState === &apos;opened&apos; ? &apos;hidden&apos; : &apos;opened&apos;;this.setAttribute(&apos;state&apos;, nextState);this.className = this.className.split(curState).join(nextState);var list = this.parentNode.nextElementSibling;if (nextState === &apos;hidden&apos;) {    list.style.display = &apos;none&apos;;} else {    list.style.display = &apos;block&apos;;}"></i></div>
+<ul>
+<li><div><a href="#&#x7B5B;&#x9009;&#x7B97;&#x6CD5;&#x5165;&#x53E3;">&#x7B5B;&#x9009;&#x7B97;&#x6CD5;&#x5165;&#x53E3;</a><i></i></div></li>
+<li><div><a href="#&#x5E76;&#x53D1;&#x63A7;&#x5236;">&#x5E76;&#x53D1;&#x63A7;&#x5236;</a><i></i></div></li>
+<li><div><a href="#predicates--function">Predicates  Function</a><i class="level__parent level__item level__parent--opened" state="opened" onclick="var curState = this.getAttribute(&apos;state&apos;);var nextState = curState === &apos;opened&apos; ? &apos;hidden&apos; : &apos;opened&apos;;this.setAttribute(&apos;state&apos;, nextState);this.className = this.className.split(curState).join(nextState);var list = this.parentNode.nextElementSibling;if (nextState === &apos;hidden&apos;) {    list.style.display = &apos;none&apos;;} else {    list.style.display = &apos;block&apos;;}"></i></div>
+<ul>
+<li><div><a href="#&#x7B5B;&#x9009;&#x987A;&#x5E8F;">&#x7B5B;&#x9009;&#x987A;&#x5E8F;</a><i></i></div></li>
+<li><div><a href="#&#x7B5B;&#x9009;key">&#x7B5B;&#x9009;key</a><i></i></div></li>
+<li><div><a href="#&#x7B5B;&#x9009;function">&#x7B5B;&#x9009;Function</a><i></i></div></li>
+</ul></li>
+</ul></li>
+<li><div><a href="#&#x91CD;&#x70B9;&#x56DE;&#x987E;">&#x91CD;&#x70B9;&#x56DE;&#x987E;</a><i></i></div></li>
+</ul></li>
+</ul>
+</div>
+
+<h1 id="p3-node&#x7B5B;&#x9009;&#x7B97;&#x6CD5;"><a name="p3-node&#x7B5B;&#x9009;&#x7B97;&#x6CD5;" class="plugin-anchor" href="#p3-node&#x7B5B;&#x9009;&#x7B97;&#x6CD5;"><i class="fa fa-link" aria-hidden="true"></i></a>P3-Node&#x7B5B;&#x9009;&#x7B97;&#x6CD5;</h1>
+<h2 id="&#x524D;&#x8A00;"><a name="&#x524D;&#x8A00;" class="plugin-anchor" href="#&#x524D;&#x8A00;"><i class="fa fa-link" aria-hidden="true"></i></a>&#x524D;&#x8A00;</h2>
+<p>&#x5728;&#x4E0A;&#x4E00;&#x7BC7;&#x6587;&#x6863;&#x4E2D;&#xFF0C;&#x6211;&#x4EEC;&#x627E;&#x5230;&#x8C03;&#x5EA6;&#x5668;&#x7B5B;&#x9009;node&#x7684;&#x7B97;&#x6CD5;&#x5165;&#x53E3;<code>pkg/scheduler/core/generic_scheduler.go:162</code> <code>Schedule()</code>&#x65B9;&#x6CD5;</p>
+<p><a href="https://github.com/yinwenqin/kubeSourceCodeNote/blob/master/scheduler/Kubernetes&#x6E90;&#x7801;&#x5B66;&#x4E60;-Scheduler-P2-&#x8C03;&#x5EA6;&#x5668;&#x6846;&#x67B6;.md" target="_blank">p2-&#x8C03;&#x5EA6;&#x5668;&#x6846;&#x67B6;</a></p>
+<p>&#x90A3;&#x4E48;&#x5728;&#x672C;&#x7BC7;&#xFF0C;&#x7531;&#x6B64;<code>Schedule()</code>&#x51FD;&#x6570;&#x5C55;&#x5F00;&#xFF0C;&#x770B;&#x4E00;&#x770B;&#x8C03;&#x5EA6;&#x5668;&#x7684;node&#x7B5B;&#x9009;&#x7B97;&#x6CD5;&#xFF0C;&#x4F18;&#x5148;&#x7EA7;&#x6392;&#x5E8F;&#x7B97;&#x6CD5;&#x7559;&#x4F5C;&#x4E0B;&#x4E00;&#x7BC7;.</p>
+<h2 id="&#x6B63;&#x6587;"><a name="&#x6B63;&#x6587;" class="plugin-anchor" href="#&#x6B63;&#x6587;"><i class="fa fa-link" aria-hidden="true"></i></a>&#x6B63;&#x6587;</h2>
+<h3 id="&#x7B5B;&#x9009;&#x7B97;&#x6CD5;&#x5165;&#x53E3;"><a name="&#x7B5B;&#x9009;&#x7B97;&#x6CD5;&#x5165;&#x53E3;" class="plugin-anchor" href="#&#x7B5B;&#x9009;&#x7B97;&#x6CD5;&#x5165;&#x53E3;"><i class="fa fa-link" aria-hidden="true"></i></a>&#x7B5B;&#x9009;&#x7B97;&#x6CD5;&#x5165;&#x53E3;</h3>
+<p>Schedule()&#x7684;&#x7B5B;&#x9009;&#x7B97;&#x6CD5;&#x6838;&#x5FC3;&#x662F;<code>findNodesThatFit()</code>&#x65B9;&#x6CD5; ,&#x76F4;&#x63A5;&#x8DF3;&#x8F6C;&#x8FC7;&#x53BB;:</p>
+<p><code>pkg/scheduler/core/generic_scheduler.go:184</code> --&gt; <code>pkg/scheduler/core/generic_scheduler.go:435</code></p>
+<p>&#x4E0B;&#x9762;&#x6CE8;&#x91CA;&#x5212;&#x51FA;&#x91CD;&#x70B9;&#xFF0C;&#x7BC7;&#x5E45;&#x6709;&#x9650;&#x7701;&#x7565;&#x90E8;&#x5206;&#x4EE3;&#x7801;:</p>
+<pre><code class="lang-go"><span class="hljs-keyword">func</span> (g *genericScheduler) findNodesThatFit(pod *v1.Pod, nodes []*v1.Node) ([]*v1.Node, FailedPredicateMap, error) {
+    <span class="hljs-keyword">var</span> filtered []*v1.Node
+    failedPredicateMap := FailedPredicateMap{}
+
+    <span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(g.predicates) == <span class="hljs-number">0</span> {
+        filtered = nodes
+    } <span class="hljs-keyword">else</span> {
+        allNodes := <span class="hljs-keyword">int32</span>(g.cache.NodeTree().NumNodes())
+
+    <span class="hljs-comment">// &#x7B5B;&#x9009;&#x7684;node&#x5BF9;&#x8C61;&#x7684;&#x6570;&#x91CF;&#xFF0C;&#x70B9;&#x51FB;&#x8FDB;&#x53BB;&#x53EF;&#x67E5;&#x770B;&#x8BE6;&#x60C5;&#xFF0C;&#x5F53;&#x96C6;&#x7FA4;&#x89C4;&#x6A21;&#x5C0F;&#x4E8E;100&#x53F0;&#x65F6;&#xFF0C;&#x5168;&#x90E8;&#x68C0;&#x67E5;&#xFF0C;&#x5F53;&#x96C6;&#x7FA4;&#x5927;&#x4E8E;100&#x53F0;&#x65F6;&#xFF0C;</span>
+    <span class="hljs-comment">// &#x68C0;&#x67E5;&#x6307;&#x5B9A;&#x6BD4;&#x4F8B;&#x7684;&#x673A;&#x5668;&#xFF0C;&#x82E5;&#x6307;&#x5B9A;&#x6BD4;&#x4F8B;&#x8303;&#x56F4;&#x5185;&#x90FD;&#x6CA1;&#x6709;&#x627E;&#x5230;&#x5408;&#x9002;&#x7684;node&#xFF0C;&#x5219;&#x7EE7;&#x7EED;&#x67E5;&#x627E;</span>
+        numNodesToFind := g.numFeasibleNodesToFind(allNodes)
+
+        ... <span class="hljs-comment">// &#x7701;&#x7565;</span>
+
+        ctx, cancel := context.WithCancel(context.Background())
+
+        <span class="hljs-comment">// &#x8D1F;&#x8D23;&#x7B5B;&#x9009;&#x8282;&#x70B9;&#x7684;&#x533F;&#x540D;&#x51FD;&#x6570;&#x4E3B;&#x4F53;&#xFF0C;&#x6838;&#x5FC3;&#x5B9E;&#x73B0;&#x5728;&#x4E8E;&#x5185;&#x90E8;&#x7684;podFitsOnNode&#x51FD;&#x6570;</span>
+        checkNode := <span class="hljs-keyword">func</span>(i <span class="hljs-keyword">int</span>) {
+            nodeName := g.cache.NodeTree().Next()
+            fits, failedPredicates, err := podFitsOnNode(
+                pod,
+                meta,
+                g.nodeInfoSnapshot.NodeInfoMap[nodeName],
+                g.predicates,
+                g.schedulingQueue,
+                g.alwaysCheckAllPredicates,
+            )
+            <span class="hljs-keyword">if</span> err != <span class="hljs-literal">nil</span> {
+                predicateResultLock.Lock()
+                errs[err.Error()]++
+                predicateResultLock.Unlock()
+                <span class="hljs-keyword">return</span>
+            }
+            <span class="hljs-keyword">if</span> fits {
+                length := atomic.AddInt32(&amp;filteredLen, <span class="hljs-number">1</span>)
+                <span class="hljs-keyword">if</span> length &gt; numNodesToFind {
+                    cancel()
+                    atomic.AddInt32(&amp;filteredLen, <span class="hljs-number">-1</span>)
+                } <span class="hljs-keyword">else</span> {
+                    filtered[length<span class="hljs-number">-1</span>] = g.nodeInfoSnapshot.NodeInfoMap[nodeName].Node()
+                }
+            } <span class="hljs-keyword">else</span> {
+                predicateResultLock.Lock()
+                failedPredicateMap[nodeName] = failedPredicates
+                predicateResultLock.Unlock()
+            }
+        }
+
+    <span class="hljs-comment">// &#x6807;&#x8BB0;&#x4E00;&#x4E0B;&#x8FD9;&#x91CC;&#xFF0C;&#x5E76;&#x53D1;&#x6267;&#x884C;&#x7B5B;&#x9009;&#xFF0C;&#x5F85;&#x4F1A;&#x513F;&#x770B;&#x770B;&#x5B83;&#x7684;&#x5E76;&#x53D1;&#x662F;&#x600E;&#x4E48;&#x8BBE;&#x8BA1;&#x7684;</span>
+        <span class="hljs-comment">// Stops searching for more nodes once the configured number of feasible nodes</span>
+        <span class="hljs-comment">// are found.</span>
+        workqueue.ParallelizeUntil(ctx, <span class="hljs-number">16</span>, <span class="hljs-keyword">int</span>(allNodes), checkNode)
+
+    <span class="hljs-comment">// &#x8C03;&#x5EA6;&#x5668;&#x7684;&#x6269;&#x5C55;&#x5904;&#x7406;&#x903B;&#x8F91;&#xFF0C;&#x5982;&#x81EA;&#x5B9A;&#x4E49;&#x7684;&#x6269;&#x5C55;&#x7B5B;&#x9009;&#x3001;&#x4F18;&#x5148;&#x7EA7;&#x6392;&#x5E8F;&#x7B97;&#x6CD5;</span>
+    <span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(filtered) &gt; <span class="hljs-number">0</span> &amp;&amp; <span class="hljs-built_in">len</span>(g.extenders) != <span class="hljs-number">0</span> {
+    ... <span class="hljs-comment">// &#x7701;&#x7565;</span>
+    }
+  <span class="hljs-comment">// &#x8FD4;&#x56DE;&#x7ED3;&#x679C;</span>
+    <span class="hljs-keyword">return</span> filtered, failedPredicateMap, <span class="hljs-literal">nil</span>
+}
+</code></pre>
+<p>&#x8FD9;&#x91CC;&#x4E00;&#x773C;&#x5C31;&#x53EF;&#x4EE5;&#x770B;&#x51FA;&#x6838;&#x5FC3;&#x533F;&#x540D;&#x51FD;&#x6570;&#x5185;&#x7684;&#x4E3B;&#x4F53;&#x662F;<code>podFitsOnNode()</code>,&#x4F46;&#x662F;&#x5E76;&#x4E0D;&#x662F;&#x76F4;&#x63A5;&#x6267;&#x884C;<code>podFitsOnNode()</code>&#x51FD;&#x6570;&#xFF0C;&#x800C;&#x662F;&#x53C8;&#x5C01;&#x88C5;&#x4E86;&#x4E00;&#x5C42;&#x51FD;&#x6570;&#xFF0C;&#x8FD9;&#x4E2A;&#x51FD;&#x6570;&#x7684;&#x4F5C;&#x7528;&#x662F;&#x5728;&#x5916;&#x5C42;&#x4F7F;&#x7528;<code>nodeName := g.cache.NodeTree().Next()</code>&#x6765;&#x83B7;&#x53D6;&#x8981;&#x5224;&#x65AD;&#x7684;node&#x4E3B;&#x4F53;&#xFF0C;&#x4F20;&#x9012;&#x7ED9;<code>podFitsOnNode()</code>&#x51FD;&#x6570;&#xFF0C;&#x800C;&#x540E;&#x5BF9;<code>podFitsOnNode</code>&#x51FD;&#x6570;&#x6267;&#x884C;&#x8FD4;&#x56DE;&#x7684;&#x7ED3;&#x679C;&#x8FDB;&#x884C;&#x5904;&#x7406;&#x3002;&#x7740;&#x773C;&#x4E8E;&#x5176;&#x4E0B;&#x7684;&#x5E76;&#x53D1;&#x5904;&#x7406;&#x5B9E;&#x73B0;:<code>workqueue.ParallelizeUntil(ctx, 16, int(allNodes), checkNode)</code>,&#x5C31;&#x53EF;&#x4EE5;&#x7406;&#x89E3;&#x8FD9;&#x6837;&#x5C01;&#x88C5;&#x7684;&#x597D;&#x5904;&#x4E86;,&#x6765;&#x770B;&#x770B;&#x5E76;&#x53D1;&#x5B9E;&#x73B0;&#x7684;&#x5185;&#x90E8;&#x5427;</p>
+<h3 id="&#x5E76;&#x53D1;&#x63A7;&#x5236;"><a name="&#x5E76;&#x53D1;&#x63A7;&#x5236;" class="plugin-anchor" href="#&#x5E76;&#x53D1;&#x63A7;&#x5236;"><i class="fa fa-link" aria-hidden="true"></i></a>&#x5E76;&#x53D1;&#x63A7;&#x5236;</h3>
+<p><code>vendor/k8s.io/client-go/util/workqueue/parallelizer.go:38</code></p>
+<pre><code class="lang-go"><span class="hljs-keyword">func</span> ParallelizeUntil(ctx context.Context, workers, pieces <span class="hljs-keyword">int</span>, doWorkPiece DoWorkPieceFunc) {
+    <span class="hljs-keyword">var</span> stop &lt;-<span class="hljs-keyword">chan</span> <span class="hljs-keyword">struct</span>{}
+    <span class="hljs-keyword">if</span> ctx != <span class="hljs-literal">nil</span> {
+        stop = ctx.Done()
+    }
+
+    toProcess := <span class="hljs-built_in">make</span>(<span class="hljs-keyword">chan</span> <span class="hljs-keyword">int</span>, pieces)
+    <span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; pieces; i++ {
+        toProcess &lt;- i
+    }
+    <span class="hljs-built_in">close</span>(toProcess)
+
+    <span class="hljs-keyword">if</span> pieces &lt; workers {
+        workers = pieces
+    }
+
+    wg := sync.WaitGroup{}
+    wg.Add(workers)
+    <span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; workers; i++ {
+        <span class="hljs-keyword">go</span> <span class="hljs-keyword">func</span>() {
+            <span class="hljs-keyword">defer</span> utilruntime.HandleCrash()
+            <span class="hljs-keyword">defer</span> wg.Done()
+            <span class="hljs-keyword">for</span> piece := <span class="hljs-keyword">range</span> toProcess {
+                <span class="hljs-keyword">select</span> {
+                <span class="hljs-keyword">case</span> &lt;-stop:
+                    <span class="hljs-keyword">return</span>
+                <span class="hljs-keyword">default</span>:
+                    doWorkPiece(piece)
+                }
+            }
+        }()
+    }
+    wg.Wait()
+}
+</code></pre>
+<p><strong>&#x6572;&#x9ED1;&#x677F;&#x8BB0;&#x7B14;&#x8BB0;</strong>:</p>
+<pre><code>1.chan struct{}&#x662F;&#x4EC0;&#x4E48;&#x9B3C;? struct{}&#x7C7B;&#x578B;&#x7684;chan&#xFF0C;&#x4E0D;&#x5360;&#x7528;&#x5185;&#x5B58;&#xFF0C;&#x901A;&#x5E38;&#x7528;&#x4F5C;go&#x534F;&#x7A0B;&#x4E4B;&#x95F4;&#x4F20;&#x9012;&#x4FE1;&#x53F7;&#xFF0C;&#x8BE6;&#x60C5;&#x53EF;&#x53C2;
+&#x8003;:https://dave.cheney.net/2014/03/25/the-empty-struct
+
+2.ParallelizeUntil&#x51FD;&#x6570;&#x63A5;&#x6536;4&#x4E2A;&#x53C2;&#x6570;,&#x5206;&#x522B;&#x662F;&#x7236;&#x534F;&#x7A0B;&#x4E0A;&#x4E0B;&#x6587;,max workers,task number,task&#x6267;&#x884C;&#x51FD;&#x6570;&#xFF0C;&#x5B83;&#x542F;&#x52A8;
+&#x6307;&#x5B9A;&#x6570;&#x91CF;&#x7684;worker&#x534F;&#x7A0B;&#xFF0C;&#x6570;&#x91CF;&#x6700;&#x5927;&#x4E0D;&#x8D85;&#x8FC7;max workers&#xFF0C;&#x5171;&#x540C;&#x5B8C;&#x6210;&#x6307;&#x5B9A;&#x6570;&#x91CF;(task number)&#x7684;task&#xFF0C;&#x6BCF;&#x4E2A;task&#x6267;&#x884C;&#x6307;
+&#x5B9A;&#x7684;&#x6267;&#x884C;&#x51FD;&#x6570;&#x3002;&#x8FD9;&#x610F;&#x5473;&#x7740;&#xFF0C;ParallelizeUntil&#x51FD;&#x6570;&#x53EA;&#x8D1F;&#x8D23;&#x5E76;&#x53D1;&#x7684;&#x6570;&#x91CF;&#xFF0C;&#x800C;&#x5E76;&#x53D1;&#x7684;&#x5BF9;&#x8C61;&#x4E3B;&#x4F53;&#xFF0C;&#x9700;&#x8981;&#x7531;task&#x6267;&#x884C;&#x51FD;&#x6570;&#x81EA;&#x884C;
+&#x83B7;&#x53D6;&#x3002;&#x56E0;&#x6B64;&#x6211;&#x4EEC;&#x770B;&#x5230;&#x4E0A;&#x9762;&#x7684;checkNode&#x533F;&#x540D;&#x51FD;&#x6570;&#xFF0C;&#x5185;&#x90E8;&#x901A;&#x8FC7;nodeName := g.cache.NodeTree().Next()&#x6765;&#x83B7;&#x53D6;task
+&#x7684;&#x5BF9;&#x8C61;&#x4E3B;&#x4F53;&#xFF0C;g.cache.NodeTree()&#x5BF9;&#x8C61;&#x5185;&#x90E8;&#x5FC5;&#x7136;&#x7EF4;&#x62A4;&#x4E86;&#x4E00;&#x4E2A;&#x6307;&#x9488;&#xFF0C;&#x6765;&#x83B7;&#x53D6;&#x5F53;&#x524D;task&#x6240;&#x9700;&#x7684;&#x5BF9;&#x8C61;&#x4E3B;&#x4F53;&#x3002;&#x8FD9;&#x91CC;&#x4F7F;&#x7528;&#x7684;&#x5E76;&#x53D1;&#x7C92;&#x5EA6;&#x662F;&#x4EE5;node&#x4E3A;&#x5355;&#x4F4D;&#x7684;.
+
+ParallelizeUntil()&#x7684;&#x8FD9;&#x79CD;&#x5B9E;&#x73B0;&#x65B9;&#x5F0F;&#xFF0C;&#x53EF;&#x4EE5;&#x5F88;&#x597D;&#x5730;&#x5C06;&#x5E76;&#x53D1;&#x5B9E;&#x73B0;&#x548C;&#x5177;&#x4F53;&#x529F;&#x80FD;&#x5B9E;&#x73B0;&#x89E3;&#x8026;&#xFF0C;&#x56E0;&#x6B64;&#x53EA;&#x8981;&#x529F;&#x80FD;&#x5B9E;&#x73B0;&#x5185;&#x90E8;&#x5904;&#x7406;&#x597D;&#x6307;&#x9488;&#xFF0C;
+&#x90FD;&#x53EF;&#x4EE5;&#x590D;&#x7528;ParallelizeUntil()&#x51FD;&#x6570;&#x6765;&#x5B9E;&#x73B0;&#x5E76;&#x53D1;&#x7684;&#x63A7;&#x5236;&#x3002;
+</code></pre><p>&#x6765;&#x770B;&#x770B;<code>checkNode()</code>&#x5185;&#x90E8;&#x662F;&#x600E;&#x6837;&#x83B7;&#x53D6;&#x6BCF;&#x4E2A;&#x5B50;&#x534F;&#x7A0B;&#x5BF9;&#x5E94;&#x7684;node&#x4E3B;&#x4F53;&#x7684;:</p>
+<p><code>pkg/scheduler/core/generic_scheduler.go:460 --&gt; pkg/scheduler/internal/cache/node_tree.go:161</code></p>
+<p><img src="http://mycloudn.kokoerp.com/zone.jpg" alt=""></p>
+<p>&#x53EF;&#x4EE5;&#x770B;&#x5230;&#xFF0C;&#x8FD9;&#x91CC;&#x6709;&#x4E00;&#x4E2A;zone&#x7684;&#x903B;&#x8F91;&#x5C42;&#x7EA7;&#xFF0C;&#x8FD9;&#x4E2A;&#x5C42;&#x7EA7;&#x4EFF;&#x4F5B;&#x6CA1;&#x6709;&#x89C1;&#x8FC7;&#xFF0C;google&#x4E86;&#x4E00;&#x756A;&#x624D;&#x4E86;&#x89E3;&#x4E86;&#x8FD9;&#x4E2A;&#x9887;&#x4E3A;&#x51B7;&#x95E8;&#x7684;&#x529F;&#x80FD;&#xFF1A;&#x8FD9;&#x662F;&#x4E00;&#x4E2A;&#x8F7B;&#x91CF;&#x7EA7;&#x7684;&#x652F;&#x6301;&#x96C6;&#x7FA4;&#x8054;&#x90A6;&#x7279;&#x6027;&#x7684;&#x5B9E;&#x73B0;&#xFF0C;&#x5355;&#x4E2A;cluster&#x53EF;&#x4EE5;&#x5C5E;&#x4E8E;&#x591A;&#x4E2A;zone&#xFF0C;&#x4F46;&#x8FD9;&#x4E2A;&#x529F;&#x80FD;&#x76EE;&#x524D;&#x53EA;&#x6709;GCE&#x548C;AWS&#x652F;&#x6301;&#xFF0C;&#x4E14;&#x7EDD;&#x5927;&#x591A;&#x6570;&#x7684;&#x4F7F;&#x7528;&#x573A;&#x666F;&#x4E5F;&#x7528;&#x4E0D;&#x5230;&#xFF0C;&#x53EF;&#x4EE5;&#x8BF4;&#x662F;&#x9887;&#x4E3A;&#x51B7;&#x95E8;&#x3002;&#x9ED8;&#x8BA4;&#x60C5;&#x51B5;&#x4E0B;&#xFF0C;cluster&#x53EA;&#x5C5E;&#x4E8E;&#x4E00;&#x4E2A;zone&#xFF0C;&#x53EF;&#x4EE5;&#x7406;&#x89E3;&#x4E3A;cluster&#x548C;zone&#x662F;&#x540C;&#x5C42;&#x7EA7;&#xFF0C;&#x56E0;&#x6B64;&#x540E;&#x9762;&#x89C1;&#x5230;&#x6709;&#x5173;zone&#x76F8;&#x5173;&#x7684;&#x5C42;&#x7EA7;&#xFF0C;&#x6211;&#x4EEC;&#x76F4;&#x63A5;&#x8D8A;&#x8FC7;&#x5B83;&#x3002;&#x6709;&#x5174;&#x8DA3;&#x7684;&#x670B;&#x53CB;&#x53EF;&#x4EE5;&#x4E86;&#x89E3;&#x4E00;&#x4E0B;zone&#x7684;&#x6982;&#x5FF5;:</p>
+<p><a href="https://kubernetes.io/docs/setup/best-practices/multiple-zones/" target="_blank">https://kubernetes.io/docs/setup/best-practices/multiple-zones/</a></p>
+<p>&#x7EE7;&#x7EED;&#x5F80;&#x4E0B;, <code>pkg/scheduler/internal/cache/node_tree.go:176</code> --&gt; <code>pkg/scheduler/internal/cache/node_tree.go:47</code></p>
+<pre><code class="lang-go"><span class="hljs-comment">// nodeArray is a struct that has nodes that are in a zone.</span>
+<span class="hljs-comment">// We use a slice (as opposed to a set/map) to store the nodes because iterating over the nodes is</span>
+<span class="hljs-comment">// a lot more frequent than searching them by name.</span>
+<span class="hljs-keyword">type</span> nodeArray <span class="hljs-keyword">struct</span> {
+    nodes     []<span class="hljs-keyword">string</span>
+    lastIndex <span class="hljs-keyword">int</span>
+}
+
+<span class="hljs-keyword">func</span> (na *nodeArray) next() (nodeName <span class="hljs-keyword">string</span>, exhausted <span class="hljs-keyword">bool</span>) {
+    <span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(na.nodes) == <span class="hljs-number">0</span> {
+        klog.Error(<span class="hljs-string">&quot;The nodeArray is empty. It should have been deleted from NodeTree.&quot;</span>)
+        <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;&quot;</span>, <span class="hljs-literal">false</span>
+    }
+    <span class="hljs-keyword">if</span> na.lastIndex &gt;= <span class="hljs-built_in">len</span>(na.nodes) {
+        <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;&quot;</span>, <span class="hljs-literal">true</span>
+    }
+    nodeName = na.nodes[na.lastIndex]
+    na.lastIndex++
+    <span class="hljs-keyword">return</span> nodeName, <span class="hljs-literal">false</span>
+}
+</code></pre>
+<p>&#x679C;&#x7136;&#x53EF;&#x4EE5;&#x770B;&#x5230;, nodeArray&#x7ED3;&#x6784;&#x4F53;&#x5185;&#x90E8;&#x7EF4;&#x62A4;&#x4E86;&#x4E00;&#x4E2A;lastIndex&#x6307;&#x9488;&#x6765;&#x83B7;&#x53D6;node&#xFF0C;&#x5370;&#x8BC1;&#x4E86;&#x4E0A;&#x9762;&#x7684;&#x63A8;&#x6D4B;&#x3002;</p>
+<p>&#x56DE;&#x5230;<code>pkg/scheduler/core/generic_scheduler.go:461</code>,&#x6B63;&#x5F0F;&#x8FDB;&#x5165;<code>podFitsOnNode</code>&#x5185;&#x90E8;:</p>
+<pre><code class="lang-go"><span class="hljs-keyword">func</span> podFitsOnNode(
+    pod *v1.Pod,
+    meta predicates.PredicateMetadata,
+    info *schedulernodeinfo.NodeInfo,
+    predicateFuncs <span class="hljs-keyword">map</span>[<span class="hljs-keyword">string</span>]predicates.FitPredicate,
+    queue internalqueue.SchedulingQueue,
+    alwaysCheckAllPredicates <span class="hljs-keyword">bool</span>,
+) (<span class="hljs-keyword">bool</span>, []predicates.PredicateFailureReason, error) {
+    <span class="hljs-keyword">var</span> failedPredicates []predicates.PredicateFailureReason
+
+    podsAdded := <span class="hljs-literal">false</span>
+    <span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">2</span>; i++ {
+        metaToUse := meta
+        nodeInfoToUse := info
+        <span class="hljs-keyword">if</span> i == <span class="hljs-number">0</span> {
+            podsAdded, metaToUse, nodeInfoToUse = addNominatedPods(pod, meta, info, queue)
+        } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> !podsAdded || <span class="hljs-built_in">len</span>(failedPredicates) != <span class="hljs-number">0</span> {
+            <span class="hljs-keyword">break</span>
+        }
+        <span class="hljs-keyword">for</span> _, predicateKey := <span class="hljs-keyword">range</span> predicates.Ordering() {
+            <span class="hljs-keyword">var</span> (
+                fit     <span class="hljs-keyword">bool</span>
+                reasons []predicates.PredicateFailureReason
+                err     error
+            )
+            <span class="hljs-comment">//TODO (yastij) : compute average predicate restrictiveness to export it as Prometheus metric</span>
+            <span class="hljs-keyword">if</span> predicate, exist := predicateFuncs[predicateKey]; exist {
+                fit, reasons, err = predicate(pod, metaToUse, nodeInfoToUse)
+                <span class="hljs-keyword">if</span> err != <span class="hljs-literal">nil</span> {
+                    <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>, []predicates.PredicateFailureReason{}, err
+                }
+             ... <span class="hljs-comment">// &#x7701;&#x7565;</span>
+            }
+        }
+    }
+
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">len</span>(failedPredicates) == <span class="hljs-number">0</span>, failedPredicates, <span class="hljs-literal">nil</span>
+}
+</code></pre>
+<p>&#x6CE8;&#x91CA;&#x548C;&#x90E8;&#x5206;&#x4EE3;&#x7801;&#x5DF2;&#x7701;&#x7565;,&#x57FA;&#x4E8E;<code>podFitsOnNode</code>&#x51FD;&#x6570;&#x5185;&#x7684;&#x6CE8;&#x91CA;&#xFF0C;&#x6765;&#x505A;&#x4E00;&#x4E0B;&#x8BF4;&#x660E;:</p>
+<p>1.&#x901A;&#x8FC7;&#x6307;&#x5B9A;<code>pod.spec.priority</code>,&#x6765;&#x4E3A;pod&#x6307;&#x5B9A;&#x8C03;&#x5EA6;&#x4F18;&#x5148;&#x7EA7;&#x7684;&#x529F;&#x80FD;&#xFF0C;&#x5728;1.14&#x7248;&#x672C;&#x5DF2;&#x7ECF;&#x6B63;&#x5F0F;GA&#xFF0C;&#x8FD9;&#x91CC;&#x6240;&#x6709;&#x7684;&#x8C03;&#x5EA6;&#x76F8;&#x5173;&#x529F;&#x80FD;&#x90FD;&#x4F1A;&#x8003;&#x8651;&#x5230;pod&#x4F18;&#x5148;&#x7EA7;,&#x56E0;&#x4E3A;&#x4F18;&#x5148;&#x7EA7;&#x7684;&#x539F;&#x56E0;&#xFF0C;&#x56E0;&#x6B64;&#x9664;&#x4E86;&#x6B63;&#x5E38;&#x7684;Schedule&#x8C03;&#x5EA6;&#x52A8;&#x4F5C;&#x5916;&#xFF0C;&#x8FD8;&#x4F1A;&#x6709;<code>Preempt</code>&#x62A2;&#x5360;&#x8C03;&#x5EA6;&#x7684;&#x884C;&#x4E3A;&#xFF0C;&#x8FD9;&#x4E2A;<code>podFitsOnNode()</code>&#x65B9;&#x6CD5;&#x4F1A;&#x88AB;&#x5728;&#x8FD9;&#x4E24;&#x4E2A;&#x5730;&#x65B9;&#x8C03;&#x7528;&#x3002;</p>
+<p>2.Schedule&#x8C03;&#x5EA6;&#x65F6;&#xFF0C;&#x4F1A;&#x53D6;&#x51FA;&#x5F53;&#x524D;node&#x4E0A;&#x6240;&#x6709;&#x5DF2;&#x5B58;&#x5728;&#x7684;pod&#xFF0C;&#x4E0E;&#x88AB;&#x63D0;&#x540D;&#x8C03;&#x5EA6;&#x7684;pod&#x8FDB;&#x884C;&#x4F18;&#x5148;&#x7EA7;&#x5BF9;&#x6BD4;&#xFF0C;&#x53D6;&#x51FA;&#x6240;&#x6709;&#x4F18;&#x5148;&#x7EA7;&#x5927;&#x4E8E;&#x7B49;&#x4E8E;&#x63D0;&#x540D;pod&#xFF0C;&#x5C06;&#x5B83;&#x4EEC;&#x9700;&#x6C42;&#x7684;&#x8D44;&#x6E90;&#x52A0;&#x4E0A;&#x63D0;&#x540D;pod&#x6240;&#x9700;&#x6C42;&#x7684;&#x8D44;&#x6E90;&#xFF0C;&#x8FDB;&#x884C;&#x6C47;&#x603B;&#xFF0C;predicate&#x7B5B;&#x9009;&#x7B97;&#x6CD5;&#x8BA1;&#x7B97;&#x7684;&#x65F6;&#x5019;&#xFF0C;&#x662F;&#x57FA;&#x4E8E;&#x8FD9;&#x4E2A;&#x6C47;&#x603B;&#x7684;&#x7ED3;&#x679C;&#x6765;&#x8FDB;&#x884C;&#x8BA1;&#x7B97;&#x7684;&#x3002;&#x4E3E;&#x4E2A;&#x4F8B;&#x5B50;&#xFF0C;<code>node A memory cap = 128Gi</code>&#xFF0C;&#x5176;&#x4E0A;&#x73B0;&#x627F;&#x8F7D;&#x6709;20&#x4E2A;pod&#xFF0C;&#x5176;&#x4E2D;10&#x4E2A;pod&#x7684;&#x4F18;&#x5148;&#x7EA7;&#x5927;&#x4E8E;&#x7B49;&#x4E8E;&#x63D0;&#x540D;pod&#xFF0C;&#x5B83;&#x4EEC;<code>sum(request.memory) = 100Gi</code>&#xFF0C;&#x82E5;&#x63D0;&#x540D;pod&#x7684;<code>request.memory = 32Gi</code>, <code>(100+32) &gt; 128</code>,&#x56E0;&#x6B64;&#x7B5B;&#x9009;&#x65F6;&#x4F1A;&#x5728;&#x5185;&#x5B58;&#x9009;&#x9879;&#x5931;&#x8D25;&#x8FD4;&#x56DE;<strong>false</strong>&#xFF1B;&#x82E5;&#x63D0;&#x540D;pod&#x7684;<code>request.memory = 16Gi</code>,<code>(100+16) &lt; 128</code>,&#x5219;&#x5185;&#x5B58;&#x9879;&#x7B5B;&#x9009;&#x901A;&#x8FC7;&#x3002;&#x90A3;&#x4E48;&#x5269;&#x4E0B;&#x7684;&#x4F18;&#x5148;&#x7EA7;&#x8F83;&#x4F4E;&#x7684;10&#x4E2A;pod&#x5C31;&#x4E0D;&#x8003;&#x8651;&#x5B83;&#x4EEC;&#x4E86;&#x5417;&#xFF0C;&#x5B83;&#x4EEC;&#x4E5F;&#x8981;&#x5360;&#x7528;&#x5185;&#x5B58;&#x5440;&#xFF1F;&#x5904;&#x7406;&#x65B9;&#x5F0F;&#x662F;&#xFF1A;&#x5982;&#x679C;&#x5B83;&#x4EEC;&#x5360;&#x7528;&#x5185;&#x5B58;&#x9020;&#x6210;node&#x8D44;&#x6E90;&#x4E0D;&#x8DB3;&#x65E0;&#x6CD5;&#x8C03;&#x5EA6;&#x63D0;&#x540D;pod&#xFF0C;&#x5219;&#x8C03;&#x5EA6;&#x5668;&#x4F1A;&#x5C06;&#x5B83;&#x4EEC;&#x5254;&#x51FA;&#x5F53;&#x524D;node&#xFF0C;&#x8FD9;&#x5373;&#x662F;<code>Preempt</code>&#x62A2;&#x5360;&#x3002;Preempt&#x62A2;&#x5360;&#x7684;&#x8BF4;&#x660E;&#x4F1A;&#x5728;&#x540E;&#x9762;&#x7684;&#x6587;&#x7AE0;&#x4E2D;&#x8865;&#x5145;.</p>
+<p>3.&#x5BF9;&#x4E8E;&#x6BCF;&#x4E2A;&#x63D0;&#x540D;pod,&#x5176;&#x8C03;&#x5EA6;&#x8FC7;&#x7A0B;&#x4F1A;&#x88AB;&#x91CD;&#x590D;&#x6267;&#x884C;1&#x6B21;&#xFF0C;&#x4E3A;&#x4EC0;&#x4E48;&#x9700;&#x8981;&#x91CD;&#x590D;&#x6267;&#x884C;&#x5462;&#xFF1F;&#x8003;&#x8651;&#x5230;&#x6709;&#x4E00;&#x4E9B;&#x573A;&#x666F;&#x4E0B;&#xFF0C;&#x4F1A;&#x5224;&#x65AD;&#x5230;pod&#x4E4B;&#x95F4;&#x7684;&#x4EB2;&#x548C;&#x529B;&#x7B5B;&#x9009;&#x7B56;&#x7565;&#xFF0C;&#x4F8B;&#x5982;pod A&#x5BF9;pod B&#x6709;&#x4EB2;&#x548C;&#x6027;&#xFF0C;&#x8FD9;&#x65F6;&#x5B83;&#x4EEC;&#x4E00;&#x8D77;&#x8C03;&#x5EA6;&#x5230;node&#x4E0A;&#xFF0C;&#x4F46;pod B&#x6B64;&#x65F6;&#x5B9E;&#x9645;&#x5E76;&#x672A;&#x5B8C;&#x6210;&#x8C03;&#x5EA6;&#x542F;&#x52A8;&#xFF0C;&#x90A3;&#x4E48;pod A&#x7684;<code>inter-pod affinity predicates</code>&#x4E00;&#x5B9A;&#x4F1A;&#x5931;&#x8D25;&#xFF0C;&#x56E0;&#x6B64;&#xFF0C;&#x91CD;&#x590D;&#x6267;&#x884C;1&#x6B21;&#x7B5B;&#x9009;&#x8FC7;&#x7A0B;&#x662F;&#x6709;&#x5FC5;&#x8981;&#x7684;.</p>
+<p>&#x6709;&#x4E86;&#x4EE5;&#x4E0A;&#x7406;&#x89E3;&#xFF0C;&#x6211;&#x4EEC;&#x63A5;&#x7740;&#x770B;&#x4EE3;&#x7801;&#xFF0C;&#x56FE;&#x4E2D;&#x5DF2;&#x6CE8;&#x91CA;:</p>
+<p><img src="http://mycloudn.kokoerp.com/podFitsOnNode.jpg" alt=""></p>
+<p>&#x56FE;&#x4E2D;<code>pkg/scheduler/core/generic_scheduler.go:608</code>&#x4F4D;&#x7F6E;&#x6B63;&#x5F0F;&#x5F00;&#x59CB;&#x4E86;&#x9010;&#x4E2A;&#x8BA1;&#x7B97;&#x7B5B;&#x9009;&#x7B97;&#x6CD5;&#xFF0C;&#x90A3;&#x4E48;&#x7B5B;&#x9009;&#x65B9;&#x6CD5;&#x3001;&#x7B5B;&#x9009;&#x65B9;&#x6CD5;&#x987A;&#x5E8F;&#x5728;&#x54EA;&#x91CC;&#x5462;&#xFF1F;&#x5728;&#x4E0A;&#x4E00;&#x7BC7;<a href="[https:/github.com/yinwenqin/kubeSourceCodeNote/blob/master/scheduler/P2-%E8%B0%83%E5%BA%A6%E5%99%A8%E6%A1%86%E6%9E%B6.md](https:/github.com/yinwenqin/kubeSourceCodeNote/blob/master/scheduler/P2-&#x8C03;&#x5EA6;&#x5668;&#x6846;&#x67B6;.md">P2-&#x6846;&#x67B6;&#x7BC7;</a>)&#x4E2D;&#x5DF2;&#x7ECF;&#x6709;&#x8BB2;&#x8FC7;&#xFF0C;&#x9ED8;&#x8BA4;&#x8C03;&#x5EA6;&#x7B97;&#x6CD5;&#x90FD;&#x5728;<code>pkg/scheduler/algorithm/</code>&#x8DEF;&#x5F84;&#x4E0B;&#xFF0C;&#x6211;&#x4EEC;&#x63A5;&#x7740;&#x5F80;&#x4E0B;&#x770B;.</p>
+<h3 id="predicates--function"><a name="predicates--function" class="plugin-anchor" href="#predicates--function"><i class="fa fa-link" aria-hidden="true"></i></a>Predicates  Function</h3>
+<p>&#x7B5B;&#x9009;&#x7B97;&#x6CD5;&#x76F8;&#x5173;&#x7684;<code>key/func/ordering</code>&#xFF0C;&#x5168;&#x90E8;&#x96C6;&#x4E2D;&#x5728;<code>pkg/scheduler/algorithm/predicates/predicates.go</code>&#x8FD9;&#x4E2A;&#x6587;&#x4EF6;&#x4E2D;</p>
+<h4 id="&#x7B5B;&#x9009;&#x987A;&#x5E8F;"><a name="&#x7B5B;&#x9009;&#x987A;&#x5E8F;" class="plugin-anchor" href="#&#x7B5B;&#x9009;&#x987A;&#x5E8F;"><i class="fa fa-link" aria-hidden="true"></i></a>&#x7B5B;&#x9009;&#x987A;&#x5E8F;</h4>
+<p><code>pkg/scheduler/algorithm/predicates/predicates.go:142</code></p>
+<pre><code class="lang-go"><span class="hljs-comment">// &#x9ED8;&#x8BA4;predicate&#x987A;&#x5E8F;</span>
+<span class="hljs-keyword">var</span> (
+    predicatesOrdering = []<span class="hljs-keyword">string</span>{CheckNodeConditionPred, CheckNodeUnschedulablePred,
+        GeneralPred, HostNamePred, PodFitsHostPortsPred,
+        MatchNodeSelectorPred, PodFitsResourcesPred, NoDiskConflictPred,
+        PodToleratesNodeTaintsPred, PodToleratesNodeNoExecuteTaintsPred, CheckNodeLabelPresencePred,
+        CheckServiceAffinityPred, MaxEBSVolumeCountPred, MaxGCEPDVolumeCountPred, MaxCSIVolumeCountPred,
+        MaxAzureDiskVolumeCountPred, MaxCinderVolumeCountPred, CheckVolumeBindingPred, NoVolumeZoneConflictPred,
+        CheckNodeMemoryPressurePred, CheckNodePIDPressurePred, CheckNodeDiskPressurePred, MatchInterPodAffinityPred}
+)
+</code></pre>
+<p>&#x5B98;&#x65B9;&#x7684;&#x5907;&#x6CE8;:</p>
+<p><a href="https://github.com/kubernetes/community/blob/master/contributors/design-proposals/scheduling/predicates-ordering.md" target="_blank">&#x94FE;&#x63A5;</a></p>
+<p><img src="http://mycloudn.kokoerp.com/predicates.jpg" alt=""></p>
+<h4 id="&#x7B5B;&#x9009;key"><a name="&#x7B5B;&#x9009;key" class="plugin-anchor" href="#&#x7B5B;&#x9009;key"><i class="fa fa-link" aria-hidden="true"></i></a>&#x7B5B;&#x9009;key</h4>
+<pre><code class="lang-go"><span class="hljs-keyword">const</span> (
+    <span class="hljs-comment">// MatchInterPodAffinityPred defines the name of predicate MatchInterPodAffinity.</span>
+    MatchInterPodAffinityPred = <span class="hljs-string">&quot;MatchInterPodAffinity&quot;</span>
+    <span class="hljs-comment">// CheckVolumeBindingPred defines the name of predicate CheckVolumeBinding.</span>
+    CheckVolumeBindingPred = <span class="hljs-string">&quot;CheckVolumeBinding&quot;</span>
+    <span class="hljs-comment">// CheckNodeConditionPred defines the name of predicate CheckNodeCondition.</span>
+    CheckNodeConditionPred = <span class="hljs-string">&quot;CheckNodeCondition&quot;</span>
+    <span class="hljs-comment">// GeneralPred defines the name of predicate GeneralPredicates.</span>
+    GeneralPred = <span class="hljs-string">&quot;GeneralPredicates&quot;</span>
+    <span class="hljs-comment">// HostNamePred defines the name of predicate HostName.</span>
+    HostNamePred = <span class="hljs-string">&quot;HostName&quot;</span>
+    <span class="hljs-comment">// PodFitsHostPortsPred defines the name of predicate PodFitsHostPorts.</span>
+    PodFitsHostPortsPred = <span class="hljs-string">&quot;PodFitsHostPorts&quot;</span>
+    <span class="hljs-comment">// MatchNodeSelectorPred defines the name of predicate MatchNodeSelector.</span>
+    MatchNodeSelectorPred = <span class="hljs-string">&quot;MatchNodeSelector&quot;</span>
+    <span class="hljs-comment">// PodFitsResourcesPred defines the name of predicate PodFitsResources.</span>
+    PodFitsResourcesPred = <span class="hljs-string">&quot;PodFitsResources&quot;</span>
+    <span class="hljs-comment">// NoDiskConflictPred defines the name of predicate NoDiskConflict.</span>
+    NoDiskConflictPred = <span class="hljs-string">&quot;NoDiskConflict&quot;</span>
+    <span class="hljs-comment">// PodToleratesNodeTaintsPred defines the name of predicate PodToleratesNodeTaints.</span>
+    PodToleratesNodeTaintsPred = <span class="hljs-string">&quot;PodToleratesNodeTaints&quot;</span>
+    <span class="hljs-comment">// CheckNodeUnschedulablePred defines the name of predicate CheckNodeUnschedulablePredicate.</span>
+    CheckNodeUnschedulablePred = <span class="hljs-string">&quot;CheckNodeUnschedulable&quot;</span>
+    <span class="hljs-comment">// PodToleratesNodeNoExecuteTaintsPred defines the name of predicate PodToleratesNodeNoExecuteTaints.</span>
+    PodToleratesNodeNoExecuteTaintsPred = <span class="hljs-string">&quot;PodToleratesNodeNoExecuteTaints&quot;</span>
+    <span class="hljs-comment">// CheckNodeLabelPresencePred defines the name of predicate CheckNodeLabelPresence.</span>
+    CheckNodeLabelPresencePred = <span class="hljs-string">&quot;CheckNodeLabelPresence&quot;</span>
+    <span class="hljs-comment">// CheckServiceAffinityPred defines the name of predicate checkServiceAffinity.</span>
+    CheckServiceAffinityPred = <span class="hljs-string">&quot;CheckServiceAffinity&quot;</span>
+    <span class="hljs-comment">// MaxEBSVolumeCountPred defines the name of predicate MaxEBSVolumeCount.</span>
+    <span class="hljs-comment">// DEPRECATED</span>
+    <span class="hljs-comment">// All cloudprovider specific predicates are deprecated in favour of MaxCSIVolumeCountPred.</span>
+    MaxEBSVolumeCountPred = <span class="hljs-string">&quot;MaxEBSVolumeCount&quot;</span>
+    <span class="hljs-comment">// MaxGCEPDVolumeCountPred defines the name of predicate MaxGCEPDVolumeCount.</span>
+    <span class="hljs-comment">// DEPRECATED</span>
+    <span class="hljs-comment">// All cloudprovider specific predicates are deprecated in favour of MaxCSIVolumeCountPred.</span>
+    MaxGCEPDVolumeCountPred = <span class="hljs-string">&quot;MaxGCEPDVolumeCount&quot;</span>
+    <span class="hljs-comment">// MaxAzureDiskVolumeCountPred defines the name of predicate MaxAzureDiskVolumeCount.</span>
+    <span class="hljs-comment">// DEPRECATED</span>
+    <span class="hljs-comment">// All cloudprovider specific predicates are deprecated in favour of MaxCSIVolumeCountPred.</span>
+    MaxAzureDiskVolumeCountPred = <span class="hljs-string">&quot;MaxAzureDiskVolumeCount&quot;</span>
+    <span class="hljs-comment">// MaxCinderVolumeCountPred defines the name of predicate MaxCinderDiskVolumeCount.</span>
+    <span class="hljs-comment">// DEPRECATED</span>
+    <span class="hljs-comment">// All cloudprovider specific predicates are deprecated in favour of MaxCSIVolumeCountPred.</span>
+    MaxCinderVolumeCountPred = <span class="hljs-string">&quot;MaxCinderVolumeCount&quot;</span>
+    <span class="hljs-comment">// MaxCSIVolumeCountPred defines the predicate that decides how many CSI volumes should be attached</span>
+    MaxCSIVolumeCountPred = <span class="hljs-string">&quot;MaxCSIVolumeCountPred&quot;</span>
+    <span class="hljs-comment">// NoVolumeZoneConflictPred defines the name of predicate NoVolumeZoneConflict.</span>
+    NoVolumeZoneConflictPred = <span class="hljs-string">&quot;NoVolumeZoneConflict&quot;</span>
+    <span class="hljs-comment">// CheckNodeMemoryPressurePred defines the name of predicate CheckNodeMemoryPressure.</span>
+    CheckNodeMemoryPressurePred = <span class="hljs-string">&quot;CheckNodeMemoryPressure&quot;</span>
+    <span class="hljs-comment">// CheckNodeDiskPressurePred defines the name of predicate CheckNodeDiskPressure.</span>
+    CheckNodeDiskPressurePred = <span class="hljs-string">&quot;CheckNodeDiskPressure&quot;</span>
+    <span class="hljs-comment">// CheckNodePIDPressurePred defines the name of predicate CheckNodePIDPressure.</span>
+    CheckNodePIDPressurePred = <span class="hljs-string">&quot;CheckNodePIDPressure&quot;</span>
+
+    <span class="hljs-comment">// DefaultMaxGCEPDVolumes defines the maximum number of PD Volumes for GCE</span>
+    <span class="hljs-comment">// GCE instances can have up to 16 PD volumes attached.</span>
+    DefaultMaxGCEPDVolumes = <span class="hljs-number">16</span>
+    <span class="hljs-comment">// DefaultMaxAzureDiskVolumes defines the maximum number of PD Volumes for Azure</span>
+    <span class="hljs-comment">// Larger Azure VMs can actually have much more disks attached.</span>
+    <span class="hljs-comment">// TODO We should determine the max based on VM size</span>
+    DefaultMaxAzureDiskVolumes = <span class="hljs-number">16</span>
+
+    <span class="hljs-comment">// KubeMaxPDVols defines the maximum number of PD Volumes per kubelet</span>
+    KubeMaxPDVols = <span class="hljs-string">&quot;KUBE_MAX_PD_VOLS&quot;</span>
+
+    <span class="hljs-comment">// EBSVolumeFilterType defines the filter name for EBSVolumeFilter.</span>
+    EBSVolumeFilterType = <span class="hljs-string">&quot;EBS&quot;</span>
+    <span class="hljs-comment">// GCEPDVolumeFilterType defines the filter name for GCEPDVolumeFilter.</span>
+    GCEPDVolumeFilterType = <span class="hljs-string">&quot;GCE&quot;</span>
+    <span class="hljs-comment">// AzureDiskVolumeFilterType defines the filter name for AzureDiskVolumeFilter.</span>
+    AzureDiskVolumeFilterType = <span class="hljs-string">&quot;AzureDisk&quot;</span>
+    <span class="hljs-comment">// CinderVolumeFilterType defines the filter name for CinderVolumeFilter.</span>
+    CinderVolumeFilterType = <span class="hljs-string">&quot;Cinder&quot;</span>
+)
+</code></pre>
+<h4 id="&#x7B5B;&#x9009;function"><a name="&#x7B5B;&#x9009;function" class="plugin-anchor" href="#&#x7B5B;&#x9009;function"><i class="fa fa-link" aria-hidden="true"></i></a>&#x7B5B;&#x9009;Function</h4>
+<p>&#x6BCF;&#x4E2A;<code>predicate key</code>&#x5BF9;&#x5E94;&#x7684;<code>function name</code>&#x4E00;&#x822C;&#x4E3A;<code>${KEY}Predicate</code>,function&#x7684;&#x5185;&#x5BB9;&#x5176;&#x5B9E;&#x90FD;&#x6BD4;&#x8F83;&#x7B80;&#x5355;,&#x4E0D;&#x4E00;&#x4E00;&#x4ECB;&#x7ECD;&#x4E86;&#xFF0C;&#x81EA;&#x884C;&#x67E5;&#x770B;&#xFF0C;&#x8FD9;&#x91CC;&#x4EC5;&#x5217;&#x4E3E;&#x4E00;&#x4E2A;:</p>
+<p><code>pkg/scheduler/algorithm/predicates/predicates.go:1567</code></p>
+<pre><code class="lang-go"><span class="hljs-comment">// CheckNodeMemoryPressurePredicate checks if a pod can be scheduled on a node</span>
+<span class="hljs-comment">// reporting memory pressure condition.</span>
+<span class="hljs-keyword">func</span> CheckNodeMemoryPressurePredicate(pod *v1.Pod, meta PredicateMetadata, nodeInfo *schedulernodeinfo.NodeInfo) (<span class="hljs-keyword">bool</span>, []PredicateFailureReason, error) {
+    <span class="hljs-keyword">var</span> podBestEffort <span class="hljs-keyword">bool</span>
+    <span class="hljs-keyword">if</span> predicateMeta, ok := meta.(*predicateMetadata); ok {
+        podBestEffort = predicateMeta.podBestEffort
+    } <span class="hljs-keyword">else</span> {
+        <span class="hljs-comment">// We couldn&apos;t parse metadata - fallback to computing it.</span>
+        podBestEffort = isPodBestEffort(pod)
+    }
+    <span class="hljs-comment">// pod is not BestEffort pod</span>
+    <span class="hljs-keyword">if</span> !podBestEffort {
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>, <span class="hljs-literal">nil</span>, <span class="hljs-literal">nil</span>
+    }
+
+    <span class="hljs-comment">// check if node is under memory pressure</span>
+    <span class="hljs-keyword">if</span> nodeInfo.MemoryPressureCondition() == v1.ConditionTrue {
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>, []PredicateFailureReason{ErrNodeUnderMemoryPressure}, <span class="hljs-literal">nil</span>
+    }
+    <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>, <span class="hljs-literal">nil</span>, <span class="hljs-literal">nil</span>
+}
+</code></pre>
+<p>&#x7B5B;&#x9009;&#x7B97;&#x6CD5;&#x8FC7;&#x7A0B;&#x5230;&#x8FD9;&#x91CC;&#x5C31;&#x5DF2;&#x7136;&#x6E05;&#x6670;&#x660E;&#x4E86;&#xFF01;</p>
+<h2 id="&#x91CD;&#x70B9;&#x56DE;&#x987E;"><a name="&#x91CD;&#x70B9;&#x56DE;&#x987E;" class="plugin-anchor" href="#&#x91CD;&#x70B9;&#x56DE;&#x987E;"><i class="fa fa-link" aria-hidden="true"></i></a>&#x91CD;&#x70B9;&#x56DE;&#x987E;</h2>
+<p>&#x7B5B;&#x9009;&#x7B97;&#x6CD5;&#x4EE3;&#x7801;&#x4E2D;&#x7684;&#x51E0;&#x4E2A;&#x4E0D;&#x6613;&#x7406;&#x89E3;&#x7684;&#x70B9;(&#x4EAE;&#x70B9;?)&#x5708;&#x51FA;:</p>
+<ul>
+<li><strong>node&#x7C92;&#x5EA6;&#x7684;&#x5E76;&#x53D1;&#x63A7;&#x5236;</strong></li>
+<li><strong>&#x57FA;&#x4E8E;&#x4F18;&#x5148;&#x7EA7;&#x7684;pod&#x8D44;&#x6E90;&#x603B;&#x548C;&#x5F52;&#x7EB3;&#x8BA1;&#x7B97;</strong></li>
+<li><strong>&#x7B5B;&#x9009;&#x8FC7;&#x7A0B;&#x91CD;&#x590D;1&#x6B21;</strong></li>
+</ul>
+<p>&#x672C;&#x7BC7;&#x8C03;&#x5EA6;&#x5668;&#x7B5B;&#x9009;&#x7B97;&#x6CD5;&#x7BC7;&#x5230;&#x6B64;&#x7ED3;&#x675F;&#xFF0C;&#x4E0B;&#x4E00;&#x7BC7;&#x5C06;&#x5B66;&#x4E60;&#x8C03;&#x5EA6;&#x5668;&#x4F18;&#x5148;&#x7EA7;&#x6392;&#x5E8F;&#x7684;&#x7B97;&#x6CD5;&#x8BE6;&#x60C5;&#x5185;&#x5BB9;</p>
+
+                                
+                                </section>
+                            
+    </div>
+    <div class="search-results">
+        <div class="has-results">
+            
+            <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+            <ul class="search-results-list"></ul>
+            
+        </div>
+        <div class="no-results">
+            
+            <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+            
+        </div>
+    </div>
+</div>
+
+                        </div>
+                    </div>
+                
+            </div>
+
+            
+                
+                <a href="Kubernetes源码学习-Scheduler-P2-调度器框架.html" class="navigation navigation-prev " aria-label="Previous page: 2.2. 调度器框架">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+                
+                
+                <a href="Kubernetes源码学习-Scheduler-P4-Node优先级算法.html" class="navigation navigation-next " aria-label="Next page: 2.4. Node优先级算法">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+                
+            
+        
+    </div>
+
+    <script>
+        var gitbook = gitbook || [];
+        gitbook.push(function() {
+            gitbook.page.hasChanged({"page":{"title":"2.3. Node筛选算法","level":"2.1.3","depth":2,"next":{"title":"2.4. Node优先级算法","level":"2.1.4","depth":2,"path":"scheduler/Kubernetes源码学习-Scheduler-P4-Node优先级算法.md","ref":"./scheduler/Kubernetes源码学习-Scheduler-P4-Node优先级算法.md","articles":[]},"previous":{"title":"2.2. 调度器框架","level":"2.1.2","depth":2,"path":"scheduler/Kubernetes源码学习-Scheduler-P2-调度器框架.md","ref":"./scheduler/Kubernetes源码学习-Scheduler-P2-调度器框架.md","articles":[]},"dir":"ltr"},"config":{"plugins":["-sharing","anchors","github","expandable-chapters","splitter","page-treeview","back-to-top-button"],"styles":{"website":"./styles/website.css"},"pluginsConfig":{"page-treeview":{"copyright":"","minHeaderCount":"1","minHeaderDeep":"1"},"github":{"url":"https://github.com/yinwenqin/kubeSourceCodeNote"},"splitter":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"back-to-top-button":{},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false},"anchors":{},"expandable-chapters":{}},"theme":"default","author":"ywq","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"Kubernetes源码学习","language":"zh-hans","links":{},"gitbook":"3.2.3","description":""},"file":{"path":"scheduler/Kubernetes源码学习-Scheduler-P3-Node筛选算法.md","mtime":"2019-11-21T07:58:02.782Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2019-11-21T08:49:34.435Z"},"basePath":"..","book":{"language":""}});
+        });
+    </script>
+</div>
+
+        
+    <script src="../gitbook/gitbook.js"></script>
+    <script src="../gitbook/theme.js"></script>
+    
+        
+        <script src="../gitbook/gitbook-plugin-github/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-expandable-chapters/expandable-chapters.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-splitter/splitter.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-back-to-top-button/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search/search-engine.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search/search.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-lunr/lunr.min.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-lunr/search-lunr.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-fontsettings/fontsettings.js"></script>
+        
+    
+
+    </body>
+</html>
+

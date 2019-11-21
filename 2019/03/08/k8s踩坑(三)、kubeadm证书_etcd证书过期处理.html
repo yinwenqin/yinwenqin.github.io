@@ -1,0 +1,1536 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-CN">
+
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link rel="stylesheet" href="/lib/pace/pace-theme-bounce.min.css?v=1.0.2">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link rel="stylesheet" href="/lib/fancybox/source/jquery.fancybox.css">
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+    
+      
+    
+
+    
+  
+
+  
+
+  
+
+  
+    
+      
+    
+
+    
+  
+
+  
+    
+    
+    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic|Roboto Slab:300,300italic,400,400italic,700,700italic|Roboto Mono:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext">
+  
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.1.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.1.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.1.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.1.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.1.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '7.1.1',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":true,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: true,
+    fancybox: true,
+    fastclick: true,
+    lazyload: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"shrinkIn","post_header":"slideLeftIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideDownIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <script>
+  (function(i,s,o,g,r,a,m){i["DaoVoiceObject"]=r;i[r]=i[r]||function(){(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;a.charset="utf-8";m.parentNode.insertBefore(a,m)})(window,document,"script",('https:' == document.location.protocol ? 'https:' : 'http:') + "//widget.daovoice.io/widget/0f81ff2f.js","daovoice")
+  daovoice('init', {
+      app_id: "bd399fce"
+    });
+  daovoice('update');
+  </script>
+
+  <meta name="description" content="故障现象使用kubeadm部署的集群，在运行了一年之后的今天，出现k8s api无法调取的现象，使用kubectl命令获取资源均返回如下报错:1Unable to connect to the server: x509: certificate has expired or is not yet valid 故障排查查看apiserver.crt证书的签署期和过期期： 123root@9027:/">
+<meta name="keywords" content="Kubernetes">
+<meta property="og:type" content="article">
+<meta property="og:title" content="k8s踩坑(三)、kubeadm证书&#x2F;etcd证书过期处理">
+<meta property="og:url" content="https://www.ipyker.com/2019/03/08/k8s踩坑(三)、kubeadm证书_etcd证书过期处理.html">
+<meta property="og:site_name" content="随笔漫谈">
+<meta property="og:description" content="故障现象使用kubeadm部署的集群，在运行了一年之后的今天，出现k8s api无法调取的现象，使用kubectl命令获取资源均返回如下报错:1Unable to connect to the server: x509: certificate has expired or is not yet valid 故障排查查看apiserver.crt证书的签署期和过期期： 123root@9027:/">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-11-21T07:48:40.135Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="k8s踩坑(三)、kubeadm证书&#x2F;etcd证书过期处理">
+<meta name="twitter:description" content="故障现象使用kubeadm部署的集群，在运行了一年之后的今天，出现k8s api无法调取的现象，使用kubectl命令获取资源均返回如下报错:1Unable to connect to the server: x509: certificate has expired or is not yet valid 故障排查查看apiserver.crt证书的签署期和过期期： 123root@9027:/">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="随笔漫谈" type="application/atom+xml">
+
+
+
+  
+  
+  <link rel="canonical" href="https://www.ipyker.com/2019/03/08/k8s踩坑(三)、kubeadm证书_etcd证书过期处理">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>k8s踩坑(三)、kubeadm证书/etcd证书过期处理 | 随笔漫谈</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+ 
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">随笔漫谈</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-book">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/gitbooks/" rel="section"><i class="menu-item-icon fa fa-fw fa-book"></i> <br>book</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-互动">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/guestbook/" rel="section"><i class="menu-item-icon fa fa-fw fa-comments"></i> <br>互动</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.ipyker.com/2019/03/08/k8s踩坑(三)、kubeadm证书_etcd证书过期处理.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="丨ywq丨">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随笔漫谈">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">k8s踩坑(三)、kubeadm证书/etcd证书过期处理
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-03-08 17:47:36" itemprop="dateCreated datePublished" datetime="2019-03-08T17:47:36+08:00">2019-03-08</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-11-21 15:48:40" itemprop="dateModified" datetime="2019-11-21T15:48:40+08:00">2019-11-21</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+            <div class="post-symbolscount">
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">本文字数：</span>
+                
+                <span title="本文字数">6.2k</span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">6 分钟</span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="故障现象"><a href="#故障现象" class="headerlink" title="故障现象"></a>故障现象</h2><p>使用kubeadm部署的集群，在运行了一年之后的今天，出现k8s api无法调取的现象，使用kubectl命令获取资源均返回如下报错:<br><figure class="highlight oxygene"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Unable <span class="keyword">to</span> connect <span class="keyword">to</span> the server: x509: certificate <span class="keyword">has</span> expired <span class="keyword">or</span> <span class="keyword">is</span> <span class="keyword">not</span> yet valid</span><br></pre></td></tr></table></figure></p>
+<h2 id="故障排查"><a href="#故障排查" class="headerlink" title="故障排查"></a>故障排查</h2><p>查看apiserver.crt证书的签署期和过期期：</p>
+<figure class="highlight elixir"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">root<span class="variable">@9027</span><span class="symbol">:/etc/etcd/ssl</span><span class="comment"># openssl x509 -in /etc/kubernetes/pki/apiserver.crt -noout -text |grep ' Not '</span></span><br><span class="line">            Not <span class="symbol">Before:</span> Mar  <span class="number">8</span> <span class="number">03</span><span class="symbol">:</span><span class="number">49</span><span class="symbol">:</span><span class="number">29</span> <span class="number">2018</span> GMT</span><br><span class="line">            Not After : Mar  <span class="number">7</span> <span class="number">05</span><span class="symbol">:</span><span class="number">44</span><span class="symbol">:</span><span class="number">27</span> <span class="number">2020</span> GMT</span><br></pre></td></tr></table></figure>
+<p>发现恰好刚到过期日期，去github查询才得知kubeadm默认的证书签署过期时间为1年，大坑！google找到方法说可以通过修改kubeadm源代码调整证书签署的过期时间然后重新编译，即可预防这个问题。但是现在证书过期的问题已经发生了，只能通过更换证书的办法解决，在github上有详细的说明，issue链接如下:<br><a href="https://github.com/kubernetes/kubeadm/issues/581" target="_blank" rel="noopener">https://github.com/kubernetes/kubeadm/issues/581</a></p>
+<h4 id="开始替换apiserver证书"><a href="#开始替换apiserver证书" class="headerlink" title="开始替换apiserver证书"></a>开始替换apiserver证书</h4><p>进入master节点<br><figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">cd /etc/kubernetes</span><br><span class="line"><span class="comment"># 备份证书和配置</span></span><br><span class="line">mkdir ./pki_bak</span><br><span class="line">mkdir ./conf_bak</span><br><span class="line">mv pki/apiserver* ./pki_bak/</span><br><span class="line">mv pki/front-proxy-client.* ./pki_bak/</span><br><span class="line"> mv ./admin.conf ./conf_bak/</span><br><span class="line"> mv ./kubelet.conf ./conf_bak/</span><br><span class="line"> mv ./controller-manager.conf ./conf_bak/</span><br><span class="line"> mv ./scheduler.conf ./conf_bak/</span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建证书</span></span><br><span class="line">kubeadm alpha phase certs apiserver --apiserver-advertise-address <span class="variable">$&#123;MASTER_API_SERVER_IP&#125;</span></span><br><span class="line">kubeadm alpha phase certs apiserver-kubelet-client</span><br><span class="line">kubeadm alpha phase certs front-proxy-client</span><br><span class="line"></span><br><span class="line"><span class="comment"># 生成新配置文件</span></span><br><span class="line">kubeadm alpha phase kubeconfig all --apiserver-advertise-address <span class="variable">$&#123;MASTER_API_SERVER_IP&#125;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 将新生成的admin配置文件覆盖掉原本的admin文件</span></span><br><span class="line">mv <span class="variable">$HOME</span>/.kube<span class="built_in">/config </span><span class="variable">$HOME</span>/.kube/config.old</span><br><span class="line">cp -i /etc/kubernetes/admin.conf <span class="variable">$HOME</span>/.kube/config</span><br><span class="line">chown $(id -u):$(id -g) <span class="variable">$HOME</span>/.kube/config</span><br><span class="line">sudo chmod 777 <span class="variable">$HOME</span>/.kube/config</span><br></pre></td></tr></table></figure></p>
+<p>完成上方操作后，docker restart重启kube-apiserver,kube-controller,kube-scheduler这3个容器</p>
+<p>查看证书的过期时间:</p>
+<figure class="highlight vhdl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">root@<span class="number">009027</span>:~# openssl x509 -<span class="keyword">in</span> /etc/kubernetes/pki/apiserver.crt -noout -<span class="literal">text</span> |grep ' <span class="keyword">Not</span> '</span><br><span class="line">            <span class="keyword">Not</span> Before: Mar  <span class="number">8</span> <span class="number">03</span>:<span class="number">49</span>:<span class="number">29</span> <span class="number">2018</span> GMT</span><br><span class="line">            <span class="keyword">Not</span> <span class="keyword">After</span> : Mar  <span class="number">7</span> <span class="number">05</span>:<span class="number">44</span>:<span class="number">27</span> <span class="number">2020</span> GMT</span><br></pre></td></tr></table></figure>
+<p>可以看到证书有效期延长了一/</p>
+<p>如果有多台master节点，先仿照上方将证书文件和配置文件进行备份，然后将这一台配置完成的master上的证书和配置scp过去:</p>
+<figure class="highlight elixir"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">scp pki/* root@<span class="variable">$&#123;</span>other_master&#125;<span class="symbol">:/etc/kubernetes/pki/</span></span><br><span class="line">scp admin.conf kubelet.conf controller-manager.conf scheduler.conf root@<span class="variable">$&#123;</span>other_master&#125;<span class="symbol">:/etc/kubernetes/</span></span><br></pre></td></tr></table></figure>
+<p>scp完成后记得重启相应master上的3个kubernetes组件容器。</p>
+<h3 id="验证"><a href="#验证" class="headerlink" title="验证"></a>验证</h3><p>kubectl命令发现还是无法查看资源，检查apiserver的志: kubectl logs ${api-server_container_id}<br><figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">I0308</span> 06<span class="selector-pseudo">:26</span><span class="selector-pseudo">:52.956024</span>       1 <span class="selector-tag">serve</span><span class="selector-class">.go</span><span class="selector-pseudo">:89</span>] <span class="selector-tag">Serving</span> <span class="selector-tag">securely</span> <span class="selector-tag">on</span> <span class="selector-attr">[::]</span><span class="selector-pseudo">:6443</span></span><br><span class="line"><span class="selector-tag">I0308</span> 06<span class="selector-pseudo">:26</span><span class="selector-pseudo">:52.956168</span>       1 <span class="selector-tag">available_controller</span><span class="selector-class">.go</span><span class="selector-pseudo">:262</span>] <span class="selector-tag">Starting</span> <span class="selector-tag">AvailableConditionController</span></span><br><span class="line"><span class="selector-tag">I0308</span> 06<span class="selector-pseudo">:26</span><span class="selector-pseudo">:52.956180</span>       1 <span class="selector-tag">apiservice_controller</span><span class="selector-class">.go</span><span class="selector-pseudo">:112</span>] <span class="selector-tag">Starting</span> <span class="selector-tag">APIServiceRegistrationController</span></span><br><span class="line"><span class="selector-tag">I0308</span> 06<span class="selector-pseudo">:26</span><span class="selector-pseudo">:52.956244</span>       1 <span class="selector-tag">cache</span><span class="selector-class">.go</span><span class="selector-pseudo">:32</span>] <span class="selector-tag">Waiting</span> <span class="selector-tag">for</span> <span class="selector-tag">caches</span> <span class="selector-tag">to</span> <span class="selector-tag">sync</span> <span class="selector-tag">for</span> <span class="selector-tag">APIServiceRegistrationController</span> <span class="selector-tag">controller</span></span><br><span class="line"><span class="selector-tag">E0308</span> 06<span class="selector-pseudo">:26</span><span class="selector-pseudo">:52.956279</span>       1 <span class="selector-tag">cache</span><span class="selector-class">.go</span><span class="selector-pseudo">:35</span>] <span class="selector-tag">Unable</span> <span class="selector-tag">to</span> <span class="selector-tag">sync</span> <span class="selector-tag">caches</span> <span class="selector-tag">for</span> <span class="selector-tag">APIServiceRegistrationController</span> <span class="selector-tag">controller</span></span><br><span class="line"><span class="selector-tag">I0308</span> 06<span class="selector-pseudo">:26</span><span class="selector-pseudo">:52.956291</span>       1 <span class="selector-tag">apiservice_controller</span><span class="selector-class">.go</span><span class="selector-pseudo">:116</span>] <span class="selector-tag">Shutting</span> <span class="selector-tag">down</span> <span class="selector-tag">APIServiceRegistrationController</span></span><br><span class="line"><span class="selector-tag">I0308</span> 06<span class="selector-pseudo">:26</span><span class="selector-pseudo">:52.956325</span>       1 <span class="selector-tag">crd_finalizer</span><span class="selector-class">.go</span><span class="selector-pseudo">:242</span>] <span class="selector-tag">Starting</span> <span class="selector-tag">CRDFinalizer</span></span><br><span class="line"><span class="selector-tag">I0308</span> 06<span class="selector-pseudo">:26</span><span class="selector-pseudo">:52.956195</span>       1 <span class="selector-tag">cache</span><span class="selector-class">.go</span><span class="selector-pseudo">:32</span>] <span class="selector-tag">Waiting</span> <span class="selector-tag">for</span> <span class="selector-tag">caches</span> <span class="selector-tag">to</span> <span class="selector-tag">sync</span> <span class="selector-tag">for</span> <span class="selector-tag">AvailableConditionController</span> <span class="selector-tag">controller</span></span><br><span class="line"><span class="selector-tag">I0308</span> 06<span class="selector-pseudo">:26</span><span class="selector-pseudo">:52.956342</span>       1 <span class="selector-tag">crd_finalizer</span><span class="selector-class">.go</span><span class="selector-pseudo">:246</span>] <span class="selector-tag">Shutting</span> <span class="selector-tag">down</span> <span class="selector-tag">CRDFinalizer</span></span><br><span class="line"><span class="selector-tag">I0308</span> 06<span class="selector-pseudo">:26</span><span class="selector-pseudo">:52.956363</span>       1 <span class="selector-tag">customresource_discovery_controller</span><span class="selector-class">.go</span><span class="selector-pseudo">:152</span>] <span class="selector-tag">Starting</span> <span class="selector-tag">DiscoveryController</span></span><br><span class="line"><span class="selector-tag">E0308</span> 06<span class="selector-pseudo">:26</span><span class="selector-pseudo">:52.956376</span>       1 <span class="selector-tag">customresource_discovery_controller</span><span class="selector-class">.go</span><span class="selector-pseudo">:155</span>] <span class="selector-tag">timed</span> <span class="selector-tag">out</span> <span class="selector-tag">waiting</span> <span class="selector-tag">for</span> <span class="selector-tag">caches</span> <span class="selector-tag">to</span> <span class="selector-tag">sync</span></span><br><span class="line"><span class="selector-tag">I0308</span> 06<span class="selector-pseudo">:26</span><span class="selector-pseudo">:52.956392</span>       1 <span class="selector-tag">naming_controller</span><span class="selector-class">.go</span><span class="selector-pseudo">:274</span>] <span class="selector-tag">Starting</span> <span class="selector-tag">NamingConditionController</span></span><br><span class="line"><span class="selector-tag">E0308</span> 06<span class="selector-pseudo">:26</span><span class="selector-pseudo">:52.956399</span>       1 <span class="selector-tag">cache</span><span class="selector-class">.go</span><span class="selector-pseudo">:35</span>] <span class="selector-tag">Unable</span> <span class="selector-tag">to</span> <span class="selector-tag">sync</span> <span class="selector-tag">caches</span> <span class="selector-tag">for</span> <span class="selector-tag">AvailableConditionController</span> <span class="selector-tag">controller</span></span><br><span class="line"><span class="selector-tag">I0308</span> 06<span class="selector-pseudo">:26</span><span class="selector-pseudo">:52.956403</span>       1 <span class="selector-tag">naming_controller</span><span class="selector-class">.go</span><span class="selector-pseudo">:278</span>] <span class="selector-tag">Shutting</span> <span class="selector-tag">down</span> <span class="selector-tag">NamingConditionController</span></span><br><span class="line"><span class="selector-tag">I0308</span> 06<span class="selector-pseudo">:26</span><span class="selector-pseudo">:52.956435</span>       1 <span class="selector-tag">controller</span><span class="selector-class">.go</span><span class="selector-pseudo">:84</span>] <span class="selector-tag">Starting</span> <span class="selector-tag">OpenAPI</span> <span class="selector-tag">AggregationController</span></span><br><span class="line"><span class="selector-tag">I0308</span> 06<span class="selector-pseudo">:26</span><span class="selector-pseudo">:52.956457</span>       1 <span class="selector-tag">controller</span><span class="selector-class">.go</span><span class="selector-pseudo">:90</span>] <span class="selector-tag">Shutting</span> <span class="selector-tag">down</span> <span class="selector-tag">OpenAPI</span> <span class="selector-tag">AggregationController</span></span><br><span class="line"><span class="selector-tag">I0308</span> 06<span class="selector-pseudo">:26</span><span class="selector-pseudo">:52.956476</span>       1 <span class="selector-tag">crdregistration_controller</span><span class="selector-class">.go</span><span class="selector-pseudo">:110</span>] <span class="selector-tag">Starting</span> <span class="selector-tag">crd-autoregister</span> <span class="selector-tag">controller</span></span><br><span class="line"><span class="selector-tag">I0308</span> 06<span class="selector-pseudo">:26</span><span class="selector-pseudo">:52.956487</span>       1 <span class="selector-tag">controller_utils</span><span class="selector-class">.go</span><span class="selector-pseudo">:1019</span>] <span class="selector-tag">Waiting</span> <span class="selector-tag">for</span> <span class="selector-tag">caches</span> <span class="selector-tag">to</span> <span class="selector-tag">sync</span> <span class="selector-tag">for</span> <span class="selector-tag">crd-autoregister</span> <span class="selector-tag">controller</span></span><br><span class="line"><span class="selector-tag">E0308</span> 06<span class="selector-pseudo">:26</span><span class="selector-pseudo">:52.956504</span>       1 <span class="selector-tag">controller_utils</span><span class="selector-class">.go</span><span class="selector-pseudo">:1022</span>] <span class="selector-tag">Unable</span> <span class="selector-tag">to</span> <span class="selector-tag">sync</span> <span class="selector-tag">caches</span> <span class="selector-tag">for</span> <span class="selector-tag">crd-autoregister</span> <span class="selector-tag">controller</span></span><br><span class="line"><span class="selector-tag">I0308</span> 06<span class="selector-pseudo">:26</span><span class="selector-pseudo">:52.957364</span>       1 <span class="selector-tag">customresource_discovery_controller</span><span class="selector-class">.go</span><span class="selector-pseudo">:156</span>] <span class="selector-tag">Shutting</span> <span class="selector-tag">down</span> <span class="selector-tag">DiscoveryController</span></span><br><span class="line"><span class="selector-tag">I0308</span> 06<span class="selector-pseudo">:26</span><span class="selector-pseudo">:52.958437</span>       1 <span class="selector-tag">available_controller</span><span class="selector-class">.go</span><span class="selector-pseudo">:266</span>] <span class="selector-tag">Shutting</span> <span class="selector-tag">down</span> <span class="selector-tag">AvailableConditionController</span></span><br><span class="line"><span class="selector-tag">I0308</span> 06<span class="selector-pseudo">:26</span><span class="selector-pseudo">:52.959508</span>       1 <span class="selector-tag">crdregistration_controller</span><span class="selector-class">.go</span><span class="selector-pseudo">:115</span>] <span class="selector-tag">Shutting</span> <span class="selector-tag">down</span> <span class="selector-tag">crd-autoregister</span> <span class="selector-tag">controller</span></span><br></pre></td></tr></table></figure></p>
+<p>发现kube-apiserver容器无法正常启动，怀疑是证书配置过程中出错，重复了如上步骤多次，发现问题依旧。etcd和kubeadm是同一时间部署的，这个时候考虑etcd是否有问题</p>
+<h2 id="etcd证书过期处理"><a href="#etcd证书过期处理" class="headerlink" title="etcd证书过期处理"></a>etcd证书过期处理</h2><p>检查etcd的证书，发现etcd同样也过期了：<br><figure class="highlight elixir"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">root<span class="variable">@yksp009027</span><span class="symbol">:/etc/etcd/ssl</span><span class="comment"># openssl x509 -in etcd.pem -noout -text |grep ' Not '</span></span><br><span class="line">            Not <span class="symbol">Before:</span> Mar  <span class="number">7</span> <span class="number">00</span><span class="symbol">:</span><span class="number">59</span><span class="symbol">:</span><span class="number">00</span> <span class="number">2018</span> GMT</span><br><span class="line">            Not After : Mar  <span class="number">7</span> <span class="number">00</span><span class="symbol">:</span><span class="number">59</span><span class="symbol">:</span><span class="number">00</span> <span class="number">2019</span> GMT</span><br></pre></td></tr></table></figure></p>
+<p>查看此前部署的时候配置etcd的ca配置文件，发现指定的证书签署过期时间居然是1/（8760h）。。太坑了！(不清楚证书生成以及etcd安装流程的，可以参考此前的文章：<a href="https://blog.csdn.net/ywq935/article/details/80109090" target="_blank" rel="noopener">部署篇</a>)</p>
+<figure class="highlight elixir"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">root<span class="variable">@009027</span><span class="symbol">:~/ssl</span><span class="comment"># cat config.json</span></span><br><span class="line">&#123;</span><br><span class="line"><span class="string">"signing"</span>: &#123;</span><br><span class="line">    <span class="string">"default"</span>: &#123;</span><br><span class="line">      <span class="string">"expiry"</span>: <span class="string">"8760h"</span></span><br><span class="line">      &#125;,</span><br><span class="line">    <span class="string">"profiles"</span>: &#123;</span><br><span class="line">      <span class="string">"kubernetes"</span>: &#123;</span><br><span class="line">        <span class="string">"usages"</span>: [</span><br><span class="line">            <span class="string">"signing"</span>,</span><br><span class="line">            <span class="string">"key encipherment"</span>,</span><br><span class="line">            <span class="string">"server auth"</span>,</span><br><span class="line">            <span class="string">"client auth"</span></span><br><span class="line">        ],</span><br><span class="line">        <span class="string">"expiry"</span>: <span class="string">"8760h"</span></span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>居然和kubeadm生产的api-server证书在同一时间过期了，两个坑连在一起，简直防不胜防！</p>
+<p>知道问题所在了，那么现在开始替换etcd的证书：</p>
+<p>首先备份etcd数据:</p>
+<figure class="highlight crystal"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cd /var/<span class="class"><span class="keyword">lib</span></span></span><br><span class="line">tar -zvcf etcd.tar.gz etcd/</span><br></pre></td></tr></table></figure>
+<p>修改ca配置文件，将默认证书签署过期时间修改为10/:</p>
+<figure class="highlight elixir"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">root<span class="variable">@009027</span><span class="symbol">:~/ssl</span><span class="comment"># cat config.json</span></span><br><span class="line">&#123;</span><br><span class="line"><span class="string">"signing"</span>: &#123;</span><br><span class="line">    <span class="string">"default"</span>: &#123;</span><br><span class="line">      <span class="string">"expiry"</span>: <span class="string">"87600h"</span></span><br><span class="line">      &#125;,</span><br><span class="line">    <span class="string">"profiles"</span>: &#123;</span><br><span class="line">      <span class="string">"kubernetes"</span>: &#123;</span><br><span class="line">        <span class="string">"usages"</span>: [</span><br><span class="line">            <span class="string">"signing"</span>,</span><br><span class="line">            <span class="string">"key encipherment"</span>,</span><br><span class="line">            <span class="string">"server auth"</span>,</span><br><span class="line">            <span class="string">"client auth"</span></span><br><span class="line">        ],</span><br><span class="line">        <span class="string">"expiry"</span>: <span class="string">"87600h"</span></span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>生成新的证书:</p>
+<figure class="highlight elixir"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#删除过期证书</span></span><br><span class="line">rm -f /etc/etcd/ssl/*</span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建新证书</span></span><br><span class="line">cfssl gencert -ca=ca.pem   -ca-key=ca-key.pem   -config=config.json   -profile=kubernetes etcd-csr.json | cfssljson -bare etcd</span><br><span class="line">cp etcd.pem etcd-key.pem  ca.pem /etc/etcd/ssl/</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看新证书</span></span><br><span class="line">root<span class="variable">@009027</span><span class="symbol">:/etc/etcd/ssl</span><span class="comment"># openssl x509 -in etcd.pem -noout -text |grep ' Not '</span></span><br><span class="line">            Not <span class="symbol">Before:</span> Mar  <span class="number">8</span> <span class="number">06</span><span class="symbol">:</span><span class="number">59</span><span class="symbol">:</span><span class="number">00</span> <span class="number">2019</span> GMT</span><br><span class="line">            Not After : Mar  <span class="number">5</span> <span class="number">06</span><span class="symbol">:</span><span class="number">59</span><span class="symbol">:</span><span class="number">00</span> <span class="number">2029</span> GMT</span><br><span class="line"></span><br><span class="line"><span class="comment">#拷贝到其他etcd节点</span></span><br><span class="line">scp -r /etc/etcd/ssl root@<span class="variable">$&#123;</span>other_node&#125;<span class="symbol">:/etc/etcd/</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 重启etcd服务(记住，要3个节点一起重启，不然会hang住)</span></span><br><span class="line">systemctl restart etcd</span><br></pre></td></tr></table></figure>
+<h2 id="处理结果"><a href="#处理结果" class="headerlink" title="处理结果"></a>处理结果</h2><p>etcd证书更换完毕后，再次尝试重启apiserver的容器，启动成功，集群api-server恢复,故障解决。连续2个证书过期，一坑接一坑，卡在apiserver一直无法恢复的时候，一度有些恐慌，担心整个集群由此崩溃数据丢失，还在后面顺利解决。在部署之初没有注意到这些细节问题，例如很明显的是etcd证书的签署ca配置的超时时间居然只有1年，才导致后面才踩了这些坑。平时也要及时备份重要数据，要多多考虑极端情况下的服务恢复方案。</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div id="reward-container">
+  <div>Thank you for your accept. mua！</div>
+  <button id="reward-button" disable="enable" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+
+    
+      
+      
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/reward/wechatpay.png" alt="丨ywq丨 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+      
+      
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/reward/alipay.png" alt="丨ywq丨 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        
+
+
+
+
+  
+
+
+
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>丨ywq丨</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    
+    <a href="https://www.ipyker.com/2019/03/08/k8s踩坑(三)、kubeadm证书_etcd证书过期处理.html" title="k8s踩坑(三)、kubeadm证书/etcd证书过期处理">https://www.ipyker.com/2019/03/08/k8s踩坑(三)、kubeadm证书_etcd证书过期处理.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li>
+</ul>
+
+      </div>
+    
+    <div>
+      
+        <div>
+    
+        <div style="text-align:center;color: #ccc;font-size:16px;">-------------本文结束<i class="fa fa-heart"></i>感谢您的阅读-------------</div>
+    
+</div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Kubernetes/" rel="tag"><i class="fa fa-tag"></i> Kubernetes</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/01/21/Python子线程异常捕获-Python自定义优化线程池.html" rel="next" title="Python子线程异常捕获 & Python自定义优化线程池">
+                <i class="fa fa-chevron-left"></i> Python子线程异常捕获 & Python自定义优化线程池
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/04/27/Golang基础学习_ array和slice对比和使用.html" rel="prev" title="Golang基础学习: array和slice对比和使用">
+                Golang基础学习: array和slice对比和使用 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC80NDM5Mi8yMDkyNA=="></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="丨ywq丨">
+            
+              <p class="site-author-name" itemprop="name">丨ywq丨</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives">
+                
+                    <span class="site-state-item-count">74</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                      <a href="/tags">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">15</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/yinwenqin" title="GitHub &rarr; https://github.com/yinwenqin" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://blog.csdn.net/ywq935" title="CSDN &rarr; https://blog.csdn.net/ywq935" rel="noopener" target="_blank"><i class="fa fa-fw fa-globe"></i>CSDN</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-book"></i>
+                推荐阅读
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.upweto.top/gitbooks/useKubernetes/" title="http://blog.upweto.top/gitbooks/useKubernetes/" rel="noopener" target="_blank">kubernetes使用指南</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.upweto.top/gitbooks/kubeSourceCodeNote/" title="http://blog.upweto.top/gitbooks/kubeSourceCodeNote/" rel="noopener" target="_blank">kubernetes源码笔记</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#故障现象"><span class="nav-number">1.</span> <span class="nav-text">故障现象</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#故障排查"><span class="nav-number">2.</span> <span class="nav-text">故障排查</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#开始替换apiserver证书"><span class="nav-number">2.0.1.</span> <span class="nav-text">开始替换apiserver证书</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#验证"><span class="nav-number">2.1.</span> <span class="nav-text">验证</span></a></li></ol><li class="nav-item nav-level-2"><a class="nav-link" href="#etcd证书过期处理"><span class="nav-number">3.</span> <span class="nav-text">etcd证书过期处理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#处理结果"><span class="nav-number">4.</span> <span class="nav-text">处理结果</span></a></li></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" style=" text-align:center;">&copy; 2017 – <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ywq</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"> 站点字数合计:</i>
+    </span>
+    
+    <span title="站点总字数">583k</span>
+  
+  
+</div>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+<div class="run_time" style=" text-align:center;">
+  <span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
+  <script>
+    var now = new Date(); 
+    function createtime() { 
+        var grt= new Date("08/23/2018 10:00:00");//此处修改你的建站时间或者网站上线时间 
+        now.setTime(now.getTime()+250); 
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days); 
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours); 
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum); 
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;} 
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum); 
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;} 
+        document.getElementById("timeDate").innerHTML = "本站已安全运行 "+dnum+" 天 "; 
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒"; 
+    } 
+    setInterval("createtime()",250);
+  </script>
+</div>
+
+        
+<div class="busuanzi-count" style=" text-align:center;">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-user"></i>
+    </span>
+    <span class="site-uv" title="总访客量">
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span> 人
+    </span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+  
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-eye"></i>
+    </span>
+    <span class="site-pv" title="总访问量">
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span> 次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+  
+    
+    
+      
+    
+  
+  <script color="black" opacity="0.7" zindex="-1" count="140" src="//cdn.jsdelivr.net/gh/theme-next/theme-next-canvas-nest@1.0.0/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+  
+  
+  <script id="ribbon" size="300" alpha="0.1" zindex="-1" src="/lib/canvas-ribbon/canvas-ribbon.js"></script>
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/fancybox/source/jquery.fancybox.pack.js"></script>
+
+
+  
+
+
+  <script src="/js/utils.js?v=7.1.1"></script>
+
+  <script src="/js/motion.js?v=7.1.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/schemes/muse.js?v=7.1.1"></script>
+
+
+
+
+  
+  <script src="/js/scrollspy.js?v=7.1.1"></script>
+<script src="/js/post-details.js?v=7.1.1"></script>
+
+
+
+  
+
+
+  <script src="/js/next-boot.js?v=7.1.1"></script>
+
+
+  
+
+  
+
+  
+  
+  
+
+  
+
+  
+  
+  
+
+
+  
+
+
+  
+    <script>
+  window.livereOptions = {
+    refer: '2019/03/08/k8s踩坑(三)、kubeadm证书_etcd证书过期处理.html'
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+</script>
+
+  
+
+
+  
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url).replace(/\/{2,}/g, '/');
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x"></i></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x"></i></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+  
+  <script src="/lib/bookmark/bookmark.min.js?v=1.0"></script>
+  <script>
+  
+    bookmark.scrollToMark('auto', "#更多");
+  
+  </script>
+
+
+  
+
+  
+
+  
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/koharu.model.json"},"display":{"position":"left","width":250,"height":500},"mobile":{"show":false},"react":{"opacity":0.7},"log":false});</script></body>
+</html>
+<!-- 页面点击小红心 -->
+<script type="text/javascript" src="/js/src/clicklove.js"></script>

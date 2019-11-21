@@ -1,0 +1,1564 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-CN">
+
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link rel="stylesheet" href="/lib/pace/pace-theme-bounce.min.css?v=1.0.2">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link rel="stylesheet" href="/lib/fancybox/source/jquery.fancybox.css">
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+    
+      
+    
+
+    
+  
+
+  
+
+  
+
+  
+    
+      
+    
+
+    
+  
+
+  
+    
+    
+    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic|Roboto Slab:300,300italic,400,400italic,700,700italic|Roboto Mono:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext">
+  
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.1.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.1.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.1.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.1.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.1.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '7.1.1',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":true,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: true,
+    fancybox: true,
+    fastclick: true,
+    lazyload: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"shrinkIn","post_header":"slideLeftIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideDownIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <script>
+  (function(i,s,o,g,r,a,m){i["DaoVoiceObject"]=r;i[r]=i[r]||function(){(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;a.charset="utf-8";m.parentNode.insertBefore(a,m)})(window,document,"script",('https:' == document.location.protocol ? 'https:' : 'http:') + "//widget.daovoice.io/widget/0f81ff2f.js","daovoice")
+  daovoice('init', {
+      app_id: "bd399fce"
+    });
+  daovoice('update');
+  </script>
+
+  <meta name="description" content="前言上一篇主要介绍prometheus基础告警相关，本篇再进行扩展，加入mysql监控，整理出一些监控告警表达式及配置文件，以及部署prometheus 2.0版之后支持的联邦job，多prometheus分支数据聚合，在多集群环境中很适用。 mysqld-exporter部署：在公司的环境中，大部分的DB已迁移至K8S内运行，因此再以常见的节点二进制安装部署mysqld-exporter的方式">
+<meta name="keywords" content="Kubernetes,Prometheus">
+<meta property="og:type" content="article">
+<meta property="og:title" content="k8s(九)、监控--Prometheus扩展篇（mysqld-exporter、服务发现、监控项、联邦、relabel）">
+<meta property="og:url" content="https://www.ipyker.com/2018/06/28/k8s(九)、监控--Prometheus扩展篇（mysqld-exporter、服务发现、监控项、联邦、relabel）.html">
+<meta property="og:site_name" content="随笔漫谈">
+<meta property="og:description" content="前言上一篇主要介绍prometheus基础告警相关，本篇再进行扩展，加入mysql监控，整理出一些监控告警表达式及配置文件，以及部署prometheus 2.0版之后支持的联邦job，多prometheus分支数据聚合，在多集群环境中很适用。 mysqld-exporter部署：在公司的环境中，大部分的DB已迁移至K8S内运行，因此再以常见的节点二进制安装部署mysqld-exporter的方式">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://mycloudn.kokoerp.com/20180628180103971.jpg">
+<meta property="og:image" content="http://mycloudn.kokoerp.com/20180628184923959.jpg">
+<meta property="og:image" content="http://mycloudn.kokoerp.com/20180628201431101.jpg">
+<meta property="og:image" content="http://mycloudn.kokoerp.com/20180703151402943.jpg">
+<meta property="og:image" content="http://mycloudn.kokoerp.com/20180703153455846.jpg">
+<meta property="og:image" content="http://mycloudn.kokoerp.com/20180628201137974.jpg">
+<meta property="og:image" content="http://mycloudn.kokoerp.com/2018062820160722.jpg">
+<meta property="og:image" content="http://mycloudn.kokoerp.com/20180628202109414.jpg">
+<meta property="og:image" content="http://mycloudn.kokoerp.com/20180828170540949.jpg">
+<meta property="og:image" content="http://mycloudn.kokoerp.com/20180828170215814.jpg">
+<meta property="og:updated_time" content="2019-11-21T07:48:40.128Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="k8s(九)、监控--Prometheus扩展篇（mysqld-exporter、服务发现、监控项、联邦、relabel）">
+<meta name="twitter:description" content="前言上一篇主要介绍prometheus基础告警相关，本篇再进行扩展，加入mysql监控，整理出一些监控告警表达式及配置文件，以及部署prometheus 2.0版之后支持的联邦job，多prometheus分支数据聚合，在多集群环境中很适用。 mysqld-exporter部署：在公司的环境中，大部分的DB已迁移至K8S内运行，因此再以常见的节点二进制安装部署mysqld-exporter的方式">
+<meta name="twitter:image" content="http://mycloudn.kokoerp.com/20180628180103971.jpg">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="随笔漫谈" type="application/atom+xml">
+
+
+
+  
+  
+  <link rel="canonical" href="https://www.ipyker.com/2018/06/28/k8s(九)、监控--Prometheus扩展篇（mysqld-exporter、服务发现、监控项、联邦、relabel）">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>k8s(九)、监控--Prometheus扩展篇（mysqld-exporter、服务发现、监控项、联邦、relabel） | 随笔漫谈</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+ 
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">随笔漫谈</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-book">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/gitbooks/" rel="section"><i class="menu-item-icon fa fa-fw fa-book"></i> <br>book</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-互动">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/guestbook/" rel="section"><i class="menu-item-icon fa fa-fw fa-comments"></i> <br>互动</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.ipyker.com/2018/06/28/k8s(九)、监控--Prometheus扩展篇（mysqld-exporter、服务发现、监控项、联邦、relabel）.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="丨ywq丨">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随笔漫谈">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">k8s(九)、监控--Prometheus扩展篇（mysqld-exporter、服务发现、监控项、联邦、relabel）
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-06-28 20:25:13" itemprop="dateCreated datePublished" datetime="2018-06-28T20:25:13+08:00">2018-06-28</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-11-21 15:48:40" itemprop="dateModified" datetime="2019-11-21T15:48:40+08:00">2019-11-21</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+            <div class="post-symbolscount">
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">本文字数：</span>
+                
+                <span title="本文字数">22k</span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">20 分钟</span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id><a href="#" class="headerlink" title=" "></a> </h2><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>上一篇主要介绍prometheus基础告警相关，本篇再进行扩展，加入mysql监控，整理出一些监控告警表达式及配置文件，以及部署prometheus 2.0版之后支持的联邦job，多prometheus分支数据聚合，在多集群环境中很适用。</p>
+<h2 id="mysqld-exporter部署："><a href="#mysqld-exporter部署：" class="headerlink" title="mysqld-exporter部署："></a>mysqld-exporter部署：</h2><p>在公司的环境中，大部分的DB已迁移至K8S内运行，因此再以常见的节点二进制安装部署mysqld-exporter的方式不再适用。在本地k8s环境中，采取单pod包含多容器镜像的方式，为原本的DB pod实例多注入一个mysql-exporter的方式，对两者进行整合为一体部署，类似此前文章里istio的注入。<br>注入后的deployment文件的spec.template.spec.containers变更如下：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  containers:</span></span><br><span class="line"><span class="attr">  - name:</span> <span class="string">mydbtm</span></span><br><span class="line"><span class="attr">    env:</span></span><br><span class="line"><span class="attr">    - name:</span> <span class="string">DB_NAME</span></span><br><span class="line"><span class="attr">      value:</span> <span class="string">mydbtm</span></span><br><span class="line"><span class="attr">    image:</span> <span class="string">registry.xxx.com:5000/mysql:56v6</span></span><br><span class="line"><span class="attr">    imagePullPolicy:</span> <span class="string">Always</span></span><br><span class="line"><span class="attr">    livenessProbe:</span></span><br><span class="line"><span class="attr">      failureThreshold:</span> <span class="number">3</span></span><br><span class="line"><span class="attr">      initialDelaySeconds:</span> <span class="number">30</span></span><br><span class="line"><span class="attr">      periodSeconds:</span> <span class="number">10</span></span><br><span class="line"><span class="attr">      successThreshold:</span> <span class="number">1</span></span><br><span class="line"><span class="attr">      tcpSocket:</span></span><br><span class="line"><span class="attr">        port:</span> <span class="number">3306</span></span><br><span class="line"><span class="attr">      timeoutSeconds:</span> <span class="number">30</span></span><br><span class="line"><span class="attr">    ports:</span></span><br><span class="line"><span class="attr">    - containerPort:</span> <span class="number">3306</span></span><br><span class="line"><span class="attr">      protocol:</span> <span class="string">TCP</span></span><br><span class="line"><span class="attr">    resources:</span></span><br><span class="line"><span class="attr">      limits:</span></span><br><span class="line"><span class="attr">        memory:</span> <span class="number">4</span><span class="string">Gi</span></span><br><span class="line"><span class="attr">      requests:</span></span><br><span class="line"><span class="attr">        memory:</span> <span class="number">512</span><span class="string">Mi</span></span><br><span class="line"><span class="attr">    terminationMessagePath:</span> <span class="string">/dev/termination-log</span></span><br><span class="line"><span class="attr">    volumeMounts:</span></span><br><span class="line"><span class="attr">    - mountPath:</span> <span class="string">/var/lib/mysql</span></span><br><span class="line"><span class="attr">      name:</span> <span class="string">datadir</span></span><br><span class="line"></span><br><span class="line"><span class="attr">  - name:</span> <span class="string">mysql-exporter</span></span><br><span class="line"><span class="attr">    env:</span></span><br><span class="line"><span class="attr">    - name:</span> <span class="string">DATA_SOURCE_NAME</span></span><br><span class="line"><span class="attr">      value:</span> <span class="string">$username:$passwrod@(127.0.0.1:3306)/</span></span><br><span class="line"><span class="attr">    image:</span> <span class="string">prom/mysqld-exporter</span></span><br><span class="line"><span class="attr">    imagePullPolicy:</span> <span class="string">Always</span></span><br><span class="line"><span class="attr">    name:</span> <span class="string">mysql-exporter</span></span><br><span class="line"><span class="attr">    ports:</span></span><br><span class="line"><span class="attr">    - containerPort:</span> <span class="number">9104</span></span><br><span class="line"><span class="attr">      protocol:</span> <span class="string">TCP</span></span><br></pre></td></tr></table></figure>
+<p>额外多增加一个mysql-exporter的容器，并提供环境变量DATA_SOURCE_NAME，注意，pod运行起来后，需要保证DATA_SOURCE_NAME的账号有数据库的读写权限。否则权限问题会导致无法获取数据。</p>
+<p><strong>进入pod查看端口3306/9104是否监听正常：</strong><br><img src="http://mycloudn.kokoerp.com/20180628180103971.jpg" alt="这里写图片描述"></p>
+<p>部署完mysql实例以及mysqld-exporter后，需要在prometheus的配置文件中增加相应的job。因为容器内POD IP是可变的，为了保证连接的持续可靠性，这里为该deployment创建了一个svc，通过svc的cluster IP与prometheus进行绑定，这样就基本不用担心POD IP变化了。</p>
+<p>首先创建svc，捆绑2个服务端口：<br><figure class="highlight less"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">apiVersion</span>: v1</span><br><span class="line"><span class="attribute">kind</span>: Service</span><br><span class="line"><span class="attribute">metadata</span>:</span><br><span class="line">  <span class="attribute">labels</span>:</span><br><span class="line">    <span class="attribute">app</span>: mydbtm</span><br><span class="line">  <span class="attribute">name</span>: mydbtm</span><br><span class="line">  <span class="attribute">namespace</span>: default</span><br><span class="line"><span class="attribute">spec</span>:</span><br><span class="line">  <span class="attribute">ports</span>:</span><br><span class="line">  - <span class="attribute">port</span>: <span class="number">3306</span></span><br><span class="line">    <span class="attribute">protocol</span>: TCP</span><br><span class="line">    <span class="attribute">targetPort</span>: <span class="number">3306</span></span><br><span class="line">    <span class="attribute">name</span>: mysql</span><br><span class="line">  - <span class="attribute">port</span>: <span class="number">9104</span></span><br><span class="line">    <span class="attribute">protocol</span>: TCP</span><br><span class="line">    <span class="attribute">targetPort</span>: <span class="number">9104</span></span><br><span class="line">    <span class="attribute">name</span>: mysql-exporter</span><br><span class="line">  <span class="attribute">selector</span>:</span><br><span class="line">    <span class="attribute">app</span>: mydbtm</span><br><span class="line">  <span class="attribute">sessionAffinity</span>: None</span><br><span class="line">  <span class="attribute">type</span>: ClusterIP</span><br></pre></td></tr></table></figure></p>
+<p>kubectl get svc 获取刚创建的svc 的cluster IP，绑定至prometheus的confimap：<br>在prometheus-configmap.yaml下添加一个job，targets对应的列表内填写刚获取到的cluster IP和9104端口，后续增加实例可直接在列表中添加元素：<br><figure class="highlight haml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">-<span class="ruby"> <span class="symbol">job_name:</span> <span class="string">'mysql performance'</span></span></span><br><span class="line"><span class="ruby">  <span class="symbol">scrape_interval:</span> <span class="number">1</span>m</span></span><br><span class="line"><span class="ruby">  <span class="symbol">static_configs:</span></span></span><br><span class="line"><span class="ruby">    - <span class="symbol">targets:</span></span></span><br><span class="line"><span class="ruby">       [<span class="string">'10.102.20.179:9104'</span>]</span></span><br><span class="line"><span class="ruby">  <span class="symbol">params:</span></span></span><br><span class="line"><span class="ruby">    collect[]<span class="symbol">:</span></span></span><br><span class="line"><span class="ruby">      - global_status</span></span><br><span class="line"><span class="ruby">      - perf_schema.tableiowaits</span></span><br><span class="line"><span class="ruby">      - perf_schema.indexiowaits </span></span><br><span class="line"><span class="ruby">      - perf_schema.tablelocks</span></span><br></pre></td></tr></table></figure></p>
+<p>更新配置文件后滚动更新pod加载配置文件：<br><figure class="highlight jboss-cli"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl <span class="keyword">patch</span> deployment prometheus <span class="params">--patch</span> '&#123;<span class="string">"spec"</span>: &#123;<span class="string">"template"</span>: &#123;<span class="string">"metadata"</span>: &#123;<span class="string">"annotations"</span>: &#123;<span class="string">"update-time"</span>: <span class="string">"2018-06-25 17:50"</span> &#125;&#125;&#125;&#125;&#125;' -n kube-system</span><br></pre></td></tr></table></figure></p>
+<p>查看prometheus的target，可以看到mysql-exporter已经up了，如果有异常，检查pod志：<br><img src="http://mycloudn.kokoerp.com/20180628184923959.jpg" alt="这里写图片描述"></p>
+<p>打开grafana查看mysql模板里的监控图：<br><img src="http://mycloudn.kokoerp.com/20180628201431101.jpg" alt="这里写图片描述"></p>
+<h2 id="服务发现"><a href="#服务发现" class="headerlink" title="服务发现"></a>服务发现</h2><p>在k8s环境中，部署的应用可能是海量的，如果像上方一样手动在static_configs.targets中增加对象，然后再触发prometheus实例的更新，未免显得太过麻烦和笨重，好在promethues提供SD(service discovery)功能，支持基于k8s的自动发现服务，可以自动发现k8s的node/service/pod/endpoints/ingress这些类型的资源。</p>
+<p>其实在第一部分部署时，已经指定了kubernetes-service的target job，但是可以看到在web /target 路径页面上没有看到任何相关的job，连kubernetes-service的标题都没有：<br><img src="http://mycloudn.kokoerp.com/20180703151402943.jpg" alt="这里写图片描述"></p>
+<p>在查阅了官方文档后，发现其中的说明并不详尽，没有具体的配置样例，网上关于此类场景的文章也没有找到，为此，特意去github上提交了issue向项目member请教，最后得知了不生效的原因为标签不匹配。</p>
+<p>github issue链接：<a href="https://github.com/prometheus/prometheus/issues/4326" target="_blank" rel="noopener">https://github.com/prometheus/prometheus/issues/4326</a><br>官方文档配置说明链接：<a href="https://prometheus.io/docs/prometheus/2.2/configuration/configuration/" target="_blank" rel="noopener">prometheus配置</a></p>
+<p><strong>作出如下修改后，配置生效，web上可见：</strong><br>1.job:</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">- job_name:</span> <span class="string">'kube_svc_mysql-exporter'</span></span><br><span class="line"><span class="attr">  kubernetes_sd_configs:</span></span><br><span class="line"><span class="attr">  - role:</span> <span class="string">service</span></span><br><span class="line"><span class="attr">  metrics_path:</span> <span class="string">/metrics</span></span><br><span class="line"><span class="attr">  relabel_configs:</span></span><br><span class="line"><span class="attr">  - source_labels:</span> <span class="string">[__meta_kubernetes_service_annotation_prometheus_io_probe]</span></span><br><span class="line"><span class="attr">    action:</span> <span class="string">keep</span></span><br><span class="line"><span class="attr">    regex:</span> <span class="literal">true</span></span><br><span class="line">    <span class="comment"># 匹配svc.metadata.annotation字段包含key/value(prometheus.io/probe: "true")</span></span><br><span class="line"><span class="attr">  - source_labels:</span> <span class="string">[__meta_kubernetes_service_port_name]</span></span><br><span class="line"><span class="attr">    action:</span> <span class="string">keep</span></span><br><span class="line"><span class="attr">    regex:</span> <span class="string">"mysql-exporter"</span></span><br><span class="line">    <span class="comment"># 匹配svc.spec.ports.name 是否包含mysql-exporter</span></span><br><span class="line"><span class="attr">  - action:</span> <span class="string">labelmap</span></span><br><span class="line"><span class="attr">    regex:</span> <span class="string">__meta_kubernetes_service_label_(.+)</span></span><br><span class="line"><span class="attr">  - source_labels:</span> <span class="string">[__meta_kubernetes_namespace]</span></span><br><span class="line"><span class="attr">    target_label:</span> <span class="string">kubernetes_namespace</span></span><br><span class="line"><span class="attr">  - source_labels:</span> <span class="string">[__meta_kubernetes_service_name]</span></span><br><span class="line"><span class="attr">    target_label:</span> <span class="string">kubernetes_name</span></span><br></pre></td></tr></table></figure>
+<p>svc样例：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Service</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  labels:</span></span><br><span class="line"><span class="attr">    app:</span> <span class="string">testdbtm</span></span><br><span class="line"><span class="attr">  annotations:</span></span><br><span class="line">    <span class="comment"># 必须包含这个kv以匹配上方job规则</span></span><br><span class="line">    <span class="string">prometheus.io/probe:</span> <span class="literal">true</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">testdbtm</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">default</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  ports:</span></span><br><span class="line"><span class="attr">  - port:</span> <span class="number">3306</span></span><br><span class="line"><span class="attr">    protocol:</span> <span class="string">TCP</span></span><br><span class="line"><span class="attr">    targetPort:</span> <span class="number">3306</span></span><br><span class="line"><span class="attr">    name:</span> <span class="string">mysql</span></span><br><span class="line"><span class="attr">  - port:</span> <span class="number">9104</span></span><br><span class="line"><span class="attr">    protocol:</span> <span class="string">TCP</span></span><br><span class="line"><span class="attr">    targetPort:</span> <span class="number">9104</span></span><br><span class="line">    <span class="comment"># 必须包含这个name以匹配job规则</span></span><br><span class="line"><span class="attr">    name:</span> <span class="string">mysql-exporter</span></span><br><span class="line"><span class="attr">  selector:</span></span><br><span class="line"><span class="attr">    app:</span> <span class="string">orderdealdbtm</span></span><br><span class="line"><span class="attr">  sessionAffinity:</span> <span class="string">None</span></span><br><span class="line"><span class="attr">  type:</span> <span class="string">ClusterIP</span></span><br></pre></td></tr></table></figure>
+<p>更新configmap以及prometheus实例后，即可在web /targets页面中查看到自动发现的包含mysql-exporter的svc，通过其集群FQDN域名+9104端口获取mysql-exporter metrics，实现自动发现。其他的各种应用，也可以类似定制。<br><img src="http://mycloudn.kokoerp.com/20180703153455846.jpg" alt="这里写图片描述"></p>
+<h2 id="监控项"><a href="#监控项" class="headerlink" title="监控项"></a>监控项</h2><p>经过这几天的验证，整理了一些基础的监控项表达式，根据exporter进行了分类，当然这还不够，需要根据环境持续补充，调整.注意，metric的名称在不同的版本有些许不同，我们的环境中有两套prometheus，其中一套对应的exporter版本较低，注意点已注释出：</p>
+<figure class="highlight clean"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br></pre></td><td class="code"><pre><span class="line">targets:</span><br><span class="line">	cadvisor:</span><br><span class="line">		#包含pod(container)相关指标</span><br><span class="line">		url: http:<span class="comment">//$NODE_IP:10255</span></span><br><span class="line">	</span><br><span class="line">		metric expr:</span><br><span class="line">		  ### 容器内存使用率超过limit值<span class="number">80</span>%,部分pod没有limit限制，所以值为+Inf，需要排除</span><br><span class="line">		  - container_memory_usage_bytes&#123;kubernetes_container_name!=<span class="string">""</span>&#125; / container_spec_memory_limit_bytes&#123;kubernetes_container_name!=<span class="string">""</span>&#125;  *<span class="number">100</span> != +Inf &gt; <span class="number">80</span> #低版本</span><br><span class="line">          - container_memory_usage_bytes&#123;container_name!=<span class="string">""</span>&#125; / container_spec_memory_limit_bytes&#123;container_name!=<span class="string">""</span>&#125;  *<span class="number">100</span> != +Inf &gt; <span class="number">80</span>  #新版本</span><br><span class="line">		  </span><br><span class="line">		  ### 计算pod的内存使用情况,单位为MB，可以按需设定阈值，有两个表达式都可以实现，感觉第一个结果更清晰。</span><br><span class="line">		  - sum (container_memory_working_set_bytes&#123;image!=<span class="string">""</span>,name=~<span class="string">"^k8s_.*"</span>&#125;) by (pod_name) /<span class="number">1024</span> /<span class="number">1024</span>  #低版本pod_name改成kubernetes_pod_name</span><br><span class="line">		  - sort_desc(sum(container_memory_usage_bytes&#123;image!=<span class="string">""</span>&#125;) by (io_kubernetes_container_name, image)) / <span class="number">1024</span> / <span class="number">1024</span>   #通用</span><br><span class="line">		  </span><br><span class="line">		  </span><br><span class="line">		  ### 根据相同的pod_name来计算过去一分钟内pod 的 cpu使用率,metric名称版本不同也有些不一样：</span><br><span class="line">		  - sum by (pod_name)( rate(container_cpu_usage_seconds_total&#123;image!=<span class="string">""</span>&#125;[<span class="number">1</span>m] ) ) * <span class="number">100</span> &gt; <span class="number">70</span>  #高版本</span><br><span class="line">		  - sum by (kubernetes_pod_name)( rate(container_cpu_usage_seconds_total&#123;image!=<span class="string">""</span>&#125;[<span class="number">1</span>m] ) ) * <span class="number">100</span> &gt; <span class="number">70</span>  #低版本</span><br><span class="line">		  </span><br><span class="line">			</span><br><span class="line">		  ### 计算pod的网络IO情况，单位为Mbps</span><br><span class="line">			# rx方向</span><br><span class="line">		  - sort_desc(sum by (kubernetes_pod_name) (rate (container_network_receive_bytes_total&#123;name!=<span class="string">""</span>&#125;[<span class="number">1</span>m]) )) /<span class="number">1024</span> /<span class="number">1024</span> /<span class="number">60</span> * <span class="number">8</span> &gt; <span class="number">100</span> #低版本</span><br><span class="line">		  - sort_desc(sum by (pod_name) (rate (container_network_receive_bytes_total&#123;name!=<span class="string">""</span>&#125;[<span class="number">1</span>m]) )) /<span class="number">1024</span> /<span class="number">1024</span> /<span class="number">60</span> *<span class="number">8</span>  &gt; <span class="number">100</span> #高版本</span><br><span class="line">		    # tx方向</span><br><span class="line">		  - sort_desc(sum by (kubernetes_pod_name) (rate (container_network_transmit_bytes_total&#123;name!=<span class="string">""</span>&#125;[<span class="number">1</span>m]) )) /<span class="number">1024</span> /<span class="number">1024</span> /<span class="number">60</span> * <span class="number">8</span> &gt; <span class="number">100</span> #低版本</span><br><span class="line">		  - sort_desc(sum by (pod_name) (rate (container_network_transmit_bytes_total&#123;name!=<span class="string">""</span>&#125;[<span class="number">1</span>m]) )) /<span class="number">1024</span> /<span class="number">1024</span> /<span class="number">60</span> *<span class="number">8</span>  &gt; <span class="number">100</span> #高版本			</span><br><span class="line">		  </span><br><span class="line">		  </span><br><span class="line">	node-exporter:</span><br><span class="line">	    ### 主要包含node相关的指标</span><br><span class="line">		# url: http:<span class="comment">//$NODE_IP:31672/metrics</span></span><br><span class="line">		</span><br><span class="line">		metric expr:</span><br><span class="line">		  ### node磁盘使用率</span><br><span class="line">		  -	(node_filesystem_size_bytes - node_filesystem_free_bytes) / node_filesystem_size_bytes * <span class="number">100</span> &gt; <span class="number">80</span>  </span><br><span class="line">		  </span><br><span class="line">		  ### node内存使用率</span><br><span class="line">		  -	(node_memory_MemTotal_bytes - node_memory_MemFree_bytes) / node_memory_MemTotal_bytes  * <span class="number">100</span> &gt; <span class="number">80</span>  </span><br><span class="line">			</span><br><span class="line">			</span><br><span class="line">		  ### 计算node cpu使用率，关于此项计算，参考了许多个模板的表达式，但感觉都不太精确，下面两个是模板里找到的：</span><br><span class="line">		  	# 这些模板里计算node cpu使用率的表达式，都是拿容器cpu使用情况除以节点cpu总数，这样计算出来的结果感觉有些偏差，因为node本身 \</span><br><span class="line">			# 还有一些额外开销，虽然在大集群中，node本身的开销相比较于这么多容器开销来说占比较小，但是还是不可忽视：</span><br><span class="line">		  - sum(sum by (io_kubernetes_container_name)( rate(container_cpu_usage_seconds_total&#123;image!=<span class="string">""</span>&#125;[<span class="number">1</span>m] ) )) / count(node_cpu&#123;mode=<span class="string">"system"</span>&#125;) * <span class="number">100</span></span><br><span class="line">		  -	sum (rate (container_cpu_usage_seconds_total&#123;id=<span class="string">"/"</span>&#125;[<span class="number">1</span>m])) / sum (machine_cpu_cores) * <span class="number">100</span></span><br><span class="line">		  </span><br><span class="line">		  	# 因此经过对集群cpu使用率的实际观察，我觉得下面这个表达式计算出的数值更为准确：</span><br><span class="line">		  - (sum(rate(node_cpu_seconds_total[<span class="number">1</span>m])) - sum(rate(node_cpu_seconds_total&#123;mode=<span class="string">"idle"</span>&#125;[<span class="number">1</span>m]))) / sum(rate(node_cpu_seconds_total[<span class="number">1</span>m]))  * <span class="number">100</span> &gt; <span class="number">80</span></span><br><span class="line">			</span><br><span class="line">		    # 在老版本的exporter中`node_cpu_seconds_total`这个metric值叫`node_cpu`,因此老版本使用这个表达式：</span><br><span class="line">		  - (sum(rate(node_cpu[<span class="number">1</span>m])) - sum(rate(node_cpu&#123;mode=<span class="string">"idle"</span>&#125;[<span class="number">1</span>m]))) / sum(rate(node_cpu[<span class="number">1</span>m]))  * <span class="number">100</span> &gt; <span class="number">80</span></span><br><span class="line">			</span><br><span class="line">			</span><br><span class="line">	mysql-exporter:</span><br><span class="line">		### 主要包含mysql相关指标</span><br><span class="line">		## url: http:<span class="comment">//$Mysql_IP:9104/metrics</span></span><br><span class="line">			# innodb各类型缓存缓存大小：</span><br><span class="line">			  - InnoDB Buffer Pool Data size : mysql_global_status_innodb_page_size * on (<span class="keyword">instance</span>) mysql_global_status_buffer_pool_pages&#123;state=<span class="string">"data"</span>&#125;</span><br><span class="line">			  - InnoDB Log Buffer Size: mysql_global_variables_innodb_log_buffer_size</span><br><span class="line">			  - InnoDB Additional Memory Pool Size: mysql_global_variables_innodb_additional_mem_pool_size</span><br><span class="line">			  - InnoDB Dictionary Size: mysql_global_status_innodb_mem_dictionary</span><br><span class="line">			  - Key Buffer Size: mysql_global_variables_key_buffer_size</span><br><span class="line">			  - Query Cache Size: mysql_global_variables_query_cache_size</span><br><span class="line">			  - Adaptive Hash Index Size: mysql_global_status_innodb_mem_adaptive_hash</span><br><span class="line">		</span><br><span class="line">		</span><br><span class="line">		metric expr:</span><br><span class="line">		  # 实例启动时间,单位s，三分钟内有重启记录则告警</span><br><span class="line">		  - mysql_global_status_uptime &lt; <span class="number">180</span>  </span><br><span class="line">		  </span><br><span class="line">		  # 每秒查询次数指标</span><br><span class="line">		  - rate(mysql_global_status_questions[<span class="number">5</span>m]) &gt; <span class="number">500</span></span><br><span class="line">		  </span><br><span class="line">		  # 连接数指标</span><br><span class="line">		  - rate(mysql_global_status_connections[<span class="number">5</span>m]) &gt; <span class="number">200</span></span><br><span class="line">		  </span><br><span class="line">		  # mysql接收速率,单位Mbps</span><br><span class="line">		  - rate(mysql_global_status_bytes_received[<span class="number">3</span>m]) * <span class="number">1024</span> * <span class="number">1024</span> * <span class="number">8</span>   &gt; <span class="number">50</span></span><br><span class="line">		  </span><br><span class="line">		  # mysql传输速率,单位Mbps</span><br><span class="line">		  - rate(mysql_global_status_bytes_sent[<span class="number">3</span>m]) * <span class="number">1024</span> * <span class="number">1024</span> * <span class="number">8</span>   &gt; <span class="number">100</span></span><br><span class="line">		  </span><br><span class="line">		  # 慢查询</span><br><span class="line">		  - rate(mysql_global_status_slow_queries[<span class="number">30</span>m]) &gt; <span class="number">3</span></span><br><span class="line">		  </span><br><span class="line">		  # 死锁</span><br><span class="line">		  - rate(mysql_global_status_innodb_deadlocks[<span class="number">3</span>m]) &gt; <span class="number">1</span></span><br><span class="line">		  </span><br><span class="line">		  # 活跃线程小于<span class="number">30</span>%</span><br><span class="line">		  - mysql_global_status_threads_running / mysql_global_status_threads_connected * <span class="number">100</span> &lt; <span class="number">30</span></span><br><span class="line">		  </span><br><span class="line">		  </span><br><span class="line">		  # innodb缓存占用缓存池大小超过<span class="number">80</span>%</span><br><span class="line">		  - (mysql_global_status_innodb_page_size * on (<span class="keyword">instance</span>) mysql_global_status_buffer_pool_pages&#123;state=<span class="string">"data"</span>&#125; +  on (<span class="keyword">instance</span>) mysql_global_variables_innodb_log_buffer_size +  on (<span class="keyword">instance</span>) mysql_global_variables_innodb_additional_mem_pool_size + on (<span class="keyword">instance</span>)  mysql_global_status_innodb_mem_dictionary + on (<span class="keyword">instance</span>)  mysql_global_variables_key_buffer_size + on (<span class="keyword">instance</span>)  mysql_global_variables_query_cache_size + on (<span class="keyword">instance</span>) mysql_global_status_innodb_mem_adaptive_hash )  / on (<span class="keyword">instance</span>) mysql_global_variables_innodb_buffer_pool_size * <span class="number">100</span> &gt; <span class="number">80</span></span><br></pre></td></tr></table></figure>
+<p><strong>根据上方的监控项expr，整理出如下rules规则模板：</strong></p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">rules.yml:</span> <span class="string">|</span></span><br><span class="line"><span class="string"></span><span class="attr">  groups:</span></span><br><span class="line"><span class="attr">  - name:</span> <span class="string">alert-rule</span></span><br><span class="line"><span class="attr">    rules:</span></span><br><span class="line">    <span class="comment">### Node监控</span></span><br><span class="line"><span class="attr">    - alert:</span> <span class="string">NodeFilesystemUsage-high</span></span><br><span class="line"><span class="attr">      expr:</span> <span class="string">(node_filesystem_size_bytes</span> <span class="bullet">-</span> <span class="string">node_filesystem_free_bytes)</span> <span class="string">/</span> <span class="string">node_filesystem_size_bytes</span> <span class="string">*</span> <span class="number">100</span> <span class="string">&gt; 80 </span></span><br><span class="line"><span class="string"></span><span class="attr">      for:</span> <span class="number">2</span><span class="string">m</span></span><br><span class="line"><span class="attr">      labels:</span></span><br><span class="line"><span class="attr">        team:</span> <span class="string">node</span></span><br><span class="line"><span class="attr">        severity:</span> <span class="string">warning</span></span><br><span class="line"><span class="attr">      annotations:</span></span><br><span class="line"><span class="attr">        summary:</span> <span class="string">"<span class="template-variable">&#123;&#123;$labels.instance&#125;&#125;</span>: High Node Filesystem usage detected"</span></span><br><span class="line"><span class="attr">        description:</span> <span class="string">"<span class="template-variable">&#123;&#123;$labels.instance&#125;&#125;</span>: Node Filesystem usage is above 80% ,(current value is: <span class="template-variable">&#123;&#123; $value &#125;&#125;</span>)"</span>		  </span><br><span class="line"><span class="attr">    - alert:</span> <span class="string">NodeMemoryUsage</span></span><br><span class="line"><span class="attr">      expr:</span> <span class="string">(node_memory_MemTotal_bytes</span> <span class="bullet">-</span> <span class="string">node_memory_MemFree_bytes)</span> <span class="string">/</span> <span class="string">node_memory_MemTotal_bytes</span>  <span class="string">*</span> <span class="number">100</span> <span class="string">&gt; 80</span></span><br><span class="line"><span class="string"></span><span class="attr">      for:</span> <span class="number">2</span><span class="string">m</span></span><br><span class="line"><span class="attr">      labels:</span></span><br><span class="line"><span class="attr">        severity:</span> <span class="string">warning</span></span><br><span class="line"><span class="attr">      annotations:</span></span><br><span class="line"><span class="attr">        summary:</span> <span class="string">"<span class="template-variable">&#123;&#123;$labels.instance&#125;&#125;</span>: High Node Memory usage detected"</span></span><br><span class="line"><span class="attr">        description:</span> <span class="string">"<span class="template-variable">&#123;&#123;$labels.instance&#125;&#125;</span>: Node Memory usage is above 80% ,(current value is: <span class="template-variable">&#123;&#123; $value &#125;&#125;</span>)"</span></span><br><span class="line"><span class="attr">    - alert:</span> <span class="string">NodeCPUUsage</span></span><br><span class="line"><span class="attr">      expr:</span> <span class="string">(sum(rate(node_cpu_seconds_total[1m]))</span> <span class="bullet">-</span> <span class="string">sum(rate(node_cpu_seconds_total&#123;mode="idle"&#125;[1m])))</span> <span class="string">/</span> <span class="string">sum(rate(node_cpu_seconds_total[1m]))</span>  <span class="string">*</span> <span class="number">100</span> <span class="string">&gt; 80</span></span><br><span class="line"><span class="string"></span><span class="attr">      for:</span> <span class="number">2</span><span class="string">m</span></span><br><span class="line"><span class="attr">      labels:</span></span><br><span class="line"><span class="attr">        severity:</span> <span class="string">warning</span></span><br><span class="line"><span class="attr">      annotations:</span></span><br><span class="line"><span class="attr">        summary:</span> <span class="string">"<span class="template-variable">&#123;&#123;$labels.instance&#125;&#125;</span>: Node High CPU usage detected"</span></span><br><span class="line"><span class="attr">        description:</span> <span class="string">"<span class="template-variable">&#123;&#123;$labels.instance&#125;&#125;</span>: Node CPU usage is above 80% ,(current value is: <span class="template-variable">&#123;&#123; $value &#125;&#125;</span>)"</span></span><br><span class="line"><span class="attr">    - alert:</span> <span class="string">NodeCPUUsage_</span></span><br><span class="line"><span class="attr">      expr:</span> <span class="string">(sum(rate(node_cpu[1m]))</span> <span class="bullet">-</span> <span class="string">sum(rate(node_cpu&#123;mode="idle"&#125;[1m])))</span> <span class="string">/</span> <span class="string">sum(rate(node_cpu[1m]))</span>  <span class="string">*</span> <span class="number">100</span> <span class="string">&gt; 80</span></span><br><span class="line"><span class="string"></span><span class="attr">      for:</span> <span class="number">2</span><span class="string">m</span></span><br><span class="line"><span class="attr">      labels:</span></span><br><span class="line"><span class="attr">        severity:</span> <span class="string">warning</span></span><br><span class="line"><span class="attr">      annotations:</span></span><br><span class="line"><span class="attr">        summary:</span> <span class="string">"<span class="template-variable">&#123;&#123;$labels.instance&#125;&#125;</span>: Node High CPU usage detected"</span></span><br><span class="line"><span class="attr">        description:</span> <span class="string">"<span class="template-variable">&#123;&#123;$labels.instance&#125;&#125;</span>: Node CPU usage is above 80% ,(current value is: <span class="template-variable">&#123;&#123; $value &#125;&#125;</span>)"</span>	</span><br><span class="line">     <span class="comment">### Pod监控</span></span><br><span class="line"><span class="attr">    - alert:</span> <span class="string">PodMemUsage</span></span><br><span class="line"><span class="attr">      expr:</span> <span class="string">container_memory_usage_bytes&#123;container_name!=""&#125;</span> <span class="string">/</span> <span class="string">container_spec_memory_limit_bytes&#123;container_name!=""&#125;</span>  <span class="string">*100</span> <span class="string">!=</span> <span class="string">+Inf</span> <span class="string">&gt; 80</span></span><br><span class="line"><span class="string"></span><span class="attr">      for:</span> <span class="number">2</span><span class="string">m</span></span><br><span class="line"><span class="attr">      labels:</span></span><br><span class="line"><span class="attr">        severity:</span> <span class="string">warning</span></span><br><span class="line"><span class="attr">      annotations:</span></span><br><span class="line"><span class="attr">        summary:</span> <span class="string">"<span class="template-variable">&#123;&#123;$labels.instance&#125;&#125;</span>: Pod High Mem usage detected"</span></span><br><span class="line"><span class="attr">        description:</span> <span class="string">"<span class="template-variable">&#123;&#123;$labels.instance&#125;&#125;</span>: Pod Mem is above 80% ,(current value is: <span class="template-variable">&#123;&#123; $value &#125;&#125;</span>)"</span></span><br><span class="line"><span class="attr">    - alert:</span> <span class="string">PodMemUsage_</span></span><br><span class="line"><span class="attr">      expr:</span> <span class="string">container_memory_usage_bytes&#123;kubernetes_container_name!=""&#125;</span> <span class="string">/</span> <span class="string">container_spec_memory_limit_bytes&#123;kubernetes_container_name!=""&#125;</span>  <span class="string">*100</span> <span class="string">!=</span> <span class="string">+Inf</span> <span class="string">&gt; 90</span></span><br><span class="line"><span class="string"></span><span class="attr">      for:</span> <span class="number">2</span><span class="string">m</span></span><br><span class="line"><span class="attr">      labels:</span></span><br><span class="line"><span class="attr">        severity:</span> <span class="string">warning</span></span><br><span class="line"><span class="attr">      annotations:</span></span><br><span class="line"><span class="attr">        summary:</span> <span class="string">"<span class="template-variable">&#123;&#123;$labels.instance&#125;&#125;</span>: Pod High Mem usage detected"</span></span><br><span class="line"><span class="attr">        description:</span> <span class="string">"<span class="template-variable">&#123;&#123;$labels.instance&#125;&#125;</span>: Pod Mem is above 80% ,(current value is: <span class="template-variable">&#123;&#123; $value &#125;&#125;</span>)"</span></span><br><span class="line"><span class="attr">    - alert:</span> <span class="string">PodCpuUsage</span></span><br><span class="line"><span class="attr">      expr:</span> <span class="string">sum</span> <span class="string">by</span> <span class="string">(pod_name)(</span> <span class="string">rate(container_cpu_usage_seconds_total&#123;image!=""&#125;[1m]</span> <span class="string">)</span> <span class="string">)</span> <span class="string">*</span> <span class="number">100</span> <span class="string">&gt; 70</span></span><br><span class="line"><span class="string"></span><span class="attr">      for:</span> <span class="number">2</span><span class="string">m</span></span><br><span class="line"><span class="attr">      labels:</span></span><br><span class="line"><span class="attr">        severity:</span> <span class="string">warning</span></span><br><span class="line"><span class="attr">      annotations:</span></span><br><span class="line"><span class="attr">        summary:</span> <span class="string">"<span class="template-variable">&#123;&#123;$labels.instance&#125;&#125;</span>: Pod High CPU usage detected"</span></span><br><span class="line"><span class="attr">        description:</span> <span class="string">"<span class="template-variable">&#123;&#123;$labels.instance&#125;&#125;</span>: Pod CPU is above 80% ,(current value is: <span class="template-variable">&#123;&#123; $value &#125;&#125;</span>)"</span></span><br><span class="line"><span class="attr">    - alert:</span> <span class="string">PodCpuUsage_</span></span><br><span class="line"><span class="attr">      expr:</span> <span class="string">sum</span> <span class="string">by</span> <span class="string">(kubernetes_pod_name)(</span> <span class="string">rate(container_cpu_usage_seconds_total&#123;image!=""&#125;[1m]</span> <span class="string">)</span> <span class="string">)</span> <span class="string">*</span> <span class="number">100</span> <span class="string">&gt; 70</span></span><br><span class="line"><span class="string"></span><span class="attr">      for:</span> <span class="number">2</span><span class="string">m</span></span><br><span class="line"><span class="attr">      labels:</span></span><br><span class="line"><span class="attr">        severity:</span> <span class="string">warning</span></span><br><span class="line"><span class="attr">      annotations:</span></span><br><span class="line"><span class="attr">        summary:</span> <span class="string">"<span class="template-variable">&#123;&#123;$labels.instance&#125;&#125;</span>: Pod High CPU usage detected"</span></span><br><span class="line"><span class="attr">        description:</span> <span class="string">"<span class="template-variable">&#123;&#123;$labels.instance&#125;&#125;</span>: Pod CPU is above 80% ,(current value is: <span class="template-variable">&#123;&#123; $value &#125;&#125;</span>)"</span></span><br><span class="line"><span class="attr">    - alert:</span> <span class="string">NetI/O_RX</span></span><br><span class="line"><span class="attr">      expr:</span> <span class="string">sort_desc(sum</span> <span class="string">by</span> <span class="string">(kubernetes_pod_name)</span> <span class="string">(rate</span> <span class="string">(container_network_receive_bytes_total&#123;name!=""&#125;[1m])</span> <span class="string">))</span> <span class="string">/1024</span> <span class="string">/1024</span> <span class="string">/60</span> <span class="string">*</span> <span class="number">8</span> <span class="string">&gt; 500</span></span><br><span class="line"><span class="string"></span><span class="attr">      for:</span> <span class="number">2</span><span class="string">m</span></span><br><span class="line"><span class="attr">      labels:</span></span><br><span class="line"><span class="attr">        severity:</span> <span class="string">warning</span></span><br><span class="line"><span class="attr">      annotations:</span></span><br><span class="line"><span class="attr">        summary:</span> <span class="string">"<span class="template-variable">&#123;&#123;$labels.instance&#125;&#125;</span>: Pod High NetI/O_RX detected"</span></span><br><span class="line"><span class="attr">        description:</span> <span class="string">"<span class="template-variable">&#123;&#123;$labels.instance&#125;&#125;</span>: Pod NetI/O_RX is more than 500Mbps ,(current value is: <span class="template-variable">&#123;&#123; $value &#125;&#125;</span>)"</span>		</span><br><span class="line"><span class="attr">    - alert:</span> <span class="string">NetI/O_RX_</span></span><br><span class="line"><span class="attr">      expr:</span> <span class="string">sort_desc(sum</span> <span class="string">by</span> <span class="string">(pod_name)</span> <span class="string">(rate</span> <span class="string">(container_network_receive_bytes_total&#123;name!=""&#125;[1m])</span> <span class="string">))</span> <span class="string">/1024</span> <span class="string">/1024</span> <span class="string">/60</span> <span class="string">*8</span>  <span class="string">&gt; 500</span></span><br><span class="line"><span class="string"></span><span class="attr">      for:</span> <span class="number">2</span><span class="string">m</span></span><br><span class="line"><span class="attr">      labels:</span></span><br><span class="line"><span class="attr">        severity:</span> <span class="string">warning</span></span><br><span class="line"><span class="attr">      annotations:</span></span><br><span class="line"><span class="attr">        summary:</span> <span class="string">"<span class="template-variable">&#123;&#123;$labels.instance&#125;&#125;</span>: Pod High NetI/O_RX detected"</span></span><br><span class="line"><span class="attr">        description:</span> <span class="string">"<span class="template-variable">&#123;&#123;$labels.instance&#125;&#125;</span>: Pod NetI/O_RX is more than 500Mbps ,(current value is: <span class="template-variable">&#123;&#123; $value &#125;&#125;</span>)"</span>				  </span><br><span class="line"><span class="attr">    - alert:</span> <span class="string">NetI/O_TX</span></span><br><span class="line"><span class="attr">      expr:</span> <span class="string">sort_desc(sum</span> <span class="string">by</span> <span class="string">(kubernetes_pod_name)</span> <span class="string">(rate</span> <span class="string">(container_network_transmit_bytes_total&#123;name!=""&#125;[1m])</span> <span class="string">))</span> <span class="string">/1024</span> <span class="string">/1024</span> <span class="string">/60</span> <span class="string">*</span> <span class="number">8</span> <span class="string">&gt; 500</span></span><br><span class="line"><span class="string"></span><span class="attr">      for:</span> <span class="number">2</span><span class="string">m</span></span><br><span class="line"><span class="attr">      labels:</span></span><br><span class="line"><span class="attr">        severity:</span> <span class="string">warning</span></span><br><span class="line"><span class="attr">      annotations:</span></span><br><span class="line"><span class="attr">        summary:</span> <span class="string">"<span class="template-variable">&#123;&#123;$labels.instance&#125;&#125;</span>: Pod High NetI/O_TX detected"</span></span><br><span class="line"><span class="attr">        description:</span> <span class="string">"<span class="template-variable">&#123;&#123;$labels.instance&#125;&#125;</span>: Pod NetI/O_TX is more than 100Mbps ,(current value is: <span class="template-variable">&#123;&#123; $value &#125;&#125;</span>)"</span>		</span><br><span class="line"><span class="attr">    - alert:</span> <span class="string">NetI/O_TX_</span></span><br><span class="line"><span class="attr">      expr:</span> <span class="string">sort_desc(sum</span> <span class="string">by</span> <span class="string">(pod_name)</span> <span class="string">(rate</span> <span class="string">(container_network_transmit_bytes_total&#123;name!=""&#125;[1m])</span> <span class="string">))</span> <span class="string">/1024</span> <span class="string">/1024</span> <span class="string">/60</span> <span class="string">*8</span> <span class="string">&gt; 500</span></span><br><span class="line"><span class="string"></span><span class="attr">      for:</span> <span class="number">2</span><span class="string">m</span></span><br><span class="line"><span class="attr">      labels:</span></span><br><span class="line"><span class="attr">        severity:</span> <span class="string">warning</span></span><br><span class="line"><span class="attr">      annotations:</span></span><br><span class="line"><span class="attr">        summary:</span> <span class="string">"<span class="template-variable">&#123;&#123;$labels.instance&#125;&#125;</span>: Pod High NetI/O_TX detected"</span></span><br><span class="line"><span class="attr">        description:</span> <span class="string">"<span class="template-variable">&#123;&#123;$labels.instance&#125;&#125;</span>: Pod NetI/O_TX is more than 100Mbps ,(current value is: <span class="template-variable">&#123;&#123; $value &#125;&#125;</span>)"</span>		</span><br><span class="line">     <span class="comment">### Mysql监控</span></span><br><span class="line"><span class="attr">    - alert:</span> <span class="string">Mysql_Instance_Reboot</span></span><br><span class="line"><span class="attr">      expr:</span> <span class="string">mysql_global_status_uptime</span> <span class="string">&lt;</span> <span class="number">180</span> </span><br><span class="line"><span class="attr">      for:</span> <span class="number">2</span><span class="string">m</span></span><br><span class="line"><span class="attr">      labels:</span></span><br><span class="line"><span class="attr">        severity:</span> <span class="string">warning</span></span><br><span class="line"><span class="attr">      annotations:</span></span><br><span class="line"><span class="attr">        summary:</span> <span class="string">"<span class="template-variable">&#123;&#123;$labels.instance&#125;&#125;</span>: Mysql_Instance_Reboot detected"</span></span><br><span class="line"><span class="attr">        description:</span> <span class="string">"<span class="template-variable">&#123;&#123;$labels.instance&#125;&#125;</span>: Mysql_Instance_Reboot in 3 minute (up to now is: <span class="template-variable">&#123;&#123; $value &#125;&#125;</span> seconds"</span>	</span><br><span class="line"><span class="attr">    - alert:</span> <span class="string">Mysql_High_QPS</span></span><br><span class="line"><span class="attr">      expr:</span> <span class="string">rate(mysql_global_status_questions[5m])</span> <span class="string">&gt; 500 </span></span><br><span class="line"><span class="string"></span><span class="attr">      for:</span> <span class="number">2</span><span class="string">m</span></span><br><span class="line"><span class="attr">      labels:</span></span><br><span class="line"><span class="attr">        severity:</span> <span class="string">warning</span></span><br><span class="line"><span class="attr">      annotations:</span></span><br><span class="line"><span class="attr">        summary:</span> <span class="string">"<span class="template-variable">&#123;&#123;$labels.instance&#125;&#125;</span>: Mysql_High_QPS detected"</span></span><br><span class="line"><span class="attr">        description:</span> <span class="string">"<span class="template-variable">&#123;&#123;$labels.instance&#125;&#125;</span>: Mysql opreation is more than 500 per second ,(current value is: <span class="template-variable">&#123;&#123; $value &#125;&#125;</span>)"</span>	</span><br><span class="line"><span class="attr">    - alert:</span> <span class="string">Mysql_Too_Many_Connections</span></span><br><span class="line"><span class="attr">      expr:</span> <span class="string">rate(mysql_global_status_connections[5m])</span> <span class="string">&gt; 100</span></span><br><span class="line"><span class="string"></span><span class="attr">      for:</span> <span class="number">2</span><span class="string">m</span></span><br><span class="line"><span class="attr">      labels:</span></span><br><span class="line"><span class="attr">        severity:</span> <span class="string">warning</span></span><br><span class="line"><span class="attr">      annotations:</span></span><br><span class="line"><span class="attr">        summary:</span> <span class="string">"<span class="template-variable">&#123;&#123;$labels.instance&#125;&#125;</span>: Mysql Too Many Connections detected"</span></span><br><span class="line"><span class="attr">        description:</span> <span class="string">"<span class="template-variable">&#123;&#123;$labels.instance&#125;&#125;</span>: Mysql Connections is more than 100 per second ,(current value is: <span class="template-variable">&#123;&#123; $value &#125;&#125;</span>)"</span>	</span><br><span class="line"><span class="attr">    - alert:</span> <span class="string">Mysql_High_Recv_Rate</span></span><br><span class="line"><span class="attr">      expr:</span> <span class="string">rate(mysql_global_status_bytes_received[3m])</span> <span class="string">*</span> <span class="number">1024</span> <span class="string">*</span> <span class="number">1024</span> <span class="string">*</span> <span class="number">8</span>   <span class="string">&gt; 100</span></span><br><span class="line"><span class="string"></span><span class="attr">      for:</span> <span class="number">2</span><span class="string">m</span></span><br><span class="line"><span class="attr">      labels:</span></span><br><span class="line"><span class="attr">        severity:</span> <span class="string">warning</span></span><br><span class="line"><span class="attr">      annotations:</span></span><br><span class="line"><span class="attr">        summary:</span> <span class="string">"<span class="template-variable">&#123;&#123;$labels.instance&#125;&#125;</span>: Mysql_High_Recv_Rate detected"</span></span><br><span class="line"><span class="attr">        description:</span> <span class="string">"<span class="template-variable">&#123;&#123;$labels.instance&#125;&#125;</span>: Mysql_Receive_Rate is more than 100Mbps ,(current value is: <span class="template-variable">&#123;&#123; $value &#125;&#125;</span>)"</span>	</span><br><span class="line"><span class="attr">    - alert:</span> <span class="string">Mysql_High_Send_Rate</span></span><br><span class="line"><span class="attr">      expr:</span> <span class="string">rate(mysql_global_status_bytes_sent[3m])</span> <span class="string">*</span> <span class="number">1024</span> <span class="string">*</span> <span class="number">1024</span> <span class="string">*</span> <span class="number">8</span>   <span class="string">&gt; 100</span></span><br><span class="line"><span class="string"></span><span class="attr">      for:</span> <span class="number">2</span><span class="string">m</span></span><br><span class="line"><span class="attr">      labels:</span></span><br><span class="line"><span class="attr">        severity:</span> <span class="string">warning</span></span><br><span class="line"><span class="attr">      annotations:</span></span><br><span class="line"><span class="attr">        summary:</span> <span class="string">"<span class="template-variable">&#123;&#123;$labels.instance&#125;&#125;</span>: Mysql_High_Send_Rate detected"</span></span><br><span class="line"><span class="attr">        description:</span> <span class="string">"<span class="template-variable">&#123;&#123;$labels.instance&#125;&#125;</span>: Mysql data Send Rate is more than 100Mbps ,(current value is: <span class="template-variable">&#123;&#123; $value &#125;&#125;</span>)"</span></span><br><span class="line"><span class="attr">    - alert:</span> <span class="string">Mysql_Too_Many_Slow_Query</span></span><br><span class="line"><span class="attr">      expr:</span> <span class="string">rate(mysql_global_status_slow_queries[30m])</span> <span class="string">&gt; 3</span></span><br><span class="line"><span class="string"></span><span class="attr">      for:</span> <span class="number">2</span><span class="string">m</span></span><br><span class="line"><span class="attr">      labels:</span></span><br><span class="line"><span class="attr">        severity:</span> <span class="string">warning</span></span><br><span class="line"><span class="attr">      annotations:</span></span><br><span class="line"><span class="attr">        summary:</span> <span class="string">"<span class="template-variable">&#123;&#123;$labels.instance&#125;&#125;</span>: Mysql_Too_Many_Slow_Query detected"</span></span><br><span class="line"><span class="attr">        description:</span> <span class="string">"<span class="template-variable">&#123;&#123;$labels.instance&#125;&#125;</span>: Mysql current Slow_Query Sql is more than 3 ,(current value is: <span class="template-variable">&#123;&#123; $value &#125;&#125;</span>)"</span></span><br><span class="line"><span class="attr">    - alert:</span> <span class="string">Mysql_Deadlock</span></span><br><span class="line"><span class="attr">      expr:</span> <span class="string">mysql_global_status_innodb_deadlocks</span> <span class="string">&gt; 0</span></span><br><span class="line"><span class="string"></span><span class="attr">      for:</span> <span class="number">2</span><span class="string">m</span></span><br><span class="line"><span class="attr">      labels:</span></span><br><span class="line"><span class="attr">        severity:</span> <span class="string">warning</span></span><br><span class="line"><span class="attr">      annotations:</span></span><br><span class="line"><span class="attr">        summary:</span> <span class="string">"<span class="template-variable">&#123;&#123;$labels.instance&#125;&#125;</span>: Mysql_Deadlock detected"</span></span><br><span class="line"><span class="attr">        description:</span> <span class="string">"<span class="template-variable">&#123;&#123;$labels.instance&#125;&#125;</span>: Mysql Deadlock was found ,(current value is: <span class="template-variable">&#123;&#123; $value &#125;&#125;</span>)"</span>			</span><br><span class="line"><span class="attr">    - alert:</span> <span class="string">Mysql_Too_Many_sleep_threads</span></span><br><span class="line"><span class="attr">      expr:</span> <span class="string">mysql_global_status_threads_running</span> <span class="string">/</span> <span class="string">mysql_global_status_threads_connected</span> <span class="string">*</span> <span class="number">100</span> <span class="string">&lt;</span> <span class="number">30</span></span><br><span class="line"><span class="attr">      for:</span> <span class="number">2</span><span class="string">m</span></span><br><span class="line"><span class="attr">      labels:</span></span><br><span class="line"><span class="attr">        severity:</span> <span class="string">warning</span></span><br><span class="line"><span class="attr">      annotations:</span></span><br><span class="line"><span class="attr">        summary:</span> <span class="string">"<span class="template-variable">&#123;&#123;$labels.instance&#125;&#125;</span>: Mysql_Too_Many_sleep_threads detected"</span></span><br><span class="line"><span class="attr">        description:</span> <span class="string">"<span class="template-variable">&#123;&#123;$labels.instance&#125;&#125;</span>: Mysql_sleep_threads percent is more than <span class="template-variable">&#123;&#123; $value &#125;&#125;</span>, please clean the sleeping threads"</span>	</span><br><span class="line"><span class="attr">    - alert:</span> <span class="string">Mysql_innodb_Cache_insufficient</span></span><br><span class="line"><span class="attr">      expr:</span> <span class="string">(mysql_global_status_innodb_page_size</span> <span class="string">*</span> <span class="string">on</span> <span class="string">(instance)</span> <span class="string">mysql_global_status_buffer_pool_pages&#123;state="data"&#125;</span> <span class="string">+</span>  <span class="string">on</span> <span class="string">(instance)</span> <span class="string">mysql_global_variables_innodb_log_buffer_size</span> <span class="string">+</span>  <span class="string">on</span> <span class="string">(instance)</span> <span class="string">mysql_global_variables_innodb_additional_mem_pool_size</span> <span class="string">+</span> <span class="string">on</span> <span class="string">(instance)</span>  <span class="string">mysql_global_status_innodb_mem_dictionary</span> <span class="string">+</span> <span class="string">on</span> <span class="string">(instance)</span>  <span class="string">mysql_global_variables_key_buffer_size</span> <span class="string">+</span> <span class="string">on</span> <span class="string">(instance)</span>  <span class="string">mysql_global_variables_query_cache_size</span> <span class="string">+</span> <span class="string">on</span> <span class="string">(instance)</span> <span class="string">mysql_global_status_innodb_mem_adaptive_hash</span> <span class="string">)</span>  <span class="string">/</span> <span class="string">on</span> <span class="string">(instance)</span> <span class="string">mysql_global_variables_innodb_buffer_pool_size</span> <span class="string">*</span> <span class="number">100</span> <span class="string">&gt; 80</span></span><br><span class="line"><span class="string"></span><span class="attr">      for:</span> <span class="number">2</span><span class="string">m</span></span><br><span class="line"><span class="attr">      labels:</span></span><br><span class="line"><span class="attr">        severity:</span> <span class="string">warning</span></span><br><span class="line"><span class="attr">      annotations:</span></span><br><span class="line"><span class="attr">        summary:</span> <span class="string">"<span class="template-variable">&#123;&#123;$labels.instance&#125;&#125;</span>: Mysql_innodb_Cache_insufficient detected"</span></span><br><span class="line"><span class="attr">        description:</span> <span class="string">"<span class="template-variable">&#123;&#123;$labels.instance&#125;&#125;</span>: Mysql innodb_Cache was used more than 80% ,(current value is: <span class="template-variable">&#123;&#123; $value &#125;&#125;</span>)"</span></span><br></pre></td></tr></table></figure>
+<p>将这些规则更新进prometheus的configmap中，重新apply config，更新prometheus,查看prometheus的告警页面，可以查看多项告警选项，则配置成功。<br><img src="http://mycloudn.kokoerp.com/20180628201137974.jpg" alt="这里写图片描述"></p>
+<h2 id="联邦"><a href="#联邦" class="headerlink" title="联邦"></a>联邦</h2><p>prometheus 2.0以上版本的新特性，联邦机制，支持从其他的prometheus扩展合并数据，比较类似zabbix的server端与proxy端，适用于跨集群/机房使用，但不同的是prometheus联邦配置非常简单，简单的增加job指定其他prometheus实例服务IP端口，即可获取数据。我们的环境中有两套集群，两个prometheus server实例，在prometheus的configmap配置增加一个如下job配置即可合并数据统一展示：</p>
+<figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">- job_name: <span class="string">'federate'</span></span><br><span class="line">  scrape_interva<span class="variable">l:</span> <span class="number">15</span>s</span><br><span class="line">  honor_label<span class="variable">s:</span> true</span><br><span class="line">  metrics_path: <span class="string">'/federate'</span></span><br><span class="line">  param<span class="variable">s:</span></span><br><span class="line">    <span class="string">'match[]'</span>:</span><br><span class="line">      - <span class="string">'&#123;job=~"kubernetes-.*"&#125;'</span></span><br><span class="line">  static_config<span class="variable">s:</span></span><br><span class="line">    - target<span class="variable">s:</span></span><br><span class="line">      - <span class="string">'192.168.9.26:9090'</span></span><br></pre></td></tr></table></figure>
+<p>更新配置，更新prometheus pod，重新打开grafana的集群监控模板页面，可以看到数据已经进行了整合：</p>
+<p><strong>整合前：</strong><br><img src="http://mycloudn.kokoerp.com/2018062820160722.jpg" alt="这里写图片描述"></p>
+<p><strong>整合后：</strong><br><img src="http://mycloudn.kokoerp.com/20180628202109414.jpg" alt="这里写图片描述"></p>
+<h2 id="Relabel"><a href="#Relabel" class="headerlink" title="Relabel"></a>Relabel</h2><p>Relabel机制可以在Prometheus采集数据存入TSDB之前，通过Target实例的Metadata信息，动态地为Label赋值，可以是metadata中的label，也可以赋值给新label。除此之外，还能根据Target实例的Metadata信息选择是否采集或者忽略该Target实例。<br>例如这里自定义了如下target：</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">- <span class="string">job_name:</span> <span class="string">'kubernetes-cadvisor'</span></span><br><span class="line"><span class="symbol">  kubernetes_sd_configs:</span></span><br><span class="line">  - <span class="string">role:</span> node</span><br><span class="line"><span class="symbol">  scheme:</span> https</span><br><span class="line"><span class="symbol">  tls_config:</span></span><br><span class="line"><span class="symbol">    ca_file:</span> <span class="regexp">/var/</span>run<span class="regexp">/secrets/</span>kubernetes.io<span class="regexp">/serviceaccount/</span>ca.crt</span><br><span class="line"><span class="symbol">  bearer_token_file:</span> <span class="regexp">/var/</span>run<span class="regexp">/secrets/</span>kubernetes.io<span class="regexp">/serviceaccount/</span>token</span><br></pre></td></tr></table></figure>
+<p>在web上查看target的原始标签：<br><img src="http://mycloudn.kokoerp.com/20180828170540949.jpg" alt="这里写图片描述"><br><strong>可以看到instance标签的值为主机名，鼠标悬停展开的黑色框中的标签为metadata标签，form表单里的标签是放入TSDB最终展示的标签</strong></p>
+<p>下面给这段配置增加一个自定义标签：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">- job_name:</span> <span class="string">'kubernetes-cadvisor'</span></span><br><span class="line"><span class="attr">  kubernetes_sd_configs:</span></span><br><span class="line"><span class="attr">  - role:</span> <span class="string">node</span></span><br><span class="line"><span class="attr">  scheme:</span> <span class="string">https</span></span><br><span class="line"><span class="attr">  tls_config:</span></span><br><span class="line"><span class="attr">    ca_file:</span> <span class="string">/var/run/secrets/kubernetes.io/serviceaccount/ca.crt</span></span><br><span class="line"><span class="attr">  bearer_token_file:</span> <span class="string">/var/run/secrets/kubernetes.io/serviceaccount/token</span></span><br><span class="line"><span class="attr">  relabel_configs:</span></span><br><span class="line"><span class="attr">  - source_labels:</span> <span class="string">[__address__]</span></span><br><span class="line"><span class="attr">    regex:</span> <span class="string">(.*):(.*)</span></span><br><span class="line"><span class="attr">    action:</span> <span class="string">replace</span></span><br><span class="line"><span class="attr">    replacement:</span> <span class="string">$1</span></span><br><span class="line"><span class="attr">    target_label:</span> <span class="string">instance</span></span><br></pre></td></tr></table></figure>
+<p><img src="http://mycloudn.kokoerp.com/20180828170215814.jpg" alt="这里写图片描述"><br><strong>可以看到instance标签的值变成了host的IP地址</strong><br><strong>relabel配置解析：</strong></p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">source_labels: [__address__]  #值的来源标签（metadata），__address__是标签名</span><br><span class="line">regex: (.*):(.*)              #正则匹配表达式</span><br><span class="line">action: replace               #动作为替换，默认动作</span><br><span class="line">replacement: <span class="variable">$1</span>               #替换的字段，即将正则表达式第一段匹配到的值赋值给target_label</span><br><span class="line">target_label:<span class="built_in"> instance </span>       #被赋值的标签，可以为metadata中的标签，也可以是自定义的新标签名</span><br></pre></td></tr></table></figure>
+<p>通过relabel，可以做一些自定义过滤规则，实现特殊的需求订制</p>
+<h2 id="配置热更新"><a href="#配置热更新" class="headerlink" title="配置热更新"></a>配置热更新</h2><p>监控配置项调整是非常常见的操作，如果每次调整配置后，都需要重建pod，过程还是比较繁琐漫长的，好在prometheus提供热重载的api，访问方式为：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">curl -X POST  http://<span class="variable">$&#123;IP/DOMAIN&#125;</span>/-/reload</span><br><span class="line"><span class="comment"># 注意，2.0版本以后默认重载api没有开启，需要在prometheus的启动参数里添加指定--web.enable-lifecycle 参数</span></span><br></pre></td></tr></table></figure>
+<h2 id="总结："><a href="#总结：" class="headerlink" title="总结："></a>总结：</h2><p>以上就是在上一篇的基础上对prometheus适应生产环境做的一些扩展，当然，需要做的监控项、应用还很多，配置文件、修改后的grafana模板文件随后打包附上，欢迎交流讨论，一起扩展。</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div id="reward-container">
+  <div>Thank you for your accept. mua！</div>
+  <button id="reward-button" disable="enable" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+
+    
+      
+      
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/reward/wechatpay.png" alt="丨ywq丨 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+      
+      
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/reward/alipay.png" alt="丨ywq丨 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        
+
+
+
+
+  
+
+
+
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>丨ywq丨</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    
+    <a href="https://www.ipyker.com/2018/06/28/k8s(九)、监控--Prometheus扩展篇（mysqld-exporter、服务发现、监控项、联邦、relabel）.html" title="k8s(九)、监控--Prometheus扩展篇（mysqld-exporter、服务发现、监控项、联邦、relabel）">https://www.ipyker.com/2018/06/28/k8s(九)、监控--Prometheus扩展篇（mysqld-exporter、服务发现、监控项、联邦、relabel）.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li>
+</ul>
+
+      </div>
+    
+    <div>
+      
+        <div>
+    
+        <div style="text-align:center;color: #ccc;font-size:16px;">-------------本文结束<i class="fa fa-heart"></i>感谢您的阅读-------------</div>
+    
+</div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Kubernetes/" rel="tag"><i class="fa fa-tag"></i> Kubernetes</a>
+          
+            <a href="/tags/Prometheus/" rel="tag"><i class="fa fa-tag"></i> Prometheus</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/06/26/k8s(八)、监控--Prometheus告警篇（告警消息对接钉钉接口）.html" rel="next" title="k8s(八)、监控--Prometheus告警篇（告警消息对接钉钉接口）">
+                <i class="fa fa-chevron-left"></i> k8s(八)、监控--Prometheus告警篇（告警消息对接钉钉接口）
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/08/02/k8s(十)、微服务--istio1.0抢鲜测试.html" rel="prev" title="k8s(十)、微服务--istio1.0抢鲜测试">
+                k8s(十)、微服务--istio1.0抢鲜测试 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC80NDM5Mi8yMDkyNA=="></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="丨ywq丨">
+            
+              <p class="site-author-name" itemprop="name">丨ywq丨</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives">
+                
+                    <span class="site-state-item-count">74</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                      <a href="/tags">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">15</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/yinwenqin" title="GitHub &rarr; https://github.com/yinwenqin" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://blog.csdn.net/ywq935" title="CSDN &rarr; https://blog.csdn.net/ywq935" rel="noopener" target="_blank"><i class="fa fa-fw fa-globe"></i>CSDN</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-book"></i>
+                推荐阅读
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.upweto.top/gitbooks/useKubernetes/" title="http://blog.upweto.top/gitbooks/useKubernetes/" rel="noopener" target="_blank">kubernetes使用指南</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.upweto.top/gitbooks/kubeSourceCodeNote/" title="http://blog.upweto.top/gitbooks/kubeSourceCodeNote/" rel="noopener" target="_blank">kubernetes源码笔记</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#null"><span class="nav-number">1.</span> <span class="nav-text"> </span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">2.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#mysqld-exporter部署："><span class="nav-number">3.</span> <span class="nav-text">mysqld-exporter部署：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#服务发现"><span class="nav-number">4.</span> <span class="nav-text">服务发现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#监控项"><span class="nav-number">5.</span> <span class="nav-text">监控项</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#联邦"><span class="nav-number">6.</span> <span class="nav-text">联邦</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Relabel"><span class="nav-number">7.</span> <span class="nav-text">Relabel</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#配置热更新"><span class="nav-number">8.</span> <span class="nav-text">配置热更新</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结："><span class="nav-number">9.</span> <span class="nav-text">总结：</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" style=" text-align:center;">&copy; 2017 – <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ywq</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"> 站点字数合计:</i>
+    </span>
+    
+    <span title="站点总字数">583k</span>
+  
+  
+</div>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+<div class="run_time" style=" text-align:center;">
+  <span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
+  <script>
+    var now = new Date(); 
+    function createtime() { 
+        var grt= new Date("08/23/2018 10:00:00");//此处修改你的建站时间或者网站上线时间 
+        now.setTime(now.getTime()+250); 
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days); 
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours); 
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum); 
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;} 
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum); 
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;} 
+        document.getElementById("timeDate").innerHTML = "本站已安全运行 "+dnum+" 天 "; 
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒"; 
+    } 
+    setInterval("createtime()",250);
+  </script>
+</div>
+
+        
+<div class="busuanzi-count" style=" text-align:center;">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-user"></i>
+    </span>
+    <span class="site-uv" title="总访客量">
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span> 人
+    </span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+  
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-eye"></i>
+    </span>
+    <span class="site-pv" title="总访问量">
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span> 次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+  
+    
+    
+      
+    
+  
+  <script color="black" opacity="0.7" zindex="-1" count="140" src="//cdn.jsdelivr.net/gh/theme-next/theme-next-canvas-nest@1.0.0/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+  
+  
+  <script id="ribbon" size="300" alpha="0.1" zindex="-1" src="/lib/canvas-ribbon/canvas-ribbon.js"></script>
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/fancybox/source/jquery.fancybox.pack.js"></script>
+
+
+  
+
+
+  <script src="/js/utils.js?v=7.1.1"></script>
+
+  <script src="/js/motion.js?v=7.1.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/schemes/muse.js?v=7.1.1"></script>
+
+
+
+
+  
+  <script src="/js/scrollspy.js?v=7.1.1"></script>
+<script src="/js/post-details.js?v=7.1.1"></script>
+
+
+
+  
+
+
+  <script src="/js/next-boot.js?v=7.1.1"></script>
+
+
+  
+
+  
+
+  
+  
+  
+
+  
+
+  
+  
+  
+
+
+  
+
+
+  
+    <script>
+  window.livereOptions = {
+    refer: '2018/06/28/k8s(九)、监控--Prometheus扩展篇（mysqld-exporter、服务发现、监控项、联邦、relabel）.html'
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+</script>
+
+  
+
+
+  
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url).replace(/\/{2,}/g, '/');
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x"></i></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x"></i></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+  
+  <script src="/lib/bookmark/bookmark.min.js?v=1.0"></script>
+  <script>
+  
+    bookmark.scrollToMark('auto', "#更多");
+  
+  </script>
+
+
+  
+
+  
+
+  
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/koharu.model.json"},"display":{"position":"left","width":250,"height":500},"mobile":{"show":false},"react":{"opacity":0.7},"log":false});</script></body>
+</html>
+<!-- 页面点击小红心 -->
+<script type="text/javascript" src="/js/src/clicklove.js"></script>

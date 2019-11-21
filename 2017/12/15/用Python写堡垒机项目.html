@@ -1,0 +1,1539 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-CN">
+
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link rel="stylesheet" href="/lib/pace/pace-theme-bounce.min.css?v=1.0.2">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link rel="stylesheet" href="/lib/fancybox/source/jquery.fancybox.css">
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+    
+      
+    
+
+    
+  
+
+  
+
+  
+
+  
+    
+      
+    
+
+    
+  
+
+  
+    
+    
+    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic|Roboto Slab:300,300italic,400,400italic,700,700italic|Roboto Mono:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext">
+  
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.1.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.1.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.1.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.1.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.1.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '7.1.1',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":true,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: true,
+    fancybox: true,
+    fastclick: true,
+    lazyload: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"shrinkIn","post_header":"slideLeftIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideDownIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <script>
+  (function(i,s,o,g,r,a,m){i["DaoVoiceObject"]=r;i[r]=i[r]||function(){(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;a.charset="utf-8";m.parentNode.insertBefore(a,m)})(window,document,"script",('https:' == document.location.protocol ? 'https:' : 'http:') + "//widget.daovoice.io/widget/0f81ff2f.js","daovoice")
+  daovoice('init', {
+      app_id: "bd399fce"
+    });
+  daovoice('update');
+  </script>
+
+  <meta name="description" content="前言堡垒机是一种运维安全审计系统。主要的功能是对运维人员的运维操作进行审计和权限控制，风险规避。同时堡垒机还有账号集中管理，单点登陆的功能。 堡垒机有以下两个至关重要的功能：集中管理安全审计 当公司的服务器变的越来越多后，需要操作这些服务器的人就肯定不只是一个运维人员，同时也可能包括多个开发人员，那么这么多的人操作业务系统，如果权限分配不当就会存在很大的安全风险，举几个场景例子：设想你们公司有30">
+<meta name="keywords" content="Python">
+<meta property="og:type" content="article">
+<meta property="og:title" content="用Python写堡垒机项目">
+<meta property="og:url" content="https://www.ipyker.com/2017/12/15/用Python写堡垒机项目.html">
+<meta property="og:site_name" content="随笔漫谈">
+<meta property="og:description" content="前言堡垒机是一种运维安全审计系统。主要的功能是对运维人员的运维操作进行审计和权限控制，风险规避。同时堡垒机还有账号集中管理，单点登陆的功能。 堡垒机有以下两个至关重要的功能：集中管理安全审计 当公司的服务器变的越来越多后，需要操作这些服务器的人就肯定不只是一个运维人员，同时也可能包括多个开发人员，那么这么多的人操作业务系统，如果权限分配不当就会存在很大的安全风险，举几个场景例子：设想你们公司有30">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://mycloudn.kokoerp.com/V0LzIwMTcxMjE1MjAyODM1MjYz.jpg">
+<meta property="og:image" content="http://mycloudn.kokoerp.com/V0LzIwMTcxMjE1MjA0MDA0Nzg2.jpg">
+<meta property="og:image" content="http://mycloudn.kokoerp.com/V0LzIwMTcxMjE1MjA0MTIzNzM2.jpg">
+<meta property="og:image" content="http://mycloudn.kokoerp.com/V0LzIwMTcxMjE1MjA0OTUwOTQy.jpg">
+<meta property="og:image" content="http://mycloudn.kokoerp.com/V0LzIwMTcxMjE1MjA1MDU1MjY0.jpg">
+<meta property="og:image" content="http://mycloudn.kokoerp.com/V0LzIwMTcxMjE1MjExNzQ4ODU2.jpg">
+<meta property="og:image" content="http://mycloudn.kokoerp.com/V0LzIwMTcxMjE1MjExNzI1ODAx.jpg">
+<meta property="og:updated_time" content="2019-11-21T07:48:40.147Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="用Python写堡垒机项目">
+<meta name="twitter:description" content="前言堡垒机是一种运维安全审计系统。主要的功能是对运维人员的运维操作进行审计和权限控制，风险规避。同时堡垒机还有账号集中管理，单点登陆的功能。 堡垒机有以下两个至关重要的功能：集中管理安全审计 当公司的服务器变的越来越多后，需要操作这些服务器的人就肯定不只是一个运维人员，同时也可能包括多个开发人员，那么这么多的人操作业务系统，如果权限分配不当就会存在很大的安全风险，举几个场景例子：设想你们公司有30">
+<meta name="twitter:image" content="http://mycloudn.kokoerp.com/V0LzIwMTcxMjE1MjAyODM1MjYz.jpg">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="随笔漫谈" type="application/atom+xml">
+
+
+
+  
+  
+  <link rel="canonical" href="https://www.ipyker.com/2017/12/15/用Python写堡垒机项目">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>用Python写堡垒机项目 | 随笔漫谈</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+ 
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">随笔漫谈</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-book">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/gitbooks/" rel="section"><i class="menu-item-icon fa fa-fw fa-book"></i> <br>book</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-互动">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/guestbook/" rel="section"><i class="menu-item-icon fa fa-fw fa-comments"></i> <br>互动</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.ipyker.com/2017/12/15/用Python写堡垒机项目.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="丨ywq丨">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随笔漫谈">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">用Python写堡垒机项目
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2017-12-15 21:22:22" itemprop="dateCreated datePublished" datetime="2017-12-15T21:22:22+08:00">2017-12-15</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-11-21 15:48:40" itemprop="dateModified" datetime="2019-11-21T15:48:40+08:00">2019-11-21</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+            <div class="post-symbolscount">
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">本文字数：</span>
+                
+                <span title="本文字数">8.7k</span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">8 分钟</span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p><strong>前言</strong><br>堡垒机是一种运维安全审计系统。主要的功能是对运维人员的运维操作进行审计和权限控制，风险规避。同时堡垒机还有账号集中管理，单点登陆的功能。</p>
+<p>堡垒机有以下两个至关重要的功能：<br><strong>集中管理</strong><br><strong>安全审计</strong></p>
+<p>当公司的服务器变的越来越多后，需要操作这些服务器的人就肯定不只是一个运维人员，同时也可能包括多个开发人员，那么这么多的人操作业务系统，如果权限分配不当就会存在很大的安全风险，举几个场景例子：<br>设想你们公司有300台Linux服务器，A开发人员需要登录其中5台WEB服务器查看志或进行问题追踪等事务，同时对另外10台hadoop服务器有root权限，在有300台服务器规模的网络中，按常理来讲你是已经使用了ldap权限统一认证的，你如何使这个开发人员只能以普通用户的身份登录5台web服务器，并且同时允许他以管理员的身份登录另外10台hadoop服务器呢？并且同时他对其它剩下的200多台服务器没有访问权限</p>
+<p>小型公司的运维团队为了方面，整个运维团队的运维人员还是共享同一套root密码，这样内部信任机制虽然使大家的工作方便了，但同时存在着极大的安全隐患，很多情况下，一个运维人员只需要管理固定数量的服务器，毕竟公司分为不同的业务线，不同的运维人员管理的业务线也不同，但如果共享一套root密码，其实就等于无限放大了每个运维人员的权限，也就是说，如果某个运维人员想干坏事的话，后果很严重。为了降低风险，于是有人想到，把不同业务线的root密码改掉就ok了么，也就是每个业务线的运维人员只知道自己的密码，这当然是最简单有效的方式，但问题是如果同时用了ldap,这样做又比较麻烦，即使设置了root不通过ldap认证，那新问题就是，每次有运维人员离职，他所在的业务线的密码都需要重新改一次。</p>
+<p>因此，堡垒机的诞生就是为了规避这些高风险的问题，同时减少繁琐的重复性工作。</p>
+<p><strong>工作流程图：</strong><br><img src="http://mycloudn.kokoerp.com/V0LzIwMTcxMjE1MjAyODM1MjYz.jpg" alt="这里写图片描述"></p>
+<h2 id="一、需求分析"><a href="#一、需求分析" class="headerlink" title="一、需求分析"></a>一、需求分析</h2><p>1.所有生产服务器配置iptables安全策略，只能通过堡垒机来登陆，用户首先登陆进堡垒机，再通过堡垒机跳转登陆target host.<br>2.各IT组，按职能划分一个统一的可以真实登陆target host的账户<br>3.组内的成员，使用自己的账号登陆堡垒机，再使用小组账号登陆target host.<br>4.审计。记录下各人员的操作记录，出现问题时可以溯源</p>
+<h2 id="二、表结构设计"><a href="#二、表结构设计" class="headerlink" title="二、表结构设计"></a>二、表结构设计</h2><p>本着最少的字段数据冗余的原则，设计了如下几张表，如果各路大神有更好的设计思路，请指点一二~<br><img src="http://mycloudn.kokoerp.com/V0LzIwMTcxMjE1MjA0MDA0Nzg2.jpg" alt="这里写图片描述"></p>
+<p><strong>表创建代码：</strong></p>
+<figure class="highlight mathematica"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br></pre></td><td class="code"><pre><span class="line">import os,sys</span><br><span class="line">BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))</span><br><span class="line">sys.path.append(BASE_DIR)</span><br><span class="line">from sqlalchemy import <span class="keyword">Table</span>, <span class="keyword">Column</span>, Enum,<span class="keyword">Integer</span>,<span class="keyword">String</span>, ForeignKey,UniqueConstraint</span><br><span class="line">from sqlalchemy.orm import relationship</span><br><span class="line">from sqlalchemy.ext.declarative import declarative_base</span><br><span class="line">from sqlalchemy import create_engine</span><br><span class="line">from conf import config</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Base = declarative_base()</span><br><span class="line"></span><br><span class="line">user_m2m_group_bind_host = <span class="keyword">Table</span>(<span class="string">'user_m2m_group_bind_host'</span>, Base.metadata,</span><br><span class="line">                        <span class="keyword">Column</span>(<span class="string">'id'</span>,<span class="keyword">Integer</span>,autoincrement=<span class="keyword">True</span>,primary_key=<span class="keyword">True</span>),</span><br><span class="line">                        <span class="keyword">Column</span>(<span class="string">'user_id'</span>, <span class="keyword">Integer</span>, ForeignKey(<span class="string">'user.id'</span>)),</span><br><span class="line">                        <span class="keyword">Column</span>(<span class="string">'group_bind_host_id'</span>, <span class="keyword">Integer</span>, ForeignKey(<span class="string">'group_bind_host.id'</span>)),</span><br><span class="line">                        )</span><br><span class="line"></span><br><span class="line">user_m2m_group = <span class="keyword">Table</span>(<span class="string">'user_m2m_group'</span>, Base.metadata,</span><br><span class="line">                               <span class="keyword">Column</span>(<span class="string">'user_id'</span>, <span class="keyword">Integer</span>, ForeignKey(<span class="string">'user.id'</span>)),</span><br><span class="line">                               <span class="keyword">Column</span>(<span class="string">'group_id'</span>, <span class="keyword">Integer</span>, ForeignKey(<span class="string">'group.id'</span>)),</span><br><span class="line">                               )</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">class Host(Base):</span><br><span class="line">    __tablename__ = <span class="string">'host'</span></span><br><span class="line">    id = <span class="keyword">Column</span>(<span class="keyword">Integer</span>,primary_key=<span class="keyword">True</span>)</span><br><span class="line">    hostname = <span class="keyword">Column</span>(<span class="keyword">String</span>(<span class="number">64</span>),unique=<span class="keyword">True</span>)</span><br><span class="line">    ip = <span class="keyword">Column</span>(<span class="keyword">String</span>(<span class="number">64</span>),unique=<span class="keyword">True</span>)</span><br><span class="line">    port = <span class="keyword">Column</span>(<span class="keyword">Integer</span>,default=<span class="number">22</span>)</span><br><span class="line">    groups=relationship(<span class="string">'Group'</span>,secondary=<span class="string">'group_bind_host'</span>)</span><br><span class="line"></span><br><span class="line">    def __repr__(self):</span><br><span class="line">        return self.hostname</span><br><span class="line"></span><br><span class="line">class Group(Base):</span><br><span class="line">    __tablename__ = <span class="string">'group'</span></span><br><span class="line">    id = <span class="keyword">Column</span>(<span class="keyword">Integer</span>, primary_key=<span class="keyword">True</span>)</span><br><span class="line">    name = <span class="keyword">Column</span>(<span class="keyword">String</span>(<span class="number">64</span>), unique=<span class="keyword">True</span>)</span><br><span class="line">    login_passwd=<span class="keyword">Column</span>(<span class="keyword">String</span>(<span class="number">64</span>))</span><br><span class="line">    bind_hosts = relationship(<span class="string">"Host"</span>,secondary=<span class="string">'group_bind_host'</span>)</span><br><span class="line">    users=relationship(<span class="string">'User'</span>,secondary=<span class="string">'user_m2m_group'</span>)</span><br><span class="line"></span><br><span class="line">    def __repr__(self):</span><br><span class="line">        return self.name</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">class Group_Bind_Host(Base):</span><br><span class="line">    __tablename__ = <span class="string">"group_bind_host"</span></span><br><span class="line">    __table_args__ = (UniqueConstraint(<span class="string">'group_id'</span>,<span class="string">'host_id'</span>, name=<span class="string">'_host_remoteuser_uc'</span>),)</span><br><span class="line">    id = <span class="keyword">Column</span>(<span class="keyword">Integer</span>, primary_key=<span class="keyword">True</span>)</span><br><span class="line">    group_id = <span class="keyword">Column</span>(<span class="keyword">Integer</span>, ForeignKey(<span class="string">'group.id'</span>))</span><br><span class="line">    host_id = <span class="keyword">Column</span>(<span class="keyword">Integer</span>,ForeignKey(<span class="string">'host.id'</span>))</span><br><span class="line"></span><br><span class="line">    users=relationship(<span class="string">'User'</span>,secondary=<span class="string">'user_m2m_group_bind_host'</span>,backref=<span class="string">'group_bind_hosts'</span>)</span><br><span class="line"></span><br><span class="line">    #host = relationship(<span class="string">"Host"</span>)</span><br><span class="line">    #host_group = relationship(<span class="string">"Group"</span>,backref=<span class="string">"bind_hosts"</span>)</span><br><span class="line">    #group = relationship(<span class="string">"Group"</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">class User(Base):</span><br><span class="line">    __tablename__ = <span class="string">'user'</span></span><br><span class="line">    id = <span class="keyword">Column</span>(<span class="keyword">Integer</span>,autoincrement=<span class="keyword">True</span>,primary_key=<span class="keyword">True</span>)</span><br><span class="line">    username = <span class="keyword">Column</span>(<span class="keyword">String</span>(<span class="number">32</span>))</span><br><span class="line">    password = <span class="keyword">Column</span>(<span class="keyword">String</span>(<span class="number">128</span>))</span><br><span class="line">    groups = relationship(<span class="string">"Group"</span>,secondary=<span class="string">"user_m2m_group"</span>)</span><br><span class="line">    bind_hosts = relationship(<span class="string">"Group_Bind_Host"</span>, secondary=<span class="string">'user_m2m_group_bind_host'</span>)</span><br><span class="line"></span><br><span class="line">    def __repr__(self):</span><br><span class="line">        return self.username</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">class Log_audit(Base):</span><br><span class="line">    __tablename__= <span class="string">'log_audit'</span></span><br><span class="line">    id = <span class="keyword">Column</span>(<span class="keyword">Integer</span>,autoincrement=<span class="keyword">True</span>,primary_key=<span class="keyword">True</span>)</span><br><span class="line">    user_id = <span class="keyword">Column</span>(<span class="keyword">Integer</span>)</span><br><span class="line">    user_name = <span class="keyword">Column</span>(<span class="keyword">String</span>(<span class="number">32</span>))</span><br><span class="line">    host_ip = <span class="keyword">Column</span>(<span class="keyword">String</span>(<span class="number">32</span>))</span><br><span class="line">    login_user = <span class="keyword">Column</span>(<span class="keyword">String</span>(<span class="number">32</span>))</span><br><span class="line">    action_type = <span class="keyword">Column</span>(<span class="keyword">String</span>(<span class="number">16</span>))</span><br><span class="line">    cmd=<span class="keyword">Column</span>(<span class="keyword">String</span>(<span class="number">128</span>))</span><br><span class="line">    date = <span class="keyword">Column</span>(<span class="keyword">String</span>(<span class="number">16</span>))</span><br><span class="line"></span><br><span class="line">if __name__ == <span class="string">"__main__"</span>:</span><br><span class="line">    engine=create_engine(config.engine_param)</span><br><span class="line">    Base.metadata.create_all(engine)  # 创建表结构</span><br></pre></td></tr></table></figure>
+<h2 id="三、项目代码"><a href="#三、项目代码" class="headerlink" title="三、项目代码"></a>三、项目代码</h2><p>1.整体结构：<br><img src="http://mycloudn.kokoerp.com/V0LzIwMTcxMjE1MjA0MTIzNzM2.jpg" alt="这里写图片描述"></p>
+<p>2.功能说明：<br>1.管理功能<br>——表结构初始化创建<br>——添加组<br>——添加主机<br>——添加用户<br>——添加组-主机绑定</p>
+<p>doc目录下提供了几个添加元素的example文档，使用yaml模块解析这些文档，解析为dict数据类型，将解析出的数据添加进数据库内，例如：<br><img src="http://mycloudn.kokoerp.com/V0LzIwMTcxMjE1MjA0OTUwOTQy.jpg" alt="这里写图片描述"><br>对应实现添加user功能的函数：<br><img src="http://mycloudn.kokoerp.com/V0LzIwMTcxMjE1MjA1MDU1MjY0.jpg" alt="这里写图片描述"></p>
+<p>2.用户视图<br>——查看属组<br>    —查看属组有权限登陆的主机<br>——直接输入IP登陆主机<br>    —查看该IP主机是否有可用的有权限的账户可供登陆<br>——开始会话连接，执行命令时向记录审计志表添加item</p>
+<p><strong>ssh会话实现：</strong><br>        使用了paramiko的demo模块，这个模块本身的交互功能是使用select模型来实现的，使用select监听会话句柄、sys.stdin（标准输入）的可读可写状态，实现字符在终端界面的输入输出。关于I/O多路复用几种模型的个人解读，可以翻看此前的博客：<a href="http://blog.csdn.net/ywq935/article/details/78550286" target="_blank" rel="noopener">网络编程之I/O模型（以吃牛肉面为例）</a>。<br>        对paramiko交互模块进行修改添加记录功能：当标准输入触发回车键时（代表一个命令输入完毕开始执行），记录下执行人、登陆用户、时间、命令内容，写入数据库。修改后的交互模块代码如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Copyright (C) 2003-2007  Robey Pointer &lt;robeypointer@gmail.com&gt;</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># This file is part of paramiko.</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Paramiko is free software; you can redistribute it and/or modify it under the</span></span><br><span class="line"><span class="comment"># terms of the GNU Lesser General Public License as published by the Free</span></span><br><span class="line"><span class="comment"># Software Foundation; either version 2.1 of the License, or (at your option)</span></span><br><span class="line"><span class="comment"># any later version.</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Paramiko is distributed in the hope that it will be useful, but WITHOUT ANY</span></span><br><span class="line"><span class="comment"># WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR</span></span><br><span class="line"><span class="comment"># A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more</span></span><br><span class="line"><span class="comment"># details.</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># You should have received a copy of the GNU Lesser General Public License</span></span><br><span class="line"><span class="comment"># along with Paramiko; if not, write to the Free Software Foundation, Inc.,</span></span><br><span class="line"><span class="comment"># 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA.</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> socket</span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"><span class="keyword">from</span> paramiko.py3compat <span class="keyword">import</span> u</span><br><span class="line"><span class="keyword">import</span> datetime</span><br><span class="line"><span class="keyword">from</span> moudle <span class="keyword">import</span> table_init</span><br><span class="line"><span class="keyword">from</span> moudle.db_conn <span class="keyword">import</span> session</span><br><span class="line"></span><br><span class="line"><span class="comment"># windows does not have termios...</span></span><br><span class="line"><span class="keyword">try</span>:</span><br><span class="line">    <span class="keyword">import</span> termios</span><br><span class="line">    <span class="keyword">import</span> tty</span><br><span class="line">    has_termios = <span class="literal">True</span></span><br><span class="line"><span class="keyword">except</span> ImportError:</span><br><span class="line">    has_termios = <span class="literal">False</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">interactive_shell</span><span class="params">(chan,user_obj,choose_host,choose_group)</span>:</span></span><br><span class="line">    <span class="keyword">if</span> has_termios:</span><br><span class="line">        posix_shell(chan,user_obj,choose_host,choose_group)</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        windows_shell(chan)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">posix_shell</span><span class="params">(chan,user_obj,choose_host,choose_group)</span>:</span></span><br><span class="line">    <span class="keyword">import</span> select</span><br><span class="line"></span><br><span class="line">    oldtty = termios.tcgetattr(sys.stdin)</span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        tty.setraw(sys.stdin.fileno())</span><br><span class="line">        tty.setcbreak(sys.stdin.fileno())</span><br><span class="line">        chan.settimeout(<span class="number">0.0</span>)</span><br><span class="line">        cmd = <span class="string">''</span></span><br><span class="line"></span><br><span class="line">        tab_key = <span class="literal">False</span></span><br><span class="line">        <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">            r, w, e = select.select([chan, sys.stdin], [], [])</span><br><span class="line">            <span class="keyword">if</span> chan <span class="keyword">in</span> r:</span><br><span class="line">                <span class="keyword">try</span>:</span><br><span class="line">                    x = u(chan.recv(<span class="number">1024</span>))</span><br><span class="line">                    <span class="keyword">if</span> tab_key:</span><br><span class="line">                        <span class="keyword">if</span> x <span class="keyword">not</span> <span class="keyword">in</span> (<span class="string">'\t'</span>,<span class="string">'\r\n'</span>):</span><br><span class="line">                            <span class="comment">#print('tab:',x)</span></span><br><span class="line">                            cmd += x</span><br><span class="line">                        tab_key = <span class="literal">False</span></span><br><span class="line">                    <span class="keyword">if</span> len(x) == <span class="number">0</span>:</span><br><span class="line">                        sys.stdout.write(<span class="string">'\r\n*** EOF\r\n'</span>)</span><br><span class="line">                        <span class="keyword">break</span></span><br><span class="line">                    sys.stdout.write(x)</span><br><span class="line">                    sys.stdout.flush()</span><br><span class="line">                <span class="keyword">except</span> socket.timeout:</span><br><span class="line">                    <span class="keyword">pass</span></span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> sys.stdin <span class="keyword">in</span> r:</span><br><span class="line">                x = sys.stdin.read(<span class="number">1</span>)</span><br><span class="line">                <span class="keyword">if</span> <span class="string">'\r'</span> != x:</span><br><span class="line">                    cmd +=x      <span class="comment">#输入字符不包含回车，则命令还未输入完成，包含回车且输入字符长度大于0，则记录志</span></span><br><span class="line">                <span class="keyword">if</span> <span class="string">'\r'</span> == x <span class="keyword">and</span> len(cmd)&gt;<span class="number">0</span>:</span><br><span class="line">                    log_item = table_init.Log_audit(user_id=user_obj.id,</span><br><span class="line">                                               user_name=user_obj.username,</span><br><span class="line">                                          host_ip=choose_host.ip,</span><br><span class="line">                                          login_user=choose_group.name,</span><br><span class="line">                                          action_type=<span class="string">'cmd'</span>,</span><br><span class="line">                                          cmd=cmd ,</span><br><span class="line">                                          date=datetime.datetime.now().strftime(<span class="string">"%Y-%m-%d %H:%M:%S"</span>)</span><br><span class="line"></span><br><span class="line">                                          )</span><br><span class="line">                    session.add(log_item)</span><br><span class="line">                    session.commit()</span><br><span class="line">                    cmd = <span class="string">''</span></span><br><span class="line"></span><br><span class="line">                <span class="keyword">if</span> <span class="string">'\t'</span> == x:</span><br><span class="line">                    tab_key = <span class="literal">True</span></span><br><span class="line">                <span class="comment"># if len(x) == 0:</span></span><br><span class="line">                <span class="comment">#     break</span></span><br><span class="line">                chan.send(x)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">finally</span>:</span><br><span class="line">        termios.tcsetattr(sys.stdin, termios.TCSADRAIN, oldtty)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># thanks to Mike Looijmans for this code</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">windows_shell</span><span class="params">(chan)</span>:</span></span><br><span class="line">    <span class="keyword">import</span> threading</span><br><span class="line"></span><br><span class="line">    sys.stdout.write(<span class="string">"Line-buffered terminal emulation. Press F6 or ^Z to send EOF.\r\n\r\n"</span>)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">writeall</span><span class="params">(sock)</span>:</span></span><br><span class="line">        <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">            data = sock.recv(<span class="number">256</span>)</span><br><span class="line">            <span class="keyword">if</span> <span class="keyword">not</span> data:</span><br><span class="line">                sys.stdout.write(<span class="string">'\r\n*** EOF ***\r\n\r\n'</span>)</span><br><span class="line">                sys.stdout.flush()</span><br><span class="line">                <span class="keyword">break</span></span><br><span class="line">            sys.stdout.write(data)</span><br><span class="line">            sys.stdout.flush()</span><br><span class="line"></span><br><span class="line">    writer = threading.Thread(target=writeall, args=(chan,))</span><br><span class="line">    writer.start()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">            d = sys.stdin.read(<span class="number">1</span>)</span><br><span class="line">            <span class="keyword">if</span> <span class="keyword">not</span> d:</span><br><span class="line">                <span class="keyword">break</span></span><br><span class="line">            chan.send(d)</span><br><span class="line">    <span class="keyword">except</span> EOFError:</span><br><span class="line">        <span class="comment"># user hit ^Z or F6</span></span><br><span class="line">        <span class="keyword">pass</span></span><br></pre></td></tr></table></figure>
+<h2 id="四、运行效果："><a href="#四、运行效果：" class="headerlink" title="四、运行效果："></a>四、运行效果：</h2><p>在堡垒机上添加用户，在目标主机上添加一个对应登陆用户：<br>在堡垒机上该用户环境变量配置文件中加入：</p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="regexp">/usr/</span>local<span class="regexp">/python3/</span>bin<span class="regexp">/python3  /u</span>sr<span class="regexp">/local/</span>packages<span class="regexp">/MyFortress/</span>bin<span class="regexp">/user_interface.py</span></span><br></pre></td></tr></table></figure>
+<p>使其打开shell后自动运行堡垒机程序，效果如下：<br><img src="http://mycloudn.kokoerp.com/V0LzIwMTcxMjE1MjExNzQ4ODU2.jpg" alt="这里写图片描述"></p>
+<p>查看数据库审计志表，记录正常：<br><img src="http://mycloudn.kokoerp.com/V0LzIwMTcxMjE1MjExNzI1ODAx.jpg" alt="这里写图片描述"></p>
+<p>写了一个星期，终于能跑起来了，github链接：<br><a href="https://github.com/yinwenqin/MyFortress-Server" target="_blank" rel="noopener">https://github.com/yinwenqin/MyFortress-Server</a></p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div id="reward-container">
+  <div>Thank you for your accept. mua！</div>
+  <button id="reward-button" disable="enable" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+
+    
+      
+      
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/reward/wechatpay.png" alt="丨ywq丨 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+      
+      
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/reward/alipay.png" alt="丨ywq丨 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        
+
+
+
+
+  
+
+
+
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>丨ywq丨</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    
+    <a href="https://www.ipyker.com/2017/12/15/用Python写堡垒机项目.html" title="用Python写堡垒机项目">https://www.ipyker.com/2017/12/15/用Python写堡垒机项目.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li>
+</ul>
+
+      </div>
+    
+    <div>
+      
+        <div>
+    
+        <div style="text-align:center;color: #ccc;font-size:16px;">-------------本文结束<i class="fa fa-heart"></i>感谢您的阅读-------------</div>
+    
+</div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Python/" rel="tag"><i class="fa fa-tag"></i> Python</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/12/05/Python ORM ：SQLAlchemy基础使用.html" rel="next" title="Python ORM ：SQLAlchemy基础使用">
+                <i class="fa fa-chevron-left"></i> Python ORM ：SQLAlchemy基础使用
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/12/28/JS：Dom的基本使用.html" rel="prev" title="JS：Dom的基本使用">
+                JS：Dom的基本使用 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC80NDM5Mi8yMDkyNA=="></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="丨ywq丨">
+            
+              <p class="site-author-name" itemprop="name">丨ywq丨</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives">
+                
+                    <span class="site-state-item-count">74</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                      <a href="/tags">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">15</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/yinwenqin" title="GitHub &rarr; https://github.com/yinwenqin" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://blog.csdn.net/ywq935" title="CSDN &rarr; https://blog.csdn.net/ywq935" rel="noopener" target="_blank"><i class="fa fa-fw fa-globe"></i>CSDN</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-book"></i>
+                推荐阅读
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.upweto.top/gitbooks/useKubernetes/" title="http://blog.upweto.top/gitbooks/useKubernetes/" rel="noopener" target="_blank">kubernetes使用指南</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.upweto.top/gitbooks/kubeSourceCodeNote/" title="http://blog.upweto.top/gitbooks/kubeSourceCodeNote/" rel="noopener" target="_blank">kubernetes源码笔记</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#一、需求分析"><span class="nav-number">1.</span> <span class="nav-text">一、需求分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#二、表结构设计"><span class="nav-number">2.</span> <span class="nav-text">二、表结构设计</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#三、项目代码"><span class="nav-number">3.</span> <span class="nav-text">三、项目代码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#四、运行效果："><span class="nav-number">4.</span> <span class="nav-text">四、运行效果：</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" style=" text-align:center;">&copy; 2017 – <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ywq</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"> 站点字数合计:</i>
+    </span>
+    
+    <span title="站点总字数">583k</span>
+  
+  
+</div>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+<div class="run_time" style=" text-align:center;">
+  <span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
+  <script>
+    var now = new Date(); 
+    function createtime() { 
+        var grt= new Date("08/23/2018 10:00:00");//此处修改你的建站时间或者网站上线时间 
+        now.setTime(now.getTime()+250); 
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days); 
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours); 
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum); 
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;} 
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum); 
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;} 
+        document.getElementById("timeDate").innerHTML = "本站已安全运行 "+dnum+" 天 "; 
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒"; 
+    } 
+    setInterval("createtime()",250);
+  </script>
+</div>
+
+        
+<div class="busuanzi-count" style=" text-align:center;">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-user"></i>
+    </span>
+    <span class="site-uv" title="总访客量">
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span> 人
+    </span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+  
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-eye"></i>
+    </span>
+    <span class="site-pv" title="总访问量">
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span> 次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+  
+    
+    
+      
+    
+  
+  <script color="black" opacity="0.7" zindex="-1" count="140" src="//cdn.jsdelivr.net/gh/theme-next/theme-next-canvas-nest@1.0.0/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+  
+  
+  <script id="ribbon" size="300" alpha="0.1" zindex="-1" src="/lib/canvas-ribbon/canvas-ribbon.js"></script>
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/fancybox/source/jquery.fancybox.pack.js"></script>
+
+
+  
+
+
+  <script src="/js/utils.js?v=7.1.1"></script>
+
+  <script src="/js/motion.js?v=7.1.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/schemes/muse.js?v=7.1.1"></script>
+
+
+
+
+  
+  <script src="/js/scrollspy.js?v=7.1.1"></script>
+<script src="/js/post-details.js?v=7.1.1"></script>
+
+
+
+  
+
+
+  <script src="/js/next-boot.js?v=7.1.1"></script>
+
+
+  
+
+  
+
+  
+  
+  
+
+  
+
+  
+  
+  
+
+
+  
+
+
+  
+    <script>
+  window.livereOptions = {
+    refer: '2017/12/15/用Python写堡垒机项目.html'
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+</script>
+
+  
+
+
+  
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url).replace(/\/{2,}/g, '/');
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x"></i></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x"></i></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+  
+  <script src="/lib/bookmark/bookmark.min.js?v=1.0"></script>
+  <script>
+  
+    bookmark.scrollToMark('auto', "#更多");
+  
+  </script>
+
+
+  
+
+  
+
+  
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/koharu.model.json"},"display":{"position":"left","width":250,"height":500},"mobile":{"show":false},"react":{"opacity":0.7},"log":false});</script></body>
+</html>
+<!-- 页面点击小红心 -->
+<script type="text/javascript" src="/js/src/clicklove.js"></script>

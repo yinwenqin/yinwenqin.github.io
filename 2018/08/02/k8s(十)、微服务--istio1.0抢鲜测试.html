@@ -1,0 +1,1561 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-CN">
+
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link rel="stylesheet" href="/lib/pace/pace-theme-bounce.min.css?v=1.0.2">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link rel="stylesheet" href="/lib/fancybox/source/jquery.fancybox.css">
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+    
+      
+    
+
+    
+  
+
+  
+
+  
+
+  
+    
+      
+    
+
+    
+  
+
+  
+    
+    
+    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic|Roboto Slab:300,300italic,400,400italic,700,700italic|Roboto Mono:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext">
+  
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.1.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.1.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.1.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.1.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.1.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '7.1.1',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":true,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: true,
+    fancybox: true,
+    fastclick: true,
+    lazyload: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"shrinkIn","post_header":"slideLeftIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideDownIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <script>
+  (function(i,s,o,g,r,a,m){i["DaoVoiceObject"]=r;i[r]=i[r]||function(){(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;a.charset="utf-8";m.parentNode.insertBefore(a,m)})(window,document,"script",('https:' == document.location.protocol ? 'https:' : 'http:') + "//widget.daovoice.io/widget/0f81ff2f.js","daovoice")
+  daovoice('init', {
+      app_id: "bd399fce"
+    });
+  daovoice('update');
+  </script>
+
+  <meta name="description" content="前言此前写了三篇文章，介绍了istio的工作原理、流量调度策略、服务可视化以及监控：k8s（四）、微服务框架istio安装测试k8s（五）、微服务框架istio流量策略控制k8s（六）、微服务框架istio服务可视化与监控istio项目成立1/多以来，鲜有生产上的用例，但这次最新的1.0版本，在官网介绍上赫然写着:  All of our core features are now ready">
+<meta name="keywords" content="Kubernetes,Istio">
+<meta property="og:type" content="article">
+<meta property="og:title" content="k8s(十)、微服务--istio1.0抢鲜测试">
+<meta property="og:url" content="https://www.ipyker.com/2018/08/02/k8s(十)、微服务--istio1.0抢鲜测试.html">
+<meta property="og:site_name" content="随笔漫谈">
+<meta property="og:description" content="前言此前写了三篇文章，介绍了istio的工作原理、流量调度策略、服务可视化以及监控：k8s（四）、微服务框架istio安装测试k8s（五）、微服务框架istio流量策略控制k8s（六）、微服务框架istio服务可视化与监控istio项目成立1/多以来，鲜有生产上的用例，但这次最新的1.0版本，在官网介绍上赫然写着:  All of our core features are now ready">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://mycloudn.kokoerp.com/20180802155357598.jpg">
+<meta property="og:image" content="http://mycloudn.kokoerp.com/20180802144428672.jpg">
+<meta property="og:image" content="http://mycloudn.kokoerp.com/2018080215090256.jpg">
+<meta property="og:image" content="http://mycloudn.kokoerp.com/20180802150912239.jpg">
+<meta property="og:image" content="http://mycloudn.kokoerp.com/20180802154533704.jpg">
+<meta property="og:updated_time" content="2019-11-21T07:48:40.130Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="k8s(十)、微服务--istio1.0抢鲜测试">
+<meta name="twitter:description" content="前言此前写了三篇文章，介绍了istio的工作原理、流量调度策略、服务可视化以及监控：k8s（四）、微服务框架istio安装测试k8s（五）、微服务框架istio流量策略控制k8s（六）、微服务框架istio服务可视化与监控istio项目成立1/多以来，鲜有生产上的用例，但这次最新的1.0版本，在官网介绍上赫然写着:  All of our core features are now ready">
+<meta name="twitter:image" content="http://mycloudn.kokoerp.com/20180802155357598.jpg">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="随笔漫谈" type="application/atom+xml">
+
+
+
+  
+  
+  <link rel="canonical" href="https://www.ipyker.com/2018/08/02/k8s(十)、微服务--istio1.0抢鲜测试">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>k8s(十)、微服务--istio1.0抢鲜测试 | 随笔漫谈</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+ 
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">随笔漫谈</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-book">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/gitbooks/" rel="section"><i class="menu-item-icon fa fa-fw fa-book"></i> <br>book</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-互动">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/guestbook/" rel="section"><i class="menu-item-icon fa fa-fw fa-comments"></i> <br>互动</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.ipyker.com/2018/08/02/k8s(十)、微服务--istio1.0抢鲜测试.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="丨ywq丨">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随笔漫谈">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">k8s(十)、微服务--istio1.0抢鲜测试
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-08-02 15:52:48" itemprop="dateCreated datePublished" datetime="2018-08-02T15:52:48+08:00">2018-08-02</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-11-21 15:48:40" itemprop="dateModified" datetime="2019-11-21T15:48:40+08:00">2019-11-21</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+            <div class="post-symbolscount">
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">本文字数：</span>
+                
+                <span title="本文字数">12k</span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">11 分钟</span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id><a href="#" class="headerlink" title=" "></a> </h2><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>此前写了三篇文章，介绍了istio的工作原理、流量调度策略、服务可视化以及监控：<br><a href="https://blog.csdn.net/ywq935/article/details/80592061" target="_blank" rel="noopener">k8s（四）、微服务框架istio安装测试</a><br><a href="https://blog.csdn.net/ywq935/article/details/80594098" target="_blank" rel="noopener">k8s（五）、微服务框架istio流量策略控制</a><br><a href="https://blog.csdn.net/ywq935/article/details/80599297" target="_blank" rel="noopener">k8s（六）、微服务框架istio服务可视化与监控</a><br>istio项目成立1/多以来，鲜有生产上的用例，但这次最新的1.0版本，在官网介绍上赫然写着:<br>  <strong>All of our core features are now ready for production use.</strong></p>
+<p>既然宣称生产可用，那么不妨来试用一番昨晚刚发布热气腾腾的1.0版本。</p>
+<h2 id="一、安装"><a href="#一、安装" class="headerlink" title="一、安装"></a>一、安装</h2><p>首先环境还是基于此前的k8s v1.9集群<br>1.下载安装istio官方包：</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">curl -L <span class="string">https:</span><span class="comment">//git.io/getLatestIstio | sh -</span></span><br><span class="line">mv istio<span class="number">-1.0</span><span class="number">.0</span><span class="regexp">/ /</span>usr/local</span><br><span class="line">ln -sv <span class="regexp">/usr/</span>local<span class="regexp">/istio-1.0.0/</span> <span class="regexp">/usr/</span>local/istio</span><br><span class="line">cd <span class="regexp">/usr/</span>local<span class="regexp">/istio/</span>install<span class="regexp">/kubernetes/</span></span><br></pre></td></tr></table></figure>
+<p>由于集群使用traefik对外服务，因此对官方的istio-demo.yaml部署文件中名为istio-ingressgateway的Service部分稍作修改，修改部分未删除已注释，大约在文件的第2482行开始：<br><figure class="highlight dts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">### </span></span><br><span class="line">vim istio-demo.yaml</span><br><span class="line"></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="symbol">apiVersion:</span> v1</span><br><span class="line"><span class="symbol">kind:</span> Service</span><br><span class="line"><span class="symbol">metadata:</span></span><br><span class="line"><span class="symbol">  name:</span> istio-ingressgateway</span><br><span class="line"><span class="symbol">  namespace:</span> istio-system</span><br><span class="line"><span class="symbol">  annotations:</span></span><br><span class="line"><span class="symbol">  labels:</span></span><br><span class="line"><span class="symbol">    chart:</span> gateways<span class="number">-1.0</span><span class="number">.0</span></span><br><span class="line"><span class="symbol">    release:</span> RELEASE-NAME</span><br><span class="line"><span class="symbol">    heritage:</span> Tiller</span><br><span class="line"><span class="symbol">    app:</span> istio-ingressgateway</span><br><span class="line"><span class="symbol">    istio:</span> ingressgateway</span><br><span class="line"><span class="symbol">spec:</span></span><br><span class="line">  <span class="meta">#type: LoadBalancer</span></span><br><span class="line"><span class="symbol">  type:</span> ClusterIP</span><br><span class="line"><span class="symbol">  selector:</span></span><br><span class="line"><span class="symbol">    app:</span> istio-ingressgateway</span><br><span class="line"><span class="symbol">    istio:</span> ingressgateway</span><br><span class="line"><span class="symbol">  ports:</span></span><br><span class="line">    -</span><br><span class="line"><span class="symbol">      name:</span> http2</span><br><span class="line">      <span class="meta">#nodePort: 31380</span></span><br><span class="line"><span class="symbol">      port:</span> <span class="number">80</span></span><br><span class="line">      <span class="meta">#targetPort: 80</span></span><br><span class="line">    -</span><br><span class="line"><span class="symbol">      name:</span> https</span><br><span class="line">      <span class="meta">#nodePort: 31390</span></span><br><span class="line"><span class="symbol">      port:</span> <span class="number">443</span></span><br><span class="line">    -</span><br><span class="line"><span class="symbol">      name:</span> tcp</span><br><span class="line">      <span class="meta">#nodePort: 31400</span></span><br><span class="line"><span class="symbol">      port:</span> <span class="number">31400</span></span><br><span class="line">    -</span><br><span class="line"><span class="symbol">      name:</span> tcp-pilot-grpc-tls</span><br><span class="line"><span class="symbol">      port:</span> <span class="number">15011</span></span><br><span class="line">      <span class="meta">#targetPort: 15011</span></span><br><span class="line">    -</span><br><span class="line"><span class="symbol">      name:</span> tcp-citadel-grpc-tls</span><br><span class="line"><span class="symbol">      port:</span> <span class="number">8060</span></span><br><span class="line">      <span class="meta">#targetPort: 8060</span></span><br><span class="line">    -</span><br><span class="line"><span class="symbol">      name:</span> http2-prometheus</span><br><span class="line"><span class="symbol">      port:</span> <span class="number">15030</span></span><br><span class="line">      <span class="meta">#targetPort: 15030</span></span><br><span class="line">    -</span><br><span class="line"><span class="symbol">      name:</span> http2-grafana</span><br><span class="line"><span class="symbol">      port:</span> <span class="number">15031</span></span><br><span class="line">      <span class="meta">#targetPort: 15031</span></span><br><span class="line"></span><br><span class="line"><span class="string">'''</span></span><br></pre></td></tr></table></figure></p>
+<p>修改完毕，<code>kubectl apply -f  istio-demo.yaml</code><br>出现了一些类似如下的报错:<br><figure class="highlight subunit"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">error: </span>unable to recognize "install/kubernetes/istio-demo.yaml": no matches for authentication.istio.io/, Kind=Policy</span><br></pre></td></tr></table></figure></p>
+<p>WTF?第一步就出错？去Github查了一下，找到一个issue下的答案说再次<code>kubectl apply -f  istio-demo.yaml</code>就不会有报错了，果然，再次apply之后确实没有报错，推测可能是某些资源之间的依赖关系导致的，几千行的yaml文件，就不深入寻找原因了，继续往下。</p>
+<p>稍后查看pod和svc是否正常部署：</p>
+<figure class="highlight subunit"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">root@yksv001238:/usr/local/istio/install/kubernetes# kubectl get pods -n istio-system</span><br><span class="line">NAME                                        READY     STATUS    RESTARTS   AGE</span><br><span class="line">grafana<span class="string">-6995</span>b4fbd7-kpfsz                    1/1       Running   0          34m</span><br><span class="line">istio-citadel<span class="string">-54</span>f4678f86-bfv72              1/1       Running   0          34m</span><br><span class="line">istio-egressgateway<span class="string">-5</span>d7f8fcc7b-fpfbr        1/1       Running   0          34m</span><br><span class="line">istio-galley<span class="string">-7</span>bd8b5f88f-gtq2x               1/1       Running   0          34m</span><br><span class="line">istio-ingressgateway<span class="string">-6</span>f58fdc8d7-pwwrz       1/1       Running   0          34m</span><br><span class="line">istio-pilot-d99689994-rfk84                 2/2       Running   0          34m</span><br><span class="line">istio-policy<span class="string">-766</span>bf4bd6d-gscqs               2/2       Running   0          34m</span><br><span class="line">istio-sidecar-injector<span class="string">-85</span>ccf84984-m9v99     1/1       Running   0          34m</span><br><span class="line">istio-statsd-prom-bridge<span class="string">-55965</span>ff9c8<span class="string">-8</span>fv4m   1/1       Running   0          34m</span><br><span class="line">istio-telemetry<span class="string">-55</span>b6b5bbc7<span class="string">-9</span>ptrx            2/2       Running   0          34m</span><br><span class="line">istio-tracing<span class="string">-77</span>f9f94b98<span class="string">-5</span>ghc5              1/1       Running   0          34m</span><br><span class="line">prometheus<span class="string">-7456</span>f56c96-qrfpg                 1/1       Running   0          34m</span><br><span class="line">servicegraph<span class="string">-684</span>c85ffb9<span class="string">-6</span>ctmc               1/1       Running   0          34m</span><br></pre></td></tr></table></figure>
+<figure class="highlight x86asm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="symbol">root@yksv001238:</span>/usr/local/istio/install/kubernetes# kubectl get svc -n istio-system</span><br><span class="line">NAME                       TYPE        CLUSTER-<span class="built_in">IP</span>       EXTERNAL-<span class="built_in">IP</span>   PORT(S)                                                           AGE</span><br><span class="line">grafana                    ClusterIP   <span class="number">10.99</span><span class="meta">.131</span><span class="meta">.246</span>    &lt;none&gt;        <span class="number">3000</span>/TCP                                                          34m</span><br><span class="line">istio-citadel              ClusterIP   <span class="number">10.96</span><span class="meta">.83</span><span class="meta">.131</span>     &lt;none&gt;        <span class="number">8060</span>/TCP,<span class="number">9093</span>/TCP                                                 34m</span><br><span class="line">istio-egressgateway        ClusterIP   <span class="number">10.111</span><span class="meta">.29</span><span class="meta">.59</span>     &lt;none&gt;        <span class="number">80</span>/TCP,<span class="number">443</span>/TCP                                                    34m</span><br><span class="line">istio-galley               ClusterIP   <span class="number">10.101</span><span class="meta">.207</span><span class="meta">.154</span>   &lt;none&gt;        <span class="number">443</span>/TCP,<span class="number">9093</span>/TCP                                                  34m</span><br><span class="line">istio-ingressgateway       ClusterIP   <span class="number">10.96</span><span class="meta">.171</span><span class="meta">.51</span>     &lt;none&gt;        <span class="number">80</span>/TCP,<span class="number">443</span>/TCP,<span class="number">31400</span>/TCP,<span class="number">15011</span>/TCP,<span class="number">8060</span>/TCP,<span class="number">15030</span>/TCP,<span class="number">15031</span>/TCP   34m</span><br><span class="line">istio-pilot                ClusterIP   <span class="number">10.103</span><span class="meta">.244</span><span class="meta">.35</span>    &lt;none&gt;        <span class="number">15010</span>/TCP,<span class="number">15011</span>/TCP,<span class="number">8080</span>/TCP,<span class="number">9093</span>/TCP                             34m</span><br><span class="line">istio-policy               ClusterIP   <span class="number">10.108</span><span class="meta">.241</span><span class="meta">.232</span>   &lt;none&gt;        <span class="number">9091</span>/TCP,<span class="number">15004</span>/TCP,<span class="number">9093</span>/TCP                                       34m</span><br><span class="line">istio-sidecar-injector     ClusterIP   <span class="number">10.103</span><span class="meta">.39</span><span class="meta">.16</span>     &lt;none&gt;        <span class="number">443</span>/TCP                                                           34m</span><br><span class="line">istio-statsd-prom-bridge   ClusterIP   <span class="number">10.100</span><span class="meta">.205</span><span class="meta">.153</span>   &lt;none&gt;        <span class="number">9102</span>/TCP,<span class="number">9125</span>/UDP                                                 34m</span><br><span class="line">istio-telemetry            ClusterIP   <span class="number">10.106</span><span class="meta">.175</span><span class="meta">.49</span>    &lt;none&gt;        <span class="number">9091</span>/TCP,<span class="number">15004</span>/TCP,<span class="number">9093</span>/TCP,<span class="number">42422</span>/TCP                             34m</span><br><span class="line">jaeger-agent               ClusterIP   None             &lt;none&gt;        <span class="number">5775</span>/UDP,<span class="number">6831</span>/UDP,<span class="number">6832</span>/UDP                                        34m</span><br><span class="line">jaeger-collector           ClusterIP   <span class="number">10.107</span><span class="meta">.200</span><span class="meta">.30</span>    &lt;none&gt;        <span class="number">14267</span>/TCP,<span class="number">14268</span>/TCP                                               34m</span><br><span class="line">jaeger-query               ClusterIP   <span class="number">10.104</span><span class="meta">.201</span><span class="meta">.226</span>   &lt;none&gt;        <span class="number">16686</span>/TCP                                                         34m</span><br><span class="line">prometheus                 ClusterIP   <span class="number">10.103</span><span class="meta">.110</span><span class="meta">.167</span>   &lt;none&gt;        <span class="number">9090</span>/TCP                                                          34m</span><br><span class="line">servicegraph               ClusterIP   <span class="number">10.108</span><span class="meta">.243</span><span class="meta">.227</span>   &lt;none&gt;        <span class="number">8088</span>/TCP                                                          34m</span><br><span class="line">tracing                    ClusterIP   <span class="number">10.96</span><span class="meta">.208</span><span class="meta">.110</span>    &lt;none&gt;        <span class="number">80</span>/TCP                                                            34m</span><br><span class="line">zipkin                     ClusterIP   <span class="number">10.98</span><span class="meta">.50</span><span class="meta">.58</span>      &lt;none&gt;        <span class="number">9411</span>/TCP                                                          34m</span><br></pre></td></tr></table></figure>
+<p>可以看到，<strong>istio-sidecar-injector</strong>已经部署成功，在此前的0.x的版本中，开启注入的钩子步骤如下，稍显繁琐，在这里已经全部集成在这一个<strong>istio-demo.yaml</strong>文件中了，省去许多步骤。<br><strong>0.x版本开启注入的步骤：</strong><br><img src="http://mycloudn.kokoerp.com/20180802155357598.jpg" alt="这里写图片描述"></p>
+<p><strong>开启指定命名空间的自动注入</strong>：</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl label namespace<span class="built_in"> default </span><span class="attribute">istio-injection</span>=enabled</span><br></pre></td></tr></table></figure>
+<h2 id="二、demo测试"><a href="#二、demo测试" class="headerlink" title="二、demo测试"></a>二、demo测试</h2><p><strong>继续沿用此前的测试demo，对此demo拆分结构不了解的可以先看前面的文章：</strong></p>
+<figure class="highlight crmsh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git <span class="keyword">clone</span> <span class="title">https</span>://github.com/yinwenqin/istio-test.git</span><br></pre></td></tr></table></figure>
+<p><strong>部署服务：</strong></p>
+<figure class="highlight armasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="symbol">cd</span> istio-test</span><br><span class="line"><span class="symbol">kubectl</span> apply -f service/go/<span class="built_in">v1</span>/go-<span class="built_in">v1</span>.yml</span><br><span class="line"><span class="symbol">kubectl</span> apply -f service/go/<span class="built_in">v2</span>/go-<span class="built_in">v2</span>.yml</span><br><span class="line"><span class="symbol">kubectl</span> apply -f service/python/<span class="built_in">v1</span>/python-<span class="built_in">v1</span>.yml</span><br><span class="line"><span class="symbol">kubectl</span> apply -f service/python/<span class="built_in">v2</span>/python-<span class="built_in">v2</span>.yml</span><br><span class="line"><span class="symbol">kubectl</span> apply -f service/js/<span class="built_in">v1</span>/js-<span class="built_in">v1</span>.yml</span><br><span class="line"><span class="symbol">kubectl</span> apply -f service/js/<span class="built_in">v2</span>/js-<span class="built_in">v2</span>.yml</span><br><span class="line"><span class="symbol">kubectl</span> apply -f service/node/<span class="built_in">v1</span>/node-<span class="built_in">v1</span>.yml</span><br><span class="line"><span class="symbol">kubectl</span> apply -f service/node/<span class="built_in">v2</span>/node-<span class="built_in">v2</span>.yml</span><br><span class="line"><span class="symbol">kubectl</span> apply -f service/lua/<span class="built_in">v1</span>/lua-<span class="built_in">v1</span>.yml</span><br><span class="line"><span class="symbol">kubectl</span> apply -f service/lua/<span class="built_in">v2</span>/lua-<span class="built_in">v2</span>.yml</span><br></pre></td></tr></table></figure>
+<p><strong>暴露服务</strong></p>
+<figure class="highlight tcl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">kubectl <span class="keyword">apply</span> -f istio/ingress-python.yml</span><br><span class="line">kubectl <span class="keyword">apply</span> -f istio/ingress-js.yml</span><br><span class="line"><span class="comment"># 这两个ingress内的host字段均为http://istio-test.will，根据path路由到不同的服务上</span></span><br></pre></td></tr></table></figure>
+<p><strong>查看部署结果：</strong></p>
+<figure class="highlight x86asm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="symbol">root@yksv001238:</span>~/istio-<span class="keyword">test</span>/service# kubectl get pods</span><br><span class="line">service-go-v1-84498949c8-4cpks        <span class="number">2</span>/<span class="number">2</span>       Running            <span class="number">1</span>          <span class="number">5h</span></span><br><span class="line">service-go-v1-84498949c8-cjnwq        <span class="number">2</span>/<span class="number">2</span>       Running            <span class="number">0</span>          <span class="number">5h</span></span><br><span class="line">service-go-v2-f7c7fb8d-46xq5          <span class="number">2</span>/<span class="number">2</span>       Running            <span class="number">0</span>          <span class="number">5h</span></span><br><span class="line">service-go-v2-f7c7fb8d-7t7fm          <span class="number">2</span>/<span class="number">2</span>       Running            <span class="number">0</span>          <span class="number">5h</span></span><br><span class="line">service-<span class="keyword">js</span>-v1-6454464f4c-czqsh        <span class="number">2</span>/<span class="number">2</span>       Running            <span class="number">1</span>          <span class="number">5h</span></span><br><span class="line">service-<span class="keyword">js</span>-v1-6454464f4c-v6l58        <span class="number">2</span>/<span class="number">2</span>       Running            <span class="number">0</span>          <span class="number">5h</span></span><br><span class="line">service-lua-v1-65bb7c6b8d-kk4xm       <span class="number">2</span>/<span class="number">2</span>       Running            <span class="number">0</span>          <span class="number">5h</span></span><br><span class="line">service-lua-v1-65bb7c6b8d-pbkng       <span class="number">2</span>/<span class="number">2</span>       Running            <span class="number">0</span>          <span class="number">5h</span></span><br><span class="line">service-lua-v2-864d7954f4-fd454       <span class="number">2</span>/<span class="number">2</span>       Running            <span class="number">0</span>          <span class="number">5h</span></span><br><span class="line">service-lua-v2-864d7954f4-h89h8       <span class="number">2</span>/<span class="number">2</span>       Running            <span class="number">0</span>          <span class="number">5h</span></span><br><span class="line">service-node-v1-6c87fdc44d-mf7ch      <span class="number">2</span>/<span class="number">2</span>       Running            <span class="number">0</span>          <span class="number">5h</span></span><br><span class="line">service-node-v1-6c87fdc44d-zlbsj      <span class="number">2</span>/<span class="number">2</span>       Running            <span class="number">1</span>          <span class="number">5h</span></span><br><span class="line">service-node-v2-7698dc75cd-qhckq      <span class="number">2</span>/<span class="number">2</span>       Running            <span class="number">0</span>          <span class="number">5h</span></span><br><span class="line">service-node-v2-7698dc75cd-r4qs8      <span class="number">2</span>/<span class="number">2</span>       Running            <span class="number">0</span>          <span class="number">5h</span></span><br><span class="line">service-python-v1-c5bf498b-7s47j      <span class="number">2</span>/<span class="number">2</span>       Running            <span class="number">0</span>          <span class="number">5h</span></span><br><span class="line">service-python-v1-c5bf498b-cb7wr      <span class="number">2</span>/<span class="number">2</span>       Running            <span class="number">0</span>          <span class="number">5h</span></span><br><span class="line">service-python-v2-7c8b865568-6wzhk    <span class="number">2</span>/<span class="number">2</span>       Running            <span class="number">0</span>          <span class="number">5h</span></span><br><span class="line">service-python-v2-7c8b865568-<span class="number">8bf7h</span>    <span class="number">2</span>/<span class="number">2</span>       Running            <span class="number">0</span>          <span class="number">5h</span></span><br><span class="line"></span><br><span class="line">###</span><br><span class="line"><span class="symbol">root@yksv001238:</span>~/istio-<span class="keyword">test</span>/service# kubectl describe pod service-go-v1-84498949c8-4cpks</span><br><span class="line">...</span><br><span class="line"><span class="symbol">Image:</span>         gcr.io/istio-release/proxy_init:<span class="number">1.0</span><span class="meta">.0</span></span><br><span class="line"><span class="symbol">Image:</span>          registry.cn-shanghai.aliyuncs.com/istio-<span class="keyword">test</span>/service-go:v1</span><br><span class="line"></span><br><span class="line">##可以看到初始化步骤中生成了两个容器，自动注入成功！</span><br></pre></td></tr></table></figure>
+<p><strong>获取到istio-ingressgateway的ClusterIP：</strong></p>
+<figure class="highlight elixir"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">root<span class="variable">@yksv001238</span><span class="symbol">:~/istio-test/istio</span><span class="comment"># kubectl get svc -n istio-system | grep istio-ingressgateway</span></span><br><span class="line">istio-ingressgateway       ClusterIP   <span class="number">10.96</span>.<span class="number">171.51</span>     &lt;none&gt;        <span class="number">80</span>/TCP,<span class="number">443</span>/TCP,<span class="number">31400</span>/TCP,<span class="number">15011</span>/TCP,<span class="number">8060</span>/TCP,<span class="number">15030</span>/TCP,<span class="number">15031</span>/TCP   <span class="number">19</span>h</span><br></pre></td></tr></table></figure>
+<p><strong>在本机添加一条dns记录，关联ingress host和istio-ingressgateway</strong>：</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">10<span class="selector-class">.96</span><span class="selector-class">.171</span><span class="selector-class">.51</span>  <span class="selector-tag">istio-test</span><span class="selector-class">.will</span></span><br></pre></td></tr></table></figure>
+<p>打开浏览器测试：<br><img src="http://mycloudn.kokoerp.com/20180802144428672.jpg" alt="这里写图片描述"><br><strong>打不开？</strong>哭脸一张，莫不是新版资源间的交互方式有什么变化，导致此前的方式不再适用，联想到1.0版本新增了gateway这种资源，去官网查官网的用例，果然发现了不一样的地方</p>
+<p><strong>官网的新版bookinfo用例说明：<a href="https://istio.io/docs/examples/bookinfo/#confirm-the-app-is-running" target="_blank" rel="noopener">https://istio.io/docs/examples/bookinfo/#confirm-the-app-is-running</a></strong><br>查看官方包中用例的服务暴露文件，发现已经不再适用ingress这种资源了，现版用的是由istio申明的Gateway和VirtualService这两种资源结合工作，代替之前的ingress。</p>
+<p>cat istio/samples/bookinfo/networking/bookinfo-gateway.yaml<br><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">networking.istio.io/v1alpha3</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Gateway</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">bookinfo-gateway</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  selector:</span></span><br><span class="line"><span class="attr">    istio:</span> <span class="string">ingressgateway</span> <span class="comment"># use istio default controller</span></span><br><span class="line"><span class="attr">  servers:</span></span><br><span class="line"><span class="attr">  - port:</span></span><br><span class="line"><span class="attr">      number:</span> <span class="number">80</span></span><br><span class="line"><span class="attr">      name:</span> <span class="string">http</span></span><br><span class="line"><span class="attr">      protocol:</span> <span class="string">HTTP</span></span><br><span class="line"><span class="attr">    hosts:</span></span><br><span class="line"><span class="bullet">    -</span> <span class="string">"*"</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">networking.istio.io/v1alpha3</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">VirtualService</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">bookinfo</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  hosts:</span></span><br><span class="line"><span class="bullet">  -</span> <span class="string">"*"</span></span><br><span class="line"><span class="attr">  gateways:</span></span><br><span class="line"><span class="bullet">  -</span> <span class="string">bookinfo-gateway</span></span><br><span class="line"><span class="attr">  http:</span></span><br><span class="line"><span class="attr">  - match:</span></span><br><span class="line"><span class="attr">    - uri:</span></span><br><span class="line"><span class="attr">        exact:</span> <span class="string">/productpage</span></span><br><span class="line"><span class="attr">    - uri:</span></span><br><span class="line"><span class="attr">        exact:</span> <span class="string">/login</span></span><br><span class="line"><span class="attr">    - uri:</span></span><br><span class="line"><span class="attr">        exact:</span> <span class="string">/logout</span></span><br><span class="line"><span class="attr">    - uri:</span></span><br><span class="line"><span class="attr">        prefix:</span> <span class="string">/api/v1/products</span></span><br><span class="line"><span class="attr">    route:</span></span><br><span class="line"><span class="attr">    - destination:</span></span><br><span class="line"><span class="attr">        host:</span> <span class="string">productpage</span></span><br><span class="line"><span class="attr">        port:</span></span><br><span class="line"><span class="attr">          number:</span> <span class="number">9080</span></span><br></pre></td></tr></table></figure></p>
+<p>看来要针对ingress进行修改了，原来的ingress-js.yaml和ingress-python.yaml文件内容:</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># service-js ingress配置</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">extensions/v1beta1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Ingress</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">ingress-js</span></span><br><span class="line"><span class="attr">  annotations:</span></span><br><span class="line">    <span class="string">kubernetes.io/ingress.class:</span> <span class="string">istio</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  rules:</span></span><br><span class="line"><span class="attr">  - host:</span> <span class="string">istio-test.will</span></span><br><span class="line"><span class="attr">    http:</span></span><br><span class="line"><span class="attr">      paths:</span></span><br><span class="line"><span class="attr">      - path:</span> <span class="string">/.*</span></span><br><span class="line"><span class="attr">        backend:</span></span><br><span class="line"><span class="attr">          serviceName:</span> <span class="string">service-js</span></span><br><span class="line"><span class="attr">          servicePort:</span> <span class="number">80</span></span><br><span class="line">          </span><br><span class="line"><span class="meta">---</span></span><br><span class="line">          </span><br><span class="line"><span class="comment"># service-python ingress配置</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">extensions/v1beta1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Ingress</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">ingress-python</span></span><br><span class="line"><span class="attr">  annotations:</span></span><br><span class="line">    <span class="string">kubernetes.io/ingress.class:</span> <span class="string">istio</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  rules:</span></span><br><span class="line"><span class="attr">  - host:</span> <span class="string">istio-test.will</span></span><br><span class="line"><span class="attr">    http:</span></span><br><span class="line"><span class="attr">      paths:</span></span><br><span class="line"><span class="attr">      - path:</span> <span class="string">/env</span></span><br><span class="line"><span class="attr">        backend:</span></span><br><span class="line"><span class="attr">          serviceName:</span> <span class="string">service-python</span></span><br><span class="line"><span class="attr">          servicePort:</span> <span class="number">80</span></span><br></pre></td></tr></table></figure>
+<p>修改之后（几个注意的点会在后方说明）：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">root@yksv001238:~/istio-test/istio#</span> <span class="string">cat</span> <span class="string">gateway-demo.yml</span> </span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">networking.istio.io/v1alpha3</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Gateway</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">demo-gateway</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  selector:</span></span><br><span class="line"><span class="attr">    istio:</span> <span class="string">ingressgateway</span> <span class="comment"># use istio default controller</span></span><br><span class="line"><span class="attr">  servers:</span></span><br><span class="line"><span class="attr">  - port:</span></span><br><span class="line"><span class="attr">      number:</span> <span class="number">80</span></span><br><span class="line"><span class="attr">      name:</span> <span class="string">http</span></span><br><span class="line"><span class="attr">      protocol:</span> <span class="string">HTTP</span></span><br><span class="line"><span class="attr">    hosts:</span></span><br><span class="line"><span class="bullet">    -</span> <span class="string">"*"</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">networking.istio.io/v1alpha3</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">VirtualService</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">test-demo</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  hosts:</span></span><br><span class="line"><span class="bullet">  -</span> <span class="string">istio-test.will</span></span><br><span class="line"><span class="attr">  gateways:</span></span><br><span class="line"><span class="bullet">  -</span> <span class="string">demo-gateway</span></span><br><span class="line"><span class="attr">  http:</span></span><br><span class="line"><span class="attr">  - match:</span></span><br><span class="line"><span class="attr">    - uri:</span></span><br><span class="line"><span class="attr">       exact:</span> <span class="string">"/"</span></span><br><span class="line"><span class="attr">    route:</span></span><br><span class="line"><span class="attr">    - destination:</span></span><br><span class="line"><span class="attr">        host:</span> <span class="string">service-js</span></span><br><span class="line"><span class="attr">        port:</span></span><br><span class="line"><span class="attr">          number:</span> <span class="number">80</span></span><br><span class="line"><span class="attr">  - match:</span></span><br><span class="line"><span class="attr">    - uri:</span></span><br><span class="line"><span class="attr">        prefix:</span> <span class="string">"/env"</span></span><br><span class="line"><span class="attr">    route:</span></span><br><span class="line"><span class="attr">    - destination:</span></span><br><span class="line"><span class="attr">        host:</span> <span class="string">service-python</span></span><br><span class="line"><span class="attr">        port:</span></span><br><span class="line"><span class="attr">          number:</span> <span class="number">80</span></span><br></pre></td></tr></table></figure>
+<p>查看资源是否生成：<br><figure class="highlight elixir"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">root<span class="variable">@yksv001238</span><span class="symbol">:~/istio-test/istio</span><span class="comment"># kubectl apply -f gateway-demo.yml </span></span><br><span class="line">gateway <span class="string">"demo-gateway"</span> configured</span><br><span class="line">virtualservice <span class="string">"test-demo"</span> configured</span><br><span class="line">root<span class="variable">@yksv001238</span><span class="symbol">:~/istio-test/istio</span><span class="comment"># kubectl get gateway</span></span><br><span class="line">NAME           AGE</span><br><span class="line">demo-gateway   <span class="number">2</span>m</span><br><span class="line">root<span class="variable">@yksv001238</span><span class="symbol">:~/istio-test/istio</span><span class="comment"># kubectl get virtualservice</span></span><br><span class="line">NAME        AGE</span><br><span class="line">test-demo   <span class="number">2</span>m</span><br></pre></td></tr></table></figure></p>
+<p>浏览器查看效果：<br><img src="http://mycloudn.kokoerp.com/2018080215090256.jpg" alt="这里写图片描述"><br><img src="http://mycloudn.kokoerp.com/20180802150912239.jpg" alt="这里写图片描述"></p>
+<p>如此前一样，多次点击发射按钮，前端js服务在调用后端的服务时，k8s会根据svc的ep负载均衡策略将流量均衡调度，因此可以看到每次点击按钮，后端服务的版本号都不一致。</p>
+<h2 id="服务暴露注意事项："><a href="#服务暴露注意事项：" class="headerlink" title="服务暴露注意事项："></a>服务暴露注意事项：</h2><p>一、.gateway是推荐作为一个项目的所有微服务节点的通用网关来使用的，建议所有VirtualService共用此gateway</p>
+<p>二、.gateway.spec.selector 必须有istio: ingressgateway标签，才能加入istio-ingress-gateway这个统一的入口</p>
+<p>三、.如果gateway之下的存在多个VirtualService，且VirtualService.spec.hosts如果存在域名冲突的情况，后者会覆盖前者的配置，因此，同一域名下的服务，建议放入同一VirtualService下。</p>
+<p><strong>四（重要）</strong>、.VirtualService.spec.http中的uri匹配规则有三种：<br>  1.不写match规则，从根路径起包含所有子路径完全匹配到destination.host指向的svc<br>  2.match匹配方式为exact，此方式为路径完全绝对匹配，例如上方的<strong>exact: “/“</strong>只能匹配根路径<br>  3.match匹配方式为prefix，此方式为路径前缀匹配，例如上方的<strong>prefix: “/env”</strong>则会匹配以/env开头的所有路径</p>
+<p>  补充说明：根据路径做路由匹配时，如果写为模糊匹配的方式，且存在某一匹配规则的匹配路径覆盖了其他规则的匹配路径，此时被覆盖的规则对应的服务如果存在前端js与后端交互，则会出现304跳转以及随之而来的同源策略造成的跨域问题，因此这里的路径规则匹配要避免不必要的路径重叠以避免出现此类问题。(见下方举例)</p>
+<p><strong>举例：</strong><br>    将上方的VirtualService的第一段稍作修改，exact方式注释掉改为prefix，其余保持不变，此时匹配前缀”/”路径会覆盖其余所有的子路径，因此会产生304跳转：<br><figure class="highlight less"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">http</span>:</span><br><span class="line">- <span class="attribute">match</span>:</span><br><span class="line">  - <span class="attribute">uri</span>:</span><br><span class="line">     #<span class="attribute">exact</span>: <span class="string">"/"</span></span><br><span class="line">     <span class="attribute">prefix</span>: <span class="string">"/"</span></span><br></pre></td></tr></table></figure></p>
+<p>kubectl apply之后再次打开浏览器查看效果：<br><img src="http://mycloudn.kokoerp.com/20180802154533704.jpg" alt="这里写图片描述"><br>无论点击多少次“发射”按钮，结果都是undefined，浏览器提示js未运行，原因如上方说明，请求在处理的过程中先从<code>&quot;/&quot;</code>在转到<code>&quot;/env&quot;</code>过程中出现了304跳转，此时js跨域将被禁，因此，一定要避免不必要的路径设计重叠。</p>
+<p>简单测试使用先到这里，随后将继续体验关于流量策略以及安全策略的一些新特性，待补充。</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div id="reward-container">
+  <div>Thank you for your accept. mua！</div>
+  <button id="reward-button" disable="enable" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+
+    
+      
+      
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/reward/wechatpay.png" alt="丨ywq丨 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+      
+      
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/reward/alipay.png" alt="丨ywq丨 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        
+
+
+
+
+  
+
+
+
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>丨ywq丨</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    
+    <a href="https://www.ipyker.com/2018/08/02/k8s(十)、微服务--istio1.0抢鲜测试.html" title="k8s(十)、微服务--istio1.0抢鲜测试">https://www.ipyker.com/2018/08/02/k8s(十)、微服务--istio1.0抢鲜测试.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li>
+</ul>
+
+      </div>
+    
+    <div>
+      
+        <div>
+    
+        <div style="text-align:center;color: #ccc;font-size:16px;">-------------本文结束<i class="fa fa-heart"></i>感谢您的阅读-------------</div>
+    
+</div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Kubernetes/" rel="tag"><i class="fa fa-tag"></i> Kubernetes</a>
+          
+            <a href="/tags/Istio/" rel="tag"><i class="fa fa-tag"></i> Istio</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/06/28/k8s(九)、监控--Prometheus扩展篇（mysqld-exporter、服务发现、监控项、联邦、relabel）.html" rel="next" title="k8s(九)、监控--Prometheus扩展篇（mysqld-exporter、服务发现、监控项、联邦、relabel）">
+                <i class="fa fa-chevron-left"></i> k8s(九)、监控--Prometheus扩展篇（mysqld-exporter、服务发现、监控项、联邦、relabel）
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/08/16/k8s部署zookeeper_kakfa集群.html" rel="prev" title="k8s部署zookeeper/kakfa集群">
+                k8s部署zookeeper/kakfa集群 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC80NDM5Mi8yMDkyNA=="></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="丨ywq丨">
+            
+              <p class="site-author-name" itemprop="name">丨ywq丨</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives">
+                
+                    <span class="site-state-item-count">74</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                      <a href="/tags">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">15</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/yinwenqin" title="GitHub &rarr; https://github.com/yinwenqin" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://blog.csdn.net/ywq935" title="CSDN &rarr; https://blog.csdn.net/ywq935" rel="noopener" target="_blank"><i class="fa fa-fw fa-globe"></i>CSDN</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-book"></i>
+                推荐阅读
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.upweto.top/gitbooks/useKubernetes/" title="http://blog.upweto.top/gitbooks/useKubernetes/" rel="noopener" target="_blank">kubernetes使用指南</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.upweto.top/gitbooks/kubeSourceCodeNote/" title="http://blog.upweto.top/gitbooks/kubeSourceCodeNote/" rel="noopener" target="_blank">kubernetes源码笔记</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#null"><span class="nav-number">1.</span> <span class="nav-text"> </span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">2.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#一、安装"><span class="nav-number">3.</span> <span class="nav-text">一、安装</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#二、demo测试"><span class="nav-number">4.</span> <span class="nav-text">二、demo测试</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#服务暴露注意事项："><span class="nav-number">5.</span> <span class="nav-text">服务暴露注意事项：</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" style=" text-align:center;">&copy; 2017 – <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ywq</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"> 站点字数合计:</i>
+    </span>
+    
+    <span title="站点总字数">583k</span>
+  
+  
+</div>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+<div class="run_time" style=" text-align:center;">
+  <span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
+  <script>
+    var now = new Date(); 
+    function createtime() { 
+        var grt= new Date("08/23/2018 10:00:00");//此处修改你的建站时间或者网站上线时间 
+        now.setTime(now.getTime()+250); 
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days); 
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours); 
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum); 
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;} 
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum); 
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;} 
+        document.getElementById("timeDate").innerHTML = "本站已安全运行 "+dnum+" 天 "; 
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒"; 
+    } 
+    setInterval("createtime()",250);
+  </script>
+</div>
+
+        
+<div class="busuanzi-count" style=" text-align:center;">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-user"></i>
+    </span>
+    <span class="site-uv" title="总访客量">
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span> 人
+    </span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+  
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-eye"></i>
+    </span>
+    <span class="site-pv" title="总访问量">
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span> 次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+  
+    
+    
+      
+    
+  
+  <script color="black" opacity="0.7" zindex="-1" count="140" src="//cdn.jsdelivr.net/gh/theme-next/theme-next-canvas-nest@1.0.0/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+  
+  
+  <script id="ribbon" size="300" alpha="0.1" zindex="-1" src="/lib/canvas-ribbon/canvas-ribbon.js"></script>
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/fancybox/source/jquery.fancybox.pack.js"></script>
+
+
+  
+
+
+  <script src="/js/utils.js?v=7.1.1"></script>
+
+  <script src="/js/motion.js?v=7.1.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/schemes/muse.js?v=7.1.1"></script>
+
+
+
+
+  
+  <script src="/js/scrollspy.js?v=7.1.1"></script>
+<script src="/js/post-details.js?v=7.1.1"></script>
+
+
+
+  
+
+
+  <script src="/js/next-boot.js?v=7.1.1"></script>
+
+
+  
+
+  
+
+  
+  
+  
+
+  
+
+  
+  
+  
+
+
+  
+
+
+  
+    <script>
+  window.livereOptions = {
+    refer: '2018/08/02/k8s(十)、微服务--istio1.0抢鲜测试.html'
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+</script>
+
+  
+
+
+  
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url).replace(/\/{2,}/g, '/');
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x"></i></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x"></i></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+  
+  <script src="/lib/bookmark/bookmark.min.js?v=1.0"></script>
+  <script>
+  
+    bookmark.scrollToMark('auto', "#更多");
+  
+  </script>
+
+
+  
+
+  
+
+  
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/koharu.model.json"},"display":{"position":"left","width":250,"height":500},"mobile":{"show":false},"react":{"opacity":0.7},"log":false});</script></body>
+</html>
+<!-- 页面点击小红心 -->
+<script type="text/javascript" src="/js/src/clicklove.js"></script>

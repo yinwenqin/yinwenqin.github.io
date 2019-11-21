@@ -1,0 +1,1600 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-CN">
+
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link rel="stylesheet" href="/lib/pace/pace-theme-bounce.min.css?v=1.0.2">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link rel="stylesheet" href="/lib/fancybox/source/jquery.fancybox.css">
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+    
+      
+    
+
+    
+  
+
+  
+
+  
+
+  
+    
+      
+    
+
+    
+  
+
+  
+    
+    
+    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic|Roboto Slab:300,300italic,400,400italic,700,700italic|Roboto Mono:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext">
+  
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.1.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.1.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.1.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.1.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.1.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '7.1.1',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":true,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: true,
+    fancybox: true,
+    fastclick: true,
+    lazyload: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"shrinkIn","post_header":"slideLeftIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideDownIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <script>
+  (function(i,s,o,g,r,a,m){i["DaoVoiceObject"]=r;i[r]=i[r]||function(){(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;a.charset="utf-8";m.parentNode.insertBefore(a,m)})(window,document,"script",('https:' == document.location.protocol ? 'https:' : 'http:') + "//widget.daovoice.io/widget/0f81ff2f.js","daovoice")
+  daovoice('init', {
+      app_id: "bd399fce"
+    });
+  daovoice('update');
+  </script>
+
+  <meta name="description" content="Kubernetes各组件参数配置优化建议kubernetes虽然默认配置下已经足够可用满足常见的中小规模场景，但是若是将各组件参数、内核参数进行适当的调整，以达到更贴合使用场景的参数值，对集群运行的稳定性、故障切换能力等方面会有不小的提升。下面介绍一下各组件生产运行常做的一些参数调整。 Kubelet参数配置kubelet在各个组件之中，作为唯一的分布在每个节点上的daemon控制程序，应该也是">
+<meta name="keywords" content="Kubernetes">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kubernetes各组件参数配置优化建议">
+<meta property="og:url" content="https://www.ipyker.com/2019/11/17/Kubernetes各组件参数配置优化建议.html">
+<meta property="og:site_name" content="随笔漫谈">
+<meta property="og:description" content="Kubernetes各组件参数配置优化建议kubernetes虽然默认配置下已经足够可用满足常见的中小规模场景，但是若是将各组件参数、内核参数进行适当的调整，以达到更贴合使用场景的参数值，对集群运行的稳定性、故障切换能力等方面会有不小的提升。下面介绍一下各组件生产运行常做的一些参数调整。 Kubelet参数配置kubelet在各个组件之中，作为唯一的分布在每个节点上的daemon控制程序，应该也是">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-11-21T07:48:40.106Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Kubernetes各组件参数配置优化建议">
+<meta name="twitter:description" content="Kubernetes各组件参数配置优化建议kubernetes虽然默认配置下已经足够可用满足常见的中小规模场景，但是若是将各组件参数、内核参数进行适当的调整，以达到更贴合使用场景的参数值，对集群运行的稳定性、故障切换能力等方面会有不小的提升。下面介绍一下各组件生产运行常做的一些参数调整。 Kubelet参数配置kubelet在各个组件之中，作为唯一的分布在每个节点上的daemon控制程序，应该也是">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="随笔漫谈" type="application/atom+xml">
+
+
+
+  
+  
+  <link rel="canonical" href="https://www.ipyker.com/2019/11/17/Kubernetes各组件参数配置优化建议">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Kubernetes各组件参数配置优化建议 | 随笔漫谈</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+ 
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">随笔漫谈</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-book">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/gitbooks/" rel="section"><i class="menu-item-icon fa fa-fw fa-book"></i> <br>book</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-互动">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/guestbook/" rel="section"><i class="menu-item-icon fa fa-fw fa-comments"></i> <br>互动</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.ipyker.com/2019/11/17/Kubernetes各组件参数配置优化建议.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="丨ywq丨">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随笔漫谈">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Kubernetes各组件参数配置优化建议
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-11-17 20:16:10" itemprop="dateCreated datePublished" datetime="2019-11-17T20:16:10+08:00">2019-11-17</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-11-21 15:48:40" itemprop="dateModified" datetime="2019-11-21T15:48:40+08:00">2019-11-21</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+            <div class="post-symbolscount">
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">本文字数：</span>
+                
+                <span title="本文字数">11k</span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">10 分钟</span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="Kubernetes各组件参数配置优化建议"><a href="#Kubernetes各组件参数配置优化建议" class="headerlink" title="Kubernetes各组件参数配置优化建议"></a>Kubernetes各组件参数配置优化建议</h1><p>kubernetes虽然默认配置下已经足够可用满足常见的中小规模场景，但是若是将各组件参数、内核参数进行适当的调整，以达到更贴合使用场景的参数值，对集群运行的稳定性、故障切换能力等方面会有不小的提升。下面介绍一下各组件生产运行常做的一些参数调整。</p>
+<h3 id="Kubelet参数配置"><a href="#Kubelet参数配置" class="headerlink" title="Kubelet参数配置"></a>Kubelet参数配置</h3><p><strong>kubelet在各个组件之中，作为唯一的分布在每个节点上的daemon控制程序，应该也是需要调整参数最多的组件了，从此前的flag形式的传参，到自1.11版本起的改用专属配置文件，充分说明了其配置调整是很常用的场景，下面举几个常见的配置项，如node状态汇报频率、pod最大数量、以及生产运行非常重要的pod驱逐、资源保留等。</strong></p>
+<h4 id="旧版本kubelet配置"><a href="#旧版本kubelet配置" class="headerlink" title="旧版本kubelet配置"></a>旧版本kubelet配置</h4><p>在1.11版本之前，kubelet通过命令flag的方式指定和调整参数，例如：</p>
+<ul>
+<li><code>--node-status-update-frequency=5s</code> # 向apiserver刷新node状态的时间间隔，默认10s</li>
+<li><code>--serialize-image-pulls=false</code> # 是否串行拉取镜像，默认为true，false改为并行，提升拉取镜像速度</li>
+<li><code>--max-pods=200</code> # 单node运行的最大pod数量，默认110，注意调整不要超过pod CIDR的单个子网可用地址数量。</li>
+<li><code>--eviction-hard=memory.available&lt;1024Mi,nodefs.available&lt;10%</code># 节点资源小于指定值时开启硬驱逐上吗的pod</li>
+</ul>
+<p><strong>资源保留配置</strong></p>
+<p>为防止pod使用过多的资源，从而挤占和影响了k8s控制组件(例如kubelet)、系统管理进程的正常运行，指定以下配置为这两者保留一部分的资源。与pod QOS 一样，资源保留的方式同样也是使用cgroup来做资源隔离保证。</p>
+<ul>
+<li><code>--enforce-node-allocatable=pods,kube-reserved,system-reserved</code> # 开启针对这几者的cgroup资源管理。</li>
+<li><code>--kube-reserved-cgroup=/system.slice/kubelet.service</code> # 指定k8s组件保留资源对应的cgroup路径</li>
+<li><code>--system-reserved-cgroup=/system.slice</code> # 指定系统组件保留资源对应的cgroup路径</li>
+<li>`–kube-reserved=cpu=1,memory=2Gi  # 指定k8s组件保留1g/1c的资源</li>
+<li>`–system-reserved=cpu=1,memory=1Gi # 为系统运行保留1g/1c的资源</li>
+</ul>
+<p>以上参数配置在kubelet systemd启动服务内，例如kubeadm安装的集群，kubelet启动服务一般在<code>/etc/systemd/system/kubelet.service.d/10-kubeadm.conf</code>路径内，配置环境变量的形式来修改启动配置，例如：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 增加一个变量</span></span><br><span class="line">Environment=<span class="string">"RESOUCE_RESERVE_CONFIG_ARGS=--kube-reserved-cgroup=/system.slice/kubelet.service  --system-reserved-cgroup=/system.slice  --kube-reserved=cpu=1,memory=2Gi,ephemeral-storage=1Gi --system-reserved=cpu=1,memory=1Gi,ephemeral-storage=1Gi</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string"># 启动命令末尾加入参数变量</span></span><br><span class="line"><span class="string">ExecStart=/usr/bin/kubelet <span class="variable">$KUBELET_KUBECONFIG_ARGS</span> <span class="variable">$KUBELET_CONFIG_ARGS</span> <span class="variable">$KUBELET_KUBEADM_ARGS</span> <span class="variable">$KUBELET_EXTRA_ARGS</span> <span class="variable">$RESOUCE_RESERVE_CONFIG_ARGS</span></span></span><br></pre></td></tr></table></figure>
+<h4 id="新版本kubelet配置"><a href="#新版本kubelet配置" class="headerlink" title="新版本kubelet配置"></a>新版本kubelet配置</h4><p>1.11及以后的版本，开始使用配置文件的形式指定kubelet配置，不再建议使用flag参数的形式。配置文件的路径在启动服务的文件里可以找到，如果使用的是kubeadm安装的，路径一般是<code>/var/lib/kubelet/config.yaml</code>各版本可能有些许不同。参数其实还是与上方一致，只不过abc-def式写法变成了go更推荐的驼峰式写法，这里不再对参数作解释，直接贴出配置</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">address:</span> <span class="number">0.0</span><span class="number">.0</span><span class="number">.0</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">kubelet.config.k8s.io/v1beta1</span></span><br><span class="line"><span class="attr">authentication:</span></span><br><span class="line"><span class="attr">  anonymous:</span></span><br><span class="line"><span class="attr">    enabled:</span> <span class="literal">false</span></span><br><span class="line"><span class="attr">  webhook:</span></span><br><span class="line"><span class="attr">    cacheTTL:</span> <span class="number">2</span><span class="string">m0s</span></span><br><span class="line"><span class="attr">    enabled:</span> <span class="literal">true</span></span><br><span class="line"><span class="attr">  x509:</span></span><br><span class="line"><span class="attr">    clientCAFile:</span> <span class="string">/etc/kubernetes/pki/ca.crt</span></span><br><span class="line"><span class="attr">authorization:</span></span><br><span class="line"><span class="attr">  mode:</span> <span class="string">Webhook</span></span><br><span class="line"><span class="attr">  webhook:</span></span><br><span class="line"><span class="attr">    cacheAuthorizedTTL:</span> <span class="number">5</span><span class="string">m0s</span></span><br><span class="line"><span class="attr">    cacheUnauthorizedTTL:</span> <span class="number">30</span><span class="string">s</span></span><br><span class="line"><span class="attr">cgroupDriver:</span> <span class="string">cgroupfs</span></span><br><span class="line"><span class="attr">cgroupsPerQOS:</span> <span class="literal">true</span></span><br><span class="line"><span class="attr">clusterDNS:</span></span><br><span class="line"><span class="bullet">-</span> <span class="number">10.112</span><span class="number">.0</span><span class="number">.10</span></span><br><span class="line"><span class="attr">clusterDomain:</span> <span class="string">cluster.local</span></span><br><span class="line"><span class="attr">configMapAndSecretChangeDetectionStrategy:</span> <span class="string">Watch</span></span><br><span class="line"><span class="attr">containerLogMaxFiles:</span> <span class="number">5</span></span><br><span class="line"><span class="attr">containerLogMaxSize:</span> <span class="number">10</span><span class="string">Mi</span></span><br><span class="line"><span class="attr">contentType:</span> <span class="string">application/vnd.kubernetes.protobuf</span></span><br><span class="line"><span class="attr">cpuCFSQuota:</span> <span class="literal">true</span></span><br><span class="line"><span class="attr">cpuCFSQuotaPeriod:</span> <span class="number">100</span><span class="string">ms</span></span><br><span class="line"><span class="attr">cpuManagerPolicy:</span> <span class="string">none</span></span><br><span class="line"><span class="attr">cpuManagerReconcilePeriod:</span> <span class="number">10</span><span class="string">s</span></span><br><span class="line"><span class="attr">enableControllerAttachDetach:</span> <span class="literal">true</span></span><br><span class="line"><span class="attr">enableDebuggingHandlers:</span> <span class="literal">true</span></span><br><span class="line"><span class="comment"># 这里添加kube-reserved, system-reserved仅作参考，官方建议不要开启</span></span><br><span class="line"><span class="attr">enforceNodeAllocatable:</span></span><br><span class="line"><span class="bullet">-</span> <span class="string">pods</span></span><br><span class="line"><span class="bullet">-</span> <span class="string">kube-reserved</span></span><br><span class="line"><span class="bullet">-</span> <span class="string">system-reserved</span></span><br><span class="line"><span class="attr">eventBurst:</span> <span class="number">10</span></span><br><span class="line"><span class="attr">eventRecordQPS:</span> <span class="number">5</span></span><br><span class="line"><span class="attr">evictionHard:</span></span><br><span class="line">  <span class="string">imagefs.available:</span> <span class="number">15</span><span class="string">%</span></span><br><span class="line">  <span class="comment"># 加到1G</span></span><br><span class="line">  <span class="string">memory.available:</span> <span class="number">1024</span><span class="string">Mi</span></span><br><span class="line">  <span class="string">nodefs.available:</span> <span class="number">10</span><span class="string">%</span></span><br><span class="line">  <span class="string">nodefs.inodesFree:</span> <span class="number">5</span><span class="string">%</span></span><br><span class="line"><span class="attr">evictionPressureTransitionPeriod:</span> <span class="number">3</span><span class="string">m0s</span></span><br><span class="line"><span class="attr">failSwapOn:</span> <span class="literal">true</span></span><br><span class="line"><span class="attr">fileCheckFrequency:</span> <span class="number">20</span><span class="string">s</span></span><br><span class="line"><span class="attr">hairpinMode:</span> <span class="string">promiscuous-bridge</span></span><br><span class="line"><span class="attr">healthzBindAddress:</span> <span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span></span><br><span class="line"><span class="attr">healthzPort:</span> <span class="number">10248</span></span><br><span class="line"><span class="attr">httpCheckFrequency:</span> <span class="number">20</span><span class="string">s</span></span><br><span class="line"><span class="attr">imageGCHighThresholdPercent:</span> <span class="number">85</span></span><br><span class="line"><span class="attr">imageGCLowThresholdPercent:</span> <span class="number">80</span></span><br><span class="line"><span class="attr">imageMinimumGCAge:</span> <span class="number">2</span><span class="string">m0s</span></span><br><span class="line"><span class="attr">iptablesDropBit:</span> <span class="number">15</span></span><br><span class="line"><span class="attr">iptablesMasqueradeBit:</span> <span class="number">14</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">KubeletConfiguration</span></span><br><span class="line"><span class="attr">kubeAPIBurst:</span> <span class="number">10</span></span><br><span class="line"><span class="attr">kubeAPIQPS:</span> <span class="number">5</span></span><br><span class="line"><span class="attr">makeIPTablesUtilChains:</span> <span class="literal">true</span></span><br><span class="line"><span class="attr">maxOpenFiles:</span> <span class="number">1000000</span></span><br><span class="line"><span class="comment"># 调整为200</span></span><br><span class="line"><span class="attr">maxPods:</span> <span class="number">200</span></span><br><span class="line"><span class="attr">nodeLeaseDurationSeconds:</span> <span class="number">40</span></span><br><span class="line"><span class="attr">nodeStatusReportFrequency:</span> <span class="number">1</span><span class="string">m0s</span></span><br><span class="line"><span class="attr">nodeStatusUpdateFrequency:</span> <span class="number">10</span><span class="string">s</span></span><br><span class="line"><span class="attr">oomScoreAdj:</span> <span class="bullet">-999</span></span><br><span class="line"><span class="attr">podPidsLimit:</span> <span class="bullet">-1</span></span><br><span class="line"><span class="attr">port:</span> <span class="number">10250</span></span><br><span class="line"><span class="attr">registryBurst:</span> <span class="number">10</span></span><br><span class="line"><span class="attr">registryPullQPS:</span> <span class="number">5</span></span><br><span class="line"><span class="attr">resolvConf:</span> <span class="string">/etc/resolv.conf</span></span><br><span class="line"><span class="attr">rotateCertificates:</span> <span class="literal">true</span></span><br><span class="line"><span class="attr">runtimeRequestTimeout:</span> <span class="number">2</span><span class="string">m0s</span></span><br><span class="line"><span class="attr">serializeImagePulls:</span> <span class="literal">false</span></span><br><span class="line"><span class="attr">staticPodPath:</span> <span class="string">/etc/kubernetes/manifests</span></span><br><span class="line"><span class="attr">streamingConnectionIdleTimeout:</span> <span class="number">4</span><span class="string">h0m0s</span></span><br><span class="line"><span class="attr">syncFrequency:</span> <span class="number">1</span><span class="string">m0s</span></span><br><span class="line"><span class="attr">volumeStatsAggPeriod:</span> <span class="number">1</span><span class="string">m0s</span></span><br><span class="line"><span class="attr">kubeReservedCgroup:</span> <span class="string">/system.slice/kubelet.service</span></span><br><span class="line"><span class="attr">kubeReserved:</span></span><br><span class="line"><span class="attr">  cpu:</span> <span class="string">"1"</span></span><br><span class="line"><span class="attr">  memory:</span> <span class="number">2</span><span class="string">Gi</span></span><br><span class="line"><span class="attr">systemReservedCgroup:</span> <span class="string">/system.slice</span></span><br><span class="line"><span class="comment"># 官方不建议开启systemReserved，因为可能会带来某些不可控的系统关键进程的异常，这里列出仅作参考</span></span><br><span class="line"><span class="attr">systemReserved:</span></span><br><span class="line"><span class="attr">  cpu:</span> <span class="string">"1"</span></span><br><span class="line"><span class="attr">  memory:</span> <span class="number">2</span><span class="string">Gi</span></span><br></pre></td></tr></table></figure>
+<p>看到网上有很多内容高度一致的文章将systemReserved和kubeReserved两者都同时开启了，其实官方不建议开启systemReserved，因为这可能会导致系统关键进程遭遇不可控的风险，说明如下：</p>
+<p><a href="https://kubernetes.io/docs/tasks/administer-cluster/reserve-compute-resources/#general-guidelines" target="_blank" rel="noopener">Be extra careful while enforcing <code>system-reserved</code></a></p>
+<p><strong>注：非常重要！kubelet并不会自动创建cgroup，因此，需要在启动服务前为其指定创建相应cgroup的命令,建议写入启动服务文件内，无论是传统指定flag方式，还是配置文件方式，都需要在启动服务文件内添加创建cgroup的命令，否则kubelet服务会启动失败</strong></p>
+<p>这里贴一个新版本的启动服务文件内容：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">~<span class="comment"># cat /etc/systemd/system/kubelet.service.d/10-kubeadm.conf</span></span><br><span class="line"><span class="comment"># <span class="doctag">Note:</span> This dropin only works with kubeadm and kubelet v1.11+</span></span><br><span class="line">[Service]</span><br><span class="line">Environment=<span class="string">"KUBELET_KUBECONFIG_ARGS=--bootstrap-kubeconfig=/etc/kubernetes/bootstrap-kubelet.conf --kubeconfig=/etc/kubernetes/kubelet.conf"</span></span><br><span class="line">Environment=<span class="string">"KUBELET_CONFIG_ARGS=--config=/var/lib/kubelet/config.yaml"</span></span><br><span class="line"><span class="comment"># This is a file that "kubeadm init" and "kubeadm join" generates at runtime, populating the KUBELET_KUBEADM_ARGS variable dynamically</span></span><br><span class="line">EnvironmentFile=-/var/lib/kubelet/kubeadm-flags.env</span><br><span class="line"><span class="comment"># This is a file that the user can use for overrides of the kubelet args as a last resort. Preferably, the user should use</span></span><br><span class="line"><span class="comment"># the .NodeRegistration.KubeletExtraArgs object in the configuration files instead. KUBELET_EXTRA_ARGS should be sourced from this file.</span></span><br><span class="line">EnvironmentFile=-/etc/default/kubelet</span><br><span class="line"><span class="comment"># 下面两条命令提前创建cgroup</span></span><br><span class="line">ExecStartPre=/bin/mkdir -p /sys/fs/cgroup/cpuset/system.slice/kubelet.service</span><br><span class="line">ExecStartPre=/bin/mkdir -p /sys/fs/cgroup/hugetlb/system.slice/kubelet.service</span><br><span class="line">ExecStart=</span><br><span class="line">ExecStart=/usr/bin/kubelet <span class="variable">$KUBELET_KUBECONFIG_ARGS</span> <span class="variable">$KUBELET_CONFIG_ARGS</span> <span class="variable">$KUBELET_KUBEADM_ARGS</span> <span class="variable">$KUBELET_EXTRA_ARGS</span></span><br></pre></td></tr></table></figure>
+<p>修改完以上配置后，执行<code>systemctl daemon-reload &amp;&amp; systemctl restart kubelet</code>重启kubelet，若无意外，kubelet重启正常后，可检验cgroup是否如期创建指定的内存限制，如下刚好是2g，说明cgroup指定已成功：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cat /sys/fs/cgroup/memory/system.slice/kubelet.service/memory.limit_in_bytes</span><br><span class="line">2147483648</span><br></pre></td></tr></table></figure>
+<p>当然，以上的kubelet配置修改需要重启kubelet，如果你需要直接在线更新kubelet配置的话，可以参考官方的的步骤进行修改配置：</p>
+<p><a href="https://kubernetes.io/docs/tasks/administer-cluster/reconfigure-kubelet/#reconfiguring-the-kubelet-on-a-live-node-in-your-cluster" target="_blank" rel="noopener">Reconfiguring the Kubelet on a Live Node in your Cluster</a></p>
+<h3 id="Controller参数配置"><a href="#Controller参数配置" class="headerlink" title="Controller参数配置"></a>Controller参数配置</h3><p>controller常调整的参数是针对其驱逐功能的，即在node进入离线状态后，将node置为ConditionUnknown状态，并在持续一段时间后开始依一定的次序驱逐问题node上面pod到其他node上，以尽快恢复到声明数量的ready副本数。</p>
+<ul>
+<li><code>--node-cidr-mask-size</code> # node上的pod cidr掩码位数，默认为24位，即最多253个可用地址，视地址空间和pod数量调整。</li>
+<li><code>--node-monitor-period</code> # 检查当前node健康状态的周期间隔，默认5s</li>
+<li><code>--node-monitor-grace-period</code> # 当前node超过了这个指定周期后，即视node为不健康，进入ConditionUnknown状态，默认40s</li>
+<li><code>--pod-eviction-timeout</code> # 当node进入notReady状态后，经过这个指定时间后，会开始驱逐node上的pod，默认5m</li>
+<li><code>--large-cluster-size-threshold</code> # 判断集群是否为大集群，默认为 50，即 50 个节点以上的集群为大集群。</li>
+<li><code>--unhealthy-zone-threshold</code>：# 故障节点数比例，默认为 55%</li>
+<li><code>--node-eviction-rate</code> # 开始对node进行驱逐操作的频率，默认0.1个/s，即每10s最多驱逐某一个node上的pod，避免当master出现问题时，会有批量的node出现异常，这时候如果一次性驱逐过多的node，对master造成额外的压力</li>
+<li><code>--secondary-node-eviction-rate</code>： # 当集群规模大于large-cluster-size-threshold个node时，视为大集群， 集群中只要有55%的node不健康， 就会认为master出现了故障， 会将驱逐速率从0.1降为0.001； 如果集群规模小于large-cluster-size-threshold个node， 集群中出现55%的node不健康，就会停止驱逐。 </li>
+</ul>
+<h4 id="配置建议："><a href="#配置建议：" class="headerlink" title="配置建议："></a>配置建议：</h4><ul>
+<li><p><strong>中大规模集群(500+ node)</strong></p>
+<p>大规模集群一般节点数较多，优势是可用性、抗风险能力强，劣势是组件之间的交互频繁，会给apiServer和etcd带来较大的压力，因此配置建议：</p>
+<ul>
+<li><code>--node-monitor-period</code> 适当增加</li>
+<li><code>--large-cluster-size-threshold</code> 适当增加</li>
+<li><code>--unhealthy-zone-threshold</code> 适当减小</li>
+<li><code>--pod-eviction-timeout</code> 视服务可用性保障级别适当调整</li>
+<li><code>--node-eviction-rate</code> 视服务可用性保障级别适当增加</li>
+<li><code>--secondary-node-eviction-rate</code> 视服务可用性保障级别适当增加</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li><p><strong>小规模集群(100- node)</strong></p>
+<p>小规模集群一般节点数不多，因此副本数量一般也较小，对节点中断的容忍度和容忍时间较低，因此配置建议：</p>
+<ul>
+<li><code>--node-monitor-period</code> 不变或可适当减小</li>
+<li><code>--pod-eviction-timeout</code>大幅减小，如1m-2m，单节点故障尽快转移上面的pod</li>
+<li><code>--node-eviction-rate</code> 建议减小，避免问题pod转移导致集群快速雪崩，预留防范处理时间</li>
+</ul>
+</li>
+</ul>
+<p>如果使用kubeadm部署的，修改yaml文件即可自动触发 apiserver/scheduler/controller这几个static pod的重启, 3者的yaml文件都位于：<code>/etc/kubernetes/manifests/</code>下，修改保存pod即会自动重启加载新配置。</p>
+<p><strong>另注：默认驱逐pod的优先级</strong></p>
+<p>根据pod的QOS保证级别，优先驱逐调度保证保障质量高级别的pod最先恢复正常：</p>
+<p>BestEffort &gt; Burstable &gt; Guaranteed</p>
+<h3 id="ApiServer参数配置"><a href="#ApiServer参数配置" class="headerlink" title="ApiServer参数配置"></a>ApiServer参数配置</h3><ul>
+<li><p><code>--max-mutating-requests-inflight</code>  # 单位时间内的最大修改型请求数量，默认200</p>
+</li>
+<li><p><code>--max-requests-inflight</code>  # 单位时间内的最大非修改型(读)请求数量，默认400</p>
+</li>
+<li><p><code>--watch-cache-sizes</code>  # 各类resource的watch cache，默认100，资源数量较多时需要增加</p>
+</li>
+<li><p><code>--feature-gates=VolumeSubpathEnvExpansion=true</code> # 开启alpha版的功能，默认alpha版功能是关闭的，可以通过这个参数指定来开启某些alpha状态的功能，关于各功能所处的alpha、beta、GA状态，请查询官方文档：</p>
+<p><a href="https://kubernetes-io-vnext-staging.netlify.com/docs/reference/command-line-tools-reference/kube-apiserver/" target="_blank" rel="noopener">https://kubernetes-io-vnext-staging.netlify.com/docs/reference/command-line-tools-reference/kube-apiserver/</a></p>
+</li>
+</ul>
+<h3 id="Scheduler参数配置"><a href="#Scheduler参数配置" class="headerlink" title="Scheduler参数配置"></a>Scheduler参数配置</h3><p>scheduler的配置项比较少，因为调度规则已经是很明确了，不过可以自定义预选和优选策略。</p>
+<ul>
+<li><code>--kube-api-qps</code>  # 请求apiserver的最大qps，默认50</li>
+<li><code>--policy-config-file</code> # json文件，不指定时使用默认的调度预选和优选策略，可以自定义指定，样例参考：<a href="https://gitlab.com/kubernetes/kubernetes/blob/ce2f0b19370db95c7b6a16cfac020858c6e3d420/examples/scheduler-policy-config.json" target="_blank" rel="noopener">scheduler-policy-config.json</a></li>
+</ul>
+<p>调度策略分为预选和优选两个步骤，建议对其过程或源码有一定了解后，再做策略调整，调度过程可以参考我的源码笔记：</p>
+<p><a href="https://blog.upweto.top/gitbooks/kubeSourceCodeNote/#《kubernetes-source-code-note》" target="_blank" rel="noopener">《Kubernetes Source Code Note》</a></p>
+<p>调度策略的调整要与自身的环境结合，默认的优选策略中，每一项计算纬度的权重默认几乎都是1，在我的环境中，比较重视资源平均利用率以及服务副本的高可用性，因此，将<code>SelectorSpreadPriority</code>和<code>BalancedResourceAllocation</code>调高。下面是我的json文件：</p>
+<p><strong>scheduler-policy-config.json</strong></p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="attr">"apiVersion"</span>: <span class="string">"v1"</span>,</span><br><span class="line">    <span class="attr">"kind"</span>: <span class="string">"Policy"</span>,</span><br><span class="line">    <span class="attr">"predicates"</span>: [</span><br><span class="line">        &#123;<span class="attr">"name"</span>: <span class="string">"NoVolumeZoneConflict"</span>&#125;,</span><br><span class="line">        &#123;<span class="attr">"name"</span>: <span class="string">"MaxEBSVolumeCount"</span>&#125;,</span><br><span class="line">        &#123;<span class="attr">"name"</span>: <span class="string">"MaxGCEPDVolumeCount"</span>&#125;,</span><br><span class="line">        &#123;<span class="attr">"name"</span>: <span class="string">"MaxAzureDiskVolumeCount"</span>&#125;,</span><br><span class="line">        &#123;<span class="attr">"name"</span>: <span class="string">"MatchInterPodAffinity"</span>&#125;,</span><br><span class="line">        &#123;<span class="attr">"name"</span>: <span class="string">"NoDiskConflict"</span>&#125;,</span><br><span class="line">        &#123;<span class="attr">"name"</span>: <span class="string">"GeneralPredicates"</span>&#125;,</span><br><span class="line">        &#123;<span class="attr">"name"</span>: <span class="string">"PodToleratesNodeTaints"</span>&#125;,</span><br><span class="line">        </span><br><span class="line">        // 下面三项在v1<span class="number">.12</span>及之后的版本下需要删除掉，这是一个bug，删掉不影响正常工作。</span><br><span class="line">      	// 参考：https://github.com/kubernetes/kops/issues/<span class="number">7740</span></span><br><span class="line">        &#123;<span class="attr">"name"</span>: <span class="string">"CheckNodeMemoryPressure"</span>&#125;,</span><br><span class="line">        &#123;<span class="attr">"name"</span>: <span class="string">"CheckNodeDiskPressure"</span>&#125;,</span><br><span class="line">        &#123;<span class="attr">"name"</span>: <span class="string">"CheckNodeCondition"</span>&#125;,</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="attr">"argument"</span>: &#123;</span><br><span class="line">                <span class="attr">"serviceAffinity"</span>: &#123;</span><br><span class="line">                    <span class="attr">"labels"</span>: [</span><br><span class="line">                        <span class="string">"region"</span></span><br><span class="line">                    ]</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;,</span><br><span class="line">            <span class="attr">"name"</span>: <span class="string">"Region"</span></span><br><span class="line">         &#125;</span><br><span class="line">    ],</span><br><span class="line">    <span class="attr">"priorities"</span>: [</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="attr">"name"</span>: <span class="string">"SelectorSpreadPriority"</span>,</span><br><span class="line">            <span class="attr">"weight"</span>: <span class="number">3</span></span><br><span class="line">        &#125;,</span><br><span class="line">       &#123;</span><br><span class="line">            <span class="attr">"name"</span>: <span class="string">"BalancedResourceAllocation"</span>,</span><br><span class="line">            <span class="attr">"weight"</span>: <span class="number">3</span></span><br><span class="line">        &#125;,</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="attr">"name"</span>: <span class="string">"InterPodAffinityPriority"</span>,</span><br><span class="line">            <span class="attr">"weight"</span>: <span class="number">1</span></span><br><span class="line">        &#125;,</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="attr">"name"</span>: <span class="string">"LeastRequestedPriority"</span>,</span><br><span class="line">            <span class="attr">"weight"</span>: <span class="number">1</span></span><br><span class="line">        &#125;,</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="attr">"name"</span>: <span class="string">"NodePreferAvoidPodsPriority"</span>,</span><br><span class="line">            <span class="attr">"weight"</span>: <span class="number">10000</span></span><br><span class="line">        &#125;,</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="attr">"name"</span>: <span class="string">"NodeAffinityPriority"</span>,</span><br><span class="line">            <span class="attr">"weight"</span>: <span class="number">1</span></span><br><span class="line">        &#125;,</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="attr">"name"</span>: <span class="string">"TaintTolerationPriority"</span>,</span><br><span class="line">            <span class="attr">"weight"</span>: <span class="number">1</span></span><br><span class="line">        &#125;,</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="attr">"argument"</span>: &#123;</span><br><span class="line">                <span class="attr">"serviceAntiAffinity"</span>: &#123;</span><br><span class="line">                    <span class="attr">"label"</span>: <span class="string">"zone"</span></span><br><span class="line">                &#125;</span><br><span class="line">            &#125;,</span><br><span class="line">            <span class="attr">"name"</span>: <span class="string">"Zone"</span>,</span><br><span class="line">            <span class="attr">"weight"</span>: <span class="number">2</span></span><br><span class="line">        &#125;</span><br><span class="line">    ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>注意</strong></p>
+<p>指定policy配置启动scheduler后，会完全覆盖默认注册的所有调度策略，因此，即使是无需改动的策略纬度，必须完全显示的在policy json中写出来，如果不写出，scheduler重启后该项纬度不再使用。</p>
+<p>配置完成后，修改scheduler的启动参数，指定此json文件，同时，最好将此文件使用configMap形式或其他形式持久化挂载。</p>
+<h3 id="内核参数配置"><a href="#内核参数配置" class="headerlink" title="内核参数配置"></a>内核参数配置</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">fs.file-max=1000000</span><br><span class="line"><span class="comment"># max-file 表示系统级别的能够打开的文件句柄的数量</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 配置arp cache 大小</span></span><br><span class="line">net.ipv4.neigh.default.gc_thresh1=1024</span><br><span class="line"><span class="comment"># 存在于ARP高速缓存中的最少层数，如果少于这个数，垃圾收集器将不会运行。缺省值是128。</span></span><br><span class="line"></span><br><span class="line">net.ipv4.neigh.default.gc_thresh2=4096</span><br><span class="line"><span class="comment"># 保存在 ARP 高速缓存中的最多的记录软限制。垃圾收集器在开始收集前，允许记录数超过这个数字 5 秒。缺省值是 512。</span></span><br><span class="line"></span><br><span class="line">net.ipv4.neigh.default.gc_thresh3=8192</span><br><span class="line"><span class="comment"># 保存在 ARP 高速缓存中的最多记录的硬限制，一旦高速缓存中的数目高于此，垃圾收集器将马上运行。缺省值是1024。</span></span><br><span class="line">以上三个参数，当内核维护的arp表过于庞大时候，可以考虑优化</span><br><span class="line"></span><br><span class="line">net.netfilter.nf_conntrack_max=10485760</span><br><span class="line"><span class="comment"># 允许的最大跟踪连接条目，是在内核内存中netfilter可以同时处理的“任务”（连接跟踪条目）</span></span><br><span class="line">net.netfilter.nf_conntrack_tcp_timeout_established=300</span><br><span class="line">net.netfilter.nf_conntrack_buckets=655360</span><br><span class="line"><span class="comment"># 哈希表大小（只读）（64位系统、8G内存默认 65536，16G翻倍，如此类推）</span></span><br><span class="line">net.core.netdev_max_backlog=10000</span><br><span class="line"><span class="comment"># 每个网络接口接收数据包的速率比内核处理这些包的速率快时，允许送到队列的数据包的最大数目。</span></span><br><span class="line">关于conntrack的详细说明：https://testerhome.com/topics/7509</span><br><span class="line"></span><br><span class="line">fs.inotify.max_user_instances=524288</span><br><span class="line"><span class="comment"># 默认值: 128 指定了每一个real user ID可创建的inotify instatnces的数量上限</span></span><br><span class="line"></span><br><span class="line">fs.inotify.max_user_watches=524288</span><br><span class="line"><span class="comment"># 默认值: 8192 指定了每个inotify instance相关联的watches的上限</span></span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div id="reward-container">
+  <div>Thank you for your accept. mua！</div>
+  <button id="reward-button" disable="enable" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+
+    
+      
+      
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/reward/wechatpay.png" alt="丨ywq丨 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+      
+      
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/reward/alipay.png" alt="丨ywq丨 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        
+
+
+
+
+  
+
+
+
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>丨ywq丨</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    
+    <a href="https://www.ipyker.com/2019/11/17/Kubernetes各组件参数配置优化建议.html" title="Kubernetes各组件参数配置优化建议">https://www.ipyker.com/2019/11/17/Kubernetes各组件参数配置优化建议.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li>
+</ul>
+
+      </div>
+    
+    <div>
+      
+        <div>
+    
+        <div style="text-align:center;color: #ccc;font-size:16px;">-------------本文结束<i class="fa fa-heart"></i>感谢您的阅读-------------</div>
+    
+</div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Kubernetes/" rel="tag"><i class="fa fa-tag"></i> Kubernetes</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/09/27/Kubernetes Pod 无法终结问题.html" rel="next" title="Kubernetes Pod 无法终结问题">
+                <i class="fa fa-chevron-left"></i> Kubernetes Pod 无法终结问题
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC80NDM5Mi8yMDkyNA=="></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="丨ywq丨">
+            
+              <p class="site-author-name" itemprop="name">丨ywq丨</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives">
+                
+                    <span class="site-state-item-count">74</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                      <a href="/tags">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">15</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/yinwenqin" title="GitHub &rarr; https://github.com/yinwenqin" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://blog.csdn.net/ywq935" title="CSDN &rarr; https://blog.csdn.net/ywq935" rel="noopener" target="_blank"><i class="fa fa-fw fa-globe"></i>CSDN</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-book"></i>
+                推荐阅读
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.upweto.top/gitbooks/useKubernetes/" title="http://blog.upweto.top/gitbooks/useKubernetes/" rel="noopener" target="_blank">kubernetes使用指南</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.upweto.top/gitbooks/kubeSourceCodeNote/" title="http://blog.upweto.top/gitbooks/kubeSourceCodeNote/" rel="noopener" target="_blank">kubernetes源码笔记</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Kubernetes各组件参数配置优化建议"><span class="nav-number">1.</span> <span class="nav-text">Kubernetes各组件参数配置优化建议</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Kubelet参数配置"><span class="nav-number">1.0.1.</span> <span class="nav-text">Kubelet参数配置</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#旧版本kubelet配置"><span class="nav-number">1.0.1.1.</span> <span class="nav-text">旧版本kubelet配置</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#新版本kubelet配置"><span class="nav-number">1.0.1.2.</span> <span class="nav-text">新版本kubelet配置</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Controller参数配置"><span class="nav-number">1.0.2.</span> <span class="nav-text">Controller参数配置</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#配置建议："><span class="nav-number">1.0.2.1.</span> <span class="nav-text">配置建议：</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ApiServer参数配置"><span class="nav-number">1.0.3.</span> <span class="nav-text">ApiServer参数配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Scheduler参数配置"><span class="nav-number">1.0.4.</span> <span class="nav-text">Scheduler参数配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#内核参数配置"><span class="nav-number">1.0.5.</span> <span class="nav-text">内核参数配置</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" style=" text-align:center;">&copy; 2017 – <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ywq</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"> 站点字数合计:</i>
+    </span>
+    
+    <span title="站点总字数">583k</span>
+  
+  
+</div>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+<div class="run_time" style=" text-align:center;">
+  <span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
+  <script>
+    var now = new Date(); 
+    function createtime() { 
+        var grt= new Date("08/23/2018 10:00:00");//此处修改你的建站时间或者网站上线时间 
+        now.setTime(now.getTime()+250); 
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days); 
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours); 
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum); 
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;} 
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum); 
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;} 
+        document.getElementById("timeDate").innerHTML = "本站已安全运行 "+dnum+" 天 "; 
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒"; 
+    } 
+    setInterval("createtime()",250);
+  </script>
+</div>
+
+        
+<div class="busuanzi-count" style=" text-align:center;">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-user"></i>
+    </span>
+    <span class="site-uv" title="总访客量">
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span> 人
+    </span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+  
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-eye"></i>
+    </span>
+    <span class="site-pv" title="总访问量">
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span> 次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+  
+    
+    
+      
+    
+  
+  <script color="black" opacity="0.7" zindex="-1" count="140" src="//cdn.jsdelivr.net/gh/theme-next/theme-next-canvas-nest@1.0.0/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+  
+  
+  <script id="ribbon" size="300" alpha="0.1" zindex="-1" src="/lib/canvas-ribbon/canvas-ribbon.js"></script>
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/fancybox/source/jquery.fancybox.pack.js"></script>
+
+
+  
+
+
+  <script src="/js/utils.js?v=7.1.1"></script>
+
+  <script src="/js/motion.js?v=7.1.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/schemes/muse.js?v=7.1.1"></script>
+
+
+
+
+  
+  <script src="/js/scrollspy.js?v=7.1.1"></script>
+<script src="/js/post-details.js?v=7.1.1"></script>
+
+
+
+  
+
+
+  <script src="/js/next-boot.js?v=7.1.1"></script>
+
+
+  
+
+  
+
+  
+  
+  
+
+  
+
+  
+  
+  
+
+
+  
+
+
+  
+    <script>
+  window.livereOptions = {
+    refer: '2019/11/17/Kubernetes各组件参数配置优化建议.html'
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+</script>
+
+  
+
+
+  
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url).replace(/\/{2,}/g, '/');
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x"></i></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x"></i></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+  
+  <script src="/lib/bookmark/bookmark.min.js?v=1.0"></script>
+  <script>
+  
+    bookmark.scrollToMark('auto', "#更多");
+  
+  </script>
+
+
+  
+
+  
+
+  
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/koharu.model.json"},"display":{"position":"left","width":250,"height":500},"mobile":{"show":false},"react":{"opacity":0.7},"log":false});</script></body>
+</html>
+<!-- 页面点击小红心 -->
+<script type="text/javascript" src="/js/src/clicklove.js"></script>

@@ -1,0 +1,1545 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-CN">
+
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link rel="stylesheet" href="/lib/pace/pace-theme-bounce.min.css?v=1.0.2">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link rel="stylesheet" href="/lib/fancybox/source/jquery.fancybox.css">
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+    
+      
+    
+
+    
+  
+
+  
+
+  
+
+  
+    
+      
+    
+
+    
+  
+
+  
+    
+    
+    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic|Roboto Slab:300,300italic,400,400italic,700,700italic|Roboto Mono:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext">
+  
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.1.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.1.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.1.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.1.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.1.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '7.1.1',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":true,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: true,
+    fancybox: true,
+    fastclick: true,
+    lazyload: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"shrinkIn","post_header":"slideLeftIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideDownIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <script>
+  (function(i,s,o,g,r,a,m){i["DaoVoiceObject"]=r;i[r]=i[r]||function(){(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;a.charset="utf-8";m.parentNode.insertBefore(a,m)})(window,document,"script",('https:' == document.location.protocol ? 'https:' : 'http:') + "//widget.daovoice.io/widget/0f81ff2f.js","daovoice")
+  daovoice('init', {
+      app_id: "bd399fce"
+    });
+  daovoice('update');
+  </script>
+
+  <meta name="description" content="前言上一篇中，介绍了django的单表操作，本篇描述一下django的多表操作，包括条件过滤、联表操作等. 一、双下划綫条件过滤： 12345678910111213141516171819202122232425262728293031323334353637383940414243444546474849505152535455565758596061626364656667686970717">
+<meta name="keywords" content="Python,Django">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Django（六）、ORM操作进阶">
+<meta property="og:url" content="https://www.ipyker.com/2018/02/03/Django（六）、ORM操作进阶.html">
+<meta property="og:site_name" content="随笔漫谈">
+<meta property="og:description" content="前言上一篇中，介绍了django的单表操作，本篇描述一下django的多表操作，包括条件过滤、联表操作等. 一、双下划綫条件过滤： 12345678910111213141516171819202122232425262728293031323334353637383940414243444546474849505152535455565758596061626364656667686970717">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-11-21T07:48:40.086Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Django（六）、ORM操作进阶">
+<meta name="twitter:description" content="前言上一篇中，介绍了django的单表操作，本篇描述一下django的多表操作，包括条件过滤、联表操作等. 一、双下划綫条件过滤： 12345678910111213141516171819202122232425262728293031323334353637383940414243444546474849505152535455565758596061626364656667686970717">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="随笔漫谈" type="application/atom+xml">
+
+
+
+  
+  
+  <link rel="canonical" href="https://www.ipyker.com/2018/02/03/Django（六）、ORM操作进阶">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Django（六）、ORM操作进阶 | 随笔漫谈</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+ 
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">随笔漫谈</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-book">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/gitbooks/" rel="section"><i class="menu-item-icon fa fa-fw fa-book"></i> <br>book</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-互动">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/guestbook/" rel="section"><i class="menu-item-icon fa fa-fw fa-comments"></i> <br>互动</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.ipyker.com/2018/02/03/Django（六）、ORM操作进阶.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="丨ywq丨">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随笔漫谈">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Django（六）、ORM操作进阶
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-02-03 20:50:41" itemprop="dateCreated datePublished" datetime="2018-02-03T20:50:41+08:00">2018-02-03</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-11-21 15:48:40" itemprop="dateModified" datetime="2019-11-21T15:48:40+08:00">2019-11-21</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+            <div class="post-symbolscount">
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">本文字数：</span>
+                
+                <span title="本文字数">6.9k</span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">6 分钟</span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p><strong>前言</strong><br>上一篇中，介绍了django的单表操作，本篇描述一下django的多表操作，包括条件过滤、联表操作等.</p>
+<p><strong>一、双下划綫条件过滤：</strong></p>
+<figure class="highlight clean"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br></pre></td><td class="code"><pre><span class="line"># 获取个数</span><br><span class="line">        #</span><br><span class="line">        # models.Tb1.objects.filter(name=<span class="string">'seven'</span>).count()</span><br><span class="line"></span><br><span class="line">        # 大于，小于</span><br><span class="line">        #</span><br><span class="line">        # models.Tb1.objects.filter(id__gt=<span class="number">1</span>)              # 获取id大于<span class="number">1</span>的值</span><br><span class="line">        # models.Tb1.objects.filter(id__gte=<span class="number">1</span>)              # 获取id大于等于<span class="number">1</span>的值</span><br><span class="line">        # models.Tb1.objects.filter(id__lt=<span class="number">10</span>)             # 获取id小于<span class="number">10</span>的值</span><br><span class="line">        # models.Tb1.objects.filter(id__lte=<span class="number">10</span>)             # 获取id小于<span class="number">10</span>的值</span><br><span class="line">        # models.Tb1.objects.filter(id__lt=<span class="number">10</span>, id__gt=<span class="number">1</span>)   # 获取id大于<span class="number">1</span> 且 小于<span class="number">10</span>的值</span><br><span class="line"></span><br><span class="line">        # <span class="keyword">in</span></span><br><span class="line">        #</span><br><span class="line">        # models.Tb1.objects.filter(id__in=[<span class="number">11</span>, <span class="number">22</span>, <span class="number">33</span>])   # 获取id等于<span class="number">11</span>、<span class="number">22</span>、<span class="number">33</span>的数据</span><br><span class="line">        # models.Tb1.objects.exclude(id__in=[<span class="number">11</span>, <span class="number">22</span>, <span class="number">33</span>])  # not <span class="keyword">in</span></span><br><span class="line"></span><br><span class="line">        # isnull</span><br><span class="line">        # Entry.objects.filter(pub_date__isnull=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">        # contains</span><br><span class="line">        #</span><br><span class="line">        # models.Tb1.objects.filter(name__contains=<span class="string">"ven"</span>)</span><br><span class="line">        # models.Tb1.objects.filter(name__icontains=<span class="string">"ven"</span>) # icontains大小写不敏感</span><br><span class="line">        # models.Tb1.objects.exclude(name__icontains=<span class="string">"ven"</span>)</span><br><span class="line"></span><br><span class="line">        # range</span><br><span class="line">        #</span><br><span class="line">        # models.Tb1.objects.filter(id__range=[<span class="number">1</span>, <span class="number">2</span>])   # 范围bettwen and</span><br><span class="line"></span><br><span class="line">        # 其他类似</span><br><span class="line">        #</span><br><span class="line">        # startswith，istartswith, endswith, iendswith,</span><br><span class="line"></span><br><span class="line">        # order by</span><br><span class="line">        #</span><br><span class="line">        # models.Tb1.objects.filter(name=<span class="string">'seven'</span>).order_by(<span class="string">'id'</span>)    # asc</span><br><span class="line">        # models.Tb1.objects.filter(name=<span class="string">'seven'</span>).order_by(<span class="string">'-id'</span>)   # desc</span><br><span class="line"></span><br><span class="line">        # group by</span><br><span class="line">        #</span><br><span class="line">        # <span class="keyword">from</span> django.db.models <span class="keyword">import</span> Count, Min, Max, Sum</span><br><span class="line">        # models.Tb1.objects.filter(c1=<span class="number">1</span>).values(<span class="string">'id'</span>).annotate(c=Count(<span class="string">'num'</span>))</span><br><span class="line">        # SELECT <span class="string">"app01_tb1"</span>.<span class="string">"id"</span>, COUNT(<span class="string">"app01_tb1"</span>.<span class="string">"num"</span>) AS <span class="string">"c"</span> FROM <span class="string">"app01_tb1"</span> WHERE <span class="string">"app01_tb1"</span>.<span class="string">"c1"</span> = <span class="number">1</span> GROUP BY <span class="string">"app01_tb1"</span>.<span class="string">"id"</span></span><br><span class="line"></span><br><span class="line">        # limit 、offset</span><br><span class="line">        #</span><br><span class="line">        # models.Tb1.objects.all()[<span class="number">10</span>:<span class="number">20</span>]</span><br><span class="line"></span><br><span class="line">        # regex正则匹配，iregex 不区分大小写</span><br><span class="line">        #</span><br><span class="line">        # Entry.objects.get(title__regex=r<span class="string">'^(An?|The) +'</span>)</span><br><span class="line">        # Entry.objects.get(title__iregex=r<span class="string">'^(an?|the) +'</span>)</span><br><span class="line"></span><br><span class="line">        # date</span><br><span class="line">        #</span><br><span class="line">        # Entry.objects.filter(pub_date__date=datetime.date(<span class="number">2005</span>, <span class="number">1</span>, <span class="number">1</span>))</span><br><span class="line">        # Entry.objects.filter(pub_date__date__gt=datetime.date(<span class="number">2005</span>, <span class="number">1</span>, <span class="number">1</span>))</span><br><span class="line"></span><br><span class="line">        # year</span><br><span class="line">        #</span><br><span class="line">        # Entry.objects.filter(pub_date__year=<span class="number">2005</span>)</span><br><span class="line">        # Entry.objects.filter(pub_date__year__gte=<span class="number">2005</span>)</span><br><span class="line"></span><br><span class="line">        # month</span><br><span class="line">        #</span><br><span class="line">        # Entry.objects.filter(pub_date__month=<span class="number">12</span>)</span><br><span class="line">        # Entry.objects.filter(pub_date__month__gte=<span class="number">6</span>)</span><br><span class="line"></span><br><span class="line">        # day</span><br><span class="line">        #</span><br><span class="line">        # Entry.objects.filter(pub_date__day=<span class="number">3</span>)</span><br><span class="line">        # Entry.objects.filter(pub_date__day__gte=<span class="number">3</span>)</span><br><span class="line"></span><br><span class="line">        # week_day</span><br><span class="line">        #</span><br><span class="line">        # Entry.objects.filter(pub_date__week_day=<span class="number">2</span>)</span><br><span class="line">        # Entry.objects.filter(pub_date__week_day__gte=<span class="number">2</span>)</span><br><span class="line"></span><br><span class="line">        # hour</span><br><span class="line">        #</span><br><span class="line">        # Event.objects.filter(timestamp__hour=<span class="number">23</span>)</span><br><span class="line">        # Event.objects.filter(time__hour=<span class="number">5</span>)</span><br><span class="line">        # Event.objects.filter(timestamp__hour__gte=<span class="number">12</span>)</span><br><span class="line"></span><br><span class="line">        # minute</span><br><span class="line">        #</span><br><span class="line">        # Event.objects.filter(timestamp__minute=<span class="number">29</span>)</span><br><span class="line">        # Event.objects.filter(time__minute=<span class="number">46</span>)</span><br><span class="line">        # Event.objects.filter(timestamp__minute__gte=<span class="number">29</span>)</span><br><span class="line"></span><br><span class="line">        # second</span><br><span class="line">        #</span><br><span class="line">        # Event.objects.filter(timestamp__second=<span class="number">31</span>)</span><br><span class="line">        # Event.objects.filter(time__second=<span class="number">2</span>)</span><br><span class="line">        # Event.objects.filter(timestamp__second__gte=<span class="number">31</span>)</span><br></pre></td></tr></table></figure>
+<p><strong>二、其他操作</strong></p>
+<figure class="highlight clean"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"># 执行原生SQL</span><br><span class="line">#</span><br><span class="line"># <span class="keyword">from</span> django.db <span class="keyword">import</span> connection, connections</span><br><span class="line"># cursor = connection.cursor()  # cursor = connections[<span class="string">'default'</span>].cursor()</span><br><span class="line"># cursor.execute(<span class="string">""</span><span class="string">"SELECT * from auth_user where id = %s"</span><span class="string">""</span>, [<span class="number">1</span>])</span><br><span class="line"># row = cursor.fetchone()</span><br></pre></td></tr></table></figure>
+<p><strong>三、联表操作</strong><br><strong>1.一对多</strong><br>表结构如下：<br><figure class="highlight gams"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">class Book(<span class="keyword">models</span>.<span class="keyword">Model</span>):</span><br><span class="line">    name = <span class="keyword">models</span>.CharField(max_length=<span class="number">32</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">class Author(<span class="keyword">models</span>.<span class="keyword">Model</span>):</span><br><span class="line">    name = <span class="keyword">models</span>.CharField(max_length=<span class="number">32</span>)</span><br><span class="line">    books = <span class="keyword">models</span>.ForeignKey(to=<span class="string">"Book"</span>,to_field=<span class="string">"id"</span>)</span><br></pre></td></tr></table></figure></p>
+<p>查询:<br><figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">#方式一</span><br><span class="line">a1=models<span class="selector-class">.Author</span><span class="selector-class">.objects</span><span class="selector-class">.filter</span>(id=<span class="number">1</span>).first()</span><br><span class="line">a1<span class="selector-class">.books</span><span class="selector-class">.name</span>  #以属性的方式关联，Author类的对象通过books属性关联至Book对象，再通过.name属性获取Book对象的name字段</span><br><span class="line"></span><br><span class="line">#方式二</span><br><span class="line">res=models<span class="selector-class">.Author</span><span class="selector-class">.objects</span><span class="selector-class">.filter</span>(id=<span class="number">1</span>).values(<span class="string">"books_id"</span>,<span class="string">"books__name"</span>)</span><br><span class="line"><span class="function"><span class="title">print</span><span class="params">(res)</span></span></span><br><span class="line">#在本地表通过ForeignKey关联，会在本地表内默认生成一个以指定属性名+<span class="string">'_'</span>+<span class="string">'to_field字段名'</span>的字段，例如这里会生成一个books_id字段，代指book.id字段，因此books_id不需跨表查询，books__id需跨表查询。通过双下划线，可以跨表关联字段，例如book__name字段代指book.name</span><br></pre></td></tr></table></figure></p>
+<p>改:</p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">models<span class="selector-class">.Author</span><span class="selector-class">.objects</span><span class="selector-class">.filter</span>(id=<span class="number">1</span>).update(<span class="string">"books"</span>:[b1,b2..])</span><br></pre></td></tr></table></figure>
+<p><strong>总结：</strong><br>一对多操作,单对象，通过”.”属性方法方式跨表操作，queryset通过”__”跨表取字段</p>
+<p><strong>2.多对多</strong><br><strong>方式一：</strong><br>自定义第三张表：</p>
+<figure class="highlight haskell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="type">Book</span>(<span class="title">models</span>.<span class="type">Model</span>):</span></span><br><span class="line"><span class="class">    name = models.<span class="type">CharField</span>(<span class="title">max_length</span>=32)</span></span><br><span class="line"><span class="class"></span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="type">Author</span>(<span class="title">models</span>.<span class="type">Model</span>):</span></span><br><span class="line"><span class="class">    name = models.<span class="type">CharField</span>(<span class="title">max_length</span>=32)</span></span><br><span class="line"><span class="class"></span></span><br><span class="line"><span class="class"></span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="type">Relation</span>(<span class="title">models</span>.<span class="type">Model</span>):</span></span><br><span class="line"><span class="class">    b = models.<span class="type">ForeignKey</span>('<span class="type">Book</span>')</span></span><br><span class="line"><span class="class">    a= models.<span class="type">ForeignKey</span>('<span class="type">Author</span>')</span></span><br></pre></td></tr></table></figure>
+<p>通过普通表进行反向间接查找</p>
+<pre><code>a1=models.Author.objects.filter(id=1).first()
+obj = a1.relation_set.all()
+#obj取出的是所有包含a1记录的relation类中的对象，queryset格式,使用类名+&quot;_set&quot;的格式时，类名字母需小写
+obj1 = a1.relation_set.select_related(&apos;b&apos;).all()
+#obj1取出的是所有包含a1记录通过relation类关联的Book类的对象，queryset格式
+
+for i in obj:
+    print(i.b.name)  
+for i in obj:
+    print(i.name)    
+</code></pre><p>2 通过关系表relation进行查找</p>
+<pre><code>obj = models.Relation.objects.filter(a__=1).all()
+for i in obj:
+    print(i.b.name)
+</code></pre><p> 通过中间关系表，相较于上面的反向查找更好理解。</p>
+<p><strong>方式二</strong><br>只定义两张表，关系表由django自动创建维护</p>
+<figure class="highlight applescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#models.py</span></span><br><span class="line"><span class="built_in">class</span> Book(models.Model):</span><br><span class="line">    <span class="built_in">name</span> = models.CharField(max_length=<span class="number">32</span>)</span><br><span class="line">   </span><br><span class="line"></span><br><span class="line"><span class="built_in">class</span> Author(models.Model):</span><br><span class="line">    <span class="built_in">name</span> = models.CharField(max_length=<span class="number">32</span>)</span><br><span class="line">    m = models.ManyToManyField('Book')</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># views.py</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># ManyToManyField</span></span><br><span class="line"></span><br><span class="line">    obj = models.Author.objects.filter(<span class="built_in">id</span>=<span class="number">1</span>).<span class="keyword">first</span>()</span><br><span class="line"></span><br><span class="line">	</span><br><span class="line">    <span class="comment"># 增</span></span><br><span class="line">    <span class="comment"># obj.m.add(3)</span></span><br><span class="line">    <span class="comment"># obj.m.add(3,4)</span></span><br><span class="line">    <span class="comment"># obj.m.add(*[1,2])</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 删</span></span><br><span class="line">    <span class="comment"># obj.m.remove(3)</span></span><br><span class="line">    <span class="comment"># obj.m.remove(3,4)</span></span><br><span class="line">    <span class="comment"># obj.m.remove(*[1,2])</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 改</span></span><br><span class="line">    <span class="comment"># obj.m.set([1,2,])</span></span><br><span class="line">    </span><br><span class="line">	<span class="comment">#查</span></span><br><span class="line">	obj.m.all()  <span class="comment">#查出所有的关联Book对象</span></span><br><span class="line">	obj.m.all().values(<span class="string">"id"</span>,<span class="string">"name"</span>)  <span class="comment">#查出所有的关联Book对象的name字段</span></span><br><span class="line">   </span><br><span class="line">    <span class="comment"># for row obj.m.all():</span></span><br><span class="line">    <span class="comment">#     print(row.id,row.name)</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">#清除</span></span><br><span class="line">    <span class="comment"># obj.m.clear()</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 反向查 在没有定义ManyToManyField 字段的表中查</span></span><br><span class="line">    b= models.Book.objects.filter(<span class="built_in">id</span>=<span class="number">1</span>).<span class="keyword">first</span>()</span><br><span class="line">    b_authors = obj.author_set.all()  <span class="comment">#获取所有的对应的Author类的对象</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 反向的改</span></span><br><span class="line">    obj.author_set.<span class="keyword">set</span>([<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>])</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> row <span class="keyword">in</span> girl_list:</span><br><span class="line">        print(row.<span class="built_in">id</span>,row.<span class="built_in">name</span>)</span><br></pre></td></tr></table></figure>
+<p>总结：在没有ForeignKey或者ManyToManyField的表内反向查找时，需要使用使用类名+”_set”的格式来获取对象</p>
+<h2 id="one-to-one-maney-to-maney-foreign-key各种混合关系查询"><a href="#one-to-one-maney-to-maney-foreign-key各种混合关系查询" class="headerlink" title="one to one/maney to maney/foreign key各种混合关系查询"></a>one to one/maney to maney/foreign key各种混合关系查询</h2><figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">class HostInfo(models.Model):</span><br><span class="line">    host = models.OneToOneField(<span class="attribute">to</span>=Host, <span class="attribute">verbose_name</span>=<span class="string">"主机"</span>, <span class="attribute">primary_key</span>=<span class="literal">True</span>)</span><br><span class="line">    hostname = models.CharField(<span class="attribute">verbose_name</span>=<span class="string">"主机名"</span>, <span class="attribute">max_length</span>=100, <span class="attribute">blank</span>=<span class="literal">True</span>, <span class="attribute">null</span>=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">class Host(models.Model):</span><br><span class="line">    name = models.CharField(<span class="attribute">verbose_name</span>=<span class="string">"资产名"</span>, <span class="attribute">max_length</span>=100, <span class="attribute">unique</span>=<span class="literal">True</span>)</span><br><span class="line">   <span class="built_in"> ip </span>= models.ManyToManyField(<span class="attribute">to</span>=IP, <span class="attribute">verbose_name</span>=<span class="string">"IP"</span>, <span class="attribute">blank</span>=<span class="literal">True</span>)</span><br><span class="line">    category = models.ForeignKey(<span class="attribute">to</span>=Category, <span class="attribute">verbose_name</span>=<span class="string">"分类"</span>)</span><br><span class="line">    </span><br><span class="line">class Category(models.Model):</span><br><span class="line">    name = models.CharField(<span class="attribute">max_length</span>=20, <span class="attribute">verbose_name</span>=<span class="string">"分类"</span>)</span><br><span class="line">    </span><br><span class="line">class IP(models.Model):</span><br><span class="line">   <span class="built_in"> address </span>= models.CharField(<span class="attribute">verbose_name</span>=<span class="string">"IP地址"</span>, <span class="attribute">max_length</span>=20)</span><br></pre></td></tr></table></figure>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 根据ip地址查host，hostinfo</span></span><br><span class="line"><span class="attr">ips</span> = (<span class="string">"192.168.1.2"</span>,<span class="string">"192.168.1.3"</span>,)</span><br><span class="line"><span class="attr">host</span> = Host.objects.filter(ip__address__in=ips)</span><br><span class="line"><span class="attr">hostinfo</span> = HostInfo.objects.filter(host__ip__address__in=ips)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 根据类型查host,hostinfo</span></span><br><span class="line"><span class="attr">host</span> = Host.objects.filter(category__name=<span class="string">"physical"</span>)</span><br><span class="line"><span class="attr">hostinfo</span> = HostInfo.objects.filter(host__category__name=<span class="string">"physical"</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># one to one单层关系正查反查：</span></span><br><span class="line"><span class="attr">hostinfo</span> = HostInfo.objects.get(hostname=<span class="string">"test"</span>)</span><br><span class="line"><span class="attr">host</span> = hostinfo.host</span><br><span class="line"></span><br><span class="line"><span class="attr">host</span> = Host.objects.get(name=<span class="string">"company-test1"</span>)</span><br><span class="line"><span class="attr">hostinfo</span> = host.hostinfo  #<span class="literal">on</span>etoone反查使用反查对象类名首字母小写可获取到对象</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div id="reward-container">
+  <div>Thank you for your accept. mua！</div>
+  <button id="reward-button" disable="enable" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+
+    
+      
+      
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/reward/wechatpay.png" alt="丨ywq丨 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+      
+      
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/reward/alipay.png" alt="丨ywq丨 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        
+
+
+
+
+  
+
+
+
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>丨ywq丨</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    
+    <a href="https://www.ipyker.com/2018/02/03/Django（六）、ORM操作进阶.html" title="Django（六）、ORM操作进阶">https://www.ipyker.com/2018/02/03/Django（六）、ORM操作进阶.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li>
+</ul>
+
+      </div>
+    
+    <div>
+      
+        <div>
+    
+        <div style="text-align:center;color: #ccc;font-size:16px;">-------------本文结束<i class="fa fa-heart"></i>感谢您的阅读-------------</div>
+    
+</div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Python/" rel="tag"><i class="fa fa-tag"></i> Python</a>
+          
+            <a href="/tags/Django/" rel="tag"><i class="fa fa-tag"></i> Django</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/01/31/Django ORM对象Json序列化问题.html" rel="next" title="Django ORM对象Json序列化问题">
+                <i class="fa fa-chevron-left"></i> Django ORM对象Json序列化问题
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/03/31/Django-rest-framework (一)、序列化.html" rel="prev" title="Django-rest-framework (一)、序列化">
+                Django-rest-framework (一)、序列化 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC80NDM5Mi8yMDkyNA=="></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="丨ywq丨">
+            
+              <p class="site-author-name" itemprop="name">丨ywq丨</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives">
+                
+                    <span class="site-state-item-count">74</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                      <a href="/tags">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">15</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/yinwenqin" title="GitHub &rarr; https://github.com/yinwenqin" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://blog.csdn.net/ywq935" title="CSDN &rarr; https://blog.csdn.net/ywq935" rel="noopener" target="_blank"><i class="fa fa-fw fa-globe"></i>CSDN</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-book"></i>
+                推荐阅读
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.upweto.top/gitbooks/useKubernetes/" title="http://blog.upweto.top/gitbooks/useKubernetes/" rel="noopener" target="_blank">kubernetes使用指南</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.upweto.top/gitbooks/kubeSourceCodeNote/" title="http://blog.upweto.top/gitbooks/kubeSourceCodeNote/" rel="noopener" target="_blank">kubernetes源码笔记</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#one-to-one-maney-to-maney-foreign-key各种混合关系查询"><span class="nav-number">1.</span> <span class="nav-text">one to one/maney to maney/foreign key各种混合关系查询</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" style=" text-align:center;">&copy; 2017 – <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ywq</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"> 站点字数合计:</i>
+    </span>
+    
+    <span title="站点总字数">583k</span>
+  
+  
+</div>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+<div class="run_time" style=" text-align:center;">
+  <span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
+  <script>
+    var now = new Date(); 
+    function createtime() { 
+        var grt= new Date("08/23/2018 10:00:00");//此处修改你的建站时间或者网站上线时间 
+        now.setTime(now.getTime()+250); 
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days); 
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours); 
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum); 
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;} 
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum); 
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;} 
+        document.getElementById("timeDate").innerHTML = "本站已安全运行 "+dnum+" 天 "; 
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒"; 
+    } 
+    setInterval("createtime()",250);
+  </script>
+</div>
+
+        
+<div class="busuanzi-count" style=" text-align:center;">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-user"></i>
+    </span>
+    <span class="site-uv" title="总访客量">
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span> 人
+    </span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+  
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-eye"></i>
+    </span>
+    <span class="site-pv" title="总访问量">
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span> 次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+  
+    
+    
+      
+    
+  
+  <script color="black" opacity="0.7" zindex="-1" count="140" src="//cdn.jsdelivr.net/gh/theme-next/theme-next-canvas-nest@1.0.0/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+  
+  
+  <script id="ribbon" size="300" alpha="0.1" zindex="-1" src="/lib/canvas-ribbon/canvas-ribbon.js"></script>
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/fancybox/source/jquery.fancybox.pack.js"></script>
+
+
+  
+
+
+  <script src="/js/utils.js?v=7.1.1"></script>
+
+  <script src="/js/motion.js?v=7.1.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/schemes/muse.js?v=7.1.1"></script>
+
+
+
+
+  
+  <script src="/js/scrollspy.js?v=7.1.1"></script>
+<script src="/js/post-details.js?v=7.1.1"></script>
+
+
+
+  
+
+
+  <script src="/js/next-boot.js?v=7.1.1"></script>
+
+
+  
+
+  
+
+  
+  
+  
+
+  
+
+  
+  
+  
+
+
+  
+
+
+  
+    <script>
+  window.livereOptions = {
+    refer: '2018/02/03/Django（六）、ORM操作进阶.html'
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+</script>
+
+  
+
+
+  
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url).replace(/\/{2,}/g, '/');
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x"></i></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x"></i></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+  
+  <script src="/lib/bookmark/bookmark.min.js?v=1.0"></script>
+  <script>
+  
+    bookmark.scrollToMark('auto', "#更多");
+  
+  </script>
+
+
+  
+
+  
+
+  
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/koharu.model.json"},"display":{"position":"left","width":250,"height":500},"mobile":{"show":false},"react":{"opacity":0.7},"log":false});</script></body>
+</html>
+<!-- 页面点击小红心 -->
+<script type="text/javascript" src="/js/src/clicklove.js"></script>
