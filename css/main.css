@@ -1812,7 +1812,7 @@ pre .javascript .function {
   width: 4px;
   height: 4px;
   border-radius: 50%;
-  background: #ff2295;
+  background: #8a968b;
 }
 .feed-link,
 .chat {
@@ -2521,7 +2521,7 @@ hr {
 .menu-item-active a,
 .menu .menu-item a:hover,
 .menu .menu-item span.exturl:hover {
-  background: #c39aad;
+  background: #9aaec3;
 }
 .menu {
   margin: 0;
