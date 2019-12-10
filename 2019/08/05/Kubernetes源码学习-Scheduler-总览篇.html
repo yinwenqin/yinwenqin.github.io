@@ -154,18 +154,18 @@
   daovoice('update');
   </script>
 
-  <meta name="description" content="##  调度器总体设计调度器源码分段阅读目录 调度器入口  调度器框架  Node筛选算法  待补充   概览首先列出官方md链接，讲解颇为生动：https://github.com/kubernetes/community/blob/master/contributors/devel/sig-scheduling/scheduler.md这里用结合自己阅读代码的理解做一下翻译。 工作模式Kube">
+  <meta name="description" content="##  调度器总体设计调度器源码分段阅读目录 调度器入口  调度器框架  Node筛选算法  待补充   概述首先列出官方md链接，讲解颇为生动：https://github.com/kubernetes/community/blob/master/contributors/devel/sig-scheduling/scheduler.md这里用结合自己阅读代码的理解做一下翻译。 工作模式Kube">
 <meta name="keywords" content="Kubernetes,Golang,读源码">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Kubernetes源码学习-Scheduler-总览篇">
 <meta property="og:url" content="http://blog.upweto.top/2019/08/05/Kubernetes源码学习-Scheduler-总览篇.html">
 <meta property="og:site_name" content="随笔漫谈">
-<meta property="og:description" content="##  调度器总体设计调度器源码分段阅读目录 调度器入口  调度器框架  Node筛选算法  待补充   概览首先列出官方md链接，讲解颇为生动：https://github.com/kubernetes/community/blob/master/contributors/devel/sig-scheduling/scheduler.md这里用结合自己阅读代码的理解做一下翻译。 工作模式Kube">
+<meta property="og:description" content="##  调度器总体设计调度器源码分段阅读目录 调度器入口  调度器框架  Node筛选算法  待补充   概述首先列出官方md链接，讲解颇为生动：https://github.com/kubernetes/community/blob/master/contributors/devel/sig-scheduling/scheduler.md这里用结合自己阅读代码的理解做一下翻译。 工作模式Kube">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2019-11-21T07:48:40.102Z">
+<meta property="og:updated_time" content="2019-12-05T08:28:20.731Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Kubernetes源码学习-Scheduler-总览篇">
-<meta name="twitter:description" content="##  调度器总体设计调度器源码分段阅读目录 调度器入口  调度器框架  Node筛选算法  待补充   概览首先列出官方md链接，讲解颇为生动：https://github.com/kubernetes/community/blob/master/contributors/devel/sig-scheduling/scheduler.md这里用结合自己阅读代码的理解做一下翻译。 工作模式Kube">
+<meta name="twitter:description" content="##  调度器总体设计调度器源码分段阅读目录 调度器入口  调度器框架  Node筛选算法  待补充   概述首先列出官方md链接，讲解颇为生动：https://github.com/kubernetes/community/blob/master/contributors/devel/sig-scheduling/scheduler.md这里用结合自己阅读代码的理解做一下翻译。 工作模式Kube">
 
 
 
@@ -554,7 +554,7 @@
 <li><p>待补充</p>
 </li>
 </ul>
-<h2 id="概览"><a href="#概览" class="headerlink" title="概览"></a>概览</h2><p>首先列出官方md链接，讲解颇为生动：<br><a href="https://github.com/kubernetes/community/blob/master/contributors/devel/sig-scheduling/scheduler.md" target="_blank" rel="noopener">https://github.com/kubernetes/community/blob/master/contributors/devel/sig-scheduling/scheduler.md</a><br>这里用结合自己阅读代码的理解做一下翻译。</p>
+<h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>首先列出官方md链接，讲解颇为生动：<br><a href="https://github.com/kubernetes/community/blob/master/contributors/devel/sig-scheduling/scheduler.md" target="_blank" rel="noopener">https://github.com/kubernetes/community/blob/master/contributors/devel/sig-scheduling/scheduler.md</a><br>这里用结合自己阅读代码的理解做一下翻译。</p>
 <h3 id="工作模式"><a href="#工作模式" class="headerlink" title="工作模式"></a>工作模式</h3><p>Kubernetes scheduler独立运作与其他主要组件之外(例如API Server)，它连接API Server，watch观察，如果有PodSpec.NodeName为空的Pod出现，则开始工作，通过一定得筛选算法，筛选出合适的Node之后，向API Server发起一个绑定指示，申请将Pod与筛选出的Node进行绑定。</p>
 <h3 id="代码层级"><a href="#代码层级" class="headerlink" title="代码层级"></a>代码层级</h3><p>回归到代码本身，scheduler的设计分为3个主要代码层级：</p>
 <ul>
@@ -766,7 +766,7 @@
                 
                   <a href="/archives">
                 
-                    <span class="site-state-item-count">74</span>
+                    <span class="site-state-item-count">76</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
@@ -903,7 +903,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#调度器总体设计"><span class="nav-number">1.</span> <span class="nav-text">调度器总体设计</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#调度器源码分段阅读目录"><span class="nav-number">1.1.</span> <span class="nav-text">调度器源码分段阅读目录</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#概览"><span class="nav-number">1.2.</span> <span class="nav-text">概览</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#工作模式"><span class="nav-number">1.2.1.</span> <span class="nav-text">工作模式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#代码层级"><span class="nav-number">1.2.2.</span> <span class="nav-text">代码层级</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#调度算法逻辑"><span class="nav-number">1.2.3.</span> <span class="nav-text">调度算法逻辑</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Predicates-and-priorities-policies"><span class="nav-number">1.2.4.</span> <span class="nav-text">Predicates and priorities policies</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#调度策略扩展"><span class="nav-number">1.2.5.</span> <span class="nav-text">调度策略扩展</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#修改调度策略"><span class="nav-number">1.2.6.</span> <span class="nav-text">修改调度策略</span></a></li></ol></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#调度器总体设计"><span class="nav-number">1.</span> <span class="nav-text">调度器总体设计</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#调度器源码分段阅读目录"><span class="nav-number">1.1.</span> <span class="nav-text">调度器源码分段阅读目录</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#概述"><span class="nav-number">1.2.</span> <span class="nav-text">概述</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#工作模式"><span class="nav-number">1.2.1.</span> <span class="nav-text">工作模式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#代码层级"><span class="nav-number">1.2.2.</span> <span class="nav-text">代码层级</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#调度算法逻辑"><span class="nav-number">1.2.3.</span> <span class="nav-text">调度算法逻辑</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Predicates-and-priorities-policies"><span class="nav-number">1.2.4.</span> <span class="nav-text">Predicates and priorities policies</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#调度策略扩展"><span class="nav-number">1.2.5.</span> <span class="nav-text">调度策略扩展</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#修改调度策略"><span class="nav-number">1.2.6.</span> <span class="nav-text">修改调度策略</span></a></li></ol></li></ol></li></ol></div>
             
 
           </div>
@@ -943,7 +943,7 @@
       <i class="fa fa-area-chart"> 站点字数合计:</i>
     </span>
     
-    <span title="站点总字数">583k</span>
+    <span title="站点总字数">599k</span>
   
   
 </div>

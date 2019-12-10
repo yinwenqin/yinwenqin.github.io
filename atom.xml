@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://blog.upweto.top/"/>
-  <updated>2019-11-21T07:48:40.106Z</updated>
+  <updated>2019-12-10T07:40:07.014Z</updated>
   <id>http://blog.upweto.top/</id>
   
   <author>
@@ -15,6 +15,62 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Kubernetes源码学习-Controller-P1-多实例leader选举.md</title>
+    <link href="http://blog.upweto.top/2019/12/09/Kubernetes%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0-Controller-P1-%E5%A4%9A%E5%AE%9E%E4%BE%8Bleader%E9%80%89%E4%B8%BE.html"/>
+    <id>http://blog.upweto.top/2019/12/09/Kubernetes源码学习-Controller-P1-多实例leader选举.html</id>
+    <published>2019-12-09T13:59:53.000Z</published>
+    <updated>2019-12-10T07:40:07.014Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;link rel=&quot;stylesheet&quot; class=&quot;aplayer-secondary-style-marker&quot; href=&quot;/assets/css/APlayer.min.css&quot;&gt;&lt;script src=&quot;/assets/js/APlayer.min.js&quot;
+        
+      
+    
+    </summary>
+    
+    
+      <category term="Kubernetes" scheme="http://blog.upweto.top/tags/Kubernetes/"/>
+    
+      <category term="Golang" scheme="http://blog.upweto.top/tags/Golang/"/>
+    
+      <category term="读源码" scheme="http://blog.upweto.top/tags/%E8%AF%BB%E6%BA%90%E7%A0%81/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Kubernetes源码学习-Controller-总览篇</title>
+    <link href="http://blog.upweto.top/2019/12/05/Kubernetes%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0-Controller-%E6%80%BB%E8%A7%88%E7%AF%87.html"/>
+    <id>http://blog.upweto.top/2019/12/05/Kubernetes源码学习-Controller-总览篇.html</id>
+    <published>2019-12-05T11:15:49.000Z</published>
+    <updated>2019-12-06T07:41:46.622Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;link rel=&quot;stylesheet&quot; class=&quot;aplayer-secondary-style-marker&quot; href=&quot;/assets/css/APlayer.min.css&quot;&gt;&lt;script src=&quot;/assets/js/APlayer.min.js&quot;
+        
+      
+    
+    </summary>
+    
+    
+      <category term="Kubernetes" scheme="http://blog.upweto.top/tags/Kubernetes/"/>
+    
+      <category term="Golang" scheme="http://blog.upweto.top/tags/Golang/"/>
+    
+      <category term="读源码" scheme="http://blog.upweto.top/tags/%E8%AF%BB%E6%BA%90%E7%A0%81/"/>
+    
+  </entry>
   
   <entry>
     <title>Kubernetes各组件参数配置优化建议</title>
@@ -311,7 +367,7 @@
     <link href="http://blog.upweto.top/2019/08/05/Kubernetes%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0-Scheduler-%E6%80%BB%E8%A7%88%E7%AF%87.html"/>
     <id>http://blog.upweto.top/2019/08/05/Kubernetes源码学习-Scheduler-总览篇.html</id>
     <published>2019-08-05T06:15:49.000Z</published>
-    <updated>2019-11-21T07:48:40.102Z</updated>
+    <updated>2019-12-05T08:28:20.731Z</updated>
     
     <summary type="html">
     
@@ -485,54 +541,6 @@
       <category term="Network" scheme="http://blog.upweto.top/tags/Network/"/>
     
       <category term="Linux" scheme="http://blog.upweto.top/tags/Linux/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Golang基础学习: Struct和Json</title>
-    <link href="http://blog.upweto.top/2019/05/03/Golang%E5%9F%BA%E7%A1%80%E5%AD%A6%E4%B9%A0_%20Struct%E5%92%8CJson.html"/>
-    <id>http://blog.upweto.top/2019/05/03/Golang基础学习_ Struct和Json.html</id>
-    <published>2019-05-03T07:38:49.000Z</published>
-    <updated>2019-11-21T07:48:40.091Z</updated>
-    
-    <summary type="html">
-    
-      
-      
-        
-        
-          &lt;link rel=&quot;stylesheet&quot; class=&quot;aplayer-secondary-style-marker&quot; href=&quot;/assets/css/APlayer.min.css&quot;&gt;&lt;script src=&quot;/assets/js/APlayer.min.js&quot;
-        
-      
-    
-    </summary>
-    
-    
-      <category term="Golang" scheme="http://blog.upweto.top/tags/Golang/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Golang基础学习: array和slice对比和使用</title>
-    <link href="http://blog.upweto.top/2019/04/27/Golang%E5%9F%BA%E7%A1%80%E5%AD%A6%E4%B9%A0_%20array%E5%92%8Cslice%E5%AF%B9%E6%AF%94%E5%92%8C%E4%BD%BF%E7%94%A8.html"/>
-    <id>http://blog.upweto.top/2019/04/27/Golang基础学习_ array和slice对比和使用.html</id>
-    <published>2019-04-27T04:09:29.000Z</published>
-    <updated>2019-11-21T07:48:40.091Z</updated>
-    
-    <summary type="html">
-    
-      
-      
-        
-        
-          &lt;link rel=&quot;stylesheet&quot; class=&quot;aplayer-secondary-style-marker&quot; href=&quot;/assets/css/APlayer.min.css&quot;&gt;&lt;script src=&quot;/assets/js/APlayer.min.js&quot;
-        
-      
-    
-    </summary>
-    
-    
-      <category term="Golang" scheme="http://blog.upweto.top/tags/Golang/"/>
     
   </entry>
   
