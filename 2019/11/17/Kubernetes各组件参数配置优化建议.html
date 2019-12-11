@@ -162,7 +162,7 @@
 <meta property="og:site_name" content="随笔漫谈">
 <meta property="og:description" content="Kubernetes各组件参数配置优化建议kubernetes虽然默认配置下已经足够可用满足常见的中小规模场景，但是若是将各组件参数、内核参数进行适当的调整，以达到更贴合使用场景的参数值，对集群运行的稳定性、故障切换能力等方面会有不小的提升。下面介绍一下各组件生产运行常做的一些参数调整。 Kubelet参数配置kubelet在各个组件之中，作为唯一的分布在每个节点上的daemon控制程序，应该也是">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2019-11-21T07:48:40.106Z">
+<meta property="og:updated_time" content="2019-12-11T09:51:41.680Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Kubernetes各组件参数配置优化建议">
 <meta name="twitter:description" content="Kubernetes各组件参数配置优化建议kubernetes虽然默认配置下已经足够可用满足常见的中小规模场景，但是若是将各组件参数、内核参数进行适当的调整，以达到更贴合使用场景的参数值，对集群运行的稳定性、故障切换能力等方面会有不小的提升。下面介绍一下各组件生产运行常做的一些参数调整。 Kubelet参数配置kubelet在各个组件之中，作为唯一的分布在每个节点上的daemon控制程序，应该也是">
@@ -509,7 +509,7 @@
                 
                   <span class="post-meta-item-text">本文字数：</span>
                 
-                <span title="本文字数">11k</span>
+                <span title="本文字数">12k</span>
               
 
               
@@ -523,7 +523,7 @@
                 
                   <span class="post-meta-item-text">阅读时长 &asymp;</span>
                 
-                <span title="阅读时长">10 分钟</span>
+                <span title="阅读时长">11 分钟</span>
               
             </div>
           
@@ -569,7 +569,7 @@
 <p><a href="https://kubernetes.io/docs/tasks/administer-cluster/reserve-compute-resources/#general-guidelines" target="_blank" rel="noopener">Be extra careful while enforcing <code>system-reserved</code></a></p>
 <p><strong>注：非常重要！kubelet并不会自动创建cgroup，因此，需要在启动服务前为其指定创建相应cgroup的命令,建议写入启动服务文件内，无论是传统指定flag方式，还是配置文件方式，都需要在启动服务文件内添加创建cgroup的命令，否则kubelet服务会启动失败</strong></p>
 <p>这里贴一个新版本的启动服务文件内容：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">~<span class="comment"># cat /etc/systemd/system/kubelet.service.d/10-kubeadm.conf</span></span><br><span class="line"><span class="comment"># <span class="doctag">Note:</span> This dropin only works with kubeadm and kubelet v1.11+</span></span><br><span class="line">[Service]</span><br><span class="line">Environment=<span class="string">"KUBELET_KUBECONFIG_ARGS=--bootstrap-kubeconfig=/etc/kubernetes/bootstrap-kubelet.conf --kubeconfig=/etc/kubernetes/kubelet.conf"</span></span><br><span class="line">Environment=<span class="string">"KUBELET_CONFIG_ARGS=--config=/var/lib/kubelet/config.yaml"</span></span><br><span class="line"><span class="comment"># This is a file that "kubeadm init" and "kubeadm join" generates at runtime, populating the KUBELET_KUBEADM_ARGS variable dynamically</span></span><br><span class="line">EnvironmentFile=-/var/lib/kubelet/kubeadm-flags.env</span><br><span class="line"><span class="comment"># This is a file that the user can use for overrides of the kubelet args as a last resort. Preferably, the user should use</span></span><br><span class="line"><span class="comment"># the .NodeRegistration.KubeletExtraArgs object in the configuration files instead. KUBELET_EXTRA_ARGS should be sourced from this file.</span></span><br><span class="line">EnvironmentFile=-/etc/default/kubelet</span><br><span class="line"><span class="comment"># 下面两条命令提前创建cgroup</span></span><br><span class="line">ExecStartPre=/bin/mkdir -p /sys/fs/cgroup/cpuset/system.slice/kubelet.service</span><br><span class="line">ExecStartPre=/bin/mkdir -p /sys/fs/cgroup/hugetlb/system.slice/kubelet.service</span><br><span class="line">ExecStart=</span><br><span class="line">ExecStart=/usr/bin/kubelet <span class="variable">$KUBELET_KUBECONFIG_ARGS</span> <span class="variable">$KUBELET_CONFIG_ARGS</span> <span class="variable">$KUBELET_KUBEADM_ARGS</span> <span class="variable">$KUBELET_EXTRA_ARGS</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">~<span class="comment"># cat /etc/systemd/system/kubelet.service.d/10-kubeadm.conf</span></span><br><span class="line"><span class="comment"># <span class="doctag">Note:</span> This dropin only works with kubeadm and kubelet v1.11+</span></span><br><span class="line">[Service]</span><br><span class="line">Environment=<span class="string">"KUBELET_KUBECONFIG_ARGS=--bootstrap-kubeconfig=/etc/kubernetes/bootstrap-kubelet.conf --kubeconfig=/etc/kubernetes/kubelet.conf"</span></span><br><span class="line">Environment=<span class="string">"KUBELET_CONFIG_ARGS=--config=/var/lib/kubelet/config.yaml"</span></span><br><span class="line"><span class="comment"># This is a file that "kubeadm init" and "kubeadm join" generates at runtime, populating the KUBELET_KUBEADM_ARGS variable dynamically</span></span><br><span class="line">EnvironmentFile=-/var/lib/kubelet/kubeadm-flags.env</span><br><span class="line"><span class="comment"># This is a file that the user can use for overrides of the kubelet args as a last resort. Preferably, the user should use</span></span><br><span class="line"><span class="comment"># the .NodeRegistration.KubeletExtraArgs object in the configuration files instead. KUBELET_EXTRA_ARGS should be sourced from this file.</span></span><br><span class="line">EnvironmentFile=-/etc/default/kubelet</span><br><span class="line"><span class="comment"># 下面命令提前创建cgroup</span></span><br><span class="line">ExecStartPre=/bin/mkdir -p /sys/fs/cgroup/pids/system.slice/kubelet.service</span><br><span class="line">ExecStartPre=/bin/mkdir -p /sys/fs/cgroup/cpu/system.slice/kubelet.service</span><br><span class="line">ExecStartPre=/bin/mkdir -p /sys/fs/cgroup/cpuacct/system.slice/kubelet.service</span><br><span class="line">ExecStartPre=/bin/mkdir -p /sys/fs/cgroup/cpuset/system.slice/kubelet.service</span><br><span class="line">ExecStartPre=/bin/mkdir -p /sys/fs/cgroup/memory/system.slice/kubelet.service</span><br><span class="line">ExecStartPre=/bin/mkdir -p /sys/fs/cgroup/devices/system.slice/kubelet.service</span><br><span class="line">ExecStartPre=/bin/mkdir -p /sys/fs/cgroup/blkio/system.slice/kubelet.service</span><br><span class="line">ExecStartPre=/bin/mkdir -p /sys/fs/cgroup/hugetlb/system.slice/kubelet.service</span><br><span class="line">ExecStartPre=/bin/mkdir -p /sys/fs/cgroup/systemd/system.slice/kubelet.service</span><br><span class="line">ExecStart=</span><br><span class="line">ExecStart=/usr/bin/kubelet <span class="variable">$KUBELET_KUBECONFIG_ARGS</span> <span class="variable">$KUBELET_CONFIG_ARGS</span> <span class="variable">$KUBELET_KUBEADM_ARGS</span> <span class="variable">$KUBELET_EXTRA_ARGS</span></span><br></pre></td></tr></table></figure>
 <p>修改完以上配置后，执行<code>systemctl daemon-reload &amp;&amp; systemctl restart kubelet</code>重启kubelet，若无意外，kubelet重启正常后，可检验cgroup是否如期创建指定的内存限制，如下刚好是2g，说明cgroup指定已成功：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cat /sys/fs/cgroup/memory/system.slice/kubelet.service/memory.limit_in_bytes</span><br><span class="line">2147483648</span><br></pre></td></tr></table></figure>
 <p>当然，以上的kubelet配置修改需要重启kubelet，如果你需要直接在线更新kubelet配置的话，可以参考官方的的步骤进行修改配置：</p>
@@ -1004,7 +1004,7 @@
       <i class="fa fa-area-chart"> 站点字数合计:</i>
     </span>
     
-    <span title="站点总字数">599k</span>
+    <span title="站点总字数">600k</span>
   
   
 </div>
