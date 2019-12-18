@@ -154,21 +154,21 @@
   daovoice('update');
   </script>
 
-  <meta name="description" content="Controller源码分段阅读导航 多实例leader选举) [Informer工作流程] [Deployment Controller] [StafulSet Controlle] 待补充  概述kube-controller的作用引述 首先依照惯例，贴两篇官方对 　  于controller的设计逻辑和运行机制的说明文档： https://github.com/kubernetes/comm">
+  <meta name="description" content="Controller源码分段阅读导航 多实例leader选举 [Informer工作流程] [Deployment Controller] [StafulSet Controlle] 待补充  概述kube-controller的作用引述 首先依照惯例，贴两篇官方对 　  于controller的设计逻辑和运行机制的说明文档： https://github.com/kubernetes/commu">
 <meta name="keywords" content="Kubernetes,Golang,读源码">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Kubernetes源码学习-Controller-总览篇">
 <meta property="og:url" content="http://blog.upweto.top/2019/12/05/Kubernetes源码学习-Controller-总览篇.html">
 <meta property="og:site_name" content="随笔漫谈">
-<meta property="og:description" content="Controller源码分段阅读导航 多实例leader选举) [Informer工作流程] [Deployment Controller] [StafulSet Controlle] 待补充  概述kube-controller的作用引述 首先依照惯例，贴两篇官方对 　  于controller的设计逻辑和运行机制的说明文档： https://github.com/kubernetes/comm">
+<meta property="og:description" content="Controller源码分段阅读导航 多实例leader选举 [Informer工作流程] [Deployment Controller] [StafulSet Controlle] 待补充  概述kube-controller的作用引述 首先依照惯例，贴两篇官方对 　  于controller的设计逻辑和运行机制的说明文档： https://github.com/kubernetes/commu">
 <meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="http://mycloudn.kokoerp.com/20191206111312.jpg">
 <meta property="og:image" content="http://mycloudn.kokoerp.com/20191206153026.jpg">
 <meta property="og:image" content="http://mycloudn.kokoerp.com/20191206154051.jpg">
-<meta property="og:updated_time" content="2019-12-10T11:30:48.285Z">
+<meta property="og:updated_time" content="2019-12-18T03:06:20.831Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Kubernetes源码学习-Controller-总览篇">
-<meta name="twitter:description" content="Controller源码分段阅读导航 多实例leader选举) [Informer工作流程] [Deployment Controller] [StafulSet Controlle] 待补充  概述kube-controller的作用引述 首先依照惯例，贴两篇官方对 　  于controller的设计逻辑和运行机制的说明文档： https://github.com/kubernetes/comm">
+<meta name="twitter:description" content="Controller源码分段阅读导航 多实例leader选举 [Informer工作流程] [Deployment Controller] [StafulSet Controlle] 待补充  概述kube-controller的作用引述 首先依照惯例，贴两篇官方对 　  于controller的设计逻辑和运行机制的说明文档： https://github.com/kubernetes/commu">
 <meta name="twitter:image" content="http://mycloudn.kokoerp.com/20191206111312.jpg">
 
 
@@ -548,7 +548,7 @@
 
       
         <h2 id="Controller源码分段阅读导航"><a href="#Controller源码分段阅读导航" class="headerlink" title="Controller源码分段阅读导航"></a>Controller源码分段阅读导航</h2><ul>
-<li><a href="[https://github.com/yinwenqin/kubeSourceCodeNote/blob/master/controller/Kubernetes%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0-Controller-P1-%E5%A4%9A%E5%AE%9E%E4%BE%8Bleader%E9%80%89%E4%B8%BE.md](https://github.com/yinwenqin/kubeSourceCodeNote/blob/master/controller/Kubernetes源码学习-Controller-P1-多实例leader选举.md">多实例leader选举</a>)</li>
+<li><a href="https://github.com/yinwenqin/kubeSourceCodeNote/blob/master/controller/Kubernetes源码学习-Controller-P1-多实例leader选举.md" target="_blank" rel="noopener">多实例leader选举</a></li>
 <li>[Informer工作流程]</li>
 <li>[Deployment Controller]</li>
 <li>[StafulSet Controlle]</li>
@@ -1065,10 +1065,6 @@
 
 
 
-
-  
-  
-  <script id="ribbon" size="300" alpha="0.1" zindex="-1" src="/lib/canvas-ribbon/canvas-ribbon.js"></script>
 
 
 
