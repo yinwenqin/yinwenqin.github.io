@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://blog.upweto.top/"/>
-  <updated>2019-12-10T07:40:07.014Z</updated>
+  <updated>2020-01-01T09:41:10.904Z</updated>
   <id>http://blog.upweto.top/</id>
   
   <author>
@@ -17,11 +17,91 @@
   <generator uri="http://hexo.io/">Hexo</generator>
   
   <entry>
+    <title>Etcd和kubernetes master的灾备与恢复</title>
+    <link href="http://blog.upweto.top/2020/01/01/Etcd%20%E5%92%8C%20kubernetes%20master%E7%9A%84%E7%81%BE%E5%A4%87%E4%B8%8E%E6%81%A2%E5%A4%8D.html"/>
+    <id>http://blog.upweto.top/2020/01/01/Etcd 和 kubernetes master的灾备与恢复.html</id>
+    <published>2020-01-01T09:49:16.000Z</published>
+    <updated>2020-01-01T09:41:10.904Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;link rel=&quot;stylesheet&quot; class=&quot;aplayer-secondary-style-marker&quot; href=&quot;/assets/css/APlayer.min.css&quot;&gt;&lt;script src=&quot;/assets/js/APlayer.min.js&quot;
+        
+      
+    
+    </summary>
+    
+    
+      <category term="Kubernetes" scheme="http://blog.upweto.top/tags/Kubernetes/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Kubernetes源码学习-Controller-P3-Controller启动流程.md</title>
+    <link href="http://blog.upweto.top/2019/12/22/Kubernetes%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0-Controller-P3-Controller%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B.html"/>
+    <id>http://blog.upweto.top/2019/12/22/Kubernetes源码学习-Controller-P3-Controller启动流程.html</id>
+    <published>2019-12-22T13:59:53.000Z</published>
+    <updated>2019-12-21T10:10:49.710Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;link rel=&quot;stylesheet&quot; class=&quot;aplayer-secondary-style-marker&quot; href=&quot;/assets/css/APlayer.min.css&quot;&gt;&lt;script src=&quot;/assets/js/APlayer.min.js&quot;
+        
+      
+    
+    </summary>
+    
+    
+      <category term="Kubernetes" scheme="http://blog.upweto.top/tags/Kubernetes/"/>
+    
+      <category term="Golang" scheme="http://blog.upweto.top/tags/Golang/"/>
+    
+      <category term="读源码" scheme="http://blog.upweto.top/tags/%E8%AF%BB%E6%BA%90%E7%A0%81/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Kubernetes源码学习-Controller-P2-Controller与client-go.md</title>
+    <link href="http://blog.upweto.top/2019/12/18/Kubernetes%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0-Controller-P2-Controller%E4%B8%8Eclient-go.html"/>
+    <id>http://blog.upweto.top/2019/12/18/Kubernetes源码学习-Controller-P2-Controller与client-go.html</id>
+    <published>2019-12-18T13:59:53.000Z</published>
+    <updated>2019-12-21T01:17:09.532Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;link rel=&quot;stylesheet&quot; class=&quot;aplayer-secondary-style-marker&quot; href=&quot;/assets/css/APlayer.min.css&quot;&gt;&lt;script src=&quot;/assets/js/APlayer.min.js&quot;
+        
+      
+    
+    </summary>
+    
+    
+      <category term="Kubernetes" scheme="http://blog.upweto.top/tags/Kubernetes/"/>
+    
+      <category term="Golang" scheme="http://blog.upweto.top/tags/Golang/"/>
+    
+      <category term="读源码" scheme="http://blog.upweto.top/tags/%E8%AF%BB%E6%BA%90%E7%A0%81/"/>
+    
+  </entry>
+  
+  <entry>
     <title>Kubernetes源码学习-Controller-P1-多实例leader选举.md</title>
     <link href="http://blog.upweto.top/2019/12/09/Kubernetes%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0-Controller-P1-%E5%A4%9A%E5%AE%9E%E4%BE%8Bleader%E9%80%89%E4%B8%BE.html"/>
     <id>http://blog.upweto.top/2019/12/09/Kubernetes源码学习-Controller-P1-多实例leader选举.html</id>
     <published>2019-12-09T13:59:53.000Z</published>
-    <updated>2019-12-10T07:40:07.014Z</updated>
+    <updated>2019-12-19T09:57:41.744Z</updated>
     
     <summary type="html">
     
@@ -465,82 +545,6 @@
       <category term="Golang" scheme="http://blog.upweto.top/tags/Golang/"/>
     
       <category term="算法" scheme="http://blog.upweto.top/tags/%E7%AE%97%E6%B3%95/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>k8s(十六): VXLAN和Flannel</title>
-    <link href="http://blog.upweto.top/2019/07/17/k8s(%E5%8D%81%E5%85%AD)-VXLAN%E5%92%8CFlannel.html"/>
-    <id>http://blog.upweto.top/2019/07/17/k8s(十六)-VXLAN和Flannel.html</id>
-    <published>2019-07-17T08:57:41.000Z</published>
-    <updated>2019-11-21T07:48:40.131Z</updated>
-    
-    <summary type="html">
-    
-      
-      
-        
-        
-          &lt;link rel=&quot;stylesheet&quot; class=&quot;aplayer-secondary-style-marker&quot; href=&quot;/assets/css/APlayer.min.css&quot;&gt;&lt;script src=&quot;/assets/js/APlayer.min.js&quot;
-        
-      
-    
-    </summary>
-    
-    
-      <category term="Kubernetes" scheme="http://blog.upweto.top/tags/Kubernetes/"/>
-    
-      <category term="Network" scheme="http://blog.upweto.top/tags/Network/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>k8s(十五)、Kubernetes v1.14多master集群部署</title>
-    <link href="http://blog.upweto.top/2019/06/18/k8s(%E5%8D%81%E4%BA%94)%E3%80%81Kubernetes%20v1.14%E5%A4%9Amaster%E9%9B%86%E7%BE%A4%E9%83%A8%E7%BD%B2.html"/>
-    <id>http://blog.upweto.top/2019/06/18/k8s(十五)、Kubernetes v1.14多master集群部署.html</id>
-    <published>2019-06-18T01:51:04.000Z</published>
-    <updated>2019-11-21T07:48:40.131Z</updated>
-    
-    <summary type="html">
-    
-      
-      
-        
-        
-          &lt;link rel=&quot;stylesheet&quot; class=&quot;aplayer-secondary-style-marker&quot; href=&quot;/assets/css/APlayer.min.css&quot;&gt;&lt;script src=&quot;/assets/js/APlayer.min.js&quot;
-        
-      
-    
-    </summary>
-    
-    
-      <category term="Kubernetes" scheme="http://blog.upweto.top/tags/Kubernetes/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>inux TCP连接失败(不回复SYN,ACK)问题分析</title>
-    <link href="http://blog.upweto.top/2019/06/10/linux%20TCP%E8%BF%9E%E6%8E%A5%E5%A4%B1%E8%B4%A5(%E4%B8%8D%E5%9B%9E%E5%A4%8DSYN,ACK)%E9%97%AE%E9%A2%98%E5%88%86%E6%9E%90.html"/>
-    <id>http://blog.upweto.top/2019/06/10/linux TCP连接失败(不回复SYN,ACK)问题分析.html</id>
-    <published>2019-06-10T08:52:33.000Z</published>
-    <updated>2019-11-21T07:48:40.142Z</updated>
-    
-    <summary type="html">
-    
-      
-      
-        
-        
-          &lt;link rel=&quot;stylesheet&quot; class=&quot;aplayer-secondary-style-marker&quot; href=&quot;/assets/css/APlayer.min.css&quot;&gt;&lt;script src=&quot;/assets/js/APlayer.min.js&quot;
-        
-      
-    
-    </summary>
-    
-    
-      <category term="Network" scheme="http://blog.upweto.top/tags/Network/"/>
-    
-      <category term="Linux" scheme="http://blog.upweto.top/tags/Linux/"/>
     
   </entry>
   

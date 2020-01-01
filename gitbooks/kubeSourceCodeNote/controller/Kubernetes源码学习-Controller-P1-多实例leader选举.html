@@ -371,8 +371,60 @@
 <p>Kubernetes&#x591A;master&#x573A;&#x666F;&#x4E0B;&#xFF0C;&#x6838;&#x5FC3;&#x7EC4;&#x4EF6;&#x90FD;&#x662F;&#x4EE5;&#x4E00;&#x4E3B;&#x591A;&#x4ECE;&#x7684;&#x6A21;&#x5F0F;&#x6765;&#x8FD0;&#x884C;&#x7684;&#xFF0C;&#x5728;&#x524D;&#x9762;scheduler&#x90E8;&#x5206;&#x7684;&#x6587;&#x7AE0;&#x4E2D;&#xFF0C;&#x5E76;&#x6CA1;&#x6709;&#x5206;&#x6790;&#x5176;&#x4E3B;&#x4ECE;&#x9009;&#x4E3E;&#x53CA;&#x5DE5;&#x4F5C;&#x7684;&#x6D41;&#x7A0B;&#xFF0C;&#x90A3;&#x4E48;&#x5728;&#x672C;&#x7BC7;&#x4E2D;&#xFF0C;&#x4EE5;controller&#x4E3A;&#x4F8B;&#xFF0C;&#x5355;&#x72EC;&#x4F5C;&#x4E00;&#x7BC7;&#x5206;&#x6790;&#x7EC4;&#x4EF6;&#x4E4B;&#x95F4;&#x4E3B;&#x4ECE;&#x5DE5;&#x4F5C;&#x6A21;&#x5F0F;&#x3002;</p>
 <h2 id="&#x5165;&#x53E3;"><a name="&#x5165;&#x53E3;" class="plugin-anchor" href="#&#x5165;&#x53E3;"><i class="fa fa-link" aria-hidden="true"></i></a>&#x5165;&#x53E3;</h2>
 <p>&#x5982;scheduler&#x4E00;&#x6837;&#xFF0C;controller&#x7684;cmd&#x542F;&#x52A8;&#x4E5F;&#x662F;&#x501F;&#x52A9;&#x7684;cobra&#xFF0C;&#x5BF9;cobra&#x4E0D;&#x4E86;&#x89E3;&#x53EF;&#x4EE5;&#x56DE;&#x5230;&#x524D;&#x9762;&#x7684;&#x6587;&#x7AE0;&#x4E2D;&#x67E5;&#x770B;&#xFF0C;&#x8FD9;&#x91CC;&#x4E0D;&#x518D;&#x8D58;&#x8FF0;&#xFF0C;&#x76F4;&#x63A5;&#x987A;&#x7740;&#x5165;&#x53E3;&#x627E;&#x5230;&#x542F;&#x52A8;&#x51FD;&#x6570;&#xFF1A;</p>
+<p><strong>&#x603B;&#x5165;&#x53E3;</strong></p>
 <p>==&gt; <code>cmd/kube-controller-manager/controller-manager.go:38</code></p>
 <p> <code>command := app.NewControllerManagerCommand()</code> </p>
+<p><strong>&#x9ED8;&#x8BA4;&#x521D;&#x59CB;&#x5316;&#x7684;controller&#x914D;&#x7F6E;</strong>&#xFF1A;</p>
+<p>==&gt; <code>cmd/kube-controller-manager/app/controllermanager.go:103</code></p>
+<p><code>c, err := s.Config(KnownControllers(), ControllersDisabledByDefault.List())</code></p>
+<p>==&gt; <code>cmd/kube-controller-manager/app/controllermanager.go:319</code></p>
+<p><code>ret := sets.StringKeySet(NewControllerInitializers(IncludeCloudLoops))</code></p>
+<p>==&gt; <code>cmd/kube-controller-manager/app/controllermanager.go:343</code></p>
+<pre><code class="lang-go"><span class="hljs-keyword">func</span> NewControllerInitializers(loopMode ControllerLoopMode) <span class="hljs-keyword">map</span>[<span class="hljs-keyword">string</span>]InitFunc {
+   controllers := <span class="hljs-keyword">map</span>[<span class="hljs-keyword">string</span>]InitFunc{}
+   controllers[<span class="hljs-string">&quot;endpoint&quot;</span>] = startEndpointController
+   controllers[<span class="hljs-string">&quot;replicationcontroller&quot;</span>] = startReplicationController
+   controllers[<span class="hljs-string">&quot;podgc&quot;</span>] = startPodGCController
+   controllers[<span class="hljs-string">&quot;resourcequota&quot;</span>] = startResourceQuotaController
+   controllers[<span class="hljs-string">&quot;namespace&quot;</span>] = startNamespaceController
+   controllers[<span class="hljs-string">&quot;serviceaccount&quot;</span>] = startServiceAccountController
+   controllers[<span class="hljs-string">&quot;garbagecollector&quot;</span>] = startGarbageCollectorController
+   controllers[<span class="hljs-string">&quot;daemonset&quot;</span>] = startDaemonSetController
+   controllers[<span class="hljs-string">&quot;job&quot;</span>] = startJobController
+   controllers[<span class="hljs-string">&quot;deployment&quot;</span>] = startDeploymentController
+   controllers[<span class="hljs-string">&quot;replicaset&quot;</span>] = startReplicaSetController
+   controllers[<span class="hljs-string">&quot;horizontalpodautoscaling&quot;</span>] = startHPAController
+   controllers[<span class="hljs-string">&quot;disruption&quot;</span>] = startDisruptionController
+   controllers[<span class="hljs-string">&quot;statefulset&quot;</span>] = startStatefulSetController
+   controllers[<span class="hljs-string">&quot;cronjob&quot;</span>] = startCronJobController
+   controllers[<span class="hljs-string">&quot;csrsigning&quot;</span>] = startCSRSigningController
+   controllers[<span class="hljs-string">&quot;csrapproving&quot;</span>] = startCSRApprovingController
+   controllers[<span class="hljs-string">&quot;csrcleaner&quot;</span>] = startCSRCleanerController
+   controllers[<span class="hljs-string">&quot;ttl&quot;</span>] = startTTLController
+   controllers[<span class="hljs-string">&quot;bootstrapsigner&quot;</span>] = startBootstrapSignerController
+   controllers[<span class="hljs-string">&quot;tokencleaner&quot;</span>] = startTokenCleanerController
+   controllers[<span class="hljs-string">&quot;nodeipam&quot;</span>] = startNodeIpamController
+   controllers[<span class="hljs-string">&quot;nodelifecycle&quot;</span>] = startNodeLifecycleController
+   <span class="hljs-keyword">if</span> loopMode == IncludeCloudLoops {
+      controllers[<span class="hljs-string">&quot;service&quot;</span>] = startServiceController
+      controllers[<span class="hljs-string">&quot;route&quot;</span>] = startRouteController
+      controllers[<span class="hljs-string">&quot;cloud-node-lifecycle&quot;</span>] = startCloudNodeLifecycleController
+      <span class="hljs-comment">// <span class="hljs-doctag">TODO:</span> volume controller into the IncludeCloudLoops only set.</span>
+   }
+   controllers[<span class="hljs-string">&quot;persistentvolume-binder&quot;</span>] = startPersistentVolumeBinderController
+   controllers[<span class="hljs-string">&quot;attachdetach&quot;</span>] = startAttachDetachController
+   controllers[<span class="hljs-string">&quot;persistentvolume-expander&quot;</span>] = startVolumeExpandController
+   controllers[<span class="hljs-string">&quot;clusterrole-aggregation&quot;</span>] = startClusterRoleAggregrationController
+   controllers[<span class="hljs-string">&quot;pvc-protection&quot;</span>] = startPVCProtectionController
+   controllers[<span class="hljs-string">&quot;pv-protection&quot;</span>] = startPVProtectionController
+   controllers[<span class="hljs-string">&quot;ttl-after-finished&quot;</span>] = startTTLAfterFinishedController
+   controllers[<span class="hljs-string">&quot;root-ca-cert-publisher&quot;</span>] = startRootCACertPublisher
+
+   <span class="hljs-keyword">return</span> controllers
+}
+</code></pre>
+<p>&#x8FD9;&#x91CC;&#x662F;&#x6240;&#x6709;&#x5728;&#x521D;&#x59CB;&#x5316;&#x914D;&#x7F6E;&#x9636;&#x6BB5;&#xFF0C;&#x542F;&#x52A8;&#x7684;&#x5404;&#x4E2A;&#x8D44;&#x6E90;&#x7684;controller&#xFF0C;&#x8FD9;&#x91CC;&#x4F1A;&#x5728;&#x540E;&#x9762;&#x7684;&#x7AE0;&#x8282;&#x4E2D;&#x5C55;&#x5F00;&#x8BB2;&#x8FF0;&#x5176;&#x4E2D;&#x7684;&#x4E24;&#x4E09;&#x4E2A;&#x3002;</p>
+<p>&#x56DE;&#x5230;run&#x51FD;&#x6570;&#x7EE7;&#x7EED;&#x5F80;&#x4E0B;&#xFF1A;</p>
 <p>==&gt; <code>cmd/kube-controller-manager/app/controllermanager.go:109</code></p>
 <p><code>Run(c.Complete(), wait.NeverStop)</code></p>
 <p>==&gt; <code>cmd/kube-controller-manager/app/controllermanager.go:153</code></p>
@@ -382,11 +434,21 @@
   ...
     <span class="hljs-comment">// &#x7BC7;&#x5E45;&#x6709;&#x9650;&#xFF0C;&#x7701;&#x7565;&#x90E8;&#x5206;&#x4EE3;&#x7801;</span>
 
-  <span class="hljs-comment">// &#x542F;&#x52A8;kube-controller&#x7684;http&#x670D;&#x52A1;</span>
+  <span class="hljs-comment">// Setup any healthz checks we will want to use.</span>
+  <span class="hljs-comment">// &#x914D;&#x7F6E;leader&#x5065;&#x5EB7;&#x68C0;&#x67E5;&#x7684;&#x63A5;&#x53E3;&#xFF0C;&#x9ED8;&#x8BA4;&#x68C0;&#x67E5;&#x95F4;&#x9694;20s</span>
+    <span class="hljs-keyword">var</span> checks []healthz.HealthzChecker
+    <span class="hljs-keyword">var</span> electionChecker *leaderelection.HealthzAdaptor
+    <span class="hljs-keyword">if</span> c.ComponentConfig.Generic.LeaderElection.LeaderElect {
+        electionChecker = leaderelection.NewLeaderHealthzAdaptor(time.Second * <span class="hljs-number">20</span>)
+        checks = <span class="hljs-built_in">append</span>(checks, electionChecker)
+    }
+
+  <span class="hljs-comment">// &#x542F;&#x52A8;kube-controller&#x7684;http/https&#x670D;&#x52A1;</span>
     <span class="hljs-comment">// Start the controller manager HTTP server</span>
     <span class="hljs-comment">// unsecuredMux is the handler for these controller *after* authn/authz filters have been applied</span>
     <span class="hljs-keyword">var</span> unsecuredMux *mux.PathRecorderMux
     <span class="hljs-keyword">if</span> c.SecureServing != <span class="hljs-literal">nil</span> {
+    <span class="hljs-comment">// &#x5C55;&#x5F00;&#x8FD9;&#x91CC;&#x7684;&#x4EE3;&#x7801;&#xFF0C;&#x53EF;&#x4EE5;&#x770B;&#x5230;&#x4F1A;&#x6CE8;&#x518C;&#x4E24;&#x4E2A;url&#xFF0C;&#x5206;&#x522B;&#x662F;/metrics &#x548C;/healthz&#xFF0C;&#x5206;&#x522B;&#x7ED9;prometheus&#x76D1;&#x63A7;&#x548C;leader&#x5065;&#x5EB7;&#x68C0;&#x67E5;&#x4F7F;&#x7528;</span>
         unsecuredMux = genericcontrollermanager.NewBaseHandler(&amp;c.ComponentConfig.Generic.Debugging, checks...)
         handler := genericcontrollermanager.BuildHandlerChain(unsecuredMux, &amp;c.Authorization, &amp;c.Authentication)
         <span class="hljs-comment">// <span class="hljs-doctag">TODO:</span> handle stoppedCh returned by c.SecureServing.Serve</span>
@@ -827,7 +889,7 @@ observedRecord  # &#x6BCF;&#x4E2A;&#x53C2;&#x9009;&#x8005;&#x90FD;&#x4F1A;&#x5B9
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"2.1. 多实例leader选举","date":"2019/12/09 21:59:53","tags":["Kubernetes","Golang","读源码"],"level":"2.2.1","depth":2,"next":{"title":"[4. ApiServer]","level":"2.3","depth":1,"ref":"","articles":[{"title":"[4.1 待补充]","level":"2.3.1","depth":2,"ref":"","articles":[]}]},"previous":{"title":"3. Controller","level":"2.2","depth":1,"path":"controller/README.md","ref":"./controller/README.md","articles":[{"title":"2.1. 多实例leader选举","level":"2.2.1","depth":2,"path":"controller/Kubernetes源码学习-Controller-P1-多实例leader选举.md","ref":"./controller/Kubernetes源码学习-Controller-P1-多实例leader选举.md","articles":[]}]},"dir":"ltr"},"config":{"plugins":["-sharing","anchors","github","expandable-chapters","splitter","page-treeview","back-to-top-button"],"styles":{"website":"./styles/website.css"},"pluginsConfig":{"page-treeview":{"copyright":"","minHeaderCount":"1","minHeaderDeep":"1"},"github":{"url":"https://github.com/yinwenqin/kubeSourceCodeNote"},"splitter":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"back-to-top-button":{},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false},"anchors":{},"expandable-chapters":{}},"theme":"default","author":"ywq","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"Kubernetes源码学习","language":"zh-hans","links":{},"gitbook":"3.2.3","description":""},"file":{"path":"controller/Kubernetes源码学习-Controller-P1-多实例leader选举.md","mtime":"2019-12-10T07:40:07.014Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2019-12-18T06:58:33.263Z"},"basePath":"..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"2.1. 多实例leader选举","date":"2019/12/09 21:59:53","tags":["Kubernetes","Golang","读源码"],"level":"2.2.1","depth":2,"next":{"title":"[4. ApiServer]","level":"2.3","depth":1,"ref":"","articles":[{"title":"[4.1 待补充]","level":"2.3.1","depth":2,"ref":"","articles":[]}]},"previous":{"title":"3. Controller","level":"2.2","depth":1,"path":"controller/README.md","ref":"./controller/README.md","articles":[{"title":"2.1. 多实例leader选举","level":"2.2.1","depth":2,"path":"controller/Kubernetes源码学习-Controller-P1-多实例leader选举.md","ref":"./controller/Kubernetes源码学习-Controller-P1-多实例leader选举.md","articles":[]}]},"dir":"ltr"},"config":{"plugins":["-sharing","anchors","github","expandable-chapters","splitter","page-treeview","back-to-top-button"],"styles":{"website":"./styles/website.css"},"pluginsConfig":{"page-treeview":{"copyright":"","minHeaderCount":"1","minHeaderDeep":"1"},"github":{"url":"https://github.com/yinwenqin/kubeSourceCodeNote"},"splitter":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"back-to-top-button":{},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false},"anchors":{},"expandable-chapters":{}},"theme":"default","author":"ywq","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"Kubernetes源码学习","language":"zh-hans","links":{},"gitbook":"3.2.3","description":""},"file":{"path":"controller/Kubernetes源码学习-Controller-P1-多实例leader选举.md","mtime":"2019-12-19T09:54:39.649Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2020-01-01T09:43:33.921Z"},"basePath":"..","book":{"language":""}});
         });
     </script>
 </div>
