@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://blog.upweto.top/"/>
-  <updated>2020-01-01T09:41:10.904Z</updated>
+  <updated>2020-01-03T10:06:36.596Z</updated>
   <id>http://blog.upweto.top/</id>
   
   <author>
@@ -15,6 +15,30 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>kubernetes 部署redis cluster</title>
+    <link href="http://blog.upweto.top/2020/01/03/kubernetes%20%E9%83%A8%E7%BD%B2redis%20cluster.html"/>
+    <id>http://blog.upweto.top/2020/01/03/kubernetes 部署redis cluster.html</id>
+    <published>2020-01-03T09:49:16.000Z</published>
+    <updated>2020-01-03T10:06:36.596Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;link rel=&quot;stylesheet&quot; class=&quot;aplayer-secondary-style-marker&quot; href=&quot;/assets/css/APlayer.min.css&quot;&gt;&lt;script src=&quot;/assets/js/APlayer.min.js&quot;
+        
+      
+    
+    </summary>
+    
+    
+      <category term="Kubernetes" scheme="http://blog.upweto.top/tags/Kubernetes/"/>
+    
+  </entry>
   
   <entry>
     <title>Etcd和kubernetes master的灾备与恢复</title>
@@ -501,32 +525,6 @@
     <link href="http://blog.upweto.top/2019/07/18/golang%E7%AE%97%E6%B3%95%E7%BB%83%E4%B9%A0%EF%BC%9A%E5%8D%95%E9%93%BE%E8%A1%A8_%E5%8F%8C%E9%93%BE%E8%A1%A8_%E7%8E%AF%E5%BD%A2%E9%93%BE%E8%A1%A8.html"/>
     <id>http://blog.upweto.top/2019/07/18/golang算法练习：单链表_双链表_环形链表.html</id>
     <published>2019-07-18T09:42:53.000Z</published>
-    <updated>2019-11-21T07:48:40.126Z</updated>
-    
-    <summary type="html">
-    
-      
-      
-        
-        
-          &lt;link rel=&quot;stylesheet&quot; class=&quot;aplayer-secondary-style-marker&quot; href=&quot;/assets/css/APlayer.min.css&quot;&gt;&lt;script src=&quot;/assets/js/APlayer.min.js&quot;
-        
-      
-    
-    </summary>
-    
-    
-      <category term="Golang" scheme="http://blog.upweto.top/tags/Golang/"/>
-    
-      <category term="算法" scheme="http://blog.upweto.top/tags/%E7%AE%97%E6%B3%95/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>golang算法练习：基于array的队列实现</title>
-    <link href="http://blog.upweto.top/2019/07/18/golang%E7%AE%97%E6%B3%95%E7%BB%83%E4%B9%A0%EF%BC%9A%E5%9F%BA%E4%BA%8Earray%E7%9A%84%E9%98%9F%E5%88%97%E5%AE%9E%E7%8E%B0.html"/>
-    <id>http://blog.upweto.top/2019/07/18/golang算法练习：基于array的队列实现.html</id>
-    <published>2019-07-18T09:30:58.000Z</published>
     <updated>2019-11-21T07:48:40.126Z</updated>
     
     <summary type="html">

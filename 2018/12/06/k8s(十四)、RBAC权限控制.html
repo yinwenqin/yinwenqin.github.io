@@ -1,0 +1,1546 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-CN">
+
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link rel="stylesheet" href="/lib/pace/pace-theme-bounce.min.css?v=1.0.2">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link rel="stylesheet" href="/lib/fancybox/source/jquery.fancybox.css">
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+    
+      
+    
+
+    
+  
+
+  
+
+  
+
+  
+    
+      
+    
+
+    
+  
+
+  
+    
+    
+    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic|Roboto Slab:300,300italic,400,400italic,700,700italic|Roboto Mono:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext">
+  
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.1.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.1.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.1.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.1.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.1.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '7.1.1',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":true,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: true,
+    fancybox: true,
+    fastclick: true,
+    lazyload: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"shrinkIn","post_header":"slideLeftIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideDownIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <script>
+  (function(i,s,o,g,r,a,m){i["DaoVoiceObject"]=r;i[r]=i[r]||function(){(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;a.charset="utf-8";m.parentNode.insertBefore(a,m)})(window,document,"script",('https:' == document.location.protocol ? 'https:' : 'http:') + "//widget.daovoice.io/widget/0f81ff2f.js","daovoice")
+  daovoice('init', {
+      app_id: "fc253f1e"
+    });
+  daovoice('update');
+  </script>
+
+  <meta name="description" content="前言kubernetes 集群相关所有的交互都通过apiserver来完成，对于这样集中式管理的系统来说，权限管理尤其重要，在1.5版的时候引入了RBAC(Role Base Access Control)的权限控制机制. RBAC也是初接触k8s的用户较难理解的一部分，同时RBAC作为集群管理的基础组件之一，本该放在最前面几篇，但是最近才想起来这个方面的知识点，赶紧梳理总结输出了本篇 工作流程">
+<meta name="keywords" content="Kubernetes">
+<meta property="og:type" content="article">
+<meta property="og:title" content="k8s(十四)、RBAC权限控制">
+<meta property="og:url" content="http://blog.upweto.top/2018/12/06/k8s(十四)、RBAC权限控制.html">
+<meta property="og:site_name" content="随笔漫谈">
+<meta property="og:description" content="前言kubernetes 集群相关所有的交互都通过apiserver来完成，对于这样集中式管理的系统来说，权限管理尤其重要，在1.5版的时候引入了RBAC(Role Base Access Control)的权限控制机制. RBAC也是初接触k8s的用户较难理解的一部分，同时RBAC作为集群管理的基础组件之一，本该放在最前面几篇，但是最近才想起来这个方面的知识点，赶紧梳理总结输出了本篇 工作流程">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://mycloudn.kokoerp.com/20181206193427845.png">
+<meta property="og:image" content="http://mycloudn.kokoerp.com/20181206195424194.png">
+<meta property="og:image" content="http://mycloudn.kokoerp.com/20181206195531599.png">
+<meta property="og:image" content="http://mycloudn.kokoerp.com/20181206201141603.png">
+<meta property="og:updated_time" content="2019-11-21T07:48:40.132Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="k8s(十四)、RBAC权限控制">
+<meta name="twitter:description" content="前言kubernetes 集群相关所有的交互都通过apiserver来完成，对于这样集中式管理的系统来说，权限管理尤其重要，在1.5版的时候引入了RBAC(Role Base Access Control)的权限控制机制. RBAC也是初接触k8s的用户较难理解的一部分，同时RBAC作为集群管理的基础组件之一，本该放在最前面几篇，但是最近才想起来这个方面的知识点，赶紧梳理总结输出了本篇 工作流程">
+<meta name="twitter:image" content="http://mycloudn.kokoerp.com/20181206193427845.png">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="随笔漫谈" type="application/atom+xml">
+
+
+
+  
+  
+  <link rel="canonical" href="http://blog.upweto.top/2018/12/06/k8s(十四)、RBAC权限控制">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>k8s(十四)、RBAC权限控制 | 随笔漫谈</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+ 
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">随笔漫谈</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-book">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/gitbooks/" rel="section"><i class="menu-item-icon fa fa-fw fa-book"></i> <br>book</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-互动">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/guestbook/" rel="section"><i class="menu-item-icon fa fa-fw fa-comments"></i> <br>互动</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://blog.upweto.top/2018/12/06/k8s(十四)、RBAC权限控制.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="丨ywq丨">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随笔漫谈">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">k8s(十四)、RBAC权限控制
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-12-06 20:16:10" itemprop="dateCreated datePublished" datetime="2018-12-06T20:16:10+08:00">2018-12-06</time>
+            
+
+            
+          </span>
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+            <div class="post-symbolscount">
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">本文字数：</span>
+                
+                <span title="本文字数">23k</span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">21 分钟</span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id><a href="#" class="headerlink" title=" "></a> </h2><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>kubernetes 集群相关所有的交互都通过apiserver来完成，对于这样集中式管理的系统来说，权限管理尤其重要，在1.5版的时候引入了RBAC(Role Base Access Control)的权限控制机制.</p>
+<p>RBAC也是初接触k8s的用户较难理解的一部分，同时RBAC作为集群管理的基础组件之一，本该放在最前面几篇，但是最近才想起来这个方面的知识点，赶紧梳理总结输出了本篇</p>
+<h2 id="工作流程"><a href="#工作流程" class="headerlink" title="工作流程"></a>工作流程</h2><h5 id="流程图"><a href="#流程图" class="headerlink" title="流程图"></a>流程图</h5><p><img src="http://mycloudn.kokoerp.com/20181206193427845.png" alt="在这里插入图片描述"></p>
+<h5 id="流程拆解"><a href="#流程拆解" class="headerlink" title="流程拆解"></a>流程拆解</h5><p>一、基于资源申明和管理方法申明组成rule规则，和Role(命名空间范围))或ClusterRole(集群范围)对象进行绑定，Role类的对象将拥有所申明资源及的指定方法的权限。<br>二、将Role权限落到实际用户或程序上，即RoleBinding(命名空间范围)或CLusterRoleBinding(集群范围)</p>
+<p>有两种方式：<br>1.用户使用：如果是用户需求权限，则将Role与User(或Group)绑定(这需要创建User/Group)；<br>2.程序使用：如果是程序需求权限，将Role与ServiceAccount指定(这需要创建ServiceAccount并且在deployment中指定ServiceAccount)。<br><strong>相当于Role是一个类，用作权限申明，User/Group/ServiceAccount将成为类的实例</strong></p>
+<h2 id="实战"><a href="#实战" class="headerlink" title="实战"></a>实战</h2><h3 id="一、用户使用"><a href="#一、用户使用" class="headerlink" title="一、用户使用"></a>一、用户使用</h3><p>安装cfssl工具，生成ca-config.json文件。这一步骤在安装集群的时候已经做过，这里不再复述，参考：<br><a href="https://blog.csdn.net/ywq935/article/details/79856469" target="_blank" rel="noopener">k8s（一）、 1.9.0高可用集群本地离线部署记录</a></p>
+<p>准备ca配置json文件如下：<br><figure class="highlight mipsasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">cat &gt;  ca-<span class="built_in">config</span>.<span class="keyword">json </span>&lt;&lt;EOF</span><br><span class="line">&#123;</span><br><span class="line"><span class="string">"signing"</span>: &#123;</span><br><span class="line"><span class="string">"default"</span>: &#123;</span><br><span class="line">  <span class="string">"expiry"</span>: <span class="string">"8760h"</span></span><br><span class="line">&#125;,</span><br><span class="line"><span class="string">"profiles"</span>: &#123;</span><br><span class="line">  <span class="string">"kubernetes"</span>: &#123;</span><br><span class="line">    <span class="string">"usages"</span>: [</span><br><span class="line">        <span class="string">"signing"</span>,</span><br><span class="line">        <span class="string">"key encipherment"</span>,</span><br><span class="line">        <span class="string">"server auth"</span>,</span><br><span class="line">        <span class="string">"client auth"</span></span><br><span class="line">    ],</span><br><span class="line">    <span class="string">"expiry"</span>: <span class="string">"8760h"</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br><span class="line">EOF</span><br></pre></td></tr></table></figure></p>
+<p>安装好的k8s集群，默认在ca文件在如下路径：</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">～ <span class="regexp">/rbac-test# ls /</span>etc<span class="regexp">/kubernetes/</span>pki/ca*</span><br><span class="line"><span class="regexp">/etc/</span>kubernetes<span class="regexp">/pki/</span>ca.crt  <span class="regexp">/etc/</span>kubernetes<span class="regexp">/pki/</span>ca.key</span><br></pre></td></tr></table></figure>
+<p><strong>创建用户的证书签署请求配置json文件：</strong></p>
+<figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">~/rbac-<span class="keyword">test</span><span class="comment"># cat opsuser-csr.json</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">"CN"</span>: <span class="string">"opsuser"</span>,</span><br><span class="line">  <span class="string">"hosts"</span>: [],</span><br><span class="line">  <span class="string">"key"</span>: &#123;</span><br><span class="line">    <span class="string">"algo"</span>: <span class="string">"rsa"</span>,</span><br><span class="line">    <span class="string">"size"</span>: <span class="number">2048</span></span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="string">"names"</span>: [</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="string">"C"</span>: <span class="string">"CN"</span>,</span><br><span class="line">      <span class="string">"ST"</span>: <span class="string">"BeiJing"</span>,</span><br><span class="line">      <span class="string">"L"</span>: <span class="string">"BeiJing"</span>,</span><br><span class="line">      <span class="string">"O"</span>: <span class="string">"k8s"</span>,</span><br><span class="line">      <span class="string">"OU"</span>: <span class="string">"System"</span></span><br><span class="line">    &#125;</span><br><span class="line">  ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>CN即comman name，后面用户证书认证时使用的用户名</p>
+<p><strong>生成opsuser的证书：</strong></p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cfssl gencert <span class="attribute">-ca</span>=/etc/kubernetes/pki/ca.crt <span class="attribute">-ca-key</span>=/etc/kubernetes/pki/ca.key <span class="attribute">-config</span>=./ca-config.json <span class="attribute">-profile</span>=kubernetes ./opsuser-csr.json | cfssljson -bare opsuser</span><br></pre></td></tr></table></figure>
+<p>会生成下面3个文件：</p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">opsuser-key<span class="selector-class">.pem</span>  opsuser<span class="selector-class">.pem</span>  opsuser.csr</span><br></pre></td></tr></table></figure>
+<p><strong>生成用户的专属配置文件</strong><br>完整的配置文件包含3块，分别是cluster/context/user部分，包含相应的内容，分3个步骤生成，后方详解</p>
+<p>1.cluster部分：<br>生成此部分需要有集群的ca.pem文件，此文件在/etc/kubernetes/pki目录下默认没有，可以使用openssl命令基于ca.key文件去生成ca.pem文件；也可以直接使用已有的/etc/kubernetes/admin.conf文件中cluster部分：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 只取cluster的上下文</span></span><br><span class="line"><span class="string">~/rbac-test#</span> <span class="string">cat</span> <span class="string">/etc/kubernetes/admin.conf</span> </span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">clusters:</span></span><br><span class="line"><span class="attr">- cluster:</span></span><br><span class="line"><span class="attr">    certificate-authority-data:</span> <span class="string">[CERT</span> <span class="string">DATA]</span></span><br><span class="line"><span class="attr">    server:</span> <span class="attr">https://10.90.1.238:6443</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">kubernetes</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 将cluster部分写入opsuser的配置文件内</span></span><br><span class="line"><span class="string">cat</span> <span class="string">&gt;  opsuser.kubeconfig &lt;&lt;EOF</span></span><br><span class="line"><span class="string"></span><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">clusters:</span></span><br><span class="line"><span class="attr">- cluster:</span></span><br><span class="line"><span class="attr">    certificate-authority-data:</span> <span class="string">[CERT</span> <span class="string">DATA]</span></span><br><span class="line"><span class="attr">    server:</span> <span class="attr">https://10.90.1.238:6443</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">kubernetes</span></span><br><span class="line"><span class="string">EOF</span></span><br></pre></td></tr></table></figure>
+<p>2.context部分</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">kubectl<span class="built_in"> config </span>set-context kubernetes \</span><br><span class="line"><span class="attribute">--cluster</span>=kubernetes \</span><br><span class="line"><span class="attribute">--user</span>=opsuser \</span><br><span class="line"><span class="attribute">--namespace</span>=default \</span><br><span class="line"><span class="attribute">--kubeconfig</span>=opsuser.kubeconfig</span><br></pre></td></tr></table></figure>
+<p>3.user认证部分</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">kubectl<span class="built_in"> config </span>set-credentials opsuser \</span><br><span class="line"><span class="attribute">--client-certificate</span>=./opsuser.pem \</span><br><span class="line"><span class="attribute">--client-key</span>=./opsuser-key.pem \</span><br><span class="line"><span class="attribute">--embed-certs</span>=<span class="literal">true</span> \</span><br><span class="line"><span class="attribute">--kubeconfig</span>=opsuser.kubeconfig</span><br></pre></td></tr></table></figure>
+<p>查看最终生成的配置文件：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># cat opsuser.kubeconfig </span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">clusters:</span></span><br><span class="line"><span class="attr">- cluster:</span></span><br><span class="line"><span class="attr">    certificate-authority-data:</span> <span class="string">[CRET</span> <span class="string">DATA]</span></span><br><span class="line"><span class="attr">    server:</span> <span class="attr">https://10.90.1.238:6443</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">kubernetes</span></span><br><span class="line"><span class="attr">contexts:</span></span><br><span class="line"><span class="attr">- context:</span></span><br><span class="line"><span class="attr">    cluster:</span> <span class="string">kubernetes</span></span><br><span class="line"><span class="attr">    namespace:</span> <span class="string">default</span></span><br><span class="line"><span class="attr">    user:</span> <span class="string">opsuser</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">kubernetes</span></span><br><span class="line"><span class="attr">current-context:</span> <span class="string">kubernetes</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Config</span></span><br><span class="line"><span class="attr">preferences:</span> <span class="string">&#123;&#125;</span></span><br><span class="line"><span class="attr">users:</span></span><br><span class="line"><span class="attr">- name:</span> <span class="string">opsuser</span></span><br><span class="line"><span class="attr">  user:</span></span><br><span class="line"><span class="attr">    as-user-extra:</span> <span class="string">&#123;&#125;</span></span><br><span class="line"><span class="attr">    client-certificate-data:</span> <span class="string">LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURZekNDQWt1Z0F3SUJBZ0lVV2ZKMlNLb1NJWWhBMHFJdzRaVUZERnlWY1pzd0RRWUpLb1pJaHZjTkFRRUwKQlFBd0ZURVRNQkVHQTFVRUF4TUthM1ZpWlhKdVpYUmxjekFlRncweE9ERXlNRFV3T0RNek1EQmFGdzB4T1RFeQpNRFV3T0RNek1EQmFNR0l4Q3pBSkJnTlZCQVlUQWtOT01SQXdEZ1lEVlFRSUV3ZENaV2xLYVc1bk1SQXdEZ1lEClZRUUhFd2RDWldsS2FXNW5NUXd3Q2dZRFZRUUtFd05yT0hNeER6QU5CZ05WQkFzVEJsTjVjM1JsYlRFUU1BNEcKQTFVRUF4TUhiM0J6ZFhObGNqQ0NBU0l3RFFZSktvWklodmNOQVFFQkJRQURnZ0VQQURDQ0FRb0NnZ0VCQU93Wgo4d1hpdFhrOGtKNk9PSkFvUHZGaWw2ZkdKUDFWT3VyYWFqTWMyZ2ROSkV0Q3o2Mzk2eTNIZGw1T2NXdlBNNURvCjJ3a0NGKzlJd09jVzljVHhTZFZMUEg3OVEvQVhHcm9Nd2ltZk9WRUNlYm9aVkswRUx3azk1K2piRUpVVHY4eTYKMForM2JvMGtwL2p2Q2pzdmwxWUR3RGtGeGtwckZ3SXliOGt0cVBLMVFkb2ZrOE16Z3NTMnNZYTR1MWFydHd0dQozSTZZbEViUFNIOXhGbmx1UUFvbjZnSmkrM0c1YTdVRGxvRm9MSHlqL00wMStPRi9YWVpEcWgwK3hoZTlVRWdHClZBZkNSQkYyZlg2WjdCaFkybnpsblZOejV5SXhmSlpJclNIYnFhUlAxZXY1Tk1ndVNRcnl3UGQ5OG5jM201RnkKMkVXa28xeEJmQ1FXSHJKd04vMENBd0VBQWFOZU1Gd3dEZ1lEVlIwUEFRSC9CQVFEQWdXZ01CMEdBMVVkSlFRVwpNQlFHQ0NzR0FRVUZCd01CQmdnckJnRUZCUWNEQWpBTUJnTlZIUk1CQWY4RUFqQUFNQjBHQTFVZERnUVdCQlFXCmpDR2NYVjRPOTRqZlV1Mk9Kd2hqTC9xMVZEQU5CZ2txaGtpRzl3MEJBUXNGQUFPQ0FRRUFBeXdlZk5uckNKU0MKdDdrT2tHL1RUSHA1NG1tT0QxS2FPZW82TnpycFRuNVQwa0h3VEdrYmNHcWxvcDIvM1lhQXJDUHo2Q1J4VDd0QQpaTUNiOXhRZkJ0cllpeHJUdGF0TTZ4YlJuQTBqaC96Y2tvRHVuYjFEYkhxbG1JQW5jLzdaTEthQklKSnA5L0IwCjB2NnJXTEd2N0F1YmZJT1ZZVTdBVTVnZmh1LzJoWC93MzFJWlgwaXZ0WEtDR0lJb1Bya2hsL3NvUTEwdVFhUmgKeFFBdzhUbTc0dTBJTDE3OFFsRlhSYm1JQXpuWk42Skh1YW5QZE82TVI1Z0dobVMzRDRaUDg2RE5DenZCOVZFcQpWa0w4R0E2bHJHNm1sem5MN0pxODlQajdOdElwZnRaeDBsdTBYRmsxTm9DWk9VMFl5Yk9peWlPS2N0NVNia3VKClVLUjVYMC9GTUE9PQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg==</span></span><br><span class="line"><span class="attr">    client-key-data:</span> <span class="string">LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlFcFFJQkFBS0NBUUVBN0JuekJlSzFlVHlRbm80NGtDZys4V0tYcDhZay9WVTY2dHBxTXh6YUIwMGtTMExQCnJmM3JMY2QyWGs1eGE4OHprT2piQ1FJWDcwakE1eGIxeFBGSjFVczhmdjFEOEJjYXVnekNLWjg1VVFKNXVobFUKclFRdkNUM242TnNRbFJPL3pMclJuN2R1alNTbitPOEtPeStYVmdQQU9RWEdTbXNYQWpKdnlTMm84clZCMmgrVAp3ek9DeExheGhyaTdWcXUzQzI3Y2pwaVVSczlJZjNFV2VXNUFDaWZxQW1MN2NibHJ0UU9XZ1dnc2ZLUDh6VFg0CjRYOWRoa09xSFQ3R0Y3MVFTQVpVQjhKRUVYWjlmcG5zR0ZqYWZPV2RVM1BuSWpGOGxraXRJZHVwcEUvVjYvazAKeUM1SkN2TEE5MzN5ZHplYmtYTFlSYVNqWEVGOEpCWWVzbkEzL1FJREFRQUJBb0lCQVFEQ0F6amUxME5FMHU0TQpQTlppTDVBNWowa01CeGtTUzkxVWJCTGsyWXFZZ1YyWHN0a3lJdndFN0dscWFZOXVoaC9icmwxL2M0YnpqSmRuCnprZzdoQU9tRUdNdi96SzZzbUcyRFJIb1hmMGRncWxBc2R3UktPVDE5VGNDOURFV0w5cG1oQVlKOXhRVFM5SDAKRDRvYXhLclpkYytaakJNN3gvQnFUOFBvVDJzTHRTN1FuTjhpNGNpTjVSeTl1TUsrOFZJcitPUVJqNWlVSHpDLwoyWXRBT0daYlJHekhZaXR1a2xtZG45RmhYV1NreGFBY0p0RkdWcGlMS2FWdjdoYVZsZm40SUJaSkZrdkJNQkxCClR4N2JCb25MYkF1K2Ezd0ZzYzlMd1NTNUJXK296eUZJYlJoWVV0SmhTdmZLUjZxTVJFMHRMV2IwUFJoRDVjZEUKenR5dWRoWEpBb0dCQVBYanVOYXA1TGNSSnUwaDhvVWxLTE9SZ1psYXFKSlpCUThrQ3A4ZTBJNXNpdFlxMEZlRwpOMnJibGdPV0RKSW5TR0pCc0I2VzFhOHI2S1F5L3dlcG9wTHJSQUE1VFo2YVMzMDBQeEgyY1paUE1aMHJpTmVXCnpLZGdIalczM0FORWtGQm5nVlA3Y3M2UENXSVlkajhyRElDUGowbWhkZEhWckd4elNycXNwWFczQW9HQkFQWFAKTWZjcEVQdVA1dGNvS0tnSXF5ZzVrNzRlZ0J0M2JUT2NHR05TellDeGV0bjJseHJWRW1nMktlOWNrMElGT0hFaAovUnFqNnJtY1VNV0JnRWExS0pNajlCRW56NWo4S2pGN3l2Z3o5ZDJPNHVkTlMyeG50R2MrZVJ1T0NpU0JNejRhCkFVZ2xSdGRJZXhkeWdoVWJsNVhMaitTeFRYVXRmWDgzZENMZEZCL3JBb0dCQUlsOU5LeHJRT1VRSlNqeEUyOVoKa01HZmVjenJBVmtiaDVXb3ZIdXV1a1Q0OGtUQW1kQm16dlBrSnFTSXNTekQ1RmgwakdyK1FpdDVyTktyWlNpKwp0SlhjRVNEaTZjRG1XNUY5dGtwdjk2RnBWTCtpU1JqclRESEdyLzJ2ZWNrbC9GL0pFR3FLTGU3TDBoNVV1VUdtCjY0MnpPQmFldm9kL0o3TllZQSt6VzYxUEFvR0JBUEFWQU01UTg5OWdlNnlsOHArOFo3K1FEUGRpUHVtVXlibmcKdWdrNHRMTC9wZWdCYXpDdjc1eU5Xb1FKUFdMOFNsWmxSaHFoQXY5cTU1RWduVE55ZVVETm12S3VtWnJvb0NWWQpyYk9pdkg4N3NlOE1sYUE1NGYvOUNyaVpFTnI2dmh2bnRseksyOWdsV09SYjJTWFluME9WWU9PVE1QNUVBaEVoCkRuT0d6c01sQW9HQUtrSXJ3Z2Y5dnVubnBTeGJCMU9UeCtUR2pkUEN3RThDUWNxWTBBeUhXZnk2eTBNaTNTSXMKTXBKZmpmbXN3NlRDSHZ1VFUvOXBkL3dYWEZ6ZU03OHBwWU5wcHZBVjQzVEVQNTdHRXZRV3VBSkNFQklvekZhdQpXZWVrRGd6bzBCc3NCMFFOUnRnUS9HdTBnaDRCWjFMdDB4QmJmWHhrMjRMTmJpSFBHTHRQL3pjPQotLS0tLUVORCBSU0EgUFJJVkFURSBLRVktLS0tLQo=</span></span><br></pre></td></tr></table></figure>
+<p>最后，加载启用此配置文件</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl<span class="built_in"> config </span>use-context kubernetes <span class="attribute">--kubeconfig</span>=opsuser.kubeconfig</span><br></pre></td></tr></table></figure>
+<p>此时，用户已经创建完成，下面开始进行RoleBinding步骤赋予权限。</p>
+<p><strong>RoleBinding绑定</strong><br>创建Role：</p>
+<figure class="highlight dts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">~/rbac-test<span class="meta"># cat pod-reader.yaml </span></span><br><span class="line"><span class="symbol">kind:</span> Role</span><br><span class="line"><span class="symbol">apiVersion:</span> rbac.authorization.k8s.io/v1</span><br><span class="line"><span class="symbol">metadata:</span></span><br><span class="line"><span class="symbol">  namespace:</span> kube-system</span><br><span class="line"><span class="symbol">  name:</span> pod-reader</span><br><span class="line"><span class="symbol">rules:</span></span><br><span class="line">- apiGroups: [<span class="string">""</span>] <span class="meta"># <span class="string">""</span>代表核心api组</span></span><br><span class="line"><span class="symbol">  resources:</span> [<span class="string">"pods"</span>]</span><br><span class="line"><span class="symbol">  verbs:</span> [<span class="string">"get"</span>, <span class="string">"list"</span>, <span class="string">"watch"</span>, <span class="string">"create"</span>, <span class="string">"update"</span>, <span class="string">"patch"</span>, <span class="string">"delete"</span>]</span><br><span class="line"></span><br><span class="line">~/rbac-test<span class="meta"># cat opsuser-role-bind.yaml</span></span><br><span class="line"><span class="symbol">kind:</span> RoleBinding</span><br><span class="line"><span class="symbol">apiVersion:</span> rbac.authorization.k8s.io/v1</span><br><span class="line"><span class="symbol">metadata:</span></span><br><span class="line"><span class="symbol">  name:</span> read-pods</span><br><span class="line"><span class="symbol">  namespace:</span> kube-system</span><br><span class="line"><span class="symbol">subjects:</span></span><br><span class="line">- kind: User</span><br><span class="line"><span class="symbol">  name:</span> opsuser   <span class="meta"># 目标用户</span></span><br><span class="line"><span class="symbol">  apiGroup:</span> rbac.authorization.k8s.io</span><br><span class="line"><span class="symbol">roleRef:</span></span><br><span class="line"><span class="symbol">  kind:</span> Role</span><br><span class="line"><span class="symbol">  name:</span> pod-reader  <span class="meta"># 角色信息</span></span><br><span class="line"><span class="symbol">  apiGroup:</span> rbac.authorization.k8s.io</span><br><span class="line"></span><br><span class="line">kubectl apply -f pod-reader.yaml</span><br><span class="line">kubectl apply -f opsuser-role-bind.yaml</span><br></pre></td></tr></table></figure>
+<p>RoleBinding步骤已完成<br><strong>检验</strong></p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 将此配置文件作为当前kubectl配置文件使用</span></span><br><span class="line">~/rbac-test# mv /root/.kube<span class="built_in">/config </span>/root/.kube/config.bak</span><br><span class="line">~/rbac-test# cp opsuser.kubeconfig /root/.kube/config</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看资源</span></span><br><span class="line">:~/rbac-test# kubectl <span class="builtin-name">get</span> pods </span><br><span class="line">NAME                                     READY     STATUS             RESTARTS   AGE</span><br><span class="line">appdev-5c4b65bbbb-t4lvr                  1/1       Running            2          44d</span><br><span class="line">deptest13dev-fb79d9957-d55vb             0/1       Pending            0          35d</span><br><span class="line">deptest13test-8687769d58-lzm2r           0/1       Pending            0          41d</span><br><span class="line">deptest14dbtm-ffbd5c56c-ph68l            0/2       Pending            0          41d</span><br><span class="line">deptest14test-7cb7bf6cc-xnrxw            0/1       Pending            0          41d</span><br><span class="line"></span><br><span class="line">:~/rbac-test# kubectl <span class="builtin-name">get</span> nodes</span><br><span class="line"><span class="builtin-name">Error</span> <span class="keyword">from</span><span class="built_in"> server </span>(Forbidden): nodes is forbidden:<span class="built_in"> User </span><span class="string">"opsuser"</span> cannot list nodes at the cluster scope</span><br></pre></td></tr></table></figure>
+<p>可以看到，基于生成的用户配置文件，已经可以管理申明的pod资源，无法管理申明以外的资源类型。测试成功</p>
+<h3 id="二、程序使用"><a href="#二、程序使用" class="headerlink" title="二、程序使用"></a>二、程序使用</h3><p>与用户使用User不同的是，程序的权限赋予是通过ServiceAccount来作为权限载体的，因此，首先要拥有程序/deployment/ServiceAccount等资源，这里以前面文章里没有讲的kube dashboard为例进行说明。</p>
+<p>首先我们来看官方最新版本的kube dashboard的yaml文件(服务暴露方式稍作修改成了NodePort)：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br><span class="line">235</span><br><span class="line">236</span><br><span class="line">237</span><br><span class="line">238</span><br><span class="line">239</span><br><span class="line">240</span><br><span class="line">241</span><br><span class="line">242</span><br><span class="line">243</span><br><span class="line">244</span><br><span class="line">245</span><br><span class="line">246</span><br><span class="line">247</span><br><span class="line">248</span><br><span class="line">249</span><br><span class="line">250</span><br><span class="line">251</span><br><span class="line">252</span><br><span class="line">253</span><br><span class="line">254</span><br><span class="line">255</span><br><span class="line">256</span><br><span class="line">257</span><br><span class="line">258</span><br><span class="line">259</span><br><span class="line">260</span><br><span class="line">261</span><br><span class="line">262</span><br><span class="line">263</span><br><span class="line">264</span><br><span class="line">265</span><br><span class="line">266</span><br><span class="line">267</span><br><span class="line">268</span><br><span class="line">269</span><br><span class="line">270</span><br><span class="line">271</span><br><span class="line">272</span><br><span class="line">273</span><br><span class="line">274</span><br><span class="line">275</span><br><span class="line">276</span><br><span class="line">277</span><br><span class="line">278</span><br><span class="line">279</span><br><span class="line">280</span><br><span class="line">281</span><br><span class="line">282</span><br><span class="line">283</span><br><span class="line">284</span><br><span class="line">285</span><br><span class="line">286</span><br><span class="line">287</span><br><span class="line">288</span><br><span class="line">289</span><br><span class="line">290</span><br><span class="line">291</span><br><span class="line">292</span><br><span class="line">293</span><br><span class="line">294</span><br><span class="line">295</span><br><span class="line">296</span><br><span class="line">297</span><br><span class="line">298</span><br><span class="line">299</span><br><span class="line">300</span><br><span class="line">301</span><br><span class="line">302</span><br><span class="line">303</span><br><span class="line">304</span><br><span class="line">305</span><br><span class="line">306</span><br><span class="line">307</span><br><span class="line">308</span><br><span class="line">309</span><br><span class="line">310</span><br><span class="line">311</span><br><span class="line">312</span><br><span class="line">313</span><br><span class="line">314</span><br><span class="line">315</span><br><span class="line">316</span><br><span class="line">317</span><br><span class="line">318</span><br><span class="line">319</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">~/dashboard#</span> <span class="string">cat</span> <span class="string">kubernetes-dashboard.yaml</span></span><br><span class="line"><span class="comment"># ------------------- Dashboard Secret ------------------- #</span></span><br><span class="line"></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Secret</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  labels:</span></span><br><span class="line"><span class="attr">    k8s-app:</span> <span class="string">kubernetes-dashboard</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">kubernetes-dashboard-certs</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">kube-system</span></span><br><span class="line"><span class="attr">type:</span> <span class="string">Opaque</span></span><br><span class="line"></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="comment"># ------------------- Dashboard Service Account ------------------- #</span></span><br><span class="line"></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">ServiceAccount</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  labels:</span></span><br><span class="line"><span class="attr">    k8s-app:</span> <span class="string">kubernetes-dashboard</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">kubernetes-dashboard</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">kube-system</span></span><br><span class="line"></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="comment"># ------------------- Dashboard Role &amp; Role Binding ------------------- #</span></span><br><span class="line"></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Role</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">rbac.authorization.k8s.io/v1</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">kubernetes-dashboard-minimal</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">kube-system</span></span><br><span class="line"><span class="attr">rules:</span></span><br><span class="line">  <span class="comment"># Allow Dashboard to create 'kubernetes-dashboard-key-holder' secret.</span></span><br><span class="line"><span class="attr">- apiGroups:</span> <span class="string">[""]</span></span><br><span class="line"><span class="attr">  resources:</span> <span class="string">["secrets"]</span></span><br><span class="line"><span class="attr">  verbs:</span> <span class="string">["create"]</span></span><br><span class="line">  <span class="comment"># Allow Dashboard to create 'kubernetes-dashboard-settings' config map.</span></span><br><span class="line"><span class="attr">- apiGroups:</span> <span class="string">[""]</span></span><br><span class="line"><span class="attr">  resources:</span> <span class="string">["configmaps"]</span></span><br><span class="line"><span class="attr">  verbs:</span> <span class="string">["create"]</span></span><br><span class="line">  <span class="comment"># Allow Dashboard to get, update and delete Dashboard exclusive secrets.</span></span><br><span class="line"><span class="attr">- apiGroups:</span> <span class="string">[""]</span></span><br><span class="line"><span class="attr">  resources:</span> <span class="string">["secrets"]</span></span><br><span class="line"><span class="attr">  resourceNames:</span> <span class="string">["kubernetes-dashboard-key-holder",</span> <span class="string">"kubernetes-dashboard-certs"</span><span class="string">]</span></span><br><span class="line"><span class="attr">  verbs:</span> <span class="string">["get",</span> <span class="string">"update"</span><span class="string">,</span> <span class="string">"delete"</span><span class="string">]</span></span><br><span class="line">  <span class="comment"># Allow Dashboard to get and update 'kubernetes-dashboard-settings' config map.</span></span><br><span class="line"><span class="attr">- apiGroups:</span> <span class="string">[""]</span></span><br><span class="line"><span class="attr">  resources:</span> <span class="string">["configmaps"]</span></span><br><span class="line"><span class="attr">  resourceNames:</span> <span class="string">["kubernetes-dashboard-settings"]</span></span><br><span class="line"><span class="attr">  verbs:</span> <span class="string">["get",</span> <span class="string">"update"</span><span class="string">]</span></span><br><span class="line">  <span class="comment"># Allow Dashboard to get metrics from heapster.</span></span><br><span class="line"><span class="attr">- apiGroups:</span> <span class="string">[""]</span></span><br><span class="line"><span class="attr">  resources:</span> <span class="string">["services"]</span></span><br><span class="line"><span class="attr">  resourceNames:</span> <span class="string">["heapster"]</span></span><br><span class="line"><span class="attr">  verbs:</span> <span class="string">["proxy"]</span></span><br><span class="line"><span class="attr">- apiGroups:</span> <span class="string">[""]</span></span><br><span class="line"><span class="attr">  resources:</span> <span class="string">["services/proxy"]</span></span><br><span class="line"><span class="attr">  resourceNames:</span> <span class="string">["heapster",</span> <span class="string">"http:heapster:"</span><span class="string">,</span> <span class="string">"https:heapster:"</span><span class="string">]</span></span><br><span class="line"><span class="attr">  verbs:</span> <span class="string">["get"]</span></span><br><span class="line"></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">rbac.authorization.k8s.io/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">RoleBinding</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">kubernetes-dashboard-minimal</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">kube-system</span></span><br><span class="line"><span class="attr">roleRef:</span></span><br><span class="line"><span class="attr">  apiGroup:</span> <span class="string">rbac.authorization.k8s.io</span></span><br><span class="line"><span class="attr">  kind:</span> <span class="string">Role</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">kubernetes-dashboard-minimal</span></span><br><span class="line"><span class="attr">subjects:</span></span><br><span class="line"><span class="attr">- kind:</span> <span class="string">ServiceAccount</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">kubernetes-dashboard</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">kube-system</span></span><br><span class="line"></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="comment"># ------------------- Dashboard Deployment ------------------- #</span></span><br><span class="line"></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Deployment</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">apps/v1beta2</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  labels:</span></span><br><span class="line"><span class="attr">    k8s-app:</span> <span class="string">kubernetes-dashboard</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">kubernetes-dashboard</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">kube-system</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  replicas:</span> <span class="number">1</span></span><br><span class="line"><span class="attr">  revisionHistoryLimit:</span> <span class="number">10</span></span><br><span class="line"><span class="attr">  selector:</span></span><br><span class="line"><span class="attr">    matchLabels:</span></span><br><span class="line"><span class="attr">      k8s-app:</span> <span class="string">kubernetes-dashboard</span></span><br><span class="line"><span class="attr">  template:</span></span><br><span class="line"><span class="attr">    metadata:</span></span><br><span class="line"><span class="attr">      labels:</span></span><br><span class="line"><span class="attr">        k8s-app:</span> <span class="string">kubernetes-dashboard</span></span><br><span class="line"><span class="attr">    spec:</span></span><br><span class="line"><span class="attr">      containers:</span></span><br><span class="line"><span class="attr">      - name:</span> <span class="string">kubernetes-dashboard</span></span><br><span class="line"><span class="attr">        image:</span> <span class="string">k8s.gcr.io/kubernetes-dashboard-amd64:v1.10.0</span></span><br><span class="line"><span class="attr">        ports:</span></span><br><span class="line"><span class="attr">        - containerPort:</span> <span class="number">8443</span></span><br><span class="line"><span class="attr">          protocol:</span> <span class="string">TCP</span></span><br><span class="line"><span class="attr">        args:</span></span><br><span class="line"><span class="bullet">          -</span> <span class="bullet">--auto-generate-certificates</span></span><br><span class="line">          <span class="comment"># Uncomment the following line to manually specify Kubernetes API server Host</span></span><br><span class="line">          <span class="comment"># If not specified, Dashboard will attempt to auto discover the API server and connect</span></span><br><span class="line">          <span class="comment"># to it. Uncomment only if the default does not work.</span></span><br><span class="line">          <span class="comment"># - --apiserver-host=http://my-address:port</span></span><br><span class="line"><span class="attr">        volumeMounts:</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">kubernetes-dashboard-certs</span></span><br><span class="line"><span class="attr">          mountPath:</span> <span class="string">/certs</span></span><br><span class="line">          <span class="comment"># Create on-disk volume to store exec logs</span></span><br><span class="line"><span class="attr">        - mountPath:</span> <span class="string">/tmp</span></span><br><span class="line"><span class="attr">          name:</span> <span class="string">tmp-volume</span></span><br><span class="line"><span class="attr">        livenessProbe:</span></span><br><span class="line"><span class="attr">          httpGet:</span></span><br><span class="line"><span class="attr">            scheme:</span> <span class="string">HTTPS</span></span><br><span class="line"><span class="attr">            path:</span> <span class="string">/</span></span><br><span class="line"><span class="attr">            port:</span> <span class="number">8443</span></span><br><span class="line"><span class="attr">          initialDelaySeconds:</span> <span class="number">30</span></span><br><span class="line"><span class="attr">          timeoutSeconds:</span> <span class="number">30</span></span><br><span class="line"><span class="attr">      volumes:</span></span><br><span class="line"><span class="attr">      - name:</span> <span class="string">kubernetes-dashboard-certs</span></span><br><span class="line"><span class="attr">        secret:</span></span><br><span class="line"><span class="attr">          secretName:</span> <span class="string">kubernetes-dashboard-certs</span></span><br><span class="line"><span class="attr">      - name:</span> <span class="string">tmp-volume</span></span><br><span class="line"><span class="attr">        emptyDir:</span> <span class="string">&#123;&#125;</span></span><br><span class="line"><span class="attr">      serviceAccountName:</span> <span class="string">kubernetes-dashboard</span></span><br><span class="line">      <span class="comment"># Comment the following tolerations if Dashboard must not be deployed on master</span></span><br><span class="line"><span class="attr">      tolerations:</span></span><br><span class="line"><span class="attr">      - key:</span> <span class="string">node-role.kubernetes.io/master</span></span><br><span class="line"><span class="attr">        effect:</span> <span class="string">NoSchedule</span></span><br><span class="line"></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="comment"># ------------------- Dashboard Service ------------------- #</span></span><br><span class="line"></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Service</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  labels:</span></span><br><span class="line"><span class="attr">    k8s-app:</span> <span class="string">kubernetes-dashboard</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">kubernetes-dashboard</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">kube-system</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  type:</span> <span class="string">NodePort</span></span><br><span class="line"><span class="attr">  ports:</span></span><br><span class="line"><span class="attr">    - port:</span> <span class="number">443</span></span><br><span class="line"><span class="attr">      targetPort:</span> <span class="number">8443</span></span><br><span class="line"><span class="attr">      nodePort:</span> <span class="number">30001</span></span><br><span class="line"><span class="attr">  selector:</span></span><br><span class="line"><span class="attr">    k8s-app:</span> <span class="string">kubernetes-dashboard</span></span><br><span class="line"><span class="string">:~/dashboard#</span> <span class="string">ls</span></span><br><span class="line"><span class="string">admin-token.yaml</span>  <span class="string">kubernetes-dashboard.yaml</span></span><br><span class="line"><span class="string">:~/dashboard#</span> <span class="string">vim</span> <span class="string">kubernetes-dashboard.yaml</span> </span><br><span class="line"><span class="string">:~/dashboard#</span> <span class="string">cat</span> <span class="string">kubernetes-dashboard.yaml</span> </span><br><span class="line"><span class="comment"># Copyright 2017 The Kubernetes Authors.</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Licensed under the Apache License, Version 2.0 (the "License");</span></span><br><span class="line"><span class="comment"># you may not use this file except in compliance with the License.</span></span><br><span class="line"><span class="comment"># You may obtain a copy of the License at</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment">#     http://www.apache.org/licenses/LICENSE-2.0</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Unless required by applicable law or agreed to in writing, software</span></span><br><span class="line"><span class="comment"># distributed under the License is distributed on an "AS IS" BASIS,</span></span><br><span class="line"><span class="comment"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span></span><br><span class="line"><span class="comment"># See the License for the specific language governing permissions and</span></span><br><span class="line"><span class="comment"># limitations under the License.</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># ------------------- Dashboard Secret ------------------- #</span></span><br><span class="line"></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Secret</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  labels:</span></span><br><span class="line"><span class="attr">    k8s-app:</span> <span class="string">kubernetes-dashboard</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">kubernetes-dashboard-certs</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">kube-system</span></span><br><span class="line"><span class="attr">type:</span> <span class="string">Opaque</span></span><br><span class="line"></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="comment"># ------------------- Dashboard Service Account ------------------- #</span></span><br><span class="line"></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">ServiceAccount</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  labels:</span></span><br><span class="line"><span class="attr">    k8s-app:</span> <span class="string">kubernetes-dashboard</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">kubernetes-dashboard</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">kube-system</span></span><br><span class="line"></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="comment"># ------------------- Dashboard Role &amp; Role Binding ------------------- #</span></span><br><span class="line"></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Role</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">rbac.authorization.k8s.io/v1</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">kubernetes-dashboard-minimal</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">kube-system</span></span><br><span class="line"><span class="attr">rules:</span></span><br><span class="line">  <span class="comment"># Allow Dashboard to create 'kubernetes-dashboard-key-holder' secret.</span></span><br><span class="line"><span class="attr">- apiGroups:</span> <span class="string">[""]</span></span><br><span class="line"><span class="attr">  resources:</span> <span class="string">["secrets"]</span></span><br><span class="line"><span class="attr">  verbs:</span> <span class="string">["create"]</span></span><br><span class="line">  <span class="comment"># Allow Dashboard to create 'kubernetes-dashboard-settings' config map.</span></span><br><span class="line"><span class="attr">- apiGroups:</span> <span class="string">[""]</span></span><br><span class="line"><span class="attr">  resources:</span> <span class="string">["configmaps"]</span></span><br><span class="line"><span class="attr">  verbs:</span> <span class="string">["create"]</span></span><br><span class="line">  <span class="comment"># Allow Dashboard to get, update and delete Dashboard exclusive secrets.</span></span><br><span class="line"><span class="attr">- apiGroups:</span> <span class="string">[""]</span></span><br><span class="line"><span class="attr">  resources:</span> <span class="string">["secrets"]</span></span><br><span class="line"><span class="attr">  resourceNames:</span> <span class="string">["kubernetes-dashboard-key-holder",</span> <span class="string">"kubernetes-dashboard-certs"</span><span class="string">]</span></span><br><span class="line"><span class="attr">  verbs:</span> <span class="string">["get",</span> <span class="string">"update"</span><span class="string">,</span> <span class="string">"delete"</span><span class="string">]</span></span><br><span class="line">  <span class="comment"># Allow Dashboard to get and update 'kubernetes-dashboard-settings' config map.</span></span><br><span class="line"><span class="attr">- apiGroups:</span> <span class="string">[""]</span></span><br><span class="line"><span class="attr">  resources:</span> <span class="string">["configmaps"]</span></span><br><span class="line"><span class="attr">  resourceNames:</span> <span class="string">["kubernetes-dashboard-settings"]</span></span><br><span class="line"><span class="attr">  verbs:</span> <span class="string">["get",</span> <span class="string">"update"</span><span class="string">]</span></span><br><span class="line">  <span class="comment"># Allow Dashboard to get metrics from heapster.</span></span><br><span class="line"><span class="attr">- apiGroups:</span> <span class="string">[""]</span></span><br><span class="line"><span class="attr">  resources:</span> <span class="string">["services"]</span></span><br><span class="line"><span class="attr">  resourceNames:</span> <span class="string">["heapster"]</span></span><br><span class="line"><span class="attr">  verbs:</span> <span class="string">["proxy"]</span></span><br><span class="line"><span class="attr">- apiGroups:</span> <span class="string">[""]</span></span><br><span class="line"><span class="attr">  resources:</span> <span class="string">["services/proxy"]</span></span><br><span class="line"><span class="attr">  resourceNames:</span> <span class="string">["heapster",</span> <span class="string">"http:heapster:"</span><span class="string">,</span> <span class="string">"https:heapster:"</span><span class="string">]</span></span><br><span class="line"><span class="attr">  verbs:</span> <span class="string">["get"]</span></span><br><span class="line"></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">rbac.authorization.k8s.io/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">RoleBinding</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">kubernetes-dashboard-minimal</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">kube-system</span></span><br><span class="line"><span class="attr">roleRef:</span></span><br><span class="line"><span class="attr">  apiGroup:</span> <span class="string">rbac.authorization.k8s.io</span></span><br><span class="line"><span class="attr">  kind:</span> <span class="string">Role</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">kubernetes-dashboard-minimal</span></span><br><span class="line"><span class="attr">subjects:</span></span><br><span class="line"><span class="attr">- kind:</span> <span class="string">ServiceAccount</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">kubernetes-dashboard</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">kube-system</span></span><br><span class="line"></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="comment"># ------------------- Dashboard Deployment ------------------- #</span></span><br><span class="line"></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Deployment</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">apps/v1beta2</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  labels:</span></span><br><span class="line"><span class="attr">    k8s-app:</span> <span class="string">kubernetes-dashboard</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">kubernetes-dashboard</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">kube-system</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  replicas:</span> <span class="number">1</span></span><br><span class="line"><span class="attr">  revisionHistoryLimit:</span> <span class="number">10</span></span><br><span class="line"><span class="attr">  selector:</span></span><br><span class="line"><span class="attr">    matchLabels:</span></span><br><span class="line"><span class="attr">      k8s-app:</span> <span class="string">kubernetes-dashboard</span></span><br><span class="line"><span class="attr">  template:</span></span><br><span class="line"><span class="attr">    metadata:</span></span><br><span class="line"><span class="attr">      labels:</span></span><br><span class="line"><span class="attr">        k8s-app:</span> <span class="string">kubernetes-dashboard</span></span><br><span class="line"><span class="attr">    spec:</span></span><br><span class="line"><span class="attr">      containers:</span></span><br><span class="line"><span class="attr">      - name:</span> <span class="string">kubernetes-dashboard</span></span><br><span class="line"><span class="attr">        image:</span> <span class="string">k8s.gcr.io/kubernetes-dashboard-amd64:v1.10.0</span></span><br><span class="line"><span class="attr">        ports:</span></span><br><span class="line"><span class="attr">        - containerPort:</span> <span class="number">8443</span></span><br><span class="line"><span class="attr">          protocol:</span> <span class="string">TCP</span></span><br><span class="line"><span class="attr">        args:</span></span><br><span class="line"><span class="bullet">          -</span> <span class="bullet">--auto-generate-certificates</span></span><br><span class="line">          <span class="comment"># Uncomment the following line to manually specify Kubernetes API server Host</span></span><br><span class="line">          <span class="comment"># If not specified, Dashboard will attempt to auto discover the API server and connect</span></span><br><span class="line">          <span class="comment"># to it. Uncomment only if the default does not work.</span></span><br><span class="line">          <span class="comment"># - --apiserver-host=http://my-address:port</span></span><br><span class="line"><span class="attr">        volumeMounts:</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">kubernetes-dashboard-certs</span></span><br><span class="line"><span class="attr">          mountPath:</span> <span class="string">/certs</span></span><br><span class="line">          <span class="comment"># Create on-disk volume to store exec logs</span></span><br><span class="line"><span class="attr">        - mountPath:</span> <span class="string">/tmp</span></span><br><span class="line"><span class="attr">          name:</span> <span class="string">tmp-volume</span></span><br><span class="line"><span class="attr">        livenessProbe:</span></span><br><span class="line"><span class="attr">          httpGet:</span></span><br><span class="line"><span class="attr">            scheme:</span> <span class="string">HTTPS</span></span><br><span class="line"><span class="attr">            path:</span> <span class="string">/</span></span><br><span class="line"><span class="attr">            port:</span> <span class="number">8443</span></span><br><span class="line"><span class="attr">          initialDelaySeconds:</span> <span class="number">30</span></span><br><span class="line"><span class="attr">          timeoutSeconds:</span> <span class="number">30</span></span><br><span class="line"><span class="attr">      volumes:</span></span><br><span class="line"><span class="attr">      - name:</span> <span class="string">kubernetes-dashboard-certs</span></span><br><span class="line"><span class="attr">        secret:</span></span><br><span class="line"><span class="attr">          secretName:</span> <span class="string">kubernetes-dashboard-certs</span></span><br><span class="line"><span class="attr">      - name:</span> <span class="string">tmp-volume</span></span><br><span class="line"><span class="attr">        emptyDir:</span> <span class="string">&#123;&#125;</span></span><br><span class="line"><span class="attr">      serviceAccountName:</span> <span class="string">kubernetes-dashboard</span></span><br><span class="line">      <span class="comment"># Comment the following tolerations if Dashboard must not be deployed on master</span></span><br><span class="line"><span class="attr">      tolerations:</span></span><br><span class="line"><span class="attr">      - key:</span> <span class="string">node-role.kubernetes.io/master</span></span><br><span class="line"><span class="attr">        effect:</span> <span class="string">NoSchedule</span></span><br><span class="line"></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="comment"># ------------------- Dashboard Service ------------------- #</span></span><br><span class="line"></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Service</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  labels:</span></span><br><span class="line"><span class="attr">    k8s-app:</span> <span class="string">kubernetes-dashboard</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">kubernetes-dashboard</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">kube-system</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  type:</span> <span class="string">NodePort</span></span><br><span class="line"><span class="attr">  ports:</span></span><br><span class="line"><span class="attr">    - port:</span> <span class="number">443</span></span><br><span class="line"><span class="attr">      targetPort:</span> <span class="number">8443</span></span><br><span class="line"><span class="attr">      nodePort:</span> <span class="number">30001</span></span><br><span class="line"><span class="attr">  selector:</span></span><br><span class="line"><span class="attr">    k8s-app:</span> <span class="string">kubernetes-dashboard</span></span><br></pre></td></tr></table></figure>
+<p>部署dashboard：</p>
+<figure class="highlight coq"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl <span class="built_in">apply</span> -f kubernetes-dashboard.yaml</span><br></pre></td></tr></table></figure>
+<p>浏览器访问dashboard需要token，或者kube-config文件，这里使用token，在创建好ServiceAccount且和role进行bind绑定之后，会自动创建一个名为${ServiceAccountName}-token-xxx 的Secret，其内包含token，为base64编码，可以使用kubectl describe直接查看：</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">:~/dashboard# kubectl <span class="builtin-name">get</span><span class="built_in"> secret </span>-o wide -n kube-system | grep kubernetes-dashboard</span><br><span class="line">istio.kubernetes-dashboard                       istio.io/key-and-cert                 3         2d</span><br><span class="line">kubernetes-dashboard-certs                       Opaque                                0         2d</span><br><span class="line">kubernetes-dashboard-key-holder                  Opaque                                2         2d</span><br><span class="line">kubernetes-dashboard-token-t2mmr                 kubernetes.io/service-account-token   3         2d</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">:~/dashboard# kubectl describe<span class="built_in"> secret </span>-n kube-system kubernetes-dashboard-token-t2mmr</span><br><span class="line">Name:         kubernetes-dashboard-token-t2mmr</span><br><span class="line">Namespace:    kube-system</span><br><span class="line">Labels:       &lt;none&gt;</span><br><span class="line">Annotations:  kubernetes.io/service-account.<span class="attribute">name</span>=kubernetes-dashboard</span><br><span class="line">              kubernetes.io/service-account.<span class="attribute">uid</span>=4f237c6c-f7ad-11e8-9859-0050569da8f2</span><br><span class="line"></span><br><span class="line">Type:  kubernetes.io/service-account-token</span><br><span class="line"></span><br><span class="line">Data</span><br><span class="line">====</span><br><span class="line">ca.crt:     1025 bytes</span><br><span class="line">namespace:  11 bytes</span><br><span class="line">token:      eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJrdWJlLXN5c3RlbSIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VjcmV0Lm5hbWUiOiJrdWJlcm5ldGVzLWRhc2hib2FyZC10b2tlbi10Mm1tciIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50Lm5hbWUiOiJrdWJlcm5ldGVzLWRhc2hib2FyZCIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50LnVpZCI6IjRmMjM3YzZjLWY3YWQtMTFlOC05ODU5LTAwNTA1NjlkYThmMiIsInN1YiI6InN5c3RlbTpzZXJ2aWNlYWNjb3VudDprdWJlLXN5c3RlbTprdWJlcm5ldGVzLWRhc2hib2FyZCJ9.UEJ0MBO9RhSF_fzZHPKezWqkZsWG3atFQQgoPGlyyIDXtQN-ZYlZPEScjunwp4FVgX5uRMpxHGyexJN5e8zYouMTRrGaDaIu7cGj5ICP80iabi8wyMCnJrR5_p0Tmy2PkNZDCyh0MbDCJE6lbOv7Lu7CldivEMtr4BAvxvMmBdmoT0CixQexfw2tioeeoYBwEKgxjL6mMBIGKE0spGZQova7bzTN8f2ZGpNn8jFI_EW9Y7Et5sitw3rCRwxxMSDwUwwCOv26NXPnPVA7cWJeuzPRTS0BHE0euRYojQN7F77NkfwCynx8iWGpM2MEuHIj6coCUcTuCyN5yMD1Zag2zg</span><br></pre></td></tr></table></figure>
+<p>使用此token登录dashboard：<br><img src="http://mycloudn.kokoerp.com/20181206195424194.png" alt="在这里插入图片描述"></p>
+<p><img src="http://mycloudn.kokoerp.com/20181206195531599.png" alt="在这里插入图片描述"></p>
+<p>第二张截图可以发现，dashboard无多种资源类型的list权限，这是因为在上面的yaml文件中，定义的role权限是限定的：</p>
+<figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"># ------------------- Dashboard Role &amp; Role Binding ------------------- #</span><br><span class="line"></span><br><span class="line">kind: Role</span><br><span class="line">apiVersion: rbac.authorization.k8s.io/v1</span><br><span class="line">metadat<span class="variable">a:</span></span><br><span class="line">  name: kubernetes-dashboard-minimal</span><br><span class="line">  namespace: kube-<span class="built_in">system</span></span><br><span class="line">rule<span class="variable">s:</span></span><br><span class="line">  # Allow Dashboard <span class="keyword">to</span> create <span class="string">'kubernetes-dashboard-key-holder'</span> secret.</span><br><span class="line">- apiGroup<span class="variable">s:</span> [<span class="string">""</span>]</span><br><span class="line">  resource<span class="variable">s:</span> [<span class="string">"secrets"</span>]</span><br><span class="line">  <span class="keyword">verb</span><span class="variable">s:</span> [<span class="string">"create"</span>]</span><br><span class="line">  # Allow Dashboard <span class="keyword">to</span> create <span class="string">'kubernetes-dashboard-settings'</span> config <span class="keyword">map</span>.</span><br><span class="line">- apiGroup<span class="variable">s:</span> [<span class="string">""</span>]</span><br><span class="line">  resource<span class="variable">s:</span> [<span class="string">"configmaps"</span>]</span><br><span class="line">  <span class="keyword">verb</span><span class="variable">s:</span> [<span class="string">"create"</span>]</span><br><span class="line">  # Allow Dashboard <span class="keyword">to</span> <span class="built_in">get</span>, <span class="keyword">update</span> <span class="built_in">and</span> <span class="keyword">delete</span> Dashboard exclusive secrets.</span><br><span class="line">- apiGroup<span class="variable">s:</span> [<span class="string">""</span>]</span><br><span class="line">  resource<span class="variable">s:</span> [<span class="string">"secrets"</span>]</span><br><span class="line">  resourceName<span class="variable">s:</span> [<span class="string">"kubernetes-dashboard-key-holder"</span>, <span class="string">"kubernetes-dashboard-certs"</span>]</span><br><span class="line">  <span class="keyword">verb</span><span class="variable">s:</span> [<span class="string">"get"</span>, <span class="string">"update"</span>, <span class="string">"delete"</span>]</span><br><span class="line">  # Allow Dashboard <span class="keyword">to</span> <span class="built_in">get</span> <span class="built_in">and</span> <span class="keyword">update</span> <span class="string">'kubernetes-dashboard-settings'</span> config <span class="keyword">map</span>.</span><br><span class="line">- apiGroup<span class="variable">s:</span> [<span class="string">""</span>]</span><br><span class="line">  resource<span class="variable">s:</span> [<span class="string">"configmaps"</span>]</span><br><span class="line">  resourceName<span class="variable">s:</span> [<span class="string">"kubernetes-dashboard-settings"</span>]</span><br><span class="line">  <span class="keyword">verb</span><span class="variable">s:</span> [<span class="string">"get"</span>, <span class="string">"update"</span>]</span><br><span class="line">  # Allow Dashboard <span class="keyword">to</span> <span class="built_in">get</span> metrics from heapster.</span><br><span class="line">- apiGroup<span class="variable">s:</span> [<span class="string">""</span>]</span><br><span class="line">  resource<span class="variable">s:</span> [<span class="string">"services"</span>]</span><br><span class="line">  resourceName<span class="variable">s:</span> [<span class="string">"heapster"</span>]</span><br><span class="line">  <span class="keyword">verb</span><span class="variable">s:</span> [<span class="string">"proxy"</span>]</span><br><span class="line">- apiGroup<span class="variable">s:</span> [<span class="string">""</span>]</span><br><span class="line">  resource<span class="variable">s:</span> [<span class="string">"services/proxy"</span>]</span><br><span class="line">  resourceName<span class="variable">s:</span> [<span class="string">"heapster"</span>, <span class="string">"http:heapster:"</span>, <span class="string">"https:heapster:"</span>]</span><br><span class="line">  <span class="keyword">verb</span><span class="variable">s:</span> [<span class="string">"get"</span>]</span><br></pre></td></tr></table></figure>
+<p>可以修改这里的Role内部的权限，也可以自行配置更高级的权限，我这里为了方便，直接配置了一个admin的ServiceAccount:<br><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">~/dashboard#</span> <span class="string">cat</span> <span class="string">admin-token.yaml</span></span><br><span class="line"></span><br><span class="line"><span class="attr">kind:</span> <span class="string">ClusterRoleBinding</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">rbac.authorization.k8s.io/v1beta1</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">admin</span></span><br><span class="line"><span class="attr">  annotations:</span></span><br><span class="line">    <span class="string">rbac.authorization.kubernetes.io/autoupdate:</span> <span class="string">"true"</span></span><br><span class="line"><span class="attr">roleRef:</span></span><br><span class="line"><span class="attr">  kind:</span> <span class="string">ClusterRole</span>  <span class="comment"># ClusterRole拥有集群级别权限，于此同时绑定时不能再使用RoleBinding而应该使用ClusterRoleBinding</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">cluster-admin</span></span><br><span class="line"><span class="attr">  apiGroup:</span> <span class="string">rbac.authorization.k8s.io</span></span><br><span class="line"><span class="attr">subjects:</span></span><br><span class="line"><span class="attr">- kind:</span> <span class="string">ServiceAccount</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">admin</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">kube-system</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">ServiceAccount</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">admin</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">kube-system</span></span><br><span class="line"><span class="attr">  labels:</span></span><br><span class="line">    <span class="string">kubernetes.io/cluster-service:</span> <span class="string">"true"</span></span><br><span class="line">    <span class="string">addonmanager.kubernetes.io/mode:</span> <span class="string">Reconcile</span></span><br></pre></td></tr></table></figure></p>
+<p>创建：</p>
+<figure class="highlight jboss-cli"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">~<span class="string">/dashboard</span><span class="comment"># kubectl apply -f admin-token.yaml</span></span><br></pre></td></tr></table></figure>
+<p>查看token：</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">:~/dashboard# kubectl <span class="builtin-name">get</span><span class="built_in"> secret </span>-n kube-system | grep admin</span><br><span class="line">admin-token-b9r26                                kubernetes.io/service-account-token   3         1d</span><br><span class="line"></span><br><span class="line">~/dashboard# kubectl describe<span class="built_in"> secret </span>-n kube-system admin-token-b9r26</span><br><span class="line">Name:         admin-token-b9r26</span><br><span class="line">Namespace:    kube-system</span><br><span class="line">Labels:       &lt;none&gt;</span><br><span class="line">Annotations:  kubernetes.io/service-account.<span class="attribute">name</span>=admin</span><br><span class="line">              kubernetes.io/service-account.<span class="attribute">uid</span>=d471a78c-f833-11e8-9859-0050569da8f2</span><br><span class="line"></span><br><span class="line">Type:  kubernetes.io/service-account-token</span><br><span class="line"></span><br><span class="line">Data</span><br><span class="line">====</span><br><span class="line">ca.crt:     1025 bytes</span><br><span class="line">namespace:  11 bytes</span><br><span class="line">token:      eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJrdWJlLXN5c3RlbSIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VjcmV0Lm5hbWUiOiJhZG1pbi10b2tlbi1iOXIyNiIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50Lm5hbWUiOiJhZG1pbiIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50LnVpZCI6ImQ0NzFhNzhjLWY4MzMtMTFlOC05ODU5LTAwNTA1NjlkYThmMiIsInN1YiI6InN5c3RlbTpzZXJ2aWNlYWNjb3VudDprdWJlLXN5c3RlbTphZG1pbiJ9.euwxJkmtt7mjbpzHdMzJWmxO0swuVRjYFGkEwzX1E6caXrUj1XXrSQO4J3mttJvMOVQaGEztInI-cKMiTDzLYHE_85VISHbZTUA8dcSFDIuGOt4SRI_XoA11pIlUAmH4b_4kxgaA3DA5TdUX6O2mo93QEvLOOngBkLO55Z9y980H_J5JiBgbndnycOGXVIW-gEgEjBewtiH1ZCiha-lwUlTvSNJkLrTPlm5Rjoao8lONn4vcD1sgzrSrW8VMxxclw8Cu3C79zyujHo0F_YuwHteIlBwOPSTaiokbuyQr-IS2UTpwUxlzf__wXgidc_SXqTC9vecM7hcRVhEi_d_hnw</span><br></pre></td></tr></table></figure>
+<p>dashboard退出之前的账号，使用admin-token重新登录，可以发现已经拥有全部权限：<br><img src="http://mycloudn.kokoerp.com/20181206201141603.png" alt="在这里插入图片描述"></p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>k8s角色授权使用的流程有多个环节多种资源类型搭配完成，权限粒度明确、用户与进程分工有序，理解了顶部的流程图，相信你将不再为RBAC疑惑。</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div id="reward-container">
+  <div>赏一瓶快乐回宅水吧～</div>
+  <button id="reward-button" disable="enable" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+
+    
+      
+      
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/reward/wechatpay.png" alt="丨ywq丨 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+      
+      
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/reward/alipay.png" alt="丨ywq丨 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        
+
+
+
+
+  
+
+
+
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>丨ywq丨</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    
+    <a href="http://blog.upweto.top/2018/12/06/k8s(十四)、RBAC权限控制.html" title="k8s(十四)、RBAC权限控制">http://blog.upweto.top/2018/12/06/k8s(十四)、RBAC权限控制.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li>
+</ul>
+
+      </div>
+    
+    <div>
+      
+        <div>
+    
+        <div style="text-align:center;color: #ccc;font-size:16px;">-------------本文结束<i class="fa fa-heart"></i>感谢您的阅读-------------</div>
+    
+</div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Kubernetes/" rel="tag"><i class="fa fa-tag"></i> Kubernetes</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/11/13/kube-router工作模式抓包分析.html" rel="next" title="kube-router工作模式抓包分析">
+                <i class="fa fa-chevron-left"></i> kube-router工作模式抓包分析
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/12/11/Kubernetes踩坑(二)_ Service IP(LVS)间断性TCP连接故障排查.html" rel="prev" title="Kubernetes踩坑(二): Service IP(LVS)间断性TCP连接故障排查">
+                Kubernetes踩坑(二): Service IP(LVS)间断性TCP连接故障排查 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC80NzY0Ny8yNDE0NQ=="></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="丨ywq丨">
+            
+              <p class="site-author-name" itemprop="name">丨ywq丨</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives">
+                
+                    <span class="site-state-item-count">80</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                      <a href="/tags">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">15</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/yinwenqin" title="GitHub &rarr; https://github.com/yinwenqin" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://blog.csdn.net/ywq935" title="CSDN &rarr; https://blog.csdn.net/ywq935" rel="noopener" target="_blank"><i class="fa fa-fw fa-globe"></i>CSDN</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-book"></i>
+                推荐阅读
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.upweto.top/gitbooks/useKubernetes/" title="http://blog.upweto.top/gitbooks/useKubernetes/">kubernetes使用指南</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.upweto.top/gitbooks/kubeSourceCodeNote/" title="http://blog.upweto.top/gitbooks/kubeSourceCodeNote/">kubernetes源码笔记</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#null"><span class="nav-number">1.</span> <span class="nav-text"> </span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">2.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#工作流程"><span class="nav-number">3.</span> <span class="nav-text">工作流程</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#流程图"><span class="nav-number">3.0.0.1.</span> <span class="nav-text">流程图</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#流程拆解"><span class="nav-number">3.0.0.2.</span> <span class="nav-text">流程拆解</span></a></li></ol></li></ol><li class="nav-item nav-level-2"><a class="nav-link" href="#实战"><span class="nav-number">4.</span> <span class="nav-text">实战</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#一、用户使用"><span class="nav-number">4.1.</span> <span class="nav-text">一、用户使用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#二、程序使用"><span class="nav-number">4.2.</span> <span class="nav-text">二、程序使用</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">5.</span> <span class="nav-text">总结</span></a></li></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" style=" text-align:center;">&copy; 2017 – <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ywq</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"> 站点字数合计:</i>
+    </span>
+    
+    <span title="站点总字数">626k</span>
+  
+  
+</div>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+<div class="run_time" style=" text-align:center;">
+  <span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
+  <script>
+    var now = new Date(); 
+    function createtime() { 
+        var grt= new Date("08/23/2018 10:00:00");//此处修改你的建站时间或者网站上线时间 
+        now.setTime(now.getTime()+250); 
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days); 
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours); 
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum); 
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;} 
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum); 
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;} 
+        document.getElementById("timeDate").innerHTML = "本站已安全运行 "+dnum+" 天 "; 
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒"; 
+    } 
+    setInterval("createtime()",250);
+  </script>
+</div>
+
+        
+<div class="busuanzi-count" style=" text-align:center;">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-user"></i>
+    </span>
+    <span class="site-uv" title="总访客量">
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span> 人
+    </span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+  
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-eye"></i>
+    </span>
+    <span class="site-pv" title="总访问量">
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span> 次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+  
+    
+    
+      
+    
+  
+  <script color="black" opacity="0.7" zindex="-1" count="140" src="//cdn.jsdelivr.net/gh/theme-next/theme-next-canvas-nest@1.0.0/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/fancybox/source/jquery.fancybox.pack.js"></script>
+
+
+  
+
+
+  <script src="/js/utils.js?v=7.1.1"></script>
+
+  <script src="/js/motion.js?v=7.1.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/schemes/muse.js?v=7.1.1"></script>
+
+
+
+
+  
+  <script src="/js/scrollspy.js?v=7.1.1"></script>
+<script src="/js/post-details.js?v=7.1.1"></script>
+
+
+
+  
+
+
+  <script src="/js/next-boot.js?v=7.1.1"></script>
+
+
+  
+
+  
+
+  
+  
+  
+
+  
+
+  
+  
+  
+
+
+  
+
+
+  
+    <script>
+  window.livereOptions = {
+    refer: '2018/12/06/k8s(十四)、RBAC权限控制.html'
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+</script>
+
+  
+
+
+  
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url).replace(/\/{2,}/g, '/');
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x"></i></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x"></i></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+  
+  <script src="/lib/bookmark/bookmark.min.js?v=1.0"></script>
+  <script>
+  
+    bookmark.scrollToMark('auto', "#更多");
+  
+  </script>
+
+
+  
+
+  
+
+  
+
+</body>
+</html>
+<!-- 页面点击小红心 -->
+<script type="text/javascript" src="/js/src/clicklove.js"></script>
