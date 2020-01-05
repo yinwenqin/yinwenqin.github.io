@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://blog.upweto.top/"/>
-  <updated>2020-01-03T10:06:36.596Z</updated>
+  <updated>2020-01-05T09:22:42.403Z</updated>
   <id>http://blog.upweto.top/</id>
   
   <author>
@@ -15,6 +15,32 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>kubernetes挂载cephfs带来的mds卡顿问题及引入cephfs storageClass</title>
+    <link href="http://blog.upweto.top/2020/01/06/kubernetes%E6%8C%82%E8%BD%BDcephfs%E5%B8%A6%E6%9D%A5%E7%9A%84mds%E5%8D%A1%E9%A1%BF%E9%97%AE%E9%A2%98%E5%8F%8A%E5%BC%95%E5%85%A5cephfs%20storageClass.html"/>
+    <id>http://blog.upweto.top/2020/01/06/kubernetes挂载cephfs带来的mds卡顿问题及引入cephfs storageClass.html</id>
+    <published>2020-01-06T10:03:29.000Z</published>
+    <updated>2020-01-05T09:22:42.403Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;link rel=&quot;stylesheet&quot; class=&quot;aplayer-secondary-style-marker&quot; href=&quot;/assets/css/APlayer.min.css&quot;&gt;&lt;script src=&quot;/assets/js/APlayer.min.js&quot;
+        
+      
+    
+    </summary>
+    
+    
+      <category term="Kubernetes" scheme="http://blog.upweto.top/tags/Kubernetes/"/>
+    
+      <category term="Ceph" scheme="http://blog.upweto.top/tags/Ceph/"/>
+    
+  </entry>
   
   <entry>
     <title>kubernetes 部署redis cluster</title>
@@ -500,32 +526,6 @@
     <id>http://blog.upweto.top/2019/07/22/golang算法练习：排序.html</id>
     <published>2019-07-22T09:34:13.000Z</published>
     <updated>2019-11-21T07:48:40.125Z</updated>
-    
-    <summary type="html">
-    
-      
-      
-        
-        
-          &lt;link rel=&quot;stylesheet&quot; class=&quot;aplayer-secondary-style-marker&quot; href=&quot;/assets/css/APlayer.min.css&quot;&gt;&lt;script src=&quot;/assets/js/APlayer.min.js&quot;
-        
-      
-    
-    </summary>
-    
-    
-      <category term="Golang" scheme="http://blog.upweto.top/tags/Golang/"/>
-    
-      <category term="算法" scheme="http://blog.upweto.top/tags/%E7%AE%97%E6%B3%95/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>golang算法练习:单链表/双链表/环形链表</title>
-    <link href="http://blog.upweto.top/2019/07/18/golang%E7%AE%97%E6%B3%95%E7%BB%83%E4%B9%A0%EF%BC%9A%E5%8D%95%E9%93%BE%E8%A1%A8_%E5%8F%8C%E9%93%BE%E8%A1%A8_%E7%8E%AF%E5%BD%A2%E9%93%BE%E8%A1%A8.html"/>
-    <id>http://blog.upweto.top/2019/07/18/golang算法练习：单链表_双链表_环形链表.html</id>
-    <published>2019-07-18T09:42:53.000Z</published>
-    <updated>2019-11-21T07:48:40.126Z</updated>
     
     <summary type="html">
     
