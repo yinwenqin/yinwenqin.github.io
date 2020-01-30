@@ -154,20 +154,20 @@
   daovoice('update');
   </script>
 
-  <meta name="description" content="P3-Controller分类与Deployment Controller前言Controller部分的第一篇文章中，我们从cobra启动命令入口开始，进入到了多实例leader选举部分的代码，对leader选举流程做了详细地分析： 接着在第二篇中，文字和图解简单描述了controller是如何结合client-go模块中的informer工作的，为本篇及后面的几篇作铺垫： 那么本篇，就接着第一篇">
+  <meta name="description" content="P3-Controller分类与Deployment Controller前言Controller部分的第一篇文章中，我们从cobra启动命令入口开始，进入到了多实例leader选举部分的代码，对leader选举流程做了详细地分析： Controller-P1-多实例leader选举 接着在第二篇中，文字和图解简单描述了controller是如何结合client-go模块中的informer工作的">
 <meta name="keywords" content="Kubernetes,Golang,读源码">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Kubernetes源码学习-Controller-P3-Controller分类与Deployment Controller">
 <meta property="og:url" content="http://blog.upweto.top/2020/01/30/Kubernetes源码学习-Controller-P3-Controller分类与Deployment Controller.html">
 <meta property="og:site_name" content="随笔漫谈">
-<meta property="og:description" content="P3-Controller分类与Deployment Controller前言Controller部分的第一篇文章中，我们从cobra启动命令入口开始，进入到了多实例leader选举部分的代码，对leader选举流程做了详细地分析： 接着在第二篇中，文字和图解简单描述了controller是如何结合client-go模块中的informer工作的，为本篇及后面的几篇作铺垫： 那么本篇，就接着第一篇">
+<meta property="og:description" content="P3-Controller分类与Deployment Controller前言Controller部分的第一篇文章中，我们从cobra启动命令入口开始，进入到了多实例leader选举部分的代码，对leader选举流程做了详细地分析： Controller-P1-多实例leader选举 接着在第二篇中，文字和图解简单描述了controller是如何结合client-go模块中的informer工作的">
 <meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="http://mycloudn.kokoerp.com/20200127122642.png">
 <meta property="og:image" content="http://mycloudn.kokoerp.com/20200130125357.png">
-<meta property="og:updated_time" content="2020-01-30T08:13:57.601Z">
+<meta property="og:updated_time" content="2020-01-30T08:32:36.926Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Kubernetes源码学习-Controller-P3-Controller分类与Deployment Controller">
-<meta name="twitter:description" content="P3-Controller分类与Deployment Controller前言Controller部分的第一篇文章中，我们从cobra启动命令入口开始，进入到了多实例leader选举部分的代码，对leader选举流程做了详细地分析： 接着在第二篇中，文字和图解简单描述了controller是如何结合client-go模块中的informer工作的，为本篇及后面的几篇作铺垫： 那么本篇，就接着第一篇">
+<meta name="twitter:description" content="P3-Controller分类与Deployment Controller前言Controller部分的第一篇文章中，我们从cobra启动命令入口开始，进入到了多实例leader选举部分的代码，对leader选举流程做了详细地分析： Controller-P1-多实例leader选举 接着在第二篇中，文字和图解简单描述了controller是如何结合client-go模块中的informer工作的">
 <meta name="twitter:image" content="http://mycloudn.kokoerp.com/20200127122642.png">
 
 
@@ -547,8 +547,10 @@
 
       
         <h1 id="P3-Controller分类与Deployment-Controller"><a href="#P3-Controller分类与Deployment-Controller" class="headerlink" title="P3-Controller分类与Deployment Controller"></a>P3-Controller分类与Deployment Controller</h1><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>Controller部分的第一篇文章中，我们从cobra启动命令入口开始，进入到了多实例leader选举部分的代码，对leader选举流程做了详细地分析：</p>
+<p><a href="https://blog.upweto.top/gitbooks/kubeSourceCodeNote/controller/Kubernetes源码学习-Controller-P1-多实例leader选举.html">Controller-P1-多实例leader选举</a></p>
 <p>接着在第二篇中，文字和图解简单描述了controller是如何结合client-go模块中的informer工作的，为本篇及后面的几篇作铺垫：</p>
-<p>那么本篇，就接着第一篇往下，继续代码分析。</p>
+<p><a href="https://blog.upweto.top/gitbooks/kubeSourceCodeNote/controller/Kubernetes源码学习-Controller-P2-Controller与informer.html">Controller-P2-Controller与informer</a></p>
+<p>那么本篇，就接着第一篇往下，继续看代码。</p>
 <h2 id="Controller的分类"><a href="#Controller的分类" class="headerlink" title="Controller的分类"></a>Controller的分类</h2><p><strong>启动</strong></p>
 <p>承接篇一，在cobra入口之下，controller的启动入口在这里：</p>
 <p><code>cmd/kube-controller-manager/app/controllermanager.go:191</code> </p>
@@ -618,7 +620,7 @@
 <p><img src="http://mycloudn.kokoerp.com/20200130125357.png" style="zoom:50%;"></p>
 <h4 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h4><p>滚动更新过程中主要是通过调用<code>reconcileNewReplicaSet</code>函数对 newRS 扩容，调用 <code>reconcileOldReplicaSets</code>函数 对 oldRSs缩容，按照 <code>maxSurge</code> 和 <code>maxUnavailable</code> 的约束，计时器间隔1s反复执行、收敛、修正，最终达到期望状态，完成更新。</p>
 <h2 id="总结-1"><a href="#总结-1" class="headerlink" title="总结"></a>总结</h2><p>Deployment的回滚、扩(缩)容、暂停、更新等操作，主要是通过修改rs来完成的。其中，rs的版本控制、replicas数量控制是其最核心也是难以理解的地方，但是只要记住99%的时间里deployment对应的活跃的rs只有一个，只有更新时才会出现2个rs，极少数情况下(短时间重复更新)才会出现2个以上的rs，对于上面源码的理解就会容易许多。</p>
-<p>另外，从上面我们也可以发现，deployment的更新实际基本不涉及对pod的直接操作，因此，本章后续的章节会分析一下replicaSet controller是怎么和pod进行管理交互的。</p>
+<p>另外，从上面这么多步骤的拆解也可以发现，deployment的更新实际基本不涉及对pod的直接操作，因此，本章后续的章节会分析一下replicaSet controller是怎么和pod进行管理交互的。</p>
 
       
     </div>
