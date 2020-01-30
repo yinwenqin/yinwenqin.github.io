@@ -154,19 +154,19 @@
   daovoice('update');
   </script>
 
-  <meta name="description" content="P2-Controller与client-go前言Controller作为k8s的资源控制组件，必定要实时地监控对比资源的目标状态、当前状态，这其中会与apiserver产生大量的交互。在k8s中，k8s各个组件都会与apiServer交互，因此k8s代码中提取了一个client-go包，路径位于项目vendor/k8s.io/client-go，非常多的组件向apiServer的curd操作都在">
+  <meta name="description" content="P2-Controller与informer前言Controller作为k8s的资源控制组件，必定要实时地监控对比资源的目标状态和当前状态，这其中会与apiserver产生大量的交互。在k8s中，k8s各个组件都会与apiServer交互，因此k8s在项目中封装了一个client-go公用模块，路径位于项目vendor/k8s.io/client-go，非常多的组件向ApiServer的curd操">
 <meta name="keywords" content="Kubernetes,Golang,读源码">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Kubernetes源码学习-Controller-P2-Controller与client-go.md">
-<meta property="og:url" content="http://blog.upweto.top/2019/12/18/Kubernetes源码学习-Controller-P2-Controller与client-go.html">
+<meta property="og:title" content="Kubernetes源码学习-Controller-P2-Controller与informer">
+<meta property="og:url" content="http://blog.upweto.top/2019/12/18/Kubernetes源码学习-Controller-P2-Controller与informer.html">
 <meta property="og:site_name" content="随笔漫谈">
-<meta property="og:description" content="P2-Controller与client-go前言Controller作为k8s的资源控制组件，必定要实时地监控对比资源的目标状态、当前状态，这其中会与apiserver产生大量的交互。在k8s中，k8s各个组件都会与apiServer交互，因此k8s代码中提取了一个client-go包，路径位于项目vendor/k8s.io/client-go，非常多的组件向apiServer的curd操作都在">
+<meta property="og:description" content="P2-Controller与informer前言Controller作为k8s的资源控制组件，必定要实时地监控对比资源的目标状态和当前状态，这其中会与apiserver产生大量的交互。在k8s中，k8s各个组件都会与apiServer交互，因此k8s在项目中封装了一个client-go公用模块，路径位于项目vendor/k8s.io/client-go，非常多的组件向ApiServer的curd操">
 <meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="http://mycloudn.kokoerp.com/20191218161137.png">
-<meta property="og:updated_time" content="2019-12-21T01:17:09.532Z">
+<meta property="og:updated_time" content="2020-01-30T08:14:31.378Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Kubernetes源码学习-Controller-P2-Controller与client-go.md">
-<meta name="twitter:description" content="P2-Controller与client-go前言Controller作为k8s的资源控制组件，必定要实时地监控对比资源的目标状态、当前状态，这其中会与apiserver产生大量的交互。在k8s中，k8s各个组件都会与apiServer交互，因此k8s代码中提取了一个client-go包，路径位于项目vendor/k8s.io/client-go，非常多的组件向apiServer的curd操作都在">
+<meta name="twitter:title" content="Kubernetes源码学习-Controller-P2-Controller与informer">
+<meta name="twitter:description" content="P2-Controller与informer前言Controller作为k8s的资源控制组件，必定要实时地监控对比资源的目标状态和当前状态，这其中会与apiserver产生大量的交互。在k8s中，k8s各个组件都会与apiServer交互，因此k8s在项目中封装了一个client-go公用模块，路径位于项目vendor/k8s.io/client-go，非常多的组件向ApiServer的curd操">
 <meta name="twitter:image" content="http://mycloudn.kokoerp.com/20191218161137.png">
 
 
@@ -177,7 +177,7 @@
 
   
   
-  <link rel="canonical" href="http://blog.upweto.top/2019/12/18/Kubernetes源码学习-Controller-P2-Controller与client-go">
+  <link rel="canonical" href="http://blog.upweto.top/2019/12/18/Kubernetes源码学习-Controller-P2-Controller与informer">
 
 
 
@@ -187,7 +187,7 @@
   };
 </script>
 
-  <title>Kubernetes源码学习-Controller-P2-Controller与client-go.md | 随笔漫谈</title>
+  <title>Kubernetes源码学习-Controller-P2-Controller与informer | 随笔漫谈</title>
   
 
 
@@ -432,7 +432,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://blog.upweto.top/2019/12/18/Kubernetes源码学习-Controller-P2-Controller与client-go.html">
+    <link itemprop="mainEntityOfPage" href="http://blog.upweto.top/2019/12/18/Kubernetes源码学习-Controller-P2-Controller与informer.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="丨ywq丨">
@@ -449,7 +449,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">Kubernetes源码学习-Controller-P2-Controller与client-go.md
+          <h1 class="post-title" itemprop="name headline">Kubernetes源码学习-Controller-P2-Controller与informer
 
               
             
@@ -511,7 +511,7 @@
                 
                   <span class="post-meta-item-text">本文字数：</span>
                 
-                <span title="本文字数">2.2k</span>
+                <span title="本文字数">5.9k</span>
               
 
               
@@ -525,7 +525,7 @@
                 
                   <span class="post-meta-item-text">阅读时长 &asymp;</span>
                 
-                <span title="阅读时长">2 分钟</span>
+                <span title="阅读时长">5 分钟</span>
               
             </div>
           
@@ -545,7 +545,7 @@
       
 
       
-        <h1 id="P2-Controller与client-go"><a href="#P2-Controller与client-go" class="headerlink" title="P2-Controller与client-go"></a>P2-Controller与client-go</h1><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>Controller作为k8s的资源控制组件，必定要实时地监控对比资源的目标状态、当前状态，这其中会与apiserver产生大量的交互。在k8s中，k8s各个组件都会与apiServer交互，因此k8s代码中提取了一个client-go包，路径位于项目<code>vendor/k8s.io/client-go</code>，非常多的组件向apiServer的curd操作都在client-go包中封装，client-go是k8s项目的核心包之一。那么它跟controller有何关联呢？往下看</p>
+        <h1 id="P2-Controller与informer"><a href="#P2-Controller与informer" class="headerlink" title="P2-Controller与informer"></a>P2-Controller与informer</h1><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>Controller作为k8s的资源控制组件，必定要实时地监控对比资源的目标状态和当前状态，这其中会与apiserver产生大量的交互。在k8s中，k8s各个组件都会与apiServer交互，因此k8s在项目中封装了一个client-go公用模块，路径位于项目<code>vendor/k8s.io/client-go</code>，非常多的组件向ApiServer的curd操作都在client-go包中封装，client-go是k8s项目的核心包之一。它与controller的工作流程密不可分，在读controller源码理解其工作流程前，必须首先对informer有一定得了解，因此本篇专门对informer机制进行简单地介绍说明，为后面的文章铺垫。</p>
 <h2 id="ApiServer的连接方式"><a href="#ApiServer的连接方式" class="headerlink" title="ApiServer的连接方式"></a>ApiServer的连接方式</h2><p><strong>1.短连接</strong></p>
 <p>获取kubernetes某种资源的方式有多种，常见的如kubectl、调用apiserver restful api的接口，restful api接口详情查看官方手册。同时也可通过kubectl命令来查看操作对应的api，例如：</p>
 <figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl <span class="builtin-name">get</span> pod POD_NAME <span class="attribute">-v</span>=9</span><br></pre></td></tr></table></figure>
@@ -580,7 +580,27 @@
 </ul>
 <p>如果你想自定义controller，关于infomer的实践建议，参考这里：</p>
 <p><a href="https://mp.weixin.qq.com/s?__biz=MzU1OTAzNzc5MQ==&amp;mid=2247484052&amp;idx=1&amp;sn=cec9f4a1ee0d21c5b2c51bd147b8af59&amp;chksm=fc1c2ea4cb6ba7b283eef5ac4a45985437c648361831bc3e6dd5f38053be1968b3389386e415&amp;scene=21#wechat_redirect" target="_blank" rel="noopener">如何用 client-go 拓展 Kubernetes 的 API</a></p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本篇先简单介绍一下client-go包和controller组件的结合工作流程，为后面的几篇(deploymentCrontroller、statefulSetController)代码分析作铺垫，后面的文章会结合controller实例代码再仔细讲解细节。</p>
+<h2 id="APIVersion的说明"><a href="#APIVersion的说明" class="headerlink" title="APIVersion的说明"></a>APIVersion的说明</h2><p>在每一个资源的申明yaml文件中，有一个必须存在的一个键<code>apiVersion</code>，这代表了apiserver对相应资源的rest操作，所绑定的group和version，常见的值例如：”apps/v1”,斜杠前一位代表的是api的group，斜杠后的值则代表的是version。每一种资源的rest操作，都必须绑定正确的group和version。</p>
+<p>在informer的代码中，因为与apiserver直接交互，因此api的group和version相关的结构体会反复出现，且结构体命名非常容易混淆。因此，这里列出进行说明，对阅读informer的源码有一定额外的帮助。</p>
+<ul>
+<li><strong>APIGroup</strong> : api所属组别的信息，其中包含的groupVersion字段，即我们每个yaml文件中apiVersion所指定的</li>
+<li><strong>APIResource</strong>：所有使用到的resouce资源类型，包含pod/deployment/svc等等</li>
+</ul>
+<p><strong>APIGroup结构体</strong>：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> APIGroup <span class="keyword">struct</span> &#123;</span><br><span class="line">	TypeMeta <span class="string">`json:",inline"`</span></span><br><span class="line">	Name <span class="keyword">string</span> <span class="string">`json:"name" protobuf:"bytes,1,opt,name=name"`</span></span><br><span class="line">	Versions []GroupVersionForDiscovery <span class="string">`json:"versions" protobuf:"bytes,2,rep,name=versions"`</span></span><br><span class="line">	PreferredVersion GroupVersionForDiscovery <span class="string">`json:"preferredVersion,omitempty" protobuf:"bytes,3,opt,name=preferredVersion"`</span></span><br><span class="line">	ServerAddressByClientCIDRs []ServerAddressByClientCIDR <span class="string">`json:"serverAddressByClientCIDRs,omitempty" protobuf:"bytes,4,rep,name=serverAddressByClientCIDRs"`</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>APIGroup实例</strong>：</p>
+<p>通过如下方式快速访问的apiserver的rest api：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 节点上运行kubectl proxy代理,免去认证步骤，这不太安全，只建议测试使用，使用完毕后及时关闭 </span></span><br><span class="line">~# kubectl proxy --port=8001 &amp; </span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 查看所有的APIGroup，groups 数组内的每一个成员都是一个APIGroup实例</span></span><br><span class="line">~#curl 127.0.0.1:8001/apis/</span><br><span class="line">&#123;</span><br><span class="line">  "kind": "APIGroupList",</span><br><span class="line">  "apiVersion": "v1",</span><br><span class="line">  "groups": [</span><br><span class="line">    &#123;</span><br><span class="line">      "name": "apiregistration.k8s.io",</span><br><span class="line">      "versions": [</span><br><span class="line">        &#123;</span><br><span class="line">          "groupVersion": "apiregistration.k8s.io/v1",</span><br><span class="line">          "version": "v1"</span><br><span class="line">        &#125;,</span><br><span class="line">        &#123;</span><br><span class="line">          "groupVersion": "apiregistration.k8s.io/v1beta1",</span><br><span class="line">          "version": "v1beta1"</span><br><span class="line">        &#125;</span><br><span class="line">      ],</span><br><span class="line">      "preferredVersion": &#123;</span><br><span class="line">        "groupVersion": "apiregistration.k8s.io/v1",</span><br><span class="line">        "version": "v1"</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;,</span><br><span class="line">    &#123;</span><br><span class="line">      "name": "extensions",</span><br><span class="line">      "versions": [</span><br><span class="line">        &#123;</span><br><span class="line">          "groupVersion": "extensions/v1beta1",</span><br><span class="line">          "version": "v1beta1"</span><br><span class="line">        &#125;</span><br><span class="line">      ],</span><br><span class="line">      "preferredVersion": &#123;</span><br><span class="line">        "groupVersion": "extensions/v1beta1",</span><br><span class="line">        "version": "v1beta1"</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;,</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>APIResource结构体</strong></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> APIResourceList <span class="keyword">struct</span> &#123;</span><br><span class="line">	TypeMeta <span class="string">`json:",inline"`</span></span><br><span class="line">	GroupVersion <span class="keyword">string</span> <span class="string">`json:"groupVersion" protobuf:"bytes,1,opt,name=groupVersion"`</span></span><br><span class="line">	APIResources []APIResource <span class="string">`json:"resources" protobuf:"bytes,2,rep,name=resources"`</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>APIResource实例</strong></p>
+<p>Resource分为多个groupVersion</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">~# curl 127.0.0.1:8001/api/v1 #默认资源</span><br><span class="line">~# curl 127.0.0.1:8001/apis/apps/v1/  # 扩展资源</span><br></pre></td></tr></table></figure>
+<p>具体参考官方api说明：</p>
+<p><a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.14/" target="_blank" rel="noopener">https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.14/</a></p>
+<p>下面是一个APIResourceList实例：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br></pre></td><td class="code"><pre><span class="line">~# curl 127.0.0.1:8001/api/v1</span><br><span class="line">&#123;</span><br><span class="line">  "kind": "APIResourceList",</span><br><span class="line">  "groupVersion": "v1",</span><br><span class="line">  "resources": [</span><br><span class="line">    &#123;</span><br><span class="line">      "name": "pods",</span><br><span class="line">      "singularName": "",</span><br><span class="line">      "namespaced": true,</span><br><span class="line">      "kind": "Pod",</span><br><span class="line">      "verbs": [</span><br><span class="line">        "create",</span><br><span class="line">        "delete",</span><br><span class="line">        "deletecollection",</span><br><span class="line">        "get",</span><br><span class="line">        "list",</span><br><span class="line">        "patch",</span><br><span class="line">        "update",</span><br><span class="line">        "watch"</span><br><span class="line">      ],</span><br><span class="line">      "shortNames": [</span><br><span class="line">        "po"</span><br><span class="line">      ],</span><br><span class="line">      "categories": [</span><br><span class="line">        "all"</span><br><span class="line">      ]</span><br><span class="line">    &#125;,</span><br><span class="line">    &#123;</span><br><span class="line">      "name": "configmaps",</span><br><span class="line">      "singularName": "",</span><br><span class="line">      "namespaced": true,</span><br><span class="line">      "kind": "ConfigMap",</span><br><span class="line">      "verbs": [</span><br><span class="line">        "create",</span><br><span class="line">        "delete",</span><br><span class="line">        "deletecollection",</span><br><span class="line">        "get",</span><br><span class="line">        "list",</span><br><span class="line">        "patch",</span><br><span class="line">        "update",</span><br><span class="line">        "watch"</span><br><span class="line">      ],</span><br><span class="line">      "shortNames": [</span><br><span class="line">        "cm"</span><br><span class="line">      ]</span><br><span class="line">    &#125;,</span><br><span class="line">    &#123;</span><br><span class="line">      "name": "endpoints",</span><br><span class="line">      "singularName": "",</span><br><span class="line">      "namespaced": true,</span><br><span class="line">      "kind": "Endpoints",</span><br><span class="line">      "verbs": [</span><br><span class="line">        "create",</span><br><span class="line">        "delete",</span><br><span class="line">        "deletecollection",</span><br><span class="line">        "get",</span><br><span class="line">        "list",</span><br><span class="line">        "patch",</span><br><span class="line">        "update",</span><br><span class="line">        "watch"</span><br><span class="line">      ],</span><br><span class="line">      "shortNames": [</span><br><span class="line">        "ep"</span><br><span class="line">      ]</span><br><span class="line">    &#125;,</span><br><span class="line">    ...</span><br><span class="line">  ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本篇先简单介绍一下informer和apiGroup的相关信息，以及和controller组件结合的工作流程，为后面的几篇(deploymentCrontroller、replicaSet controller 、statefulSetController等)分析作铺垫，后面的文章中会反复提到本篇上方的informer与controller结合工作的流程描述和图解。</p>
 
       
     </div>
@@ -648,7 +668,7 @@
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
     
-    <a href="http://blog.upweto.top/2019/12/18/Kubernetes源码学习-Controller-P2-Controller与client-go.html" title="Kubernetes源码学习-Controller-P2-Controller与client-go.md">http://blog.upweto.top/2019/12/18/Kubernetes源码学习-Controller-P2-Controller与client-go.html</a>
+    <a href="http://blog.upweto.top/2019/12/18/Kubernetes源码学习-Controller-P2-Controller与informer.html" title="Kubernetes源码学习-Controller-P2-Controller与informer">http://blog.upweto.top/2019/12/18/Kubernetes源码学习-Controller-P2-Controller与informer.html</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li>
@@ -697,8 +717,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2019/12/22/Kubernetes源码学习-Controller-P3-Controller启动流程.html" rel="prev" title="Kubernetes源码学习-Controller-P3-Controller启动流程.md">
-                Kubernetes源码学习-Controller-P3-Controller启动流程.md <i class="fa fa-chevron-right"></i>
+              <a href="/2020/01/01/Etcd 和 kubernetes master的灾备与恢复.html" rel="prev" title="Etcd和kubernetes master的灾备与恢复">
+                Etcd和kubernetes master的灾备与恢复 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -912,7 +932,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#P2-Controller与client-go"><span class="nav-number">1.</span> <span class="nav-text">P2-Controller与client-go</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ApiServer的连接方式"><span class="nav-number">1.2.</span> <span class="nav-text">ApiServer的连接方式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#client-go工作模式"><span class="nav-number">1.3.</span> <span class="nav-text">client-go工作模式</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#工作流程图"><span class="nav-number">1.3.0.1.</span> <span class="nav-text">工作流程图</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#流程图组件解释"><span class="nav-number">1.3.0.2.</span> <span class="nav-text">流程图组件解释</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">1.4.</span> <span class="nav-text">总结</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#P2-Controller与informer"><span class="nav-number">1.</span> <span class="nav-text">P2-Controller与informer</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ApiServer的连接方式"><span class="nav-number">1.2.</span> <span class="nav-text">ApiServer的连接方式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#client-go工作模式"><span class="nav-number">1.3.</span> <span class="nav-text">client-go工作模式</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#工作流程图"><span class="nav-number">1.3.0.1.</span> <span class="nav-text">工作流程图</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#流程图组件解释"><span class="nav-number">1.3.0.2.</span> <span class="nav-text">流程图组件解释</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#APIVersion的说明"><span class="nav-number">1.4.</span> <span class="nav-text">APIVersion的说明</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">1.5.</span> <span class="nav-text">总结</span></a></li></ol></div>
             
 
           </div>
@@ -952,7 +972,7 @@
       <i class="fa fa-area-chart"> 站点字数合计:</i>
     </span>
     
-    <span title="站点总字数">635k</span>
+    <span title="站点总字数">662k</span>
   
   
 </div>
@@ -1149,7 +1169,7 @@
   
     <script>
   window.livereOptions = {
-    refer: '2019/12/18/Kubernetes源码学习-Controller-P2-Controller与client-go.html'
+    refer: '2019/12/18/Kubernetes源码学习-Controller-P2-Controller与informer.html'
   };
   (function(d, s) {
     var j, e = d.getElementsByTagName(s)[0];

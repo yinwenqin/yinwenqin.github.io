@@ -1,0 +1,680 @@
+
+<!DOCTYPE HTML>
+<html lang="zh-hans" >
+    <head>
+        <meta charset="UTF-8">
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <title>2.2. Controller与informer · Kubernetes源码学习</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="description" content="">
+        <meta name="generator" content="GitBook 3.2.3">
+        <meta name="author" content="ywq">
+        
+        
+    
+    <link rel="stylesheet" href="../gitbook/style.css">
+
+    
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-anchors/plugin.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-expandable-chapters/expandable-chapters.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-splitter/splitter.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-page-treeview/style.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-back-to-top-button/plugin.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-highlight/website.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-search/search.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-fontsettings/website.css">
+                
+            
+        
+
+    
+
+    
+        
+    
+
+        
+    
+    
+    <meta name="HandheldFriendly" content="true"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="../gitbook/images/apple-touch-icon-precomposed-152.png">
+    <link rel="shortcut icon" href="../gitbook/images/favicon.ico" type="image/x-icon">
+
+    
+    <link rel="next" href="Kubernetes源码学习-Controller-P3-Controller分类与Deployment Controller.html" />
+    
+    
+    <link rel="prev" href="Kubernetes源码学习-Controller-P1-多实例leader选举.html" />
+    
+
+    </head>
+    <body>
+        
+<div class="book">
+    <div class="book-summary">
+        
+            
+<div id="book-search-input" role="search">
+    <input type="text" placeholder="输入并搜索" />
+</div>
+
+            
+                <nav role="navigation">
+                
+
+
+<ul class="summary">
+    
+    
+
+    
+
+    
+        
+        <li class="header"><></li>
+        
+        
+    
+
+    
+        
+        <li class="header">Part I-写在前面</li>
+        
+        
+    
+        <li class="chapter " data-level="2.1" data-path="../">
+            
+                <a href="../">
+            
+                    
+                    1. 总览篇
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Part II-核心组件</li>
+        
+        
+    
+        <li class="chapter " data-level="3.1" data-path="../scheduler/">
+            
+                <a href="../scheduler/">
+            
+                    
+                    2. Scheduler
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="3.1.1" data-path="../scheduler/Kubernetes源码学习-Scheduler-P1-调度器入口篇.html">
+            
+                <a href="../scheduler/Kubernetes源码学习-Scheduler-P1-调度器入口篇.html">
+            
+                    
+                    2.1. 调度器入口
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.1.2" data-path="../scheduler/Kubernetes源码学习-Scheduler-P2-调度器框架.html">
+            
+                <a href="../scheduler/Kubernetes源码学习-Scheduler-P2-调度器框架.html">
+            
+                    
+                    2.2. 调度器框架
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.1.3" data-path="../scheduler/Kubernetes源码学习-Scheduler-P3-Node筛选算法.html">
+            
+                <a href="../scheduler/Kubernetes源码学习-Scheduler-P3-Node筛选算法.html">
+            
+                    
+                    2.3. Node筛选算法
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.1.4" data-path="../scheduler/Kubernetes源码学习-Scheduler-P4-Node优先级算法.html">
+            
+                <a href="../scheduler/Kubernetes源码学习-Scheduler-P4-Node优先级算法.html">
+            
+                    
+                    2.4. Node优先级算法
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.1.5" data-path="../scheduler/Kubernetes源码学习-Scheduler-P5-Pod优先级抢占调度.html">
+            
+                <a href="../scheduler/Kubernetes源码学习-Scheduler-P5-Pod优先级抢占调度.html">
+            
+                    
+                    2.5 Pod优先级调度
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="3.2" data-path="./">
+            
+                <a href="./">
+            
+                    
+                    3. Controller
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="3.2.1" data-path="Kubernetes源码学习-Controller-P1-多实例leader选举.html">
+            
+                <a href="Kubernetes源码学习-Controller-P1-多实例leader选举.html">
+            
+                    
+                    2.1. 多实例leader选举
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter active" data-level="3.2.2" data-path="Kubernetes源码学习-Controller-P2-Controller与informer.html">
+            
+                <a href="Kubernetes源码学习-Controller-P2-Controller与informer.html">
+            
+                    
+                    2.2. Controller与informer
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.2.3" data-path="Kubernetes源码学习-Controller-P3-Controller分类与Deployment Controller.html">
+            
+                <a href="Kubernetes源码学习-Controller-P3-Controller分类与Deployment Controller.html">
+            
+                    
+                    2.3. Controller分类与Deployment Controller
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="3.3" >
+            
+                <span>
+            
+                    
+                    [4. ApiServer]
+            
+                </span>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="3.3.1" >
+            
+                <span>
+            
+                    
+                    [4.1 待补充]
+            
+                </span>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="3.4" >
+            
+                <span>
+            
+                    
+                    [5. Kubelet]
+            
+                </span>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="3.4.1" >
+            
+                <span>
+            
+                    
+                    [5.1 待补充]
+            
+                </span>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+
+    <li class="divider"></li>
+
+    <li>
+        <a href="https://www.gitbook.com" target="blank" class="gitbook-link">
+            本书使用 GitBook 发布
+        </a>
+    </li>
+</ul>
+
+
+                </nav>
+            
+        
+    </div>
+
+    <div class="book-body">
+        
+            <div class="body-inner">
+                
+                    
+
+<div class="book-header" role="navigation">
+    
+
+    <!-- Title -->
+    <h1>
+        <i class="fa fa-circle-o-notch fa-spin"></i>
+        <a href=".." >2.2. Controller与informer</a>
+    </h1>
+</div>
+
+
+
+
+                    <div class="page-wrapper" tabindex="-1" role="main">
+                        <div class="page-inner">
+                            
+<div id="book-search-results">
+    <div class="search-noresults">
+    
+                                <section class="normal markdown-section">
+                                
+                                <div class="treeview__container"><ul>
+<li><div><a href="#p2-controller&#x4E0E;informer">P2-Controller&#x4E0E;informer</a><i class="level__parent level__item level__parent--opened" state="opened" onclick="var curState = this.getAttribute(&apos;state&apos;);var nextState = curState === &apos;opened&apos; ? &apos;hidden&apos; : &apos;opened&apos;;this.setAttribute(&apos;state&apos;, nextState);this.className = this.className.split(curState).join(nextState);var list = this.parentNode.nextElementSibling;if (nextState === &apos;hidden&apos;) {    list.style.display = &apos;none&apos;;} else {    list.style.display = &apos;block&apos;;}"></i></div>
+<ul>
+<li><div><a href="#&#x524D;&#x8A00;">&#x524D;&#x8A00;</a><i></i></div></li>
+<li><div><a href="#apiserver&#x7684;&#x8FDE;&#x63A5;&#x65B9;&#x5F0F;">ApiServer&#x7684;&#x8FDE;&#x63A5;&#x65B9;&#x5F0F;</a><i></i></div></li>
+<li><div><a href="#client-go&#x5DE5;&#x4F5C;&#x6A21;&#x5F0F;">client-go&#x5DE5;&#x4F5C;&#x6A21;&#x5F0F;</a><i class="level__parent level__item level__parent--opened" state="opened" onclick="var curState = this.getAttribute(&apos;state&apos;);var nextState = curState === &apos;opened&apos; ? &apos;hidden&apos; : &apos;opened&apos;;this.setAttribute(&apos;state&apos;, nextState);this.className = this.className.split(curState).join(nextState);var list = this.parentNode.nextElementSibling;if (nextState === &apos;hidden&apos;) {    list.style.display = &apos;none&apos;;} else {    list.style.display = &apos;block&apos;;}"></i></div>
+<ul>
+<li> 
+<ul>
+<li><div><a href="#&#x5DE5;&#x4F5C;&#x6D41;&#x7A0B;&#x56FE;">&#x5DE5;&#x4F5C;&#x6D41;&#x7A0B;&#x56FE;</a><i></i></div></li>
+<li><div><a href="#&#x6D41;&#x7A0B;&#x56FE;&#x7EC4;&#x4EF6;&#x89E3;&#x91CA;">&#x6D41;&#x7A0B;&#x56FE;&#x7EC4;&#x4EF6;&#x89E3;&#x91CA;</a><i></i></div></li>
+</ul></li>
+</ul></li>
+<li><div><a href="#apiversion&#x7684;&#x8BF4;&#x660E;">APIVersion&#x7684;&#x8BF4;&#x660E;</a><i></i></div></li>
+<li><div><a href="#&#x603B;&#x7ED3;">&#x603B;&#x7ED3;</a><i></i></div></li>
+</ul></li>
+</ul>
+</div>
+
+
+<h1 id="p2-controller&#x4E0E;informer"><a name="p2-controller&#x4E0E;informer" class="plugin-anchor" href="#p2-controller&#x4E0E;informer"><i class="fa fa-link" aria-hidden="true"></i></a>P2-Controller&#x4E0E;informer</h1>
+<h2 id="&#x524D;&#x8A00;"><a name="&#x524D;&#x8A00;" class="plugin-anchor" href="#&#x524D;&#x8A00;"><i class="fa fa-link" aria-hidden="true"></i></a>&#x524D;&#x8A00;</h2>
+<p>Controller&#x4F5C;&#x4E3A;k8s&#x7684;&#x8D44;&#x6E90;&#x63A7;&#x5236;&#x7EC4;&#x4EF6;&#xFF0C;&#x5FC5;&#x5B9A;&#x8981;&#x5B9E;&#x65F6;&#x5730;&#x76D1;&#x63A7;&#x5BF9;&#x6BD4;&#x8D44;&#x6E90;&#x7684;&#x76EE;&#x6807;&#x72B6;&#x6001;&#x548C;&#x5F53;&#x524D;&#x72B6;&#x6001;&#xFF0C;&#x8FD9;&#x5176;&#x4E2D;&#x4F1A;&#x4E0E;apiserver&#x4EA7;&#x751F;&#x5927;&#x91CF;&#x7684;&#x4EA4;&#x4E92;&#x3002;&#x5728;k8s&#x4E2D;&#xFF0C;k8s&#x5404;&#x4E2A;&#x7EC4;&#x4EF6;&#x90FD;&#x4F1A;&#x4E0E;apiServer&#x4EA4;&#x4E92;&#xFF0C;&#x56E0;&#x6B64;k8s&#x5728;&#x9879;&#x76EE;&#x4E2D;&#x5C01;&#x88C5;&#x4E86;&#x4E00;&#x4E2A;client-go&#x516C;&#x7528;&#x6A21;&#x5757;&#xFF0C;&#x8DEF;&#x5F84;&#x4F4D;&#x4E8E;&#x9879;&#x76EE;<code>vendor/k8s.io/client-go</code>&#xFF0C;&#x975E;&#x5E38;&#x591A;&#x7684;&#x7EC4;&#x4EF6;&#x5411;ApiServer&#x7684;curd&#x64CD;&#x4F5C;&#x90FD;&#x5728;client-go&#x5305;&#x4E2D;&#x5C01;&#x88C5;&#xFF0C;client-go&#x662F;k8s&#x9879;&#x76EE;&#x7684;&#x6838;&#x5FC3;&#x5305;&#x4E4B;&#x4E00;&#x3002;&#x5B83;&#x4E0E;controller&#x7684;&#x5DE5;&#x4F5C;&#x6D41;&#x7A0B;&#x5BC6;&#x4E0D;&#x53EF;&#x5206;&#xFF0C;&#x5728;&#x8BFB;controller&#x6E90;&#x7801;&#x7406;&#x89E3;&#x5176;&#x5DE5;&#x4F5C;&#x6D41;&#x7A0B;&#x524D;&#xFF0C;&#x5FC5;&#x987B;&#x9996;&#x5148;&#x5BF9;informer&#x6709;&#x4E00;&#x5B9A;&#x5F97;&#x4E86;&#x89E3;&#xFF0C;&#x56E0;&#x6B64;&#x672C;&#x7BC7;&#x4E13;&#x95E8;&#x5BF9;informer&#x673A;&#x5236;&#x8FDB;&#x884C;&#x7B80;&#x5355;&#x5730;&#x4ECB;&#x7ECD;&#x8BF4;&#x660E;&#xFF0C;&#x4E3A;&#x540E;&#x9762;&#x7684;&#x6587;&#x7AE0;&#x94FA;&#x57AB;&#x3002;</p>
+<h2 id="apiserver&#x7684;&#x8FDE;&#x63A5;&#x65B9;&#x5F0F;"><a name="apiserver&#x7684;&#x8FDE;&#x63A5;&#x65B9;&#x5F0F;" class="plugin-anchor" href="#apiserver&#x7684;&#x8FDE;&#x63A5;&#x65B9;&#x5F0F;"><i class="fa fa-link" aria-hidden="true"></i></a>ApiServer&#x7684;&#x8FDE;&#x63A5;&#x65B9;&#x5F0F;</h2>
+<p><strong>1.&#x77ED;&#x8FDE;&#x63A5;</strong></p>
+<p>&#x83B7;&#x53D6;kubernetes&#x67D0;&#x79CD;&#x8D44;&#x6E90;&#x7684;&#x65B9;&#x5F0F;&#x6709;&#x591A;&#x79CD;&#xFF0C;&#x5E38;&#x89C1;&#x7684;&#x5982;kubectl&#x3001;&#x8C03;&#x7528;apiserver restful api&#x7684;&#x63A5;&#x53E3;&#xFF0C;restful api&#x63A5;&#x53E3;&#x8BE6;&#x60C5;&#x67E5;&#x770B;&#x5B98;&#x65B9;&#x624B;&#x518C;&#x3002;&#x540C;&#x65F6;&#x4E5F;&#x53EF;&#x901A;&#x8FC7;kubectl&#x547D;&#x4EE4;&#x6765;&#x67E5;&#x770B;&#x64CD;&#x4F5C;&#x5BF9;&#x5E94;&#x7684;api&#xFF0C;&#x4F8B;&#x5982;&#xFF1A;</p>
+<pre><code>kubectl get pod POD_NAME -v=9
+</code></pre><p>&#x8F93;&#x51FA;&#x4FE1;&#x606F;&#x4E2D;&#x4F1A;&#x5305;&#x542B;&#x6B64;&#x64CD;&#x4F5C;&#x5BF9;&#x5E94;&#x7684;api url</p>
+<p>&#x4F46;&#x8FD9;&#x79CD;&#x5168;&#x91CF;&#x578B;&#x7684;&#x64CD;&#x4F5C;&#x65B9;&#x5F0F;&#xFF0C;&#x5728;&#x5927;&#x96C6;&#x7FA4;&#x89C4;&#x6A21;&#x4E0B;&#xFF0C;&#x5F00;&#x9500;&#x8FD8;&#x662F;&#x6BD4;&#x8F83;&#x5927;&#x7684;&#xFF0C;&#x56E0;&#x6B64;&#xFF0C;k8s&#x8FD8;&#x63D0;&#x4F9B;&#x957F;&#x8FDE;&#x63A5;&#x7684;watch&#x63A5;&#x53E3;&#x3002;</p>
+<p><strong>2.&#x957F;&#x8FDE;&#x63A5;</strong></p>
+<p>watch&#x63A5;&#x53E3;&#x662F;&#x5BF9;list&#x63A5;&#x53E3;&#x7684;&#x4E00;&#x79CD;&#x6539;&#x8FDB;&#xFF0C;&#x5728;&#x8C03;&#x7528;watch&#x63A5;&#x53E3;&#x540E;&#xFF0C;&#x9996;&#x5148;&#x4F1A;&#x4E00;&#x6B21;&#x6027;&#x8FD4;&#x56DE;list&#x7684;&#x6570;&#x636E;&#xFF0C;&#x540C;&#x65F6;&#x4F1A;&#x4FDD;&#x6301;&#x4F1A;&#x8BDD;&#x8FDE;&#x63A5;&#xFF0C;&#x540E;&#x7EED;&#x7684;&#x63A5;&#x53E3;&#x5BF9;&#x8C61;&#x7684;curd&#xFF0C;&#x90FD;&#x4F1A;&#x4EA7;&#x751F;&#x4E8B;&#x4EF6;&#x7531;apiserver&#x5C06;&#x53D8;&#x66F4;&#x6570;&#x636E;&#x63A8;&#x9001;&#x7ED9;&#x8C03;&#x7528;&#x7AEF;&#xFF0C;&#x8C03;&#x7528;&#x7AEF;&#x63A5;&#x6536;&#x6570;&#x636E;&#x540E;&#xFF0C;&#x518D;&#x66F4;&#x65B0;&#x521D;&#x59CB;&#x63A5;&#x6536;&#x5230;&#x7684;list&#x7684;&#x5168;&#x91CF;&#x6570;&#x636E;&#x4EE5;&#x53CA;&#x5176;&#x4ED6;&#x64CD;&#x4F5C;&#x3002;</p>
+<p><strong>3.client-go</strong></p>
+<p>watch&#x4F9D;&#x7136;&#x6BD4;&#x8F83;&#x9EBB;&#x70E6;&#xFF0C;&#x6BD5;&#x7ADF;list&#x83B7;&#x53D6;&#x7684;&#x6570;&#x636E;&#x4EE5;&#x53CA;&#x540E;&#x7EED;watch&#x5230;&#x7684;&#x6570;&#x636E;&#xFF0C;&#x9700;&#x8981;&#x8C03;&#x7528;&#x7AEF;&#x5728;&#x5185;&#x90E8;&#x5904;&#x7406;&#x548C;&#x66F4;&#x65B0;&#x7F13;&#x5B58;&#x3002;&#x7D22;&#x6027;&#xFF0C;&#x5B98;&#x65B9;&#x63D0;&#x4F9B;&#x4E86;&#x4E00;&#x4E2A;client-go&#x5BA2;&#x6237;&#x7AEF;&#x5DE5;&#x5177;&#x5305;&#x5C01;&#x88C5;&#xFF0C;&#x91CC;&#x9762;&#x63D0;&#x4F9B;&#x591A;&#x79CD;apiserver&#x76F8;&#x5173;&#x64CD;&#x4F5C;&#xFF0C;&#x505A;&#x5230;&#x5F00;&#x7BB1;&#x5373;&#x7528;&#xFF0C;k8s&#x5404;&#x7EC4;&#x4EF6;&#x4E5F;&#x90FD;&#x4F7F;&#x7528;&#x4E86;&#x5B83;&#x3002;</p>
+<h2 id="client-go&#x5DE5;&#x4F5C;&#x6A21;&#x5F0F;"><a name="client-go&#x5DE5;&#x4F5C;&#x6A21;&#x5F0F;" class="plugin-anchor" href="#client-go&#x5DE5;&#x4F5C;&#x6A21;&#x5F0F;"><i class="fa fa-link" aria-hidden="true"></i></a>client-go&#x5DE5;&#x4F5C;&#x6A21;&#x5F0F;</h2>
+<p>&#x5728;client-go&#x4E2D;&#xFF0C;informer&#x662F;&#x5BF9;watch&#x64CD;&#x4F5C;&#x7684;&#x4E00;&#x6B21;&#x518D;&#x5C01;&#x88C5;&#xFF0C; Informer&#x662F;&#x4E00;&#x4E2A;&#x5E26;&#x6709;&#x672C;&#x5730;&#x7F13;&#x5B58;&#x3001;&#x7D22;&#x5F15;&#x529F;&#x80FD;&#x7684;client&#x7AEF;(list/watch)&#xFF0C;&#x5728;&#x7EDD;&#x5927;&#x591A;&#x6570;&#x573A;&#x666F;&#x4E0B;&#xFF0C;&#x5BA2;&#x6237;&#x7AEF;&#x4E0E;apiserver&#x7684;&#x4EA4;&#x4E92;&#x90FD;&#x662F;&#x8BFB;&#x591A;&#x5199;&#x5C11;&#x7684;&#xFF0C;&#x56E0;&#x6B64;&#xFF0C;&#x505A;&#x597D;&#x672C;&#x5730;&#x7F13;&#x5B58;(Store)&#x548C;&#x7D22;&#x5F15;(Index)&#x53EF;&#x4EE5;&#x5927;&#x5E45;&#x51CF;&#x5C11;&#x5F00;&#x9500;&#x63D0;&#x5347;&#x6027;&#x80FD;&#x3002;&#x540C;&#x65F6;&#xFF0C;informer&#x53EF;&#x4EE5;&#x6CE8;&#x518C;&#x76F8;&#x5E94;&#x7684;EventHandler&#x4E8B;&#x4EF6;&#x89E6;&#x53D1;&#x5668;&#x7684;&#xFF0C;&#x5728;&#x6267;&#x884C;&#x8D44;&#x6E90;&#x66F4;&#x65B0;&#x540E;&#x89E6;&#x53D1;&#x5176;&#x4ED6;&#x8FDE;&#x9501;&#x64CD;&#x4F5C;&#x3002;</p>
+<h4 id="&#x5DE5;&#x4F5C;&#x6D41;&#x7A0B;&#x56FE;"><a name="&#x5DE5;&#x4F5C;&#x6D41;&#x7A0B;&#x56FE;" class="plugin-anchor" href="#&#x5DE5;&#x4F5C;&#x6D41;&#x7A0B;&#x56FE;"><i class="fa fa-link" aria-hidden="true"></i></a>&#x5DE5;&#x4F5C;&#x6D41;&#x7A0B;&#x56FE;</h4>
+<p><img src="http://mycloudn.kokoerp.com/20191218161137.png" alt=""></p>
+<h4 id="&#x6D41;&#x7A0B;&#x56FE;&#x7EC4;&#x4EF6;&#x89E3;&#x91CA;"><a name="&#x6D41;&#x7A0B;&#x56FE;&#x7EC4;&#x4EF6;&#x89E3;&#x91CA;" class="plugin-anchor" href="#&#x6D41;&#x7A0B;&#x56FE;&#x7EC4;&#x4EF6;&#x89E3;&#x91CA;"><i class="fa fa-link" aria-hidden="true"></i></a>&#x6D41;&#x7A0B;&#x56FE;&#x7EC4;&#x4EF6;&#x89E3;&#x91CA;</h4>
+<p>&#x56FE;&#x4E2D;&#x6709;&#x4E0A;&#x4E0B;&#x5206;&#x5C42;&#xFF0C;&#x4E0A;&#x5C42;&#x903B;&#x8F91;&#x7531;client-go&#x5185;&#x90E8;&#x5C01;&#x88C5;&#xFF0C;&#x4E0B;&#x5C42;&#x7684;&#x903B;&#x8F91;&#x7531;controller&#x5185;&#x90E8;&#x5B8C;&#x6210;&#xFF0C;&#x5BF9;&#x7167;&#x4E0A;&#x56FE;&#x5206;&#x5C42;&#x8BF4;&#x660E;&#xFF1A;</p>
+<p><strong>&#x4E0A;&#x5C42;</strong>&#xFF1A;</p>
+<ul>
+<li>Reflector&#xFF1A;&#x53CD;&#x5C04;&#x5668;&#xFF0C;&#x8C03;&#x7528; Kubernetes &#x7684; List/Watch API&#xFF0C;&#x5B9E;&#x73B0;&#x5BF9; apiserver &#x6307;&#x5B9A;&#x7C7B;&#x578B;&#x5BF9;&#x8C61;&#x7684;&#x76D1;&#x63A7;(List/Watch)&#xFF0C;&#x5C06;&#x83B7;&#x53D6;&#x7684;&#x6570;&#x636E;&#xFF0C;&#x53CD;&#x5E8F;&#x5217;&#x5316;&#x6210;&#x5BF9;&#x8C61;&#x5B9E;&#x4F8B;&#xFF0C;&#x5B58;&#x5165;delta &#x7F13;&#x5B58;&#x961F;&#x5217;&#x4E2D;&#xFF1B;</li>
+</ul>
+<ul>
+<li>DeltaIFIFO Queue&#xFF1A;&#x4E00;&#x4E2A;&#x589E;&#x91CF;fifo&#x7F13;&#x5B58;&#x961F;&#x5217;&#xFF0C;&#x63A5;&#x6536;&#x6765;&#x81EA; Reflector &#x4F20;&#x9012;&#x7684;&#x53CD;&#x5E8F;&#x5217;&#x5316;&#x5BF9;&#x8C61;&#xFF1B;</li>
+</ul>
+<ul>
+<li>Informer&#xFF1A;&#x662F;&#x8FD9;&#x4E2A;&#x6D41;&#x7A0B;&#x4E2D;&#x7684;&#x5173;&#x952E;&#x91CD;&#x8981;&#x7684;&#x6865;&#x6881;&#xFF0C;&#x4E3B;&#x8981;&#x6709;&#x4E24;&#x4E2A;&#x5DE5;&#x4F5C;&#xFF1A;1.&#x4ECE;DeltaIFIFO Queue&#x4E2D;&#x83B7;&#x53D6;&#x5BF9;&#x8C61;&#xFF0C;&#x66F4;&#x65B0;LocalStore&#x7684;cache&#x6570;&#x636E; 2.&#x89E6;&#x53D1;&#x540E;&#x7EED;&#x7684;eventHandler&#xFF0C;&#x751F;&#x6210;&#x5DE5;&#x4F5C;&#x961F;&#x5217;&#x5BF9;&#x8C61;&#xFF0C;&#x52A0;&#x5165;WorkQueue&#xFF0C;&#x4F9B;&#x540E;&#x9762;&#x7684;controller&#x8BFB;&#x53D6;&#x8FDB;&#x884C;&#x5B9E;&#x9645;&#x7684;&#x63A7;&#x5236;&#x5904;&#x7406;&#x5DE5;&#x4F5C;&#x3002;&#xFF08;&#x503C;&#x5F97;&#x6CE8;&#x610F;&#x7684;&#x662F;&#xFF0C;&#x6BCF;&#x4E00;&#x79CD;&#x8D44;&#x6E90;&#x90FD;&#x5BF9;&#x5E94;&#x4E00;&#x4E2A;informer&#xFF0C;&#x591A;&#x79CD;&#x8D44;&#x6E90;&#x5BF9;&#x5E94;&#x591A;&#x4E2A;informer&#xFF0C;&#x4F46;&#x6BCF;&#x4E2A;informer&#x90FD;&#x4F1A;&#x4E0E;apiserver&#x5EFA;&#x7ACB;&#x8D77;&#x4E00;&#x4E2A;watch&#x957F;&#x8FDE;&#x63A5;&#xFF0C;&#x901A;&#x5E38;controller&#x90FD;&#x4F1A;&#x4F7F;&#x7528;SharedInformerFactory&#x8FD9;&#x4E2A;&#x5355;&#x4F8B;&#x5DE5;&#x5382;&#x6A21;&#x5F0F;&#xFF0C;&#x6765;&#x4F7F;&#x6240;&#x6709;&#x7684;informer&#x7684;&#x521B;&#x5EFA;&#x5168;&#x90E8;&#x90FD;&#x7ECF;&#x8FC7;&#x8FD9;&#x4E2A;&#x5355;&#x4F8B;&#x5DE5;&#x5382;&#xFF0C;&#x4ECE;&#x800C;&#x4FDD;&#x8BC1;&#x6BCF;&#x79CD;&#x8D44;&#x6E90;&#x5BF9;&#x5E94;&#x7684;informer&#x90FD;&#x662F;&#x552F;&#x4E00;&#x4E14;&#x53EF;&#x590D;&#x7528;&#x7684;&#xFF0C;&#x4EE5;&#x964D;&#x4F4E;&#x5F00;&#x9500;&#x3002;&#xFF09;</li>
+</ul>
+<ul>
+<li>LocalStore&#xFF1A;informer &#x7684; cache&#x7F13;&#x5B58;&#xFF0C;&#x8FD9;&#x91CC;&#x7F13;&#x5B58;&#x7684;&#x662F;&#x4ECE; apiserver &#x4E2D;&#x83B7;&#x53D6;&#x5F97;&#x5230;&#x7684;&#x5BF9;&#x8C61;(&#x5176;&#x4E2D;&#x6709;&#x4E00;&#x90E8;&#x5206;&#x53EF;&#x80FD;&#x8FD8;&#x5728;DeltaFIFO &#x4E2D;&#x6CA1;&#x6765;&#x5F97;&#x53CA;&#x653E;&#x5165;&#x7F13;&#x5B58;&#x91CC;&#x6765;)&#xFF0C;&#x6B64;&#x65F6;client&#x518D;&#x67E5;&#x8BE2;&#x5BF9;&#x8C61;&#x7684;&#x65F6;&#x5019;&#x5C31;&#x76F4;&#x63A5;&#x4ECE; cache &#x4E2D;&#x67E5;&#x627E;&#xFF0C;&#x51CF;&#x5C11;&#x4E86; apiserver &#x7684;&#x538B;&#x529B;&#xFF0C;LocalStore &#x53EA;&#x4F1A;&#x88AB; Lister &#x7684; List/Get &#x8BFB;&#x64CD;&#x4F5C;&#x7684;&#x65B9;&#x6CD5;&#x8BBF;&#x95EE;&#xFF1B;</li>
+</ul>
+<p><strong>&#x4E0B;&#x5C42;</strong>&#xFF1A;</p>
+<ul>
+<li>ResourceEventHandler&#xFF1A;&#x7531;controller&#x6CE8;&#x518C;&#xFF0C;&#x7531;informer&#x6765;&#x89E6;&#x53D1;&#xFF0C;&#x5F53;resource object&#x7B26;&#x5408;&#x8FC7;&#x6EE4;&#x89C4;&#x5219;&#x65F6;&#xFF0C;&#x89E6;&#x53D1;ResourceEventHandler&#x5C06;&#x5176;&#x4E22;&#x5165;WorkQueue&#x5185;&#x3002;</li>
+</ul>
+<ul>
+<li>WorkQueue&#xFF1A;informer&#x66F4;&#x65B0;&#x672C;&#x5730;&#x7684;&#x7F13;&#x5B58;&#x540E;&#xFF0C;&#x4F1A;&#x6839;&#x636E;&#x6CE8;&#x518C;&#x7684;&#x76F8;&#x5173;EventHandler&#xFF0C;&#x751F;&#x6210;&#x4E8B;&#x4EF6;&#x653E;&#x5165;WorkQueue&#x5185;&#xFF0C;Controller &#x63A5;&#x6536; WorkQueue  &#x4E2D;&#x7684;&#x4E8B;&#x4EF6;&#xFF0C;&#x7136;&#x540E;&#x76F8;&#x5E94;&#x6267;&#x884C;controller&#x7684;&#x4E1A;&#x52A1;&#x903B;&#x8F91;&#xFF0C;&#x4E00;&#x822C;&#x6765;&#x8BF4;&#xFF0C;&#x5C31;&#x662F;&#x4FDD;&#x8BC1;&#x8D44;&#x6E90;&#x5BF9;&#x8C61;&#x7684;&#x76EE;&#x6807;&#x72B6;&#x6001;&#x4E0E;&#x5B9E;&#x9645;&#x72B6;&#x6001;&#x8FBE;&#x6210;&#x4E00;&#x81F4;&#x7684;&#x903B;&#x8F91;&#x3002;</li>
+</ul>
+<p>&#x5982;&#x679C;&#x4F60;&#x60F3;&#x81EA;&#x5B9A;&#x4E49;controller&#xFF0C;&#x5173;&#x4E8E;infomer&#x7684;&#x5B9E;&#x8DF5;&#x5EFA;&#x8BAE;&#xFF0C;&#x53C2;&#x8003;&#x8FD9;&#x91CC;&#xFF1A;</p>
+<p><a href="https://mp.weixin.qq.com/s?__biz=MzU1OTAzNzc5MQ==&amp;mid=2247484052&amp;idx=1&amp;sn=cec9f4a1ee0d21c5b2c51bd147b8af59&amp;chksm=fc1c2ea4cb6ba7b283eef5ac4a45985437c648361831bc3e6dd5f38053be1968b3389386e415&amp;scene=21#wechat_redirect" target="_blank">&#x5982;&#x4F55;&#x7528; client-go &#x62D3;&#x5C55; Kubernetes &#x7684; API</a></p>
+<h2 id="apiversion&#x7684;&#x8BF4;&#x660E;"><a name="apiversion&#x7684;&#x8BF4;&#x660E;" class="plugin-anchor" href="#apiversion&#x7684;&#x8BF4;&#x660E;"><i class="fa fa-link" aria-hidden="true"></i></a>APIVersion&#x7684;&#x8BF4;&#x660E;</h2>
+<p>&#x5728;&#x6BCF;&#x4E00;&#x4E2A;&#x8D44;&#x6E90;&#x7684;&#x7533;&#x660E;yaml&#x6587;&#x4EF6;&#x4E2D;&#xFF0C;&#x6709;&#x4E00;&#x4E2A;&#x5FC5;&#x987B;&#x5B58;&#x5728;&#x7684;&#x4E00;&#x4E2A;&#x952E;<code>apiVersion</code>&#xFF0C;&#x8FD9;&#x4EE3;&#x8868;&#x4E86;apiserver&#x5BF9;&#x76F8;&#x5E94;&#x8D44;&#x6E90;&#x7684;rest&#x64CD;&#x4F5C;&#xFF0C;&#x6240;&#x7ED1;&#x5B9A;&#x7684;group&#x548C;version&#xFF0C;&#x5E38;&#x89C1;&#x7684;&#x503C;&#x4F8B;&#x5982;&#xFF1A;&quot;apps/v1&quot;,&#x659C;&#x6760;&#x524D;&#x4E00;&#x4F4D;&#x4EE3;&#x8868;&#x7684;&#x662F;api&#x7684;group&#xFF0C;&#x659C;&#x6760;&#x540E;&#x7684;&#x503C;&#x5219;&#x4EE3;&#x8868;&#x7684;&#x662F;version&#x3002;&#x6BCF;&#x4E00;&#x79CD;&#x8D44;&#x6E90;&#x7684;rest&#x64CD;&#x4F5C;&#xFF0C;&#x90FD;&#x5FC5;&#x987B;&#x7ED1;&#x5B9A;&#x6B63;&#x786E;&#x7684;group&#x548C;version&#x3002;</p>
+<p>&#x5728;informer&#x7684;&#x4EE3;&#x7801;&#x4E2D;&#xFF0C;&#x56E0;&#x4E3A;&#x4E0E;apiserver&#x76F4;&#x63A5;&#x4EA4;&#x4E92;&#xFF0C;&#x56E0;&#x6B64;api&#x7684;group&#x548C;version&#x76F8;&#x5173;&#x7684;&#x7ED3;&#x6784;&#x4F53;&#x4F1A;&#x53CD;&#x590D;&#x51FA;&#x73B0;&#xFF0C;&#x4E14;&#x7ED3;&#x6784;&#x4F53;&#x547D;&#x540D;&#x975E;&#x5E38;&#x5BB9;&#x6613;&#x6DF7;&#x6DC6;&#x3002;&#x56E0;&#x6B64;&#xFF0C;&#x8FD9;&#x91CC;&#x5217;&#x51FA;&#x8FDB;&#x884C;&#x8BF4;&#x660E;&#xFF0C;&#x5BF9;&#x9605;&#x8BFB;informer&#x7684;&#x6E90;&#x7801;&#x6709;&#x4E00;&#x5B9A;&#x989D;&#x5916;&#x7684;&#x5E2E;&#x52A9;&#x3002;</p>
+<ul>
+<li><strong>APIGroup</strong> : api&#x6240;&#x5C5E;&#x7EC4;&#x522B;&#x7684;&#x4FE1;&#x606F;&#xFF0C;&#x5176;&#x4E2D;&#x5305;&#x542B;&#x7684;groupVersion&#x5B57;&#x6BB5;&#xFF0C;&#x5373;&#x6211;&#x4EEC;&#x6BCF;&#x4E2A;yaml&#x6587;&#x4EF6;&#x4E2D;apiVersion&#x6240;&#x6307;&#x5B9A;&#x7684;</li>
+<li><strong>APIResource</strong>&#xFF1A;&#x6240;&#x6709;&#x4F7F;&#x7528;&#x5230;&#x7684;resouce&#x8D44;&#x6E90;&#x7C7B;&#x578B;&#xFF0C;&#x5305;&#x542B;pod/deployment/svc&#x7B49;&#x7B49;</li>
+</ul>
+<p><strong>APIGroup&#x7ED3;&#x6784;&#x4F53;</strong>&#xFF1A;</p>
+<pre><code class="lang-go"><span class="hljs-keyword">type</span> APIGroup <span class="hljs-keyword">struct</span> {
+    TypeMeta <span class="hljs-string">`json:&quot;,inline&quot;`</span>
+    Name <span class="hljs-keyword">string</span> <span class="hljs-string">`json:&quot;name&quot; protobuf:&quot;bytes,1,opt,name=name&quot;`</span>
+    Versions []GroupVersionForDiscovery <span class="hljs-string">`json:&quot;versions&quot; protobuf:&quot;bytes,2,rep,name=versions&quot;`</span>
+    PreferredVersion GroupVersionForDiscovery <span class="hljs-string">`json:&quot;preferredVersion,omitempty&quot; protobuf:&quot;bytes,3,opt,name=preferredVersion&quot;`</span>
+    ServerAddressByClientCIDRs []ServerAddressByClientCIDR <span class="hljs-string">`json:&quot;serverAddressByClientCIDRs,omitempty&quot; protobuf:&quot;bytes,4,rep,name=serverAddressByClientCIDRs&quot;`</span>
+}
+</code></pre>
+<p><strong>APIGroup&#x5B9E;&#x4F8B;</strong>&#xFF1A;</p>
+<p>&#x901A;&#x8FC7;&#x5982;&#x4E0B;&#x65B9;&#x5F0F;&#x5FEB;&#x901F;&#x8BBF;&#x95EE;&#x7684;apiserver&#x7684;rest api&#xFF1A;</p>
+<pre><code class="lang-shell"># &#x8282;&#x70B9;&#x4E0A;&#x8FD0;&#x884C;kubectl proxy&#x4EE3;&#x7406;,&#x514D;&#x53BB;&#x8BA4;&#x8BC1;&#x6B65;&#x9AA4;&#xFF0C;&#x8FD9;&#x4E0D;&#x592A;&#x5B89;&#x5168;&#xFF0C;&#x53EA;&#x5EFA;&#x8BAE;&#x6D4B;&#x8BD5;&#x4F7F;&#x7528;&#xFF0C;&#x4F7F;&#x7528;&#x5B8C;&#x6BD5;&#x540E;&#x53CA;&#x65F6;&#x5173;&#x95ED; 
+~# kubectl proxy --port=8001 &amp; 
+
+# &#x67E5;&#x770B;&#x6240;&#x6709;&#x7684;APIGroup&#xFF0C;groups &#x6570;&#x7EC4;&#x5185;&#x7684;&#x6BCF;&#x4E00;&#x4E2A;&#x6210;&#x5458;&#x90FD;&#x662F;&#x4E00;&#x4E2A;APIGroup&#x5B9E;&#x4F8B;
+~#curl 127.0.0.1:8001/apis/
+{
+  &quot;kind&quot;: &quot;APIGroupList&quot;,
+  &quot;apiVersion&quot;: &quot;v1&quot;,
+  &quot;groups&quot;: [
+    {
+      &quot;name&quot;: &quot;apiregistration.k8s.io&quot;,
+      &quot;versions&quot;: [
+        {
+          &quot;groupVersion&quot;: &quot;apiregistration.k8s.io/v1&quot;,
+          &quot;version&quot;: &quot;v1&quot;
+        },
+        {
+          &quot;groupVersion&quot;: &quot;apiregistration.k8s.io/v1beta1&quot;,
+          &quot;version&quot;: &quot;v1beta1&quot;
+        }
+      ],
+      &quot;preferredVersion&quot;: {
+        &quot;groupVersion&quot;: &quot;apiregistration.k8s.io/v1&quot;,
+        &quot;version&quot;: &quot;v1&quot;
+      }
+    },
+    {
+      &quot;name&quot;: &quot;extensions&quot;,
+      &quot;versions&quot;: [
+        {
+          &quot;groupVersion&quot;: &quot;extensions/v1beta1&quot;,
+          &quot;version&quot;: &quot;v1beta1&quot;
+        }
+      ],
+      &quot;preferredVersion&quot;: {
+        &quot;groupVersion&quot;: &quot;extensions/v1beta1&quot;,
+        &quot;version&quot;: &quot;v1beta1&quot;
+      }
+    },
+    ...
+}
+</code></pre>
+<p><strong>APIResource&#x7ED3;&#x6784;&#x4F53;</strong></p>
+<pre><code class="lang-go"><span class="hljs-keyword">type</span> APIResourceList <span class="hljs-keyword">struct</span> {
+    TypeMeta <span class="hljs-string">`json:&quot;,inline&quot;`</span>
+    GroupVersion <span class="hljs-keyword">string</span> <span class="hljs-string">`json:&quot;groupVersion&quot; protobuf:&quot;bytes,1,opt,name=groupVersion&quot;`</span>
+    APIResources []APIResource <span class="hljs-string">`json:&quot;resources&quot; protobuf:&quot;bytes,2,rep,name=resources&quot;`</span>
+}
+</code></pre>
+<p><strong>APIResource&#x5B9E;&#x4F8B;</strong></p>
+<p>Resource&#x5206;&#x4E3A;&#x591A;&#x4E2A;groupVersion</p>
+<pre><code class="lang-shell">~# curl 127.0.0.1:8001/api/v1 #&#x9ED8;&#x8BA4;&#x8D44;&#x6E90;
+~# curl 127.0.0.1:8001/apis/apps/v1/  # &#x6269;&#x5C55;&#x8D44;&#x6E90;
+</code></pre>
+<p>&#x5177;&#x4F53;&#x53C2;&#x8003;&#x5B98;&#x65B9;api&#x8BF4;&#x660E;&#xFF1A;</p>
+<p><a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.14/" target="_blank">https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.14/</a></p>
+<p>&#x4E0B;&#x9762;&#x662F;&#x4E00;&#x4E2A;APIResourceList&#x5B9E;&#x4F8B;&#xFF1A;</p>
+<pre><code class="lang-shell">~# curl 127.0.0.1:8001/api/v1
+{
+  &quot;kind&quot;: &quot;APIResourceList&quot;,
+  &quot;groupVersion&quot;: &quot;v1&quot;,
+  &quot;resources&quot;: [
+    {
+      &quot;name&quot;: &quot;pods&quot;,
+      &quot;singularName&quot;: &quot;&quot;,
+      &quot;namespaced&quot;: true,
+      &quot;kind&quot;: &quot;Pod&quot;,
+      &quot;verbs&quot;: [
+        &quot;create&quot;,
+        &quot;delete&quot;,
+        &quot;deletecollection&quot;,
+        &quot;get&quot;,
+        &quot;list&quot;,
+        &quot;patch&quot;,
+        &quot;update&quot;,
+        &quot;watch&quot;
+      ],
+      &quot;shortNames&quot;: [
+        &quot;po&quot;
+      ],
+      &quot;categories&quot;: [
+        &quot;all&quot;
+      ]
+    },
+    {
+      &quot;name&quot;: &quot;configmaps&quot;,
+      &quot;singularName&quot;: &quot;&quot;,
+      &quot;namespaced&quot;: true,
+      &quot;kind&quot;: &quot;ConfigMap&quot;,
+      &quot;verbs&quot;: [
+        &quot;create&quot;,
+        &quot;delete&quot;,
+        &quot;deletecollection&quot;,
+        &quot;get&quot;,
+        &quot;list&quot;,
+        &quot;patch&quot;,
+        &quot;update&quot;,
+        &quot;watch&quot;
+      ],
+      &quot;shortNames&quot;: [
+        &quot;cm&quot;
+      ]
+    },
+    {
+      &quot;name&quot;: &quot;endpoints&quot;,
+      &quot;singularName&quot;: &quot;&quot;,
+      &quot;namespaced&quot;: true,
+      &quot;kind&quot;: &quot;Endpoints&quot;,
+      &quot;verbs&quot;: [
+        &quot;create&quot;,
+        &quot;delete&quot;,
+        &quot;deletecollection&quot;,
+        &quot;get&quot;,
+        &quot;list&quot;,
+        &quot;patch&quot;,
+        &quot;update&quot;,
+        &quot;watch&quot;
+      ],
+      &quot;shortNames&quot;: [
+        &quot;ep&quot;
+      ]
+    },
+    ...
+  ]
+}
+</code></pre>
+<h2 id="&#x603B;&#x7ED3;"><a name="&#x603B;&#x7ED3;" class="plugin-anchor" href="#&#x603B;&#x7ED3;"><i class="fa fa-link" aria-hidden="true"></i></a>&#x603B;&#x7ED3;</h2>
+<p>&#x672C;&#x7BC7;&#x5148;&#x7B80;&#x5355;&#x4ECB;&#x7ECD;&#x4E00;&#x4E0B;informer&#x548C;apiGroup&#x7684;&#x76F8;&#x5173;&#x4FE1;&#x606F;&#xFF0C;&#x4EE5;&#x53CA;&#x548C;controller&#x7EC4;&#x4EF6;&#x7ED3;&#x5408;&#x7684;&#x5DE5;&#x4F5C;&#x6D41;&#x7A0B;&#xFF0C;&#x4E3A;&#x540E;&#x9762;&#x7684;&#x51E0;&#x7BC7;(deploymentCrontroller&#x3001;replicaSet controller &#x3001;statefulSetController&#x7B49;)&#x5206;&#x6790;&#x4F5C;&#x94FA;&#x57AB;&#xFF0C;&#x540E;&#x9762;&#x7684;&#x6587;&#x7AE0;&#x4E2D;&#x4F1A;&#x53CD;&#x590D;&#x63D0;&#x5230;&#x672C;&#x7BC7;&#x4E0A;&#x65B9;&#x7684;informer&#x4E0E;controller&#x7ED3;&#x5408;&#x5DE5;&#x4F5C;&#x7684;&#x6D41;&#x7A0B;&#x63CF;&#x8FF0;&#x548C;&#x56FE;&#x89E3;&#x3002;</p>
+
+                                
+                                </section>
+                            
+    </div>
+    <div class="search-results">
+        <div class="has-results">
+            
+            <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+            <ul class="search-results-list"></ul>
+            
+        </div>
+        <div class="no-results">
+            
+            <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+            
+        </div>
+    </div>
+</div>
+
+                        </div>
+                    </div>
+                
+            </div>
+
+            
+                
+                <a href="Kubernetes源码学习-Controller-P1-多实例leader选举.html" class="navigation navigation-prev " aria-label="Previous page: 2.1. 多实例leader选举">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+                
+                
+                <a href="Kubernetes源码学习-Controller-P3-Controller分类与Deployment Controller.html" class="navigation navigation-next " aria-label="Next page: 2.3. Controller分类与Deployment Controller">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+                
+            
+        
+    </div>
+
+    <script>
+        var gitbook = gitbook || [];
+        gitbook.push(function() {
+            gitbook.page.hasChanged({"page":{"title":"2.2. Controller与informer","date":"2019/12/18 21:59:53","tags":["Kubernetes","Golang","读源码"],"level":"3.2.2","depth":2,"next":{"title":"2.3. Controller分类与Deployment Controller","level":"3.2.3","depth":2,"path":"controller/Kubernetes源码学习-Controller-P3-Controller分类与Deployment Controller.md","ref":"./controller/Kubernetes源码学习-Controller-P3-Controller分类与Deployment Controller.md","articles":[]},"previous":{"title":"2.1. 多实例leader选举","level":"3.2.1","depth":2,"path":"controller/Kubernetes源码学习-Controller-P1-多实例leader选举.md","ref":"./controller/Kubernetes源码学习-Controller-P1-多实例leader选举.md","articles":[]},"dir":"ltr"},"config":{"plugins":["-sharing","anchors","github","expandable-chapters","splitter","page-treeview","back-to-top-button"],"styles":{"website":"./styles/website.css"},"pluginsConfig":{"page-treeview":{"copyright":"","minHeaderCount":"1","minHeaderDeep":"1"},"github":{"url":"https://github.com/yinwenqin/kubeSourceCodeNote"},"splitter":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"back-to-top-button":{},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false},"anchors":{},"expandable-chapters":{}},"theme":"default","author":"ywq","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"Kubernetes源码学习","language":"zh-hans","links":{},"gitbook":"3.2.3","description":""},"file":{"path":"controller/Kubernetes源码学习-Controller-P2-Controller与informer.md","mtime":"2020-01-30T08:14:31.378Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2020-01-30T08:23:39.586Z"},"basePath":"..","book":{"language":""}});
+        });
+    </script>
+</div>
+
+        
+    <script src="../gitbook/gitbook.js"></script>
+    <script src="../gitbook/theme.js"></script>
+    
+        
+        <script src="../gitbook/gitbook-plugin-github/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-expandable-chapters/expandable-chapters.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-splitter/splitter.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-back-to-top-button/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search/search-engine.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search/search.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-lunr/lunr.min.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-lunr/search-lunr.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-fontsettings/fontsettings.js"></script>
+        
+    
+
+    </body>
+</html>
+

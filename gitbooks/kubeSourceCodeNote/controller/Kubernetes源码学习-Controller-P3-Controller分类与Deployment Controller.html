@@ -1,0 +1,1140 @@
+
+<!DOCTYPE HTML>
+<html lang="zh-hans" >
+    <head>
+        <meta charset="UTF-8">
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <title>2.3. Controller分类与Deployment Controller · Kubernetes源码学习</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="description" content="">
+        <meta name="generator" content="GitBook 3.2.3">
+        <meta name="author" content="ywq">
+        
+        
+    
+    <link rel="stylesheet" href="../gitbook/style.css">
+
+    
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-anchors/plugin.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-expandable-chapters/expandable-chapters.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-splitter/splitter.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-page-treeview/style.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-back-to-top-button/plugin.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-highlight/website.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-search/search.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-fontsettings/website.css">
+                
+            
+        
+
+    
+
+    
+        
+    
+
+        
+    
+    
+    <meta name="HandheldFriendly" content="true"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="../gitbook/images/apple-touch-icon-precomposed-152.png">
+    <link rel="shortcut icon" href="../gitbook/images/favicon.ico" type="image/x-icon">
+
+    
+    
+    <link rel="prev" href="Kubernetes源码学习-Controller-P2-Controller与informer.html" />
+    
+
+    </head>
+    <body>
+        
+<div class="book">
+    <div class="book-summary">
+        
+            
+<div id="book-search-input" role="search">
+    <input type="text" placeholder="输入并搜索" />
+</div>
+
+            
+                <nav role="navigation">
+                
+
+
+<ul class="summary">
+    
+    
+
+    
+
+    
+        
+        <li class="header"><></li>
+        
+        
+    
+
+    
+        
+        <li class="header">Part I-写在前面</li>
+        
+        
+    
+        <li class="chapter " data-level="2.1" data-path="../">
+            
+                <a href="../">
+            
+                    
+                    1. 总览篇
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Part II-核心组件</li>
+        
+        
+    
+        <li class="chapter " data-level="3.1" data-path="../scheduler/">
+            
+                <a href="../scheduler/">
+            
+                    
+                    2. Scheduler
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="3.1.1" data-path="../scheduler/Kubernetes源码学习-Scheduler-P1-调度器入口篇.html">
+            
+                <a href="../scheduler/Kubernetes源码学习-Scheduler-P1-调度器入口篇.html">
+            
+                    
+                    2.1. 调度器入口
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.1.2" data-path="../scheduler/Kubernetes源码学习-Scheduler-P2-调度器框架.html">
+            
+                <a href="../scheduler/Kubernetes源码学习-Scheduler-P2-调度器框架.html">
+            
+                    
+                    2.2. 调度器框架
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.1.3" data-path="../scheduler/Kubernetes源码学习-Scheduler-P3-Node筛选算法.html">
+            
+                <a href="../scheduler/Kubernetes源码学习-Scheduler-P3-Node筛选算法.html">
+            
+                    
+                    2.3. Node筛选算法
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.1.4" data-path="../scheduler/Kubernetes源码学习-Scheduler-P4-Node优先级算法.html">
+            
+                <a href="../scheduler/Kubernetes源码学习-Scheduler-P4-Node优先级算法.html">
+            
+                    
+                    2.4. Node优先级算法
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.1.5" data-path="../scheduler/Kubernetes源码学习-Scheduler-P5-Pod优先级抢占调度.html">
+            
+                <a href="../scheduler/Kubernetes源码学习-Scheduler-P5-Pod优先级抢占调度.html">
+            
+                    
+                    2.5 Pod优先级调度
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="3.2" data-path="./">
+            
+                <a href="./">
+            
+                    
+                    3. Controller
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="3.2.1" data-path="Kubernetes源码学习-Controller-P1-多实例leader选举.html">
+            
+                <a href="Kubernetes源码学习-Controller-P1-多实例leader选举.html">
+            
+                    
+                    2.1. 多实例leader选举
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.2.2" data-path="Kubernetes源码学习-Controller-P2-Controller与informer.html">
+            
+                <a href="Kubernetes源码学习-Controller-P2-Controller与informer.html">
+            
+                    
+                    2.2. Controller与informer
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter active" data-level="3.2.3" data-path="Kubernetes源码学习-Controller-P3-Controller分类与Deployment Controller.html">
+            
+                <a href="Kubernetes源码学习-Controller-P3-Controller分类与Deployment Controller.html">
+            
+                    
+                    2.3. Controller分类与Deployment Controller
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="3.3" >
+            
+                <span>
+            
+                    
+                    [4. ApiServer]
+            
+                </span>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="3.3.1" >
+            
+                <span>
+            
+                    
+                    [4.1 待补充]
+            
+                </span>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="3.4" >
+            
+                <span>
+            
+                    
+                    [5. Kubelet]
+            
+                </span>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="3.4.1" >
+            
+                <span>
+            
+                    
+                    [5.1 待补充]
+            
+                </span>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+
+    <li class="divider"></li>
+
+    <li>
+        <a href="https://www.gitbook.com" target="blank" class="gitbook-link">
+            本书使用 GitBook 发布
+        </a>
+    </li>
+</ul>
+
+
+                </nav>
+            
+        
+    </div>
+
+    <div class="book-body">
+        
+            <div class="body-inner">
+                
+                    
+
+<div class="book-header" role="navigation">
+    
+
+    <!-- Title -->
+    <h1>
+        <i class="fa fa-circle-o-notch fa-spin"></i>
+        <a href=".." >2.3. Controller分类与Deployment Controller</a>
+    </h1>
+</div>
+
+
+
+
+                    <div class="page-wrapper" tabindex="-1" role="main">
+                        <div class="page-inner">
+                            
+<div id="book-search-results">
+    <div class="search-noresults">
+    
+                                <section class="normal markdown-section">
+                                
+                                <div class="treeview__container"><ul>
+<li><div><a href="#p3-controller&#x5206;&#x7C7B;&#x4E0E;deployment-controller">P3-Controller&#x5206;&#x7C7B;&#x4E0E;Deployment Controller</a><i class="level__parent level__item level__parent--opened" state="opened" onclick="var curState = this.getAttribute(&apos;state&apos;);var nextState = curState === &apos;opened&apos; ? &apos;hidden&apos; : &apos;opened&apos;;this.setAttribute(&apos;state&apos;, nextState);this.className = this.className.split(curState).join(nextState);var list = this.parentNode.nextElementSibling;if (nextState === &apos;hidden&apos;) {    list.style.display = &apos;none&apos;;} else {    list.style.display = &apos;block&apos;;}"></i></div>
+<ul>
+<li><div><a href="#&#x524D;&#x8A00;">&#x524D;&#x8A00;</a><i></i></div></li>
+<li><div><a href="#controller&#x7684;&#x5206;&#x7C7B;">Controller&#x7684;&#x5206;&#x7C7B;</a><i></i></div></li>
+<li><div><a href="#deployment-controller">Deployment Controller</a><i class="level__parent level__item level__parent--opened" state="opened" onclick="var curState = this.getAttribute(&apos;state&apos;);var nextState = curState === &apos;opened&apos; ? &apos;hidden&apos; : &apos;opened&apos;;this.setAttribute(&apos;state&apos;, nextState);this.className = this.className.split(curState).join(nextState);var list = this.parentNode.nextElementSibling;if (nextState === &apos;hidden&apos;) {    list.style.display = &apos;none&apos;;} else {    list.style.display = &apos;block&apos;;}"></i></div>
+<ul>
+<li><div><a href="#&#x521D;&#x59CB;&#x5316;">&#x521D;&#x59CB;&#x5316;</a><i class="level__parent level__item level__parent--opened" state="opened" onclick="var curState = this.getAttribute(&apos;state&apos;);var nextState = curState === &apos;opened&apos; ? &apos;hidden&apos; : &apos;opened&apos;;this.setAttribute(&apos;state&apos;, nextState);this.className = this.className.split(curState).join(nextState);var list = this.parentNode.nextElementSibling;if (nextState === &apos;hidden&apos;) {    list.style.display = &apos;none&apos;;} else {    list.style.display = &apos;block&apos;;}"></i></div>
+<ul>
+<li><div><a href="#waituntil&#x5FAA;&#x73AF;&#x8BA1;&#x65F6;&#x5668;&#x51FD;&#x6570;">wait.Until&#x5FAA;&#x73AF;&#x8BA1;&#x65F6;&#x5668;&#x51FD;&#x6570;</a><i></i></div></li>
+<li><div><a href="#dcworker&#x51FD;&#x6570;">dc.worker&#x51FD;&#x6570;</a><i></i></div></li>
+</ul></li>
+<li><div><a href="#&#x6682;&#x505C;&#x548C;&#x6269;&#x7F29;&#x5BB9;&#x5220;&#x9664;">&#x6682;&#x505C;&#x548C;&#x6269;(&#x7F29;)&#x5BB9;(/&#x5220;&#x9664;) </a><i class="level__parent level__item level__parent--opened" state="opened" onclick="var curState = this.getAttribute(&apos;state&apos;);var nextState = curState === &apos;opened&apos; ? &apos;hidden&apos; : &apos;opened&apos;;this.setAttribute(&apos;state&apos;, nextState);this.className = this.className.split(curState).join(nextState);var list = this.parentNode.nextElementSibling;if (nextState === &apos;hidden&apos;) {    list.style.display = &apos;none&apos;;} else {    list.style.display = &apos;block&apos;;}"></i></div>
+<ul>
+<li><div><a href="#syncdeploymentstatus&#x51FD;&#x6570;">syncDeploymentStatus&#x51FD;&#x6570;</a><i></i></div></li>
+</ul></li>
+<li><div><a href="#&#x6EDA;&#x52A8;&#x66F4;&#x65B0;">&#x6EDA;&#x52A8;&#x66F4;&#x65B0;</a><i class="level__parent level__item level__parent--opened" state="opened" onclick="var curState = this.getAttribute(&apos;state&apos;);var nextState = curState === &apos;opened&apos; ? &apos;hidden&apos; : &apos;opened&apos;;this.setAttribute(&apos;state&apos;, nextState);this.className = this.className.split(curState).join(nextState);var list = this.parentNode.nextElementSibling;if (nextState === &apos;hidden&apos;) {    list.style.display = &apos;none&apos;;} else {    list.style.display = &apos;block&apos;;}"></i></div>
+<ul>
+<li><div><a href="#syncrolloutstatus&#x51FD;&#x6570;">syncRolloutStatus&#x51FD;&#x6570;</a><i></i></div></li>
+<li><div><a href="#&#x603B;&#x7ED3;">&#x603B;&#x7ED3;</a><i></i></div></li>
+</ul></li>
+</ul></li>
+<li><div><a href="#&#x603B;&#x7ED3;">&#x603B;&#x7ED3;</a><i></i></div></li>
+</ul></li>
+</ul>
+</div>
+
+
+<h1 id="p3-controller&#x5206;&#x7C7B;&#x4E0E;deployment-controller"><a name="p3-controller&#x5206;&#x7C7B;&#x4E0E;deployment-controller" class="plugin-anchor" href="#p3-controller&#x5206;&#x7C7B;&#x4E0E;deployment-controller"><i class="fa fa-link" aria-hidden="true"></i></a>P3-Controller&#x5206;&#x7C7B;&#x4E0E;Deployment Controller</h1>
+<h2 id="&#x524D;&#x8A00;"><a name="&#x524D;&#x8A00;" class="plugin-anchor" href="#&#x524D;&#x8A00;"><i class="fa fa-link" aria-hidden="true"></i></a>&#x524D;&#x8A00;</h2>
+<p>Controller&#x90E8;&#x5206;&#x7684;&#x7B2C;&#x4E00;&#x7BC7;&#x6587;&#x7AE0;&#x4E2D;&#xFF0C;&#x6211;&#x4EEC;&#x4ECE;cobra&#x542F;&#x52A8;&#x547D;&#x4EE4;&#x5165;&#x53E3;&#x5F00;&#x59CB;&#xFF0C;&#x8FDB;&#x5165;&#x5230;&#x4E86;&#x591A;&#x5B9E;&#x4F8B;leader&#x9009;&#x4E3E;&#x90E8;&#x5206;&#x7684;&#x4EE3;&#x7801;&#xFF0C;&#x5BF9;leader&#x9009;&#x4E3E;&#x6D41;&#x7A0B;&#x505A;&#x4E86;&#x8BE6;&#x7EC6;&#x5730;&#x5206;&#x6790;&#xFF1A;</p>
+<p>&#x63A5;&#x7740;&#x5728;&#x7B2C;&#x4E8C;&#x7BC7;&#x4E2D;&#xFF0C;&#x6587;&#x5B57;&#x548C;&#x56FE;&#x89E3;&#x7B80;&#x5355;&#x63CF;&#x8FF0;&#x4E86;controller&#x662F;&#x5982;&#x4F55;&#x7ED3;&#x5408;client-go&#x6A21;&#x5757;&#x4E2D;&#x7684;informer&#x5DE5;&#x4F5C;&#x7684;&#xFF0C;&#x4E3A;&#x672C;&#x7BC7;&#x53CA;&#x540E;&#x9762;&#x7684;&#x51E0;&#x7BC7;&#x4F5C;&#x94FA;&#x57AB;&#xFF1A;</p>
+<p>&#x90A3;&#x4E48;&#x672C;&#x7BC7;&#xFF0C;&#x5C31;&#x63A5;&#x7740;&#x7B2C;&#x4E00;&#x7BC7;&#x5F80;&#x4E0B;&#xFF0C;&#x7EE7;&#x7EED;&#x4EE3;&#x7801;&#x5206;&#x6790;&#x3002;</p>
+<h2 id="controller&#x7684;&#x5206;&#x7C7B;"><a name="controller&#x7684;&#x5206;&#x7C7B;" class="plugin-anchor" href="#controller&#x7684;&#x5206;&#x7C7B;"><i class="fa fa-link" aria-hidden="true"></i></a>Controller&#x7684;&#x5206;&#x7C7B;</h2>
+<p><strong>&#x542F;&#x52A8;</strong></p>
+<p>&#x627F;&#x63A5;&#x7BC7;&#x4E00;&#xFF0C;&#x5728;cobra&#x5165;&#x53E3;&#x4E4B;&#x4E0B;&#xFF0C;controller&#x7684;&#x542F;&#x52A8;&#x5165;&#x53E3;&#x5728;&#x8FD9;&#x91CC;&#xFF1A;</p>
+<p><code>cmd/kube-controller-manager/app/controllermanager.go:191</code> </p>
+<pre><code class="lang-go">run := <span class="hljs-keyword">func</span>(ctx context.Context) {}
+</code></pre>
+<p>==&gt; <code>cmd/kube-controller-manager/app/controllermanager.go:217</code>&#xFF0C;&#x91CD;&#x70B9;&#x662F;&#x8FD9;&#x91CC;&#x7684;<strong>NewControllerInitializers</strong>&#x51FD;&#x6570;&#x3002;</p>
+<pre><code class="lang-go"><span class="hljs-keyword">if</span> err := StartControllers(controllerContext, saTokenControllerInitFunc, NewControllerInitializers(controllerContext.LoopMode), unsecuredMux); err != <span class="hljs-literal">nil</span> {
+   klog.Fatalf(<span class="hljs-string">&quot;error starting controllers: %v&quot;</span>, err)
+}
+</code></pre>
+<p>==&gt; <code>cmd/kube-controller-manager/app/controllermanager.go:343</code></p>
+<p><img src="http://mycloudn.kokoerp.com/20200127122642.png" style="zoom:80%;"></p>
+<p>&#x53EF;&#x4EE5;&#x770B;&#x5230;&#xFF0C;controller&#x4F1A;&#x5BF9;&#x4E0D;&#x540C;&#x7684;&#x8D44;&#x6E90;&#xFF0C;&#x5206;&#x522B;&#x521D;&#x59CB;&#x5316;&#x76F8;&#x5E94;&#x7684;controller&#xFF0C;&#x5305;&#x542B;&#x6211;&#x4EEC;&#x5E38;&#x89C1;&#x7684;deployment&#x3001;statefulset&#x3001;endpoint&#x3001;pvc&#x7B49;&#x7B49;&#x8D44;&#x6E90;&#xFF0C;controller&#x79CD;&#x7C7B;&#x6709;&#x591A;&#x8FBE;30&#x4F59;&#x4E2A;&#x3002;&#x56E0;&#x6B64;&#xFF0C;&#x5728;controller&#x6574;&#x4E2A;&#x7AE0;&#x8282;&#x4E2D;&#xFF0C;&#x4E0D;&#x4F1A;&#x5BF9;&#x5B83;&#x4EEC;&#x9010;&#x4E00;&#x5206;&#x6790;&#xFF0C;&#x53EA;&#x4F1A;&#x62BD;&#x53D6;&#x51E0;&#x4E2A;&#x5E38;&#x89C1;&#x6709;&#x4EE3;&#x8868;&#x6027;&#x5730;&#x8FDB;&#x884C;&#x6DF1;&#x5165;&#xFF0C;&#x672C;&#x7BC7;&#x5C31;&#x6765;&#x770B;&#x770B;deployment controller&#x5427;&#x3002;</p>
+<h2 id="deployment-controller"><a name="deployment-controller" class="plugin-anchor" href="#deployment-controller"><i class="fa fa-link" aria-hidden="true"></i></a>Deployment Controller</h2>
+<h3 id="&#x521D;&#x59CB;&#x5316;"><a name="&#x521D;&#x59CB;&#x5316;" class="plugin-anchor" href="#&#x521D;&#x59CB;&#x5316;"><i class="fa fa-link" aria-hidden="true"></i></a>&#x521D;&#x59CB;&#x5316;</h3>
+<p><code>cmd/kube-controller-manager/app/controllermanager.go:354</code></p>
+<pre><code class="lang-go">controllers[<span class="hljs-string">&quot;deployment&quot;</span>] = startDeploymentController
+</code></pre>
+<p>==&gt; <code>cmd/kube-controller-manager/app/apps.go:82</code></p>
+<pre><code class="lang-go"><span class="hljs-keyword">func</span> startDeploymentController(ctx ControllerContext) (http.Handler, <span class="hljs-keyword">bool</span>, error) {
+    <span class="hljs-keyword">if</span> !ctx.AvailableResources[schema.GroupVersionResource{Group: <span class="hljs-string">&quot;apps&quot;</span>, Version: <span class="hljs-string">&quot;v1&quot;</span>, Resource: <span class="hljs-string">&quot;deployments&quot;</span>}] {
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">nil</span>, <span class="hljs-literal">false</span>, <span class="hljs-literal">nil</span>
+    }
+    dc, err := deployment.NewDeploymentController(
+    <span class="hljs-comment">// deployment&#x4E3B;&#x8981;&#x5173;&#x6CE8;&#x8FD9;3&#x4E2A;&#x8D44;&#x6E90;: Deployment/ReplicaSet/Pod&#xFF0C;deployment&#x901A;&#x8FC7;replicaSet&#x6765;&#x7BA1;&#x7406;Pod</span>
+    <span class="hljs-comment">// &#x8FD9;3&#x4E2A;&#x51FD;&#x6570;&#x4F1A;&#x8FD4;&#x56DE;&#x76F8;&#x5E94;&#x8D44;&#x6E90;&#x7684;informer</span>
+        ctx.InformerFactory.Apps().V1().Deployments(),
+        ctx.InformerFactory.Apps().V1().ReplicaSets(),
+        ctx.InformerFactory.Core().V1().Pods(),
+        ctx.ClientBuilder.ClientOrDie(<span class="hljs-string">&quot;deployment-controller&quot;</span>),
+    )
+    <span class="hljs-keyword">if</span> err != <span class="hljs-literal">nil</span> {
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">nil</span>, <span class="hljs-literal">true</span>, fmt.Errorf(<span class="hljs-string">&quot;error creating Deployment controller: %v&quot;</span>, err)
+
+  <span class="hljs-comment">// deployment controller &#x8FD0;&#x884C;&#x51FD;&#x6570;</span>
+    <span class="hljs-keyword">go</span> dc.Run(<span class="hljs-keyword">int</span>(ctx.ComponentConfig.DeploymentController.ConcurrentDeploymentSyncs), ctx.Stop)
+    <span class="hljs-keyword">return</span> <span class="hljs-literal">nil</span>, <span class="hljs-literal">true</span>, <span class="hljs-literal">nil</span>
+}
+</code></pre>
+<p>dc.Run()&#x51FD;&#x6570;&#xFF0C;&#x7B2C;&#x4E00;&#x4E2A;&#x53C2;&#x6570;&#x662F;worker&#x7684;&#x6570;&#x91CF;&#xFF0C;&#x9ED8;&#x8BA4;&#x503C;&#x662F;5&#x4E2A;&#xFF0C;&#x5728;&#x8FD9;&#x91CC;&#x5B9A;&#x4E49;&#x7684;&#xFF1A;<code>pkg/controller/apis/config/v1alpha1/defaults.go:48</code>&#xFF0C;&#x7B2C;&#x4E8C;&#x4E2A;&#x53C2;&#x6570;&#x662F;&#x7A7A;&#x7ED3;&#x6784;&#x4F53;&#xFF0C;&#x8BA9;go&#x534F;&#x7A0B;&#x63A5;&#x6536;&#x5F02;&#x5E38;&#x505C;&#x6B62;&#x7684;&#x4FE1;&#x53F7;&#x3002;</p>
+<p>==&gt; <code>pkg/controller/deployment/deployment_controller.go:148</code></p>
+<pre><code class="lang-go"><span class="hljs-comment">// Run begins watching and syncing.</span>
+<span class="hljs-keyword">func</span> (dc *DeploymentController) Run(workers <span class="hljs-keyword">int</span>, stopCh &lt;-<span class="hljs-keyword">chan</span> <span class="hljs-keyword">struct</span>{}) {
+    <span class="hljs-keyword">defer</span> utilruntime.HandleCrash()
+    <span class="hljs-keyword">defer</span> dc.queue.ShutDown()
+
+    klog.Infof(<span class="hljs-string">&quot;Starting deployment controller&quot;</span>)
+    <span class="hljs-keyword">defer</span> klog.Infof(<span class="hljs-string">&quot;Shutting down deployment controller&quot;</span>)
+  <span class="hljs-comment">// &#x5224;&#x65AD;&#x5404;&#x4E2A;informer&#x7684;&#x7F13;&#x5B58;&#x662F;&#x5426;&#x5DF2;&#x7ECF;&#x540C;&#x6B65;&#x5B8C;&#x6BD5;&#x7684;&#x51FD;&#x6570;</span>
+    <span class="hljs-keyword">if</span> !controller.WaitForCacheSync(<span class="hljs-string">&quot;deployment&quot;</span>, stopCh, dc.dListerSynced, dc.rsListerSynced, dc.podListerSynced) {
+        <span class="hljs-keyword">return</span>
+    }
+  <span class="hljs-comment">// &#x542F;&#x52A8;&#x591A;&#x4E2A;worker&#x5F00;&#x59CB;&#x5DE5;&#x4F5C;</span>
+    <span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; workers; i++ {
+        <span class="hljs-keyword">go</span> wait.Until(dc.worker, time.Second, stopCh)
+    }
+
+    &lt;-stopCh
+}
+</code></pre>
+<p>controller.WaitForCacheSync&#x51FD;&#x6570;&#x662F;&#x7528;&#x6765;&#x68C0;&#x6D4B;&#x5404;&#x4E2A;informer&#x662F;&#x5426;&#x672C;&#x5730;&#x7F13;&#x5B58;&#x5DF2;&#x7ECF;&#x540C;&#x6B65;&#x5B8C;&#x6BD5;&#x7684;&#x51FD;&#x6570;&#xFF0C;&#x8FD4;&#x56DE;&#x503C;&#x662F;bool&#x7C7B;&#x578B;&#x3002;&#x524D;&#x9762;&#x7B2C;&#x4E8C;&#x7AE0;&#x8BB2;&#x5230;&#x8FC7;&#xFF0C;informer&#x4E3A;&#x4E86;&#x52A0;&#x901F;&#x548C;&#x51CF;&#x8F7B;apiserver&#x7684;&#x8D1F;&#x62C5;&#xFF0C;&#x8BBE;&#x8BA1;&#x4E86;local storage&#x7F13;&#x5B58;&#xFF0C;&#x56E0;&#x6B64;&#x8FD9;&#x91CC;&#x505A;&#x4E86;&#x4E00;&#x6B65;&#x7F13;&#x5B58;&#x662F;&#x5426;&#x5DF2;&#x540C;&#x6B65;&#x7684;&#x68C0;&#x6D4B;&#x3002;</p>
+<p>&#x9ED8;&#x8BA4;&#x662F;5&#x4E2A;worker&#xFF0C;&#x6BCF;&#x4E2A;worker&#xFF0C;&#x8C03;&#x7528;wait.Until()&#x65B9;&#x6CD5;&#xFF0C;&#x6BCF;&#x95F4;&#x9694;1s&#xFF0C;&#x5FAA;&#x73AF;&#x6267;&#x884C;dc.worker&#x51FD;&#x6570;&#xFF0C;&#x8FD0;&#x884C;deployment controller&#x7684;&#x5DE5;&#x4F5C;&#x903B;&#x8F91;&#x3002;wait.Until()&#x8FD9;&#x4E2A;&#x5FAA;&#x73AF;&#x8C03;&#x7528;&#x7684;&#x8BA1;&#x65F6;&#x5668;&#x51FD;&#x6570;&#x8FD8;&#x662F;&#x633A;&#x6709;&#x610F;&#x601D;&#x7684;&#xFF0C;&#x5C55;&#x5F00;&#x770B;&#x4E0B;&#x3002;</p>
+<h4 id="waituntil&#x5FAA;&#x73AF;&#x8BA1;&#x65F6;&#x5668;&#x51FD;&#x6570;"><a name="waituntil&#x5FAA;&#x73AF;&#x8BA1;&#x65F6;&#x5668;&#x51FD;&#x6570;" class="plugin-anchor" href="#waituntil&#x5FAA;&#x73AF;&#x8BA1;&#x65F6;&#x5668;&#x51FD;&#x6570;"><i class="fa fa-link" aria-hidden="true"></i></a>wait.Until&#x5FAA;&#x73AF;&#x8BA1;&#x65F6;&#x5668;&#x51FD;&#x6570;</h4>
+<p><code>pkg/controller/deployment/deployment_controller.go:160</code></p>
+<p>==&gt; <code>vendor/k8s.io/apimachinery/pkg/util/wait/wait.go:88</code></p>
+<p>==&gt;<code>vendor/k8s.io/apimachinery/pkg/util/wait/wait.go:130</code></p>
+<pre><code class="lang-go"><span class="hljs-keyword">func</span> JitterUntil(f <span class="hljs-keyword">func</span>(), period time.Duration, jitterFactor <span class="hljs-keyword">float64</span>, sliding <span class="hljs-keyword">bool</span>, stopCh &lt;-<span class="hljs-keyword">chan</span> <span class="hljs-keyword">struct</span>{}) {
+    <span class="hljs-keyword">var</span> t *time.Timer
+    <span class="hljs-keyword">var</span> sawTimeout <span class="hljs-keyword">bool</span>
+
+    <span class="hljs-keyword">for</span> {
+        <span class="hljs-keyword">select</span> {
+        <span class="hljs-keyword">case</span> &lt;-stopCh:
+            <span class="hljs-keyword">return</span>
+        <span class="hljs-keyword">default</span>:
+        }
+
+        jitteredPeriod := period
+        <span class="hljs-keyword">if</span> jitterFactor &gt; <span class="hljs-number">0.0</span> {
+            jitteredPeriod = Jitter(period, jitterFactor)
+        }
+    <span class="hljs-comment">// sliding&#x8FD9;&#x4E2A;&#x5E03;&#x5C14;&#x503C;&#x7684;&#x610F;&#x601D;&#x662F;&#x662F;&#x5426;&#x5C06;&#x6267;&#x884C;&#x51FD;&#x6570;f()&#x7684;&#x6267;&#x884C;&#x65F6;&#x95F4;&#x8BA1;&#x5165;&#x6267;&#x884C;&#x95F4;&#x9694;&#x65F6;&#x95F4;&#x5185;&#xFF0C;&#x5982;&#x679C;&#x4E3A;&#x5426;&#xFF0C;&#x5219;&#x5728;f&#x6267;&#x884C;&#x524D;&#x5C31;&#x5F00;&#x59CB;&#x8BA1;&#x65F6;&#xFF0C;&#x5982;&#x679C;&#x4E3A;&#x662F;&#xFF0C;&#x5219;&#x5728;f&#x6267;&#x884C;&#x540E;&#x518D;&#x5F00;&#x59CB;&#x8BA1;&#x65F6;&#x3002;</span>
+        <span class="hljs-keyword">if</span> !sliding {
+            t = resetOrReuseTimer(t, jitteredPeriod, sawTimeout)
+        }
+
+        <span class="hljs-keyword">func</span>() {
+            <span class="hljs-keyword">defer</span> runtime.HandleCrash()
+            f()
+        }()
+
+        <span class="hljs-keyword">if</span> sliding {
+            t = resetOrReuseTimer(t, jitteredPeriod, sawTimeout)
+        }
+
+    <span class="hljs-comment">// select &#x4E0B;&#x5404;&#x4E2A;&#x5206;&#x652F;&#x7684;&#x6743;&#x91CD;&#x662F;&#x516C;&#x5E73;&#x7684;&#xFF0C;&#x56E0;&#x6B64;&#xFF0C;stop&#x4FE1;&#x53F7;&#x7684;&#x5904;&#x7406;&#xFF0C;&#x5728;&#x5FAA;&#x73AF;&#x5F00;&#x59CB;&#x4E4B;&#x524D;&#x548C;&#x5FAA;&#x73AF;&#x5F00;&#x59CB;&#x4E4B;&#x540E;&#x90FD;&#x5206;&#x522B;&#x5224;&#x65AD;&#x4E86;&#x4E00;&#x6B21;</span>
+        <span class="hljs-keyword">select</span> {
+        <span class="hljs-keyword">case</span> &lt;-stopCh:
+            <span class="hljs-keyword">return</span>
+    <span class="hljs-comment">// Timer.C&#x662F;Timer&#x7ED3;&#x6784;&#x4F53;&#x5185;&#x90E8;&#x7684;&#x4E00;&#x4E2A;channel&#xFF0C;&#x8BA1;&#x65F6;&#x5668;&#x5728;&#x5230;&#x8FBE;&#x6307;&#x5B9A;&#x7684;&#x65F6;&#x95F4;&#x540E;&#x4F1A;&#x5F80;&#x6B64;channel&#x53D1;&#x9001;&#x4E00;&#x4E2A;&#x4E8B;&#x4EF6;&#xFF0C;channel&#x540C;&#x65F6;&#x4E5F;&#x53EF;&#x4EE5;&#x88AB;&#x63A5;&#x6536;&#xFF0C;&#x6765;&#x89E6;&#x53D1;&#x5176;&#x4ED6;&#x7684;&#x903B;&#x8F91;&#x3002;&#x8FD9;&#x91CC;&#x7684;&#x903B;&#x8F91;&#x662F;&#x5224;&#x65AD;&#xFF1A;&#x5982;&#x679C;f()&#x6267;&#x884C;&#x8D85;&#x8FC7;&#x8BA1;&#x65F6;&#x5668;&#x7684;&#x8D85;&#x65F6;&#x65F6;&#x95F4;&#xFF0C;&#x90A3;&#x4E48;&#x52A0;&#x4E00;&#x4E2A;&#x8D85;&#x65F6;&#x7684;&#x6807;&#x8BB0;sawTimeout&#x3002;</span>
+        <span class="hljs-keyword">case</span> &lt;-t.C:
+            sawTimeout = <span class="hljs-literal">true</span>
+        }
+    }
+}
+</code></pre>
+<p>resetOrReuseTimer&#x51FD;&#x6570;&#xFF1A;</p>
+<pre><code class="lang-go"><span class="hljs-keyword">func</span> resetOrReuseTimer(t *time.Timer, d time.Duration, sawTimeout <span class="hljs-keyword">bool</span>) *time.Timer {
+    <span class="hljs-keyword">if</span> t == <span class="hljs-literal">nil</span> {
+        <span class="hljs-keyword">return</span> time.NewTimer(d)
+    }
+    <span class="hljs-keyword">if</span> !t.Stop() &amp;&amp; !sawTimeout {
+        &lt;-t.C
+    }
+    t.Reset(d)
+    <span class="hljs-keyword">return</span> t
+}
+</code></pre>
+<p>&#x6982;&#x62EC;&#x4E00;&#x4E0B;&#xFF0C;&#x8FD9;&#x4E2A;&#x51FD;&#x6570;&#x662F;&#x5BF9;timer&#x6A21;&#x5757;&#x7684;&#x4E00;&#x4E2A;&#x518D;&#x5C01;&#x88C5;&#xFF0C;&#x91CD;&#x590D;&#x5229;&#x7528;timer&#x8BA1;&#x65F6;&#x5668;&#xFF0C;&#x6765;&#x6BCF;&#x79D2;&#x6267;&#x884C;&#x4E00;&#x6B21;dc.worker().</p>
+<h4 id="dcworker&#x51FD;&#x6570;"><a name="dcworker&#x51FD;&#x6570;" class="plugin-anchor" href="#dcworker&#x51FD;&#x6570;"><i class="fa fa-link" aria-hidden="true"></i></a>dc.worker&#x51FD;&#x6570;</h4>
+<p><code>pkg/controller/deployment/deployment_controller.go:460</code></p>
+<p>==&gt; <code>pkg/controller/deployment/deployment_controller.go:464</code></p>
+<pre><code class="lang-go"><span class="hljs-keyword">func</span> (dc *DeploymentController) processNextWorkItem() <span class="hljs-keyword">bool</span> {
+  <span class="hljs-comment">// &#x4ECE;&#x961F;&#x5217;&#x5934;&#x90E8;&#x53D6;&#x51FA;&#x5BF9;&#x8C61;</span>
+    key, quit := dc.queue.Get()
+    <span class="hljs-keyword">if</span> quit {
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>
+    }
+    <span class="hljs-keyword">defer</span> dc.queue.Done(key)
+  <span class="hljs-comment">// &#x5904;&#x7406;&#x5BF9;&#x8C61;</span>
+    err := dc.syncHandler(key.(<span class="hljs-keyword">string</span>))
+    dc.handleErr(err, key)
+
+    <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>
+}
+</code></pre>
+<p>Deployment controller &#x7684;worker&#x51FD;&#x6570;&#x5C31;&#x662F;&#x4E0D;&#x65AD;&#x5730;&#x8C03;&#x7528;processNextWorkItem&#x51FD;&#x6570;&#xFF0C;processNextWorkItem&#x51FD;&#x6570;&#x662F;&#x4ECE;work queue&#x4E2D;&#x83B7;&#x53D6;&#x5F85;&#x5904;&#x7406;&#x7684;&#x5BF9;&#x8C61;(&#x7B2C;&#x4E8C;&#x7BC7;&#x4E2D;informer&#x56FE;&#x89E3;&#x4E2D;&#x7684;&#x7B2C;7-&#x7B2C;8&#x6B65;)&#xFF0C;&#x5982;&#x679C;&#x5B58;&#x5728;&#xFF0C;&#x90A3;&#x4E48;&#x6267;&#x884C;&#x76F8;&#x5E94;&#x540E;&#x7EED;&#x7684;&#x589E;&#x5220;&#x6539;&#x67E5;&#x903B;&#x8F91;&#xFF0C;&#x5982;&#x679C;&#x4E0D;&#x5B58;&#x5728;&#xFF0C;&#x90A3;&#x4E48;&#x5C31;&#x9000;&#x51FA;&#x3002;</p>
+<p>&#x5176;&#x4E2D;dc.queue.Get()&#x63A5;&#x53E3;&#x65B9;&#x6CD5;&#x7684;&#x5B9E;&#x73B0;&#x5728;&#x8FD9;&#x91CC;&#xFF1A;</p>
+<p><code>vendor/k8s.io/client-go/util/workqueue/queue.go:140</code></p>
+<pre><code class="lang-go"><span class="hljs-keyword">func</span> (q *Type) Get() (item <span class="hljs-keyword">interface</span>{}, shutdown <span class="hljs-keyword">bool</span>) {
+    q.cond.L.Lock()
+    <span class="hljs-keyword">defer</span> q.cond.L.Unlock()
+    <span class="hljs-keyword">for</span> <span class="hljs-built_in">len</span>(q.queue) == <span class="hljs-number">0</span> &amp;&amp; !q.shuttingDown {
+        q.cond.Wait()
+    }
+    <span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(q.queue) == <span class="hljs-number">0</span> {
+        <span class="hljs-comment">// We must be shutting down.</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">nil</span>, <span class="hljs-literal">true</span>
+    }
+  <span class="hljs-comment">// &#x53D6;&#x51FA;&#x961F;&#x5217;&#x7684;&#x961F;&#x9996;</span>
+    item, q.queue = q.queue[<span class="hljs-number">0</span>], q.queue[<span class="hljs-number">1</span>:]
+
+    q.metrics.get(item)
+  <span class="hljs-comment">// &#x5BF9;&#x8C61;&#x52A0;&#x5165;&#x6B63;&#x5728;&#x5904;&#x7406;&#x4E2D;map</span>
+    q.processing.insert(item)
+  <span class="hljs-comment">// dirty map&#x53BB;&#x9664;&#x5BF9;&#x8C61;(dirty map&#x4E2D;&#x4FDD;&#x5B58;&#x7684;&#x662F;&#x7B49;&#x5F85;&#x5904;&#x7406;&#x7684;&#x5BF9;&#x8C61;)</span>
+    q.dirty.<span class="hljs-built_in">delete</span>(item)
+
+    <span class="hljs-keyword">return</span> item, <span class="hljs-literal">false</span>
+}
+</code></pre>
+<p>&#x5176;&#x4E2D;&#x7684;<code>dc.syncHandler()</code>&#x65B9;&#x6CD5;&#x5728;&#x8FD9;&#x91CC;&#xFF1A;</p>
+<p>pkg/controller/deployment/deployment_controller.go:135</p>
+<pre><code class="lang-go">dc.syncHandler = dc.syncDeployment
+</code></pre>
+<p>==&gt; pkg/controller/deployment/deployment_controller.go:560</p>
+<p>&#x6240;&#x6709;&#x7684;&#x589E;&#x5220;&#x6539;(&#x6EDA;&#x52A8;&#x66F4;&#x65B0;)&#x67E5;&#x64CD;&#x4F5C;&#xFF0C;&#x5168;&#x90E8;&#x90FD;&#x5728;&#x8FD9;&#x4E2A;&#x51FD;&#x6570;&#x5185;&#x90E8;&#x5904;&#x7406;&#x3002;</p>
+<pre><code class="lang-go"><span class="hljs-keyword">func</span> (dc *DeploymentController) syncDeployment(key <span class="hljs-keyword">string</span>) error {
+   startTime := time.Now()
+   klog.V(<span class="hljs-number">4</span>).Infof(<span class="hljs-string">&quot;Started syncing deployment %q (%v)&quot;</span>, key, startTime)
+   <span class="hljs-keyword">defer</span> <span class="hljs-keyword">func</span>() {
+      klog.V(<span class="hljs-number">4</span>).Infof(<span class="hljs-string">&quot;Finished syncing deployment %q (%v)&quot;</span>, key, time.Since(startTime))
+   }()
+
+   namespace, name, err := cache.SplitMetaNamespaceKey(key)
+   <span class="hljs-keyword">if</span> err != <span class="hljs-literal">nil</span> {
+      <span class="hljs-keyword">return</span> err
+   }
+   deployment, err := dc.dLister.Deployments(namespace).Get(name)
+   <span class="hljs-keyword">if</span> errors.IsNotFound(err) {
+      klog.V(<span class="hljs-number">2</span>).Infof(<span class="hljs-string">&quot;Deployment %v has been deleted&quot;</span>, key)
+      <span class="hljs-keyword">return</span> <span class="hljs-literal">nil</span>
+   }
+   <span class="hljs-keyword">if</span> err != <span class="hljs-literal">nil</span> {
+      <span class="hljs-keyword">return</span> err
+   }
+
+   <span class="hljs-comment">// Deep-copy otherwise we are mutating our cache.</span>
+   <span class="hljs-comment">// <span class="hljs-doctag">TODO:</span> Deep-copy only when needed.</span>
+   d := deployment.DeepCopy()
+
+   everything := metav1.LabelSelector{}
+   <span class="hljs-keyword">if</span> reflect.DeepEqual(d.Spec.Selector, &amp;everything) {
+      <span class="hljs-comment">// deployment&#x5FC5;&#x987B;&#x5305;&#x542B;selector&#x6807;&#x7B7E;</span>
+      dc.eventRecorder.Eventf(d, v1.EventTypeWarning, <span class="hljs-string">&quot;SelectingAll&quot;</span>, <span class="hljs-string">&quot;This deployment is selecting all pods. A non-empty selector is required.&quot;</span>)
+      <span class="hljs-keyword">if</span> d.Status.ObservedGeneration &lt; d.Generation {
+         d.Status.ObservedGeneration = d.Generation
+         dc.client.AppsV1().Deployments(d.Namespace).UpdateStatus(d)
+      }
+      <span class="hljs-keyword">return</span> <span class="hljs-literal">nil</span>
+   }
+
+   <span class="hljs-comment">// &#x83B7;&#x53D6;deployment&#x6240;&#x63A7;&#x5236;&#x7684;replicaSet</span>
+   rsList, err := dc.getReplicaSetsForDeployment(d)
+   <span class="hljs-keyword">if</span> err != <span class="hljs-literal">nil</span> {
+      <span class="hljs-keyword">return</span> err
+   }
+
+   <span class="hljs-comment">// &#x83B7;&#x53D6;&#x6240;&#x6709;&#x7684;pod&#xFF0C;map&#x7ED3;&#x6784;&#xFF0C;&#x6309;replicaSet&#x5206;&#x7EC4;&#xFF0C;key&#x662F;rs&#x3002;</span>
+   <span class="hljs-comment">// &#x68C0;&#x67E5;deployment&#x5728;&#x91CD;&#x5EFA;&#x7684;&#x8FC7;&#x7A0B;&#x4E2D;&#x662F;&#x5426;&#x8FD8;&#x5B58;&#x5728;&#x65E7;&#x7248;&#x672C;(&#x672A;&#x66F4;&#x65B0;)&#x7684;pod</span>
+   podMap, err := dc.getPodMapForDeployment(d, rsList)
+   <span class="hljs-keyword">if</span> err != <span class="hljs-literal">nil</span> {
+      <span class="hljs-keyword">return</span> err
+   }
+
+   <span class="hljs-keyword">if</span> d.DeletionTimestamp != <span class="hljs-literal">nil</span> {
+      <span class="hljs-keyword">return</span> dc.syncStatusOnly(d, rsList)
+   }
+
+
+   <span class="hljs-comment">// &#x68C0;&#x67E5;deployment&#x662F;&#x5426;&#x4E3A;pause&#x6682;&#x505C;&#x72B6;&#x6001;&#xFF0C;pause&#x72B6;&#x6001;&#x5219;&#x8C03;&#x7528;sync&#x65B9;&#x6CD5;&#x540C;&#x6B65;deployment</span>
+   <span class="hljs-keyword">if</span> err = dc.checkPausedConditions(d); err != <span class="hljs-literal">nil</span> {
+      <span class="hljs-keyword">return</span> err
+   }
+
+   <span class="hljs-keyword">if</span> d.Spec.Paused {
+      <span class="hljs-keyword">return</span> dc.sync(d, rsList)
+   }
+
+     <span class="hljs-comment">// &#x5224;&#x65AD;&#x672C;&#x6B21;deployment&#x4E8B;&#x4EF6;&#x662F;&#x5426;&#x662F;&#x4E00;&#x4E2A;&#x56DE;&#x6EDA;&#x4E8B;&#x4EF6;</span>
+   <span class="hljs-comment">// &#x4E00;&#x65E6;&#x5E95;&#x5C42;&#x7684;rs&#x66F4;&#x65B0;&#x5230;&#x4E86;&#x4E00;&#x4E2A;&#x65B0;&#x7684;&#x7248;&#x672C;&#xFF0C;&#x5C31;&#x65E0;&#x6CD5;&#x81EA;&#x52A8;&#x6267;&#x884C;&#x56DE;&#x6EDA;&#x4E86;&#xFF0C;&#x56E0;&#x6B64;&#xFF0C;&#x76F4;&#x5230;&#x4E0B;&#x4E00;&#x6B21;&#x961F;&#x5217;&#x4E2D;&#x518D;&#x6B21;&#x51FA;&#x73B0;&#x6B64;deployment&#x4E14;&#x4E0D;&#x4E3A;rollback&#x72B6;&#x6001;&#x65F6;&#xFF0C;&#x624D;&#x80FD;&#x65E0;&#x865E;&#x5730;&#x89E6;&#x53D1;&#x66F4;&#x65B0;rs&#x3002;&#x6240;&#x4EE5;&#xFF0C;&#x8FD9;&#x91CC;&#x518D;&#x8FDB;&#x884C;&#x4E00;&#x6B21;&#x5224;&#x65AD;&#xFF0C;&#x5982;&#x679C;deployment&#x5E26;&#x6709;&#x56DE;&#x6EDA;&#x6807;&#x8BB0;&#xFF0C;&#x90A3;&#x4E48;&#x5148;&#x6267;&#x884C;rs&#x7684;&#x56DE;&#x6EDA;&#x3002;</span>
+   <span class="hljs-keyword">if</span> getRollbackTo(d) != <span class="hljs-literal">nil</span> {
+      <span class="hljs-keyword">return</span> dc.rollback(d, rsList)
+   }
+
+   <span class="hljs-comment">// &#x5224;&#x65AD;&#x672C;&#x6B21;deployment&#x4E8B;&#x4EF6;&#x662F;&#x5426;&#x662F;&#x4E00;&#x4E2A;scale&#x4E8B;&#x4EF6;&#xFF0C;&#x662F;&#x5219;&#x8C03;&#x7528;sync&#x65B9;&#x6CD5;&#x540C;&#x6B65;deployment</span>
+   scalingEvent, err := dc.isScalingEvent(d, rsList)
+   <span class="hljs-keyword">if</span> err != <span class="hljs-literal">nil</span> {
+      <span class="hljs-keyword">return</span> err
+   }
+   <span class="hljs-keyword">if</span> scalingEvent {
+      <span class="hljs-keyword">return</span> dc.sync(d, rsList)
+   }
+
+   <span class="hljs-comment">// &#x66F4;&#x65B0;deployment&#xFF0C;&#x89C6;Deployment.Spec.Strategy&#x6307;&#x5B9A;&#x7684;&#x66F4;&#x65B0;&#x7B56;&#x7565;&#x7C7B;&#x578B;&#x6765;&#x6267;&#x884C;&#x76F8;&#x5E94;&#x7684;&#x66F4;&#x65B0;&#x64CD;&#x4F5C;</span>
+   <span class="hljs-comment">// 1.&#x5982;&#x679C;&#x662F;rolloutRecreate&#x7C7B;&#x578B;&#xFF0C;&#x5219;&#x4E00;&#x6B21;&#x6027;&#x6740;&#x6B7B;pod&#x518D;&#x91CD;&#x5EFA;</span>
+   <span class="hljs-comment">// 2.&#x5982;&#x679C;&#x662F;rolloutRolling&#x7C7B;&#x578B;&#xFF0C;&#x5219;&#x6EDA;&#x52A8;&#x66F4;&#x65B0;pod</span>
+   <span class="hljs-keyword">switch</span> d.Spec.Strategy.Type {
+   <span class="hljs-keyword">case</span> apps.RecreateDeploymentStrategyType:
+      <span class="hljs-keyword">return</span> dc.rolloutRecreate(d, rsList, podMap)
+   <span class="hljs-keyword">case</span> apps.RollingUpdateDeploymentStrategyType:
+      <span class="hljs-keyword">return</span> dc.rolloutRolling(d, rsList)
+   }
+   <span class="hljs-keyword">return</span> fmt.Errorf(<span class="hljs-string">&quot;unexpected deployment strategy type: %s&quot;</span>, d.Spec.Strategy.Type)
+}
+</code></pre>
+<h3 id="&#x6682;&#x505C;&#x548C;&#x6269;&#x7F29;&#x5BB9;&#x5220;&#x9664;"><a name="&#x6682;&#x505C;&#x548C;&#x6269;&#x7F29;&#x5BB9;&#x5220;&#x9664;" class="plugin-anchor" href="#&#x6682;&#x505C;&#x548C;&#x6269;&#x7F29;&#x5BB9;&#x5220;&#x9664;"><i class="fa fa-link" aria-hidden="true"></i></a>&#x6682;&#x505C;&#x548C;&#x6269;(&#x7F29;)&#x5BB9;(/&#x5220;&#x9664;)</h3>
+<p>dc.sync&#x65B9;&#x6CD5;&#x8FD9;&#x91CC;&#x51FA;&#x73B0;&#x4E86;&#x4E24;&#x6B21;&#xFF0C;&#x5206;&#x522B;&#x5728;pause&#x72B6;&#x6001;&#x548C;scaling&#x72B6;&#x6001;&#x8C03;&#x7528;&#xFF0C;&#x6BD4;&#x8F83;&#x5173;&#x952E;&#xFF0C;&#x5206;&#x6790;&#x4E00;&#x4E0B;sync&#x65B9;&#x6CD5;&#x7684;&#x5185;&#x5BB9;&#x3002;</p>
+<p><code>pkg/controller/deployment/sync.go:48</code></p>
+<pre><code class="lang-go"><span class="hljs-keyword">func</span> (dc *DeploymentController) sync(d *apps.Deployment, rsList []*apps.ReplicaSet) error {
+  <span class="hljs-comment">// &#x5C55;&#x5F00;&#x67E5;&#x770B;&#x4EE3;&#x7801;&#xFF0C;&#x53EF;&#x4EE5;&#x77E5;&#x9053;&#xFF0C;&#x8FD9;&#x91CC;&#x7684;newRS&#xFF0C;&#x6307;&#x7684;&#x662F;&#x627E;&#x5230;&#x6A21;&#x677F;hash&#x503C;&#x4E0E;&#x5F53;&#x524D;&#x7684;d Deployment &#x6A21;&#x677F;hash&#x503C;&#x76F8;&#x540C;&#x7684;rs&#xFF0C;oldRSs&#x5219;&#x662F;&#x6240;&#x6709;&#x7684;&#x5386;&#x53F2;&#x7248;&#x672C;&#x7684;rs</span>
+   newRS, oldRSs, err := dc.getAllReplicaSetsAndSyncRevision(d, rsList, <span class="hljs-literal">false</span>)
+   <span class="hljs-keyword">if</span> err != <span class="hljs-literal">nil</span> {
+      <span class="hljs-keyword">return</span> err
+   }
+  <span class="hljs-comment">// &#x5BF9;&#x6BD4;&#x6700;&#x65B0;&#x7684;rs&#x548C;&#x4E4B;&#x524D;&#x7684;rs&#xFF0C;&#x5982;&#x679C;&#x9700;&#x8981;scale&#x7F29;&#x6269;&#x5BB9;&#xFF0C;&#x5219;&#x6267;&#x884C;scale&#x65B9;&#x6CD5;</span>
+   <span class="hljs-keyword">if</span> err := dc.scale(d, newRS, oldRSs); err != <span class="hljs-literal">nil</span> {
+      <span class="hljs-comment">// If we get an error while trying to scale, the deployment will be requeued</span>
+      <span class="hljs-comment">// so we can abort this resync</span>
+      <span class="hljs-keyword">return</span> err
+   }
+
+  <span class="hljs-comment">// pause&#x72B6;&#x6001;&#xFF0C;&#x4E14;&#x4E0D;&#x5904;&#x4E8E;&#x56DE;&#x6EDA;&#x72B6;&#x6001;&#x7684;deployment&#xFF0C;&#x8FDB;&#x884C;&#x6E05;&#x7406;(&#x6839;&#x636E;&#x6307;&#x5B9A;&#x7684;&#x4FDD;&#x5B58;&#x5386;&#x53F2;&#x7248;&#x672C;&#x6570;&#x4E0A;&#x9650;&#xFF0C;&#x6E05;&#x7406;&#x8D85;&#x51FA;&#x9650;&#x5236;&#x7684;&#x5386;&#x53F2;&#x7248;&#x672C;)</span>
+   <span class="hljs-keyword">if</span> d.Spec.Paused &amp;&amp; getRollbackTo(d) == <span class="hljs-literal">nil</span> {
+      <span class="hljs-keyword">if</span> err := dc.cleanupDeployment(oldRSs, d); err != <span class="hljs-literal">nil</span> {
+         <span class="hljs-keyword">return</span> err
+      }
+   }
+
+   allRSs := <span class="hljs-built_in">append</span>(oldRSs, newRS)
+   <span class="hljs-comment">// &#x540C;&#x6B65;deployment&#x72B6;&#x6001;</span>
+   <span class="hljs-keyword">return</span> dc.syncDeploymentStatus(allRSs, newRS, d)
+}
+</code></pre>
+<p>&#x6765;&#x770B;&#x770B;dc.scale()&#x65B9;&#x6CD5;&#xFF1A;</p>
+<p><code>pkg/controller/deployment/sync.go:289</code></p>
+<pre><code class="lang-go"><span class="hljs-keyword">func</span> (dc *DeploymentController) scale(deployment *apps.Deployment, newRS *apps.ReplicaSet, oldRSs []*apps.ReplicaSet) error {
+  <span class="hljs-comment">// FindActiveOrLatest&#x65B9;&#x6CD5;&#x8FD4;&#x56DE;&#x503C;&#xFF1A;&#x5982;&#x679C;&#x6B64;&#x65F6;&#x53EA;&#x6709;&#x4E00;&#x4E2A;&#x6D3B;&#x8DC3;&#x7684;rs&#xFF0C;&#x90A3;&#x4E48;&#x5C31;&#x8FD4;&#x56DE;&#x8FD9;&#x4E2A;rs&#xFF0C;&#x5982;&#x679C;&#x4E0D;&#x6B62;&#xFF0C;&#x90A3;&#x4E48;&#x5C31;&#x627E;&#x51FA;revision&#x6700;&#x65B0;&#x7684;rs&#x8FD4;&#x56DE;</span>
+   <span class="hljs-keyword">if</span> activeOrLatest := deploymentutil.FindActiveOrLatest(newRS, oldRSs); activeOrLatest != <span class="hljs-literal">nil</span> { 
+      <span class="hljs-keyword">if</span> *(activeOrLatest.Spec.Replicas) == *(deployment.Spec.Replicas) {
+        <span class="hljs-comment">// &#x5982;&#x679C;rs&#x5DF2;&#x7ECF;&#x548C;deployment&#x6307;&#x5B9A;&#x7684;&#x526F;&#x672C;&#x6570;&#x4E00;&#x81F4;&#xFF0C;&#x76F4;&#x63A5;return</span>
+         <span class="hljs-keyword">return</span> <span class="hljs-literal">nil</span>
+      }
+      _, _, err := dc.scaleReplicaSetAndRecordEvent(activeOrLatest, *(deployment.Spec.Replicas), deployment)
+      <span class="hljs-keyword">return</span> err
+   }
+
+   <span class="hljs-comment">// &#x5982;&#x679C;&#x6700;&#x65B0;&#x7684;rs&#x7684;&#x5DF2;&#x7ECF;&#x6536;&#x655B;&#x5230;&#x4E86;deployment&#x7684;&#x671F;&#x671B;&#x72B6;&#x6001;&#xFF0C;&#x5219;&#x65E7;rs&#x9700;&#x8981;&#x88AB;&#x5B8C;&#x5168;scale down&#x7F29;&#x5BB9;&#x5220;&#x9664;&#x6389;&#x3002;</span>
+   <span class="hljs-keyword">if</span> deploymentutil.IsSaturated(deployment, newRS) {
+      <span class="hljs-keyword">for</span> _, old := <span class="hljs-keyword">range</span> controller.FilterActiveReplicaSets(oldRSs) {
+         <span class="hljs-keyword">if</span> _, _, err := dc.scaleReplicaSetAndRecordEvent(old, <span class="hljs-number">0</span>, deployment); err != <span class="hljs-literal">nil</span> {
+            <span class="hljs-keyword">return</span> err
+         }
+      }
+      <span class="hljs-keyword">return</span> <span class="hljs-literal">nil</span>
+   }
+
+
+     <span class="hljs-comment">// &#x5728;&#x6EDA;&#x52A8;&#x66F4;&#x65B0;&#x7684;&#x8FC7;&#x7A0B;&#x4E2D;&#xFF0C;&#x9700;&#x8981;&#x63A7;&#x5236;&#x65E7;rs&#x4E0E;&#x65B0;rs&#x6240;&#x63A7;&#x5236;&#x7684;&#x6A21;&#x677F;pod&#x7684;&#x6570;&#x91CF;&#x7684;&#x603B;&#x548C;&#xFF0C;&#x591A;&#x51FA;&#x7684;pod&#x6570;&#x91CF;&#x4E0D;&#x80FD;&#x8D85;&#x8FC7;MaxSurge&#x6570;&#xFF0C;&#x56E0;&#x6B64;&#x662F;&#x6EDA;&#x52A8;&#x66F4;&#x65B0;&#x7684;&#x8FC7;&#x7A0B;&#x4E2D;&#xFF0C;&#x65E7;rs&#x548C;&#x65B0;rs&#x63A7;&#x5236;&#x5F97;pod&#x6570;&#x91CF;&#x5FC5;&#x7136;&#x662F;&#x4E00;&#x4E2A;&#x6B64;&#x6D88;&#x5F7C;&#x957F;&#x7684;&#x8FC7;&#x7A0B;</span>
+   <span class="hljs-keyword">if</span> deploymentutil.IsRollingUpdate(deployment) {
+      allRSs := controller.FilterActiveReplicaSets(<span class="hljs-built_in">append</span>(oldRSs, newRS))
+      allRSsReplicas := deploymentutil.GetReplicaCountForReplicaSets(allRSs)
+
+      allowedSize := <span class="hljs-keyword">int32</span>(<span class="hljs-number">0</span>)
+      <span class="hljs-keyword">if</span> *(deployment.Spec.Replicas) &gt; <span class="hljs-number">0</span> {
+         allowedSize = *(deployment.Spec.Replicas) + deploymentutil.MaxSurge(*deployment)
+      }
+
+      <span class="hljs-comment">// &#x53EF;&#x4EE5;&#x589E;&#x52A0;&#x6216;&#x5220;&#x9664;&#x7684;pod&#x6570;&#x91CF;&#xFF0C;&#x7ED3;&#x679C;&#x6B63;&#x6570;&#x5219;&#x4EE3;&#x8868;&#x53EF;&#x4EE5;&#x7EE7;&#x7EED;&#x65B0;&#x589E;pod&#xFF0C;&#x7ED3;&#x679C;&#x4E3A;&#x8D1F;&#x6570;&#x5219;&#x4EE3;&#x8868;&#x9700;&#x8981;&#x5220;&#x9664;pod&#x4E86;</span>
+      deploymentReplicasToAdd := allowedSize - allRSsReplicas
+
+      <span class="hljs-keyword">var</span> scalingOperation <span class="hljs-keyword">string</span>
+      <span class="hljs-keyword">switch</span> {
+      <span class="hljs-keyword">case</span> deploymentReplicasToAdd &gt; <span class="hljs-number">0</span>:
+         <span class="hljs-comment">// &#x5982;&#x679C;&#x662F;&#x6269;&#x5BB9;&#xFF0C;&#x90A3;&#x4E48;&#x628A;&#x6240;&#x6709;&#x7684;rs&#x6309;&#x65F6;&#x95F4;&#x4ECE;&#x6700;&#x65B0;&#x5230;&#x6700;&#x65E7;&#x7684;&#x987A;&#x5E8F;&#x6392;&#x5E8F;</span>
+         sort.Sort(controller.ReplicaSetsBySizeNewer(allRSs))
+         scalingOperation = <span class="hljs-string">&quot;up&quot;</span>
+
+      <span class="hljs-keyword">case</span> deploymentReplicasToAdd &lt; <span class="hljs-number">0</span>:
+         <span class="hljs-comment">// &#x5982;&#x679C;&#x662F;&#x7F29;&#x5BB9;&#xFF0C;&#x90A3;&#x4E48;&#x628A;&#x6240;&#x6709;&#x7684;rs&#x6309;&#x65F6;&#x95F4;&#x4ECE;&#x6700;&#x65E7;&#x5230;&#x6700;&#x65B0;&#x7684;&#x987A;&#x5E8F;&#x6392;&#x5E8F;</span>
+         sort.Sort(controller.ReplicaSetsBySizeOlder(allRSs))
+         scalingOperation = <span class="hljs-string">&quot;down&quot;</span>
+      }
+
+     <span class="hljs-comment">// &#x904D;&#x5386;&#x6BCF;&#x4E00;&#x4E2A;rs, &#x7528;map&#x4FDD;&#x5B58;&#x6B64;rs&#x5E94;&#x8BE5;&#x8FBE;&#x5230;&#x7684;pod&#x7684;&#x6570;&#x91CF;(&#x7B49;&#x4E8E;&#x5F53;&#x524D;&#x6570;&#x91CF;+&#x9700;scale&#x6570;&#x91CF;&#xFF09;</span>
+      deploymentReplicasAdded := <span class="hljs-keyword">int32</span>(<span class="hljs-number">0</span>)
+      nameToSize := <span class="hljs-built_in">make</span>(<span class="hljs-keyword">map</span>[<span class="hljs-keyword">string</span>]<span class="hljs-keyword">int32</span>)
+      <span class="hljs-keyword">for</span> i := <span class="hljs-keyword">range</span> allRSs {
+         rs := allRSs[i]
+
+         <span class="hljs-keyword">if</span> deploymentReplicasToAdd != <span class="hljs-number">0</span> {
+            <span class="hljs-comment">// &#x8BA1;&#x7B97;&#x5F53;&#x524D;rs&#x9700;scale&#x7684;&#x6570;&#x91CF;</span>
+            proportion := deploymentutil.GetProportion(rs, *deployment, deploymentReplicasToAdd, deploymentReplicasAdded)
+            <span class="hljs-comment">// &#x603B;pod&#x6570;&#x91CF;&#x7B49;&#x4E8E;&#x5F53;&#x524D;&#x6570;&#x91CF;+scale&#x6570;&#x91CF;</span>
+            nameToSize[rs.Name] = *(rs.Spec.Replicas) + proportion
+            deploymentReplicasAdded += proportion
+         } <span class="hljs-keyword">else</span> {
+            nameToSize[rs.Name] = *(rs.Spec.Replicas)
+         }
+      }
+
+      <span class="hljs-comment">// Update all replica sets</span>
+      <span class="hljs-keyword">for</span> i := <span class="hljs-keyword">range</span> allRSs {
+         rs := allRSs[i]
+
+         <span class="hljs-comment">// Add/remove any leftovers to the largest replica set.</span>
+        <span class="hljs-comment">// &#x5982;&#x679C;&#x8FD8;&#x6709;&#x5404;rs&#x52A0;&#x8D77;&#x6765;&#x90FD;&#x672A;&#x6D88;&#x5316;&#x5B8C;&#x7684;pod&#xFF0C;&#x5219;&#x4EA4;&#x7ED9;&#x4E0A;&#x9762;&#x6392;&#x5E8F;&#x540E;&#x7684;&#x7B2C;&#x4E00;&#x4E2A;rs(&#x6700;&#x65B0;&#x6216;&#x6700;&#x65E7;&#x7684;rs)&#x3002;</span>
+         <span class="hljs-keyword">if</span> i == <span class="hljs-number">0</span> &amp;&amp; deploymentReplicasToAdd != <span class="hljs-number">0</span> {
+            leftover := deploymentReplicasToAdd - deploymentReplicasAdded
+            nameToSize[rs.Name] = nameToSize[rs.Name] + leftover
+            <span class="hljs-keyword">if</span> nameToSize[rs.Name] &lt; <span class="hljs-number">0</span> {
+               nameToSize[rs.Name] = <span class="hljs-number">0</span>
+            }
+         }
+
+         <span class="hljs-comment">// &#x628A;&#x8FD9;&#x4E2A;rs scale&#x5230;&#x5B83;&#x5E94;&#x8BE5;&#x8FBE;&#x5230;&#x7684;&#x6570;&#x91CF;</span>
+         <span class="hljs-keyword">if</span> _, _, err := dc.scaleReplicaSet(rs, nameToSize[rs.Name], deployment, scalingOperation); err != <span class="hljs-literal">nil</span> {
+            <span class="hljs-comment">// Return as soon as we fail, the deployment is requeued</span>
+            <span class="hljs-keyword">return</span> err
+         }
+      }
+   }
+   <span class="hljs-keyword">return</span> <span class="hljs-literal">nil</span>
+}
+</code></pre>
+<h4 id="syncdeploymentstatus&#x51FD;&#x6570;"><a name="syncdeploymentstatus&#x51FD;&#x6570;" class="plugin-anchor" href="#syncdeploymentstatus&#x51FD;&#x6570;"><i class="fa fa-link" aria-hidden="true"></i></a>syncDeploymentStatus&#x51FD;&#x6570;</h4>
+<p>&#x5728;&#x5B8C;&#x6210;rs&#x7684;scale&#x548C;pause&#x72B6;&#x6001;&#x7684;&#x903B;&#x8F91;&#x5904;&#x7406;&#x540E;&#xFF0C;deployment&#x7684;&#x72B6;&#x6001;&#x4E5F;&#x9700;&#x8981;&#x4E0E;&#x6700;&#x65B0;&#x7684;rs&#x540C;&#x6B65;&#xFF0C;&#x56E0;&#x6B64;&#x8FD9;&#x4E2A;&#x51FD;&#x6570;&#x5C31;&#x662F;&#x7528;&#x6765;&#x540C;&#x6B65;deployment&#x7684;&#x72B6;&#x6001;&#x7684;&#x3002;</p>
+<pre><code class="lang-go"><span class="hljs-keyword">func</span> (dc *DeploymentController) syncDeploymentStatus(allRSs []*apps.ReplicaSet, newRS *apps.ReplicaSet, d *apps.Deployment) error {
+   newStatus := calculateStatus(allRSs, newRS, d)
+
+   <span class="hljs-keyword">if</span> reflect.DeepEqual(d.Status, newStatus) {
+      <span class="hljs-keyword">return</span> <span class="hljs-literal">nil</span>
+   }
+
+   newDeployment := d
+   newDeployment.Status = newStatus
+   _, err := dc.client.AppsV1().Deployments(newDeployment.Namespace).UpdateStatus(newDeployment)
+   <span class="hljs-keyword">return</span> err
+}
+</code></pre>
+<p>&#x8FD9;&#x4E2A;&#x51FD;&#x6570;&#x4E3B;&#x8981;&#x7528;&#x6765;&#x66F4;&#x65B0;deployment&#x7684;status&#x5B57;&#x6BB5;&#x7684;&#x5185;&#x5BB9;&#xFF0C;&#x4F8B;&#x5982;&#x7248;&#x672C;&#x3001;&#x526F;&#x672C;&#x6570;&#x3001;&#x53EF;&#x7528;&#x526F;&#x672C;&#x6570;&#x3001;&#x66F4;&#x65B0;&#x526F;&#x672C;&#x6570;&#x7B49;&#x7B49;&#x3002;</p>
+<p>&#x6574;&#x4E2A;&#x6269;&#x5BB9;&#x7684;&#x8FC7;&#x7A0B;&#x6D89;&#x53CA;&#x6240;&#x6709;rs&#x7684;&#x64CD;&#x4F5C;&#xFF0C;&#x53EF;&#x80FD;&#x5F88;&#x5BB9;&#x6613;&#x6DF7;&#x6DC6;&#xFF0C;&#x4F46;&#x5176;&#x5B9E;&#x53EA;&#x8981;&#x8BB0;&#x4F4F;&#x5728;99%&#x7684;&#x60C5;&#x51B5;&#x4E0B;&#xFF0C;deployment&#x53EA;&#x6709;&#x4E00;&#x4E2A;&#x6D3B;&#x8DC3;&#x72B6;&#x6001;&#x7684;rs&#xFF0C;&#x5373;newRS&#xFF0C;&#x5927;&#x90E8;&#x5206;&#x64CD;&#x4F5C;&#x90FD;&#x662F;&#x9488;&#x5BF9;&#x8FD9;&#x4E2A;newRS&#x505A;&#x7684;&#xFF0C;&#x90A3;&#x4E48;&#x4E0A;&#x9762;&#x7684;&#x8FC7;&#x7A0B;&#x5C31;&#x5BB9;&#x6613;&#x7406;&#x89E3;&#x5F88;&#x591A;&#x4E86;&#x3002;</p>
+<h3 id="&#x6EDA;&#x52A8;&#x66F4;&#x65B0;"><a name="&#x6EDA;&#x52A8;&#x66F4;&#x65B0;" class="plugin-anchor" href="#&#x6EDA;&#x52A8;&#x66F4;&#x65B0;"><i class="fa fa-link" aria-hidden="true"></i></a>&#x6EDA;&#x52A8;&#x66F4;&#x65B0;</h3>
+<p>Deployment&#x66F4;&#x65B0;&#x7B56;&#x7565;&#x5206;&#x4E3A;&#x6EDA;&#x52A8;&#x66F4;&#x65B0;&#x548C;&#x4E00;&#x6B21;&#x6027;&#x66F4;&#x65B0;&#xFF0C;&#x66F4;&#x65B0;&#x65B9;&#x5F0F;&#x5176;&#x5B9E;&#x90FD;&#x662F;&#x7C7B;&#x4F3C;&#xFF0C;&#x53EA;&#x662F;&#x4E00;&#x4E2A;&#x662F;&#x5206;&#x6279;&#x5F0F;&#xFF0C;&#x4E00;&#x4E2A;&#x662F;&#x5168;&#x91CF;&#x5F0F;&#xFF0C;&#x8FD9;&#x91CC;&#x770B;&#x4E0B;&#x6EDA;&#x52A8;&#x66F4;&#x65B0;&#x7684;&#x4EE3;&#x7801;&#x3002;</p>
+<p>deployment &#x7684;spec&#x5B57;&#x6BB5;&#x5185;&#x7684;&#x5185;&#x5BB9;&#x4E00;&#x65E6;&#x53D1;&#x751F;&#x53D8;&#x5316;&#xFF0C;&#x5C31;&#x4F1A;&#x89E6;&#x53D1;rs&#x7684;&#x66F4;&#x65B0;&#xFF0C;&#x751F;&#x6210;&#x65B0;&#x7248;&#x672C;&#x7684;rs&#xFF0C;&#x5E76;&#x4E14;&#x57FA;&#x4E8E;&#x65B0;rs&#x8FDB;&#x884C;&#x526F;&#x672C;&#x6269;&#x5BB9;&#xFF0C;&#x65E7;&#x7248;&#x672C;&#x7684;rs&#x5219;&#x4F1A;&#x7F29;&#x5BB9;&#x3002;</p>
+<p><code>pkg/controller/deployment/deployment_controller.go:644</code></p>
+<p>==&gt; <code>pkg/controller/deployment/rolling.go:31</code></p>
+<pre><code class="lang-go"><span class="hljs-keyword">func</span> (dc *DeploymentController) rolloutRolling(d *apps.Deployment, rsList []*apps.ReplicaSet) error {
+   <span class="hljs-comment">// &#x83B7;&#x53D6;&#x65B0;&#x7684;rs&#xFF0C;&#x5982;&#x679C;&#x6CA1;&#x6709;&#x65B0;&#x7684;rs&#x5219;&#x521B;&#x5EFA;newRS  </span>
+   newRS, oldRSs, err := dc.getAllReplicaSetsAndSyncRevision(d, rsList, <span class="hljs-literal">true</span>)
+   <span class="hljs-keyword">if</span> err != <span class="hljs-literal">nil</span> {
+      <span class="hljs-keyword">return</span> err
+   }
+   allRSs := <span class="hljs-built_in">append</span>(oldRSs, newRS)
+
+  <span class="hljs-comment">// &#x5BF9;&#x6BD4;&#x5224;&#x65AD;newRS&#x662F;&#x5426;&#x9700;&#x8981;&#x6269;&#x5BB9;(&#x65B0;rs&#x7BA1;&#x7406;&#x7684;pod&#x662F;&#x5426;&#x5DF2;&#x8FBE;&#x5230;&#x76EE;&#x6807;&#x6570;&#x91CF;)</span>
+   scaledUp, err := dc.reconcileNewReplicaSet(allRSs, newRS, d)
+   <span class="hljs-keyword">if</span> err != <span class="hljs-literal">nil</span> {
+      <span class="hljs-keyword">return</span> err
+   }
+   <span class="hljs-keyword">if</span> scaledUp {
+      <span class="hljs-comment">// &#x6269;&#x5BB9;&#x5B8C;&#x6BD5;&#xFF0C;&#x66F4;&#x65B0;deployment&#x7684;status</span>
+      <span class="hljs-keyword">return</span> dc.syncRolloutStatus(allRSs, newRS, d)
+   }
+
+  <span class="hljs-comment">// &#x5BF9;&#x6BD4;&#x5224;&#x65AD;oldRS&#x662F;&#x5426;&#x9700;&#x8981;&#x7F29;&#x5BB9;(&#x65E7;rs&#x7BA1;&#x7406;&#x7684;pod&#x662F;&#x5426;&#x5DF2;&#x7ECF;&#x5168;&#x90E8;&#x7EC8;&#x7ED3;)</span>
+   scaledDown, err := dc.reconcileOldReplicaSets(allRSs, controller.FilterActiveReplicaSets(oldRSs), newRS, d)
+   <span class="hljs-keyword">if</span> err != <span class="hljs-literal">nil</span> {
+      <span class="hljs-keyword">return</span> err
+   }
+   <span class="hljs-keyword">if</span> scaledDown {
+      <span class="hljs-comment">// &#x7F29;&#x5BB9;&#x5B8C;&#x6BD5;&#xFF0C;&#x66F4;&#x65B0;deployment&#x7684;status</span>
+      <span class="hljs-keyword">return</span> dc.syncRolloutStatus(allRSs, newRS, d)
+   }
+
+   <span class="hljs-comment">// deployment &#x8FDB;&#x5165;complete&#x72B6;&#x6001;&#xFF0C;&#x6839;&#x636E;revision&#x5386;&#x53F2;&#x7248;&#x672C;&#x6570;&#x9650;&#x5236;&#xFF0C;&#x6E05;&#x9664;&#x65E7;&#x7684;rs</span>
+   <span class="hljs-keyword">if</span> deploymentutil.DeploymentComplete(d, &amp;d.Status) {
+      <span class="hljs-keyword">if</span> err := dc.cleanupDeployment(oldRSs, d); err != <span class="hljs-literal">nil</span> {
+         <span class="hljs-keyword">return</span> err
+      }
+   }
+
+   <span class="hljs-comment">// &#x66F4;&#x65B0;deployment&#x7684;status</span>
+   <span class="hljs-keyword">return</span> dc.syncRolloutStatus(allRSs, newRS, d)
+}
+</code></pre>
+<p>reconcileNewReplicaSet&#x51FD;&#x6570;&#xFF1A;</p>
+<p>&#x8FD9;&#x4E2A;&#x51FD;&#x6570;&#x8FD4;&#x56DE;bool&#x503C;&#xFF0C;&#x5373;&#x662F;&#x5426;&#x5E94;&#x8BE5;&#x6269;&#x5BB9;newRS&#x7684;bool&#x503C;</p>
+<pre><code class="lang-go"><span class="hljs-keyword">func</span> (dc *DeploymentController) reconcileNewReplicaSet(allRSs []*apps.ReplicaSet, newRS *apps.ReplicaSet, deployment *apps.Deployment) (<span class="hljs-keyword">bool</span>, error) {
+   <span class="hljs-keyword">if</span> *(newRS.Spec.Replicas) == *(deployment.Spec.Replicas) {
+      <span class="hljs-comment">// deployment replicas &#x548C;newRS replicas&#x76F8;&#x7B49;&#xFF0C;&#x5219;&#x8BF4;&#x660E;new rs&#x5DF2;&#x7ECF;&#x65E0;&#x9700;&#x6269;&#x5BB9;</span>
+      <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>, <span class="hljs-literal">nil</span>
+   }
+   <span class="hljs-keyword">if</span> *(newRS.Spec.Replicas) &gt; *(deployment.Spec.Replicas) {
+      <span class="hljs-comment">// newRS replicas &gt; deployment replicas,&#x5219;&#x8BF4;&#x660E;newRS&#x9700;&#x8981;&#x7F29;&#x5BB9;&#xFF0C;&#x8FD4;&#x56DE;&#x503C;scaled&#x6B64;&#x65F6;&#x503C;&#x5E94;&#x5F53;&#x662F;false</span>
+      scaled, _, err := dc.scaleReplicaSetAndRecordEvent(newRS, *(deployment.Spec.Replicas), deployment)
+      <span class="hljs-keyword">return</span> scaled, err
+   }
+   <span class="hljs-comment">// newRS replicas &lt; deployment replicas,&#x5219;&#x4F7F;&#x7528;NewRSNewReplicas&#x65B9;&#x6CD5;&#x8BA1;&#x7B97;newRS&#x6B64;&#x65F6;&#x5E94;&#x7528;&#x62E5;&#x6709;&#x7684;pod&#x526F;&#x672C;&#x7684;&#x6570;&#x91CF;</span>
+   newReplicasCount, err := deploymentutil.NewRSNewReplicas(deployment, allRSs, newRS)
+   <span class="hljs-keyword">if</span> err != <span class="hljs-literal">nil</span> {
+      <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>, err
+   }
+   <span class="hljs-comment">// &#x8FD4;&#x56DE;&#x503C;scaled&#x6B64;&#x65F6;&#x503C;&#x5E94;&#x5F53;&#x662F;true</span>
+   scaled, _, err := dc.scaleReplicaSetAndRecordEvent(newRS, newReplicasCount, deployment)
+   <span class="hljs-keyword">return</span> scaled, err
+}
+</code></pre>
+<p>NewRSNewReplicas&#x51FD;&#x6570;&#xFF1A;</p>
+<p>&#x8BA1;&#x7B97;newRS&#x6B64;&#x65F6;&#x5E94;&#x8BE5;&#x6709;&#x7684;&#x526F;&#x672C;&#x6570;&#x91CF;&#x7684;&#x51FD;&#x6570;</p>
+<pre><code class="lang-go"><span class="hljs-keyword">func</span> NewRSNewReplicas(deployment *apps.Deployment, allRSs []*apps.ReplicaSet, newRS *apps.ReplicaSet) (<span class="hljs-keyword">int32</span>, error) {
+   <span class="hljs-keyword">switch</span> deployment.Spec.Strategy.Type {
+   <span class="hljs-comment">// &#x6EDA;&#x52A8;&#x66F4;&#x65B0;&#x65F6;</span>
+   <span class="hljs-keyword">case</span> apps.RollingUpdateDeploymentStrategyType:
+      <span class="hljs-comment">// Check if we can scale up.</span>
+      maxSurge, err := intstrutil.GetValueFromIntOrPercent(deployment.Spec.Strategy.RollingUpdate.MaxSurge, <span class="hljs-keyword">int</span>(*(deployment.Spec.Replicas)), <span class="hljs-literal">true</span>)
+      <span class="hljs-keyword">if</span> err != <span class="hljs-literal">nil</span> {
+         <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>, err
+      }
+     <span class="hljs-comment">// &#x5F53;&#x524D;&#x7684;&#x526F;&#x672C;&#x6570;(&#x5F53;&#x524D;&#x503C;) = &#x6240;&#x6709;&#x7248;&#x672C;&#x7684;rs&#x7BA1;&#x7406;&#x7684;pod&#x6570;&#x91CF;&#x7684;&#x603B;&#x548C;</span>
+      currentPodCount := GetReplicaCountForReplicaSets(allRSs)
+     <span class="hljs-comment">// &#x6700;&#x591A;&#x5141;&#x8BB8;&#x540C;&#x65F6;&#x5B58;&#x5728;&#x7684;&#x526F;&#x672C;&#x6570;(&#x6700;&#x5927;&#x503C;) = &#x6307;&#x5B9A;&#x526F;&#x672C;&#x6570; + maxSurge&#x7684;&#x526F;&#x672C;&#x6570;(&#x6574;&#x6570;&#x6216;&#x8005;&#x6BD4;&#x4F8B;&#x8BA1;&#x7B97;)</span>
+      maxTotalPods := *(deployment.Spec.Replicas) + <span class="hljs-keyword">int32</span>(maxSurge)
+      <span class="hljs-comment">// &#x5982;&#x679C;&#x5F53;&#x524D;&#x503C;&#x6BD4;&#x6700;&#x5927;&#x503C;&#x8FD8;&#x5927;&#xFF0C;&#x90A3;&#x4E48;&#x8BF4;&#x660E;&#x4E0D;&#x80FD;&#x518D;&#x6269;&#x5BB9;&#x4E86;&#xFF0C;&#x76F4;&#x63A5;&#x8FD4;&#x56DE;&#x6700;&#x65B0;&#x7684;newRS.Spec.Replicas</span>
+      <span class="hljs-keyword">if</span> currentPodCount &gt;= maxTotalPods {
+         <span class="hljs-keyword">return</span> *(newRS.Spec.Replicas), <span class="hljs-literal">nil</span>
+      }
+      <span class="hljs-comment">// &#x5426;&#x5219;&#xFF0C;&#x53EF;&#x6269;&#x5BB9;&#x503C; = &#x6700;&#x5927;&#x503C; - &#x5F53;&#x524D;&#x503C; </span>
+      scaleUpCount := maxTotalPods - currentPodCount
+      <span class="hljs-comment">// &#x4F46;&#x6BCF;&#x4E00;&#x4E2A;&#x7248;&#x672C;&#x7684;rs&#x7BA1;&#x7406;&#x7684;&#x526F;&#x672C;&#x6570;&#x91CF;&#xFF0C;&#x4E0D;&#x80FD;&#x8D85;&#x8FC7;deployment&#x6240;&#x6307;&#x5B9A;&#x7684;&#x526F;&#x672C;&#x6570;&#x91CF;&#xFF0C;&#x53EA;&#x6709;&#x65B0;&#x65E7;&#x7248;&#x672C;&#x7684;rs&#x52A0;&#x8D77;&#x6765;&#x7684;&#x526F;&#x672C;&#x6570;&#x53EF;&#x4EE5;&#x7A81;&#x7834;&#x5230;maxSurge&#x7684;&#x4E0A;&#x9650;&#x3002;&#x56E0;&#x6B64;&#xFF0C;&#x8FD9;&#x91CC;&#x7684;&#x53EF;&#x6269;&#x5BB9;&#x503C;&#x8981;&#x53D6;&#x8FD9;&#x4E24;&#x4E2A;&#x503C;&#x4E4B;&#x95F4;&#x7684;&#x6700;&#x5C0F;&#x503C;&#x3002;</span>
+      scaleUpCount = <span class="hljs-keyword">int32</span>(integer.IntMin(<span class="hljs-keyword">int</span>(scaleUpCount), <span class="hljs-keyword">int</span>(*(deployment.Spec.Replicas)-*(newRS.Spec.Replicas))))
+      <span class="hljs-comment">// &#x6B64;&#x65F6;newRS&#x5E94;&#x6709;&#x7684;&#x526F;&#x672C;&#x6570; = &#x5F53;&#x524D;&#x503C; + &#x53EF;&#x6269;&#x5BB9;&#x503C;</span>
+      <span class="hljs-keyword">return</span> *(newRS.Spec.Replicas) + scaleUpCount, <span class="hljs-literal">nil</span>
+   <span class="hljs-keyword">case</span> apps.RecreateDeploymentStrategyType:
+      <span class="hljs-comment">// &#x975E;&#x6EDA;&#x52A8;&#x66F4;&#x65B0;&#x65F6;&#xFF0C;newRS&#x7684;&#x5E94;&#x7528;&#x526F;&#x672C;&#x6570; = deployment.Spec.Replicas,&#x65E0;&#x5F39;&#x6027;</span>
+      <span class="hljs-keyword">return</span> *(deployment.Spec.Replicas), <span class="hljs-literal">nil</span>
+   <span class="hljs-keyword">default</span>:
+      <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>, fmt.Errorf(<span class="hljs-string">&quot;deployment type %v isn&apos;t supported&quot;</span>, deployment.Spec.Strategy.Type)
+   }
+}
+</code></pre>
+<p>reconcileOldReplicaSets&#x51FD;&#x6570;</p>
+<p>&#x8FD9;&#x4E2A;&#x51FD;&#x6570;&#x8FD4;&#x56DE;bool&#x503C;&#xFF0C;&#x5373;&#x662F;&#x5426;&#x5E94;&#x8BE5;&#x7F29;&#x5BB9;oldRSs&#x7684;bool&#x503C;</p>
+<pre><code class="lang-go"><span class="hljs-keyword">func</span> (dc *DeploymentController) reconcileOldReplicaSets(allRSs []*apps.ReplicaSet, oldRSs []*apps.ReplicaSet, newRS *apps.ReplicaSet, deployment *apps.Deployment) (<span class="hljs-keyword">bool</span>, error) {
+   oldPodsCount := deploymentutil.GetReplicaCountForReplicaSets(oldRSs)
+   <span class="hljs-keyword">if</span> oldPodsCount == <span class="hljs-number">0</span> {
+      <span class="hljs-comment">// &#x5DF2;&#x7ECF;&#x7F29;&#x5BB9;&#x5B8C;&#x6BD5;&#xFF0C;&#x76F4;&#x63A5;&#x8FD4;&#x56DE;</span>
+      <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>, <span class="hljs-literal">nil</span>
+   }
+  <span class="hljs-comment">// &#x5F53;&#x524D;&#x6240;&#x6709;&#x7684;pod&#x7684;&#x6570;&#x91CF;(&#x5F53;&#x524D;&#x503C;)</span>
+   allPodsCount := deploymentutil.GetReplicaCountForReplicaSets(allRSs)
+   klog.V(<span class="hljs-number">4</span>).Infof(<span class="hljs-string">&quot;New replica set %s/%s has %d available pods.&quot;</span>, newRS.Namespace, newRS.Name, newRS.Status.AvailableReplicas)
+  <span class="hljs-comment">// deployment &#x6307;&#x5B9A;&#x7684;&#x6700;&#x5927;&#x4E0D;&#x53EF;&#x7528;&#x7684;&#x526F;&#x672C;&#x6570;(&#x6700;&#x5927;&#x4E0D;&#x53EF;&#x7528;&#x503C;)</span>
+   maxUnavailable := deploymentutil.MaxUnavailable(*deployment)
+
+   <span class="hljs-comment">// Check if we can scale down. We can scale down in the following 2 cases:</span>
+   <span class="hljs-comment">// * Some old replica sets have unhealthy replicas, we could safely scale down those unhealthy replicas since that won&apos;t further</span>
+   <span class="hljs-comment">//  increase unavailability.</span>
+   <span class="hljs-comment">// * New replica set has scaled up and it&apos;s replicas becomes ready, then we can scale down old replica sets in a further step.</span>
+   <span class="hljs-comment">//</span>
+   <span class="hljs-comment">// maxScaledDown := allPodsCount - minAvailable - newReplicaSetPodsUnavailable</span>
+   <span class="hljs-comment">// take into account not only maxUnavailable and any surge pods that have been created, but also unavailable pods from</span>
+   <span class="hljs-comment">// the newRS, so that the unavailable pods from the newRS would not make us scale down old replica sets in a further</span>
+   <span class="hljs-comment">// step(that will increase unavailability).</span>
+   <span class="hljs-comment">//</span>
+   <span class="hljs-comment">// Concrete example:</span>
+   <span class="hljs-comment">//</span>
+   <span class="hljs-comment">// * 10 replicas</span>
+   <span class="hljs-comment">// * 2 maxUnavailable (absolute number, not percent)</span>
+   <span class="hljs-comment">// * 3 maxSurge (absolute number, not percent)</span>
+   <span class="hljs-comment">//</span>
+   <span class="hljs-comment">// case 1:</span>
+   <span class="hljs-comment">// * Deployment is updated, newRS is created with 3 replicas, oldRS is scaled down to 8, and newRS is scaled up to 5.</span>
+   <span class="hljs-comment">// * The new replica set pods crashloop and never become available.</span>
+   <span class="hljs-comment">// * allPodsCount is 13. minAvailable is 8. newRSPodsUnavailable is 5.</span>
+   <span class="hljs-comment">// * A node fails and causes one of the oldRS pods to become unavailable. However, 13 - 8 - 5 = 0, so the oldRS won&apos;t be scaled down.</span>
+   <span class="hljs-comment">// * The user notices the crashloop and does kubectl rollout undo to rollback.</span>
+   <span class="hljs-comment">// * newRSPodsUnavailable is 1, since we rolled back to the good replica set, so maxScaledDown = 13 - 8 - 1 = 4. 4 of the crashlooping pods will be scaled down.</span>
+   <span class="hljs-comment">// * The total number of pods will then be 9 and the newRS can be scaled up to 10.</span>
+   <span class="hljs-comment">//</span>
+   <span class="hljs-comment">// case 2:</span>
+   <span class="hljs-comment">// Same example, but pushing a new pod template instead of rolling back (aka &quot;roll over&quot;):</span>
+   <span class="hljs-comment">// * The new replica set created must start with 0 replicas because allPodsCount is already at 13.</span>
+   <span class="hljs-comment">// * However, newRSPodsUnavailable would also be 0, so the 2 old replica sets could be scaled down by 5 (13 - 8 - 0), which would then</span>
+   <span class="hljs-comment">// allow the new replica set to be scaled up by 5.</span>
+  <span class="hljs-comment">// Available&#x6307;&#x7684;&#x662F;&#x5C31;&#x7EEA;&#x63A2;&#x9488;&#x7ED3;&#x679C;&#x4E3A;true&#x7684;&#x526F;&#x672C;&#xFF0C;&#x82E5;&#x9ED8;&#x8BA4;&#x672A;&#x6307;&#x5B9A;&#x5C31;&#x7EEA;&#x63A2;&#x9488;&#xFF0C;&#x5219;pod running&#x4E4B;&#x540E;&#x81EA;&#x52A8;&#x89C6;&#x5C31;&#x7EEA;&#x4E3A;true</span>
+  <span class="hljs-comment">// &#x6700;&#x5C0F;&#x53EF;&#x7528;&#x526F;&#x672C;&#x6570;(&#x81F3;&#x5C11;&#x53EF;&#x7528;&#x6570;)</span>
+   minAvailable := *(deployment.Spec.Replicas) - maxUnavailable
+   <span class="hljs-comment">// newRs&#x4E0D;&#x53EF;&#x7528;&#x6570;</span>
+   newRSUnavailablePodCount := *(newRS.Spec.Replicas) - newRS.Status.AvailableReplicas
+  <span class="hljs-comment">// &#x6700;&#x5927;&#x53EF;&#x7F29;&#x5BB9;&#x6570; = &#x603B;&#x6570; - &#x6700;&#x5C0F;&#x53EF;&#x7528;&#x6570; - newRS&#x4E0D;&#x53EF;&#x7528;&#x6570;(&#x4E3A;&#x4E86;&#x4FDD;&#x8BC1;&#x6700;&#x5C0F;&#x53EF;&#x7528;&#x6570;&#xFF0C;&#x56E0;&#x6B64;&#x6B64;&#x65F6;newRS&#x7684;&#x4E0D;&#x53EF;&#x7528;&#x526F;&#x672C;&#x4E0D;&#x80FD;&#x53C2;&#x4E0E;&#x8FD9;&#x4E2A;&#x8BA1;&#x7B97;)</span>
+   maxScaledDown := allPodsCount - minAvailable - newRSUnavailablePodCount
+   <span class="hljs-keyword">if</span> maxScaledDown &lt;= <span class="hljs-number">0</span> {
+      <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>, <span class="hljs-literal">nil</span>
+   }
+
+   <span class="hljs-comment">// oldRS&#x91CC;&#x4E0D;&#x5065;&#x5EB7;&#x7684;&#x526F;&#x672C;&#xFF0C;&#x65E0;&#x8BBA;&#x5982;&#x4F55;&#x90FD;&#x662F;&#x9700;&#x8981;&#x6E05;&#x9664;&#x7684;</span>
+   <span class="hljs-comment">// and cause timeout. See https://github.com/kubernetes/kubernetes/issues/16737</span>
+   oldRSs, cleanupCount, err := dc.cleanupUnhealthyReplicas(oldRSs, deployment, maxScaledDown)
+   <span class="hljs-keyword">if</span> err != <span class="hljs-literal">nil</span> {
+      <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>, <span class="hljs-literal">nil</span>
+   }
+   klog.V(<span class="hljs-number">4</span>).Infof(<span class="hljs-string">&quot;Cleaned up unhealthy replicas from old RSes by %d&quot;</span>, cleanupCount)
+
+   <span class="hljs-comment">// &#x8FD8;&#x8981;&#x5BF9;&#x6BD4;&#x6700;&#x5927;&#x53EF;&#x7F29;&#x5BB9;&#x6570;&#x548C;deployment&#x6307;&#x5B9A;&#x7684;&#x6700;&#x5927;&#x540C;&#x65F6;&#x4E0D;&#x53EF;&#x7528;&#x526F;&#x672C;&#x6570;&#xFF0C;&#x8FD9;&#x4E24;&#x8005;&#x4E4B;&#x95F4;&#x7684;&#x6700;&#x5C0F;&#x503C;&#xFF0C;&#x624D;&#x662F;&#x53EF;&#x7F29;&#x5BB9;&#x6570;&#x91CF;</span>
+   allRSs = <span class="hljs-built_in">append</span>(oldRSs, newRS)
+   scaledDownCount, err := dc.scaleDownOldReplicaSetsForRollingUpdate(allRSs, oldRSs, deployment)
+   <span class="hljs-keyword">if</span> err != <span class="hljs-literal">nil</span> {
+      <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>, <span class="hljs-literal">nil</span>
+   }
+   klog.V(<span class="hljs-number">4</span>).Infof(<span class="hljs-string">&quot;Scaled down old RSes of deployment %s by %d&quot;</span>, deployment.Name, scaledDownCount)
+    <span class="hljs-comment">// oldRS&#x91CC;&#x4E0D;&#x5065;&#x5EB7;&#x7684;&#x526F;&#x672C;&#xFF0C;&#x65E0;&#x8BBA;&#x5982;&#x4F55;&#x90FD;&#x662F;&#x9700;&#x8981;&#x6E05;&#x9664;&#x7684;</span>
+   totalScaledDown := cleanupCount + scaledDownCount
+   <span class="hljs-comment">// &#x5224;&#x65AD;&#x7F29;&#x5BB9;&#x6570;&#x662F;&#x5426;&#x5927;&#x4E8E;0</span>
+   <span class="hljs-keyword">return</span> totalScaledDown &gt; <span class="hljs-number">0</span>, <span class="hljs-literal">nil</span>
+}
+</code></pre>
+<p>&#x4E2D;&#x95F4;&#x7684;&#x82F1;&#x6587;&#x6CE8;&#x91CA;&#x91CC;&#x7684;&#x4E3E;&#x4F8B;&#x8BF4;&#x660E;&#x975E;&#x5E38;&#x8BE6;&#x7EC6;&#xFF0C;&#x53EF;&#x4EE5;&#x770B;&#x4E00;&#x4E0B;&#x6CE8;&#x91CA;&#x3002;</p>
+<h4 id="syncrolloutstatus&#x51FD;&#x6570;"><a name="syncrolloutstatus&#x51FD;&#x6570;" class="plugin-anchor" href="#syncrolloutstatus&#x51FD;&#x6570;"><i class="fa fa-link" aria-hidden="true"></i></a>syncRolloutStatus&#x51FD;&#x6570;</h4>
+<p>&#x8FD9;&#x4E2A;&#x51FD;&#x6570;&#x4E3B;&#x8981;&#x7528;&#x4E8E;&#x66F4;&#x65B0;deployment&#x7684;status&#x5B57;&#x6BB5;&#x548C;&#x5176;&#x4E2D;&#x7684;condition&#x5B57;&#x6BB5;&#x3002;</p>
+<pre><code class="lang-go"><span class="hljs-keyword">func</span> (dc *DeploymentController) syncRolloutStatus(allRSs []*apps.ReplicaSet, newRS *apps.ReplicaSet, d *apps.Deployment) error {
+   newStatus := calculateStatus(allRSs, newRS, d)
+
+   <span class="hljs-keyword">if</span> !util.HasProgressDeadline(d) {
+      util.RemoveDeploymentCondition(&amp;newStatus, apps.DeploymentProgressing)
+   }
+
+   currentCond := util.GetDeploymentCondition(d.Status, apps.DeploymentProgressing)
+   <span class="hljs-comment">/** 
+   &#x5224;&#x65AD;deployment&#x662F;&#x5426;&#x4E3A;complete&#x72B6;&#x6001;&#xFF0C;&#x6761;&#x4EF6;&#x6709;&#x591A;&#x4E2A;&#xFF1A;
+   1. newRS.replicas = newRS.Status.UpdatedReplicas &#x8BF4;&#x660E;newRS&#x7684;&#x526F;&#x672C;&#x66F4;&#x65B0;&#x5DF2;&#x5168;&#x90E8;&#x5B8C;&#x6210;
+   2. newRS.status.condition.reason = miniumReplicasAvailable
+   **/</span>
+   isCompleteDeployment := newStatus.Replicas == newStatus.UpdatedReplicas &amp;&amp; currentCond != <span class="hljs-literal">nil</span> &amp;&amp; currentCond.Reason == util.NewRSAvailableReason
+   <span class="hljs-comment">// &#x672A;&#x8FBE;&#x5230;complete&#x72B6;&#x6001;&#x7684;deployment&#xFF0C;&#x624D;&#x8FDB;&#x884C;&#x4E0B;&#x9762;&#x7684;&#x68C0;&#x67E5;</span>
+   <span class="hljs-keyword">if</span> util.HasProgressDeadline(d) &amp;&amp; !isCompleteDeployment {
+      <span class="hljs-keyword">switch</span> {
+      <span class="hljs-keyword">case</span> util.DeploymentComplete(d, &amp;newStatus):
+         <span class="hljs-comment">// Update the deployment conditions with a message for the new replica set that</span>
+         <span class="hljs-comment">// was successfully deployed. If the condition already exists, we ignore this update.</span>
+         msg := fmt.Sprintf(<span class="hljs-string">&quot;Deployment %q has successfully progressed.&quot;</span>, d.Name)
+         <span class="hljs-keyword">if</span> newRS != <span class="hljs-literal">nil</span> {
+            msg = fmt.Sprintf(<span class="hljs-string">&quot;ReplicaSet %q has successfully progressed.&quot;</span>, newRS.Name)
+         }
+         condition := util.NewDeploymentCondition(apps.DeploymentProgressing, v1.ConditionTrue, util.NewRSAvailableReason, msg)
+         util.SetDeploymentCondition(&amp;newStatus, *condition)
+
+      <span class="hljs-keyword">case</span> util.DeploymentProgressing(d, &amp;newStatus):
+         <span class="hljs-comment">// If there is any progress made, continue by not checking if the deployment failed. This</span>
+         <span class="hljs-comment">// behavior emulates the rolling updater progressDeadline check.</span>
+         msg := fmt.Sprintf(<span class="hljs-string">&quot;Deployment %q is progressing.&quot;</span>, d.Name)
+         <span class="hljs-keyword">if</span> newRS != <span class="hljs-literal">nil</span> {
+            msg = fmt.Sprintf(<span class="hljs-string">&quot;ReplicaSet %q is progressing.&quot;</span>, newRS.Name)
+         }
+         condition := util.NewDeploymentCondition(apps.DeploymentProgressing, v1.ConditionTrue, util.ReplicaSetUpdatedReason, msg)
+         <span class="hljs-comment">// Update the current Progressing condition or add a new one if it doesn&apos;t exist.</span>
+         <span class="hljs-comment">// If a Progressing condition with status=true already exists, we should update</span>
+         <span class="hljs-comment">// everything but lastTransitionTime. SetDeploymentCondition already does that but</span>
+         <span class="hljs-comment">// it also is not updating conditions when the reason of the new condition is the</span>
+         <span class="hljs-comment">// same as the old. The Progressing condition is a special case because we want to</span>
+         <span class="hljs-comment">// update with the same reason and change just lastUpdateTime iff we notice any</span>
+         <span class="hljs-comment">// progress. That&apos;s why we handle it here.</span>
+         <span class="hljs-keyword">if</span> currentCond != <span class="hljs-literal">nil</span> {
+            <span class="hljs-keyword">if</span> currentCond.Status == v1.ConditionTrue {
+               condition.LastTransitionTime = currentCond.LastTransitionTime
+            }
+            util.RemoveDeploymentCondition(&amp;newStatus, apps.DeploymentProgressing)
+         }
+         util.SetDeploymentCondition(&amp;newStatus, *condition)
+
+      <span class="hljs-keyword">case</span> util.DeploymentTimedOut(d, &amp;newStatus):
+         <span class="hljs-comment">// Update the deployment with a timeout condition. If the condition already exists,</span>
+         <span class="hljs-comment">// we ignore this update.</span>
+         msg := fmt.Sprintf(<span class="hljs-string">&quot;Deployment %q has timed out progressing.&quot;</span>, d.Name)
+         <span class="hljs-keyword">if</span> newRS != <span class="hljs-literal">nil</span> {
+            msg = fmt.Sprintf(<span class="hljs-string">&quot;ReplicaSet %q has timed out progressing.&quot;</span>, newRS.Name)
+         }
+         condition := util.NewDeploymentCondition(apps.DeploymentProgressing, v1.ConditionFalse, util.TimedOutReason, msg)
+         util.SetDeploymentCondition(&amp;newStatus, *condition)
+      }
+   }
+</code></pre>
+<p>DeploymentCondition&#x5728;&#x8FD9;&#x91CC;&#x9762;&#x53CD;&#x590D;&#x51FA;&#x73B0;&#xFF0C;&#x4FBF;&#x4E8E;&#x7406;&#x89E3;&#xFF0C;&#x53C2;&#x7167;&#x4E00;&#x4E2A;&#x6B63;&#x5E38;&#x72B6;&#x6001;&#x7684;deployment condition&#x6837;&#x4F8B;:</p>
+<p><img src="http://mycloudn.kokoerp.com/20200130125357.png" style="zoom:50%;"></p>
+<h4 id="&#x603B;&#x7ED3;"><a name="&#x603B;&#x7ED3;" class="plugin-anchor" href="#&#x603B;&#x7ED3;"><i class="fa fa-link" aria-hidden="true"></i></a>&#x603B;&#x7ED3;</h4>
+<p>&#x6EDA;&#x52A8;&#x66F4;&#x65B0;&#x8FC7;&#x7A0B;&#x4E2D;&#x4E3B;&#x8981;&#x662F;&#x901A;&#x8FC7;&#x8C03;&#x7528;<code>reconcileNewReplicaSet</code>&#x51FD;&#x6570;&#x5BF9; newRS &#x6269;&#x5BB9;&#xFF0C;&#x8C03;&#x7528; <code>reconcileOldReplicaSets</code>&#x51FD;&#x6570; &#x5BF9; oldRSs&#x7F29;&#x5BB9;&#xFF0C;&#x6309;&#x7167; <code>maxSurge</code> &#x548C; <code>maxUnavailable</code> &#x7684;&#x7EA6;&#x675F;&#xFF0C;&#x8BA1;&#x65F6;&#x5668;&#x95F4;&#x9694;1s&#x53CD;&#x590D;&#x6267;&#x884C;&#x3001;&#x6536;&#x655B;&#x3001;&#x4FEE;&#x6B63;&#xFF0C;&#x6700;&#x7EC8;&#x8FBE;&#x5230;&#x671F;&#x671B;&#x72B6;&#x6001;&#xFF0C;&#x5B8C;&#x6210;&#x66F4;&#x65B0;&#x3002;</p>
+<h2 id="&#x603B;&#x7ED3;"><a name="&#x603B;&#x7ED3;" class="plugin-anchor" href="#&#x603B;&#x7ED3;"><i class="fa fa-link" aria-hidden="true"></i></a>&#x603B;&#x7ED3;</h2>
+<p>Deployment&#x7684;&#x56DE;&#x6EDA;&#x3001;&#x6269;(&#x7F29;)&#x5BB9;&#x3001;&#x6682;&#x505C;&#x3001;&#x66F4;&#x65B0;&#x7B49;&#x64CD;&#x4F5C;&#xFF0C;&#x4E3B;&#x8981;&#x662F;&#x901A;&#x8FC7;&#x4FEE;&#x6539;rs&#x6765;&#x5B8C;&#x6210;&#x7684;&#x3002;&#x5176;&#x4E2D;&#xFF0C;rs&#x7684;&#x7248;&#x672C;&#x63A7;&#x5236;&#x3001;replicas&#x6570;&#x91CF;&#x63A7;&#x5236;&#x662F;&#x5176;&#x6700;&#x6838;&#x5FC3;&#x4E5F;&#x662F;&#x96BE;&#x4EE5;&#x7406;&#x89E3;&#x7684;&#x5730;&#x65B9;&#xFF0C;&#x4F46;&#x662F;&#x53EA;&#x8981;&#x8BB0;&#x4F4F;99%&#x7684;&#x65F6;&#x95F4;&#x91CC;deployment&#x5BF9;&#x5E94;&#x7684;&#x6D3B;&#x8DC3;&#x7684;rs&#x53EA;&#x6709;&#x4E00;&#x4E2A;&#xFF0C;&#x53EA;&#x6709;&#x66F4;&#x65B0;&#x65F6;&#x624D;&#x4F1A;&#x51FA;&#x73B0;2&#x4E2A;rs&#xFF0C;&#x6781;&#x5C11;&#x6570;&#x60C5;&#x51B5;&#x4E0B;(&#x77ED;&#x65F6;&#x95F4;&#x91CD;&#x590D;&#x66F4;&#x65B0;)&#x624D;&#x4F1A;&#x51FA;&#x73B0;2&#x4E2A;&#x4EE5;&#x4E0A;&#x7684;rs&#xFF0C;&#x5BF9;&#x4E8E;&#x4E0A;&#x9762;&#x6E90;&#x7801;&#x7684;&#x7406;&#x89E3;&#x5C31;&#x4F1A;&#x5BB9;&#x6613;&#x8BB8;&#x591A;&#x3002;</p>
+<p>&#x53E6;&#x5916;&#xFF0C;&#x4ECE;&#x4E0A;&#x9762;&#x6211;&#x4EEC;&#x4E5F;&#x53EF;&#x4EE5;&#x53D1;&#x73B0;&#xFF0C;deployment&#x7684;&#x66F4;&#x65B0;&#x5B9E;&#x9645;&#x57FA;&#x672C;&#x4E0D;&#x6D89;&#x53CA;&#x5BF9;pod&#x7684;&#x76F4;&#x63A5;&#x64CD;&#x4F5C;&#xFF0C;&#x56E0;&#x6B64;&#xFF0C;&#x672C;&#x7AE0;&#x540E;&#x7EED;&#x7684;&#x7AE0;&#x8282;&#x4F1A;&#x5206;&#x6790;&#x4E00;&#x4E0B;replicaSet controller&#x662F;&#x600E;&#x4E48;&#x548C;pod&#x8FDB;&#x884C;&#x7BA1;&#x7406;&#x4EA4;&#x4E92;&#x7684;&#x3002;</p>
+
+                                
+                                </section>
+                            
+    </div>
+    <div class="search-results">
+        <div class="has-results">
+            
+            <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+            <ul class="search-results-list"></ul>
+            
+        </div>
+        <div class="no-results">
+            
+            <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+            
+        </div>
+    </div>
+</div>
+
+                        </div>
+                    </div>
+                
+            </div>
+
+            
+                
+                <a href="Kubernetes源码学习-Controller-P2-Controller与informer.html" class="navigation navigation-prev navigation-unique" aria-label="Previous page: 2.2. Controller与informer">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+                
+                
+            
+        
+    </div>
+
+    <script>
+        var gitbook = gitbook || [];
+        gitbook.push(function() {
+            gitbook.page.hasChanged({"page":{"title":"2.3. Controller分类与Deployment Controller","date":"2020/01/30 15:59:53","tags":["Kubernetes","Golang","读源码"],"level":"3.2.3","depth":2,"next":{"title":"[4. ApiServer]","level":"3.3","depth":1,"ref":"","articles":[{"title":"[4.1 待补充]","level":"3.3.1","depth":2,"ref":"","articles":[]}]},"previous":{"title":"2.2. Controller与informer","level":"3.2.2","depth":2,"path":"controller/Kubernetes源码学习-Controller-P2-Controller与informer.md","ref":"./controller/Kubernetes源码学习-Controller-P2-Controller与informer.md","articles":[]},"dir":"ltr"},"config":{"plugins":["-sharing","anchors","github","expandable-chapters","splitter","page-treeview","back-to-top-button"],"styles":{"website":"./styles/website.css"},"pluginsConfig":{"page-treeview":{"copyright":"","minHeaderCount":"1","minHeaderDeep":"1"},"github":{"url":"https://github.com/yinwenqin/kubeSourceCodeNote"},"splitter":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"back-to-top-button":{},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false},"anchors":{},"expandable-chapters":{}},"theme":"default","author":"ywq","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"Kubernetes源码学习","language":"zh-hans","links":{},"gitbook":"3.2.3","description":""},"file":{"path":"controller/Kubernetes源码学习-Controller-P3-Controller分类与Deployment Controller.md","mtime":"2020-01-30T08:13:57.601Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2020-01-30T08:23:39.586Z"},"basePath":"..","book":{"language":""}});
+        });
+    </script>
+</div>
+
+        
+    <script src="../gitbook/gitbook.js"></script>
+    <script src="../gitbook/theme.js"></script>
+    
+        
+        <script src="../gitbook/gitbook-plugin-github/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-expandable-chapters/expandable-chapters.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-splitter/splitter.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-back-to-top-button/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search/search-engine.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search/search.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-lunr/lunr.min.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-lunr/search-lunr.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-fontsettings/fontsettings.js"></script>
+        
+    
+
+    </body>
+</html>
+

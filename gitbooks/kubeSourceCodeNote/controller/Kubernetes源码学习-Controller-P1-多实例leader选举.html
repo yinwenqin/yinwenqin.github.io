@@ -67,6 +67,8 @@
     <link rel="shortcut icon" href="../gitbook/images/favicon.ico" type="image/x-icon">
 
     
+    <link rel="next" href="Kubernetes源码学习-Controller-P2-Controller与informer.html" />
+    
     
     <link rel="prev" href="./" />
     
@@ -95,11 +97,18 @@
 
     
         
+        <li class="header"><></li>
+        
+        
+    
+
+    
+        
         <li class="header">Part I-写在前面</li>
         
         
     
-        <li class="chapter " data-level="1.1" data-path="../">
+        <li class="chapter " data-level="2.1" data-path="../">
             
                 <a href="../">
             
@@ -119,7 +128,7 @@
         
         
     
-        <li class="chapter " data-level="2.1" data-path="../scheduler/">
+        <li class="chapter " data-level="3.1" data-path="../scheduler/">
             
                 <a href="../scheduler/">
             
@@ -133,7 +142,7 @@
             <ul class="articles">
                 
     
-        <li class="chapter " data-level="2.1.1" data-path="../scheduler/Kubernetes源码学习-Scheduler-P1-调度器入口篇.html">
+        <li class="chapter " data-level="3.1.1" data-path="../scheduler/Kubernetes源码学习-Scheduler-P1-调度器入口篇.html">
             
                 <a href="../scheduler/Kubernetes源码学习-Scheduler-P1-调度器入口篇.html">
             
@@ -146,7 +155,7 @@
             
         </li>
     
-        <li class="chapter " data-level="2.1.2" data-path="../scheduler/Kubernetes源码学习-Scheduler-P2-调度器框架.html">
+        <li class="chapter " data-level="3.1.2" data-path="../scheduler/Kubernetes源码学习-Scheduler-P2-调度器框架.html">
             
                 <a href="../scheduler/Kubernetes源码学习-Scheduler-P2-调度器框架.html">
             
@@ -159,7 +168,7 @@
             
         </li>
     
-        <li class="chapter " data-level="2.1.3" data-path="../scheduler/Kubernetes源码学习-Scheduler-P3-Node筛选算法.html">
+        <li class="chapter " data-level="3.1.3" data-path="../scheduler/Kubernetes源码学习-Scheduler-P3-Node筛选算法.html">
             
                 <a href="../scheduler/Kubernetes源码学习-Scheduler-P3-Node筛选算法.html">
             
@@ -172,7 +181,7 @@
             
         </li>
     
-        <li class="chapter " data-level="2.1.4" data-path="../scheduler/Kubernetes源码学习-Scheduler-P4-Node优先级算法.html">
+        <li class="chapter " data-level="3.1.4" data-path="../scheduler/Kubernetes源码学习-Scheduler-P4-Node优先级算法.html">
             
                 <a href="../scheduler/Kubernetes源码学习-Scheduler-P4-Node优先级算法.html">
             
@@ -185,7 +194,7 @@
             
         </li>
     
-        <li class="chapter " data-level="2.1.5" data-path="../scheduler/Kubernetes源码学习-Scheduler-P5-Pod优先级抢占调度.html">
+        <li class="chapter " data-level="3.1.5" data-path="../scheduler/Kubernetes源码学习-Scheduler-P5-Pod优先级抢占调度.html">
             
                 <a href="../scheduler/Kubernetes源码学习-Scheduler-P5-Pod优先级抢占调度.html">
             
@@ -203,7 +212,7 @@
             
         </li>
     
-        <li class="chapter " data-level="2.2" data-path="./">
+        <li class="chapter " data-level="3.2" data-path="./">
             
                 <a href="./">
             
@@ -217,7 +226,7 @@
             <ul class="articles">
                 
     
-        <li class="chapter active" data-level="2.2.1" data-path="Kubernetes源码学习-Controller-P1-多实例leader选举.html">
+        <li class="chapter active" data-level="3.2.1" data-path="Kubernetes源码学习-Controller-P1-多实例leader选举.html">
             
                 <a href="Kubernetes源码学习-Controller-P1-多实例leader选举.html">
             
@@ -230,12 +239,38 @@
             
         </li>
     
+        <li class="chapter " data-level="3.2.2" data-path="Kubernetes源码学习-Controller-P2-Controller与informer.html">
+            
+                <a href="Kubernetes源码学习-Controller-P2-Controller与informer.html">
+            
+                    
+                    2.2. Controller与informer
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.2.3" data-path="Kubernetes源码学习-Controller-P3-Controller分类与Deployment Controller.html">
+            
+                <a href="Kubernetes源码学习-Controller-P3-Controller分类与Deployment Controller.html">
+            
+                    
+                    2.3. Controller分类与Deployment Controller
+            
+                </a>
+            
+
+            
+        </li>
+    
 
             </ul>
             
         </li>
     
-        <li class="chapter " data-level="2.3" >
+        <li class="chapter " data-level="3.3" >
             
                 <span>
             
@@ -249,7 +284,7 @@
             <ul class="articles">
                 
     
-        <li class="chapter " data-level="2.3.1" >
+        <li class="chapter " data-level="3.3.1" >
             
                 <span>
             
@@ -267,7 +302,7 @@
             
         </li>
     
-        <li class="chapter " data-level="2.4" >
+        <li class="chapter " data-level="3.4" >
             
                 <span>
             
@@ -281,7 +316,7 @@
             <ul class="articles">
                 
     
-        <li class="chapter " data-level="2.4.1" >
+        <li class="chapter " data-level="3.4.1" >
             
                 <span>
             
@@ -877,10 +912,14 @@ observedRecord  # &#x6BCF;&#x4E2A;&#x53C2;&#x9009;&#x8005;&#x90FD;&#x4F1A;&#x5B9
 
             
                 
-                <a href="./" class="navigation navigation-prev navigation-unique" aria-label="Previous page: 3. Controller">
+                <a href="./" class="navigation navigation-prev " aria-label="Previous page: 3. Controller">
                     <i class="fa fa-angle-left"></i>
                 </a>
                 
+                
+                <a href="Kubernetes源码学习-Controller-P2-Controller与informer.html" class="navigation navigation-next " aria-label="Next page: 2.2. Controller与informer">
+                    <i class="fa fa-angle-right"></i>
+                </a>
                 
             
         
@@ -889,7 +928,7 @@ observedRecord  # &#x6BCF;&#x4E2A;&#x53C2;&#x9009;&#x8005;&#x90FD;&#x4F1A;&#x5B9
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"2.1. 多实例leader选举","date":"2019/12/09 21:59:53","tags":["Kubernetes","Golang","读源码"],"level":"2.2.1","depth":2,"next":{"title":"[4. ApiServer]","level":"2.3","depth":1,"ref":"","articles":[{"title":"[4.1 待补充]","level":"2.3.1","depth":2,"ref":"","articles":[]}]},"previous":{"title":"3. Controller","level":"2.2","depth":1,"path":"controller/README.md","ref":"./controller/README.md","articles":[{"title":"2.1. 多实例leader选举","level":"2.2.1","depth":2,"path":"controller/Kubernetes源码学习-Controller-P1-多实例leader选举.md","ref":"./controller/Kubernetes源码学习-Controller-P1-多实例leader选举.md","articles":[]}]},"dir":"ltr"},"config":{"plugins":["-sharing","anchors","github","expandable-chapters","splitter","page-treeview","back-to-top-button"],"styles":{"website":"./styles/website.css"},"pluginsConfig":{"page-treeview":{"copyright":"","minHeaderCount":"1","minHeaderDeep":"1"},"github":{"url":"https://github.com/yinwenqin/kubeSourceCodeNote"},"splitter":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"back-to-top-button":{},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false},"anchors":{},"expandable-chapters":{}},"theme":"default","author":"ywq","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"Kubernetes源码学习","language":"zh-hans","links":{},"gitbook":"3.2.3","description":""},"file":{"path":"controller/Kubernetes源码学习-Controller-P1-多实例leader选举.md","mtime":"2019-12-19T09:54:39.649Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2020-01-05T09:30:37.048Z"},"basePath":"..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"2.1. 多实例leader选举","date":"2019/12/09 21:59:53","tags":["Kubernetes","Golang","读源码"],"level":"3.2.1","depth":2,"next":{"title":"2.2. Controller与informer","level":"3.2.2","depth":2,"path":"controller/Kubernetes源码学习-Controller-P2-Controller与informer.md","ref":"./controller/Kubernetes源码学习-Controller-P2-Controller与informer.md","articles":[]},"previous":{"title":"3. Controller","level":"3.2","depth":1,"path":"controller/README.md","ref":"./controller/README.md","articles":[{"title":"2.1. 多实例leader选举","level":"3.2.1","depth":2,"path":"controller/Kubernetes源码学习-Controller-P1-多实例leader选举.md","ref":"./controller/Kubernetes源码学习-Controller-P1-多实例leader选举.md","articles":[]},{"title":"2.2. Controller与informer","level":"3.2.2","depth":2,"path":"controller/Kubernetes源码学习-Controller-P2-Controller与informer.md","ref":"./controller/Kubernetes源码学习-Controller-P2-Controller与informer.md","articles":[]},{"title":"2.3. Controller分类与Deployment Controller","level":"3.2.3","depth":2,"path":"controller/Kubernetes源码学习-Controller-P3-Controller分类与Deployment Controller.md","ref":"./controller/Kubernetes源码学习-Controller-P3-Controller分类与Deployment Controller.md","articles":[]}]},"dir":"ltr"},"config":{"plugins":["-sharing","anchors","github","expandable-chapters","splitter","page-treeview","back-to-top-button"],"styles":{"website":"./styles/website.css"},"pluginsConfig":{"page-treeview":{"copyright":"","minHeaderCount":"1","minHeaderDeep":"1"},"github":{"url":"https://github.com/yinwenqin/kubeSourceCodeNote"},"splitter":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"back-to-top-button":{},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false},"anchors":{},"expandable-chapters":{}},"theme":"default","author":"ywq","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"Kubernetes源码学习","language":"zh-hans","links":{},"gitbook":"3.2.3","description":""},"file":{"path":"controller/Kubernetes源码学习-Controller-P1-多实例leader选举.md","mtime":"2019-12-19T09:54:39.649Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2020-01-30T08:23:39.586Z"},"basePath":"..","book":{"language":""}});
         });
     </script>
 </div>
