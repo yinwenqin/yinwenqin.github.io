@@ -1,0 +1,1542 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-CN">
+
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link rel="stylesheet" href="/lib/pace/pace-theme-bounce.min.css?v=1.0.2">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link rel="stylesheet" href="/lib/fancybox/source/jquery.fancybox.css">
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+    
+      
+    
+
+    
+  
+
+  
+
+  
+
+  
+    
+      
+    
+
+    
+  
+
+  
+    
+    
+    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic|Roboto Slab:300,300italic,400,400italic,700,700italic|Roboto Mono:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext">
+  
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.1.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.1.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.1.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.1.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.1.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '7.1.1',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":true,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: true,
+    fancybox: true,
+    fastclick: true,
+    lazyload: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"shrinkIn","post_header":"slideLeftIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideDownIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <script>
+  (function(i,s,o,g,r,a,m){i["DaoVoiceObject"]=r;i[r]=i[r]||function(){(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;a.charset="utf-8";m.parentNode.insertBefore(a,m)})(window,document,"script",('https:' == document.location.protocol ? 'https:' : 'http:') + "//widget.daovoice.io/widget/0f81ff2f.js","daovoice")
+  daovoice('init', {
+      app_id: "fc253f1e"
+    });
+  daovoice('update');
+  </script>
+
+  <meta name="description" content="P4-ReplicaSet Controller前言在上一篇文章中，对deployment controller的工作模式进行了详细地分析: Controller-P3-Controller 分析后得知，deployment controller更多的是对每个相应版本的replicaset副本数进行管理，而不涉及直接对pod的管理，因此，承接上节，本章来分析replicaSet Controlle">
+<meta name="keywords" content="Kubernetes,Golang,读源码">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kubernetes源码学习-Controller-P4-ReplicaSet Controller">
+<meta property="og:url" content="http://blog.upweto.top/2020/03/17/Kubernetes源码学习-Controller-P4-ReplicaSet-Controller.html">
+<meta property="og:site_name" content="随笔漫谈">
+<meta property="og:description" content="P4-ReplicaSet Controller前言在上一篇文章中，对deployment controller的工作模式进行了详细地分析: Controller-P3-Controller 分析后得知，deployment controller更多的是对每个相应版本的replicaset副本数进行管理，而不涉及直接对pod的管理，因此，承接上节，本章来分析replicaSet Controlle">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2020-03-24T11:34:20.953Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Kubernetes源码学习-Controller-P4-ReplicaSet Controller">
+<meta name="twitter:description" content="P4-ReplicaSet Controller前言在上一篇文章中，对deployment controller的工作模式进行了详细地分析: Controller-P3-Controller 分析后得知，deployment controller更多的是对每个相应版本的replicaset副本数进行管理，而不涉及直接对pod的管理，因此，承接上节，本章来分析replicaSet Controlle">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="随笔漫谈" type="application/atom+xml">
+
+
+
+  
+  
+  <link rel="canonical" href="http://blog.upweto.top/2020/03/17/Kubernetes源码学习-Controller-P4-ReplicaSet-Controller">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Kubernetes源码学习-Controller-P4-ReplicaSet Controller | 随笔漫谈</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+ 
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">随笔漫谈</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-book">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/gitbooks/" rel="section"><i class="menu-item-icon fa fa-fw fa-book"></i> <br>book</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-互动">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/guestbook/" rel="section"><i class="menu-item-icon fa fa-fw fa-comments"></i> <br>互动</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://blog.upweto.top/2020/03/17/Kubernetes源码学习-Controller-P4-ReplicaSet-Controller.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="丨ywq丨">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随笔漫谈">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Kubernetes源码学习-Controller-P4-ReplicaSet Controller
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2020-03-17 15:59:53" itemprop="dateCreated datePublished" datetime="2020-03-17T15:59:53+08:00">2020-03-17</time>
+            
+
+            
+          </span>
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+            <div class="post-symbolscount">
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">本文字数：</span>
+                
+                <span title="本文字数">16k</span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">14 分钟</span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="P4-ReplicaSet-Controller"><a href="#P4-ReplicaSet-Controller" class="headerlink" title="P4-ReplicaSet Controller"></a>P4-ReplicaSet Controller</h1><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>在上一篇文章中，对deployment controller的工作模式进行了详细地分析:</p>
+<p><a href="https://github.com/yinwenqin/kubeSourceCodeNote/blob/master/controller/Kubernetes源码学习-Controller-P3-Controller分类与Deployment Controller.md" target="_blank" rel="noopener">Controller-P3-Controller</a></p>
+<p>分析后得知，deployment controller更多的是对每个相应版本的replicaset副本数进行管理，而不涉及直接对pod的管理，因此，承接上节，本章来分析replicaSet Controller的源码.</p>
+<h2 id="ReplicaSet-Controller"><a href="#ReplicaSet-Controller" class="headerlink" title="ReplicaSet Controller"></a>ReplicaSet Controller</h2><h3 id="初始化"><a href="#初始化" class="headerlink" title="初始化"></a>初始化</h3><p>参照上节一样，直接来到各类controller初始化的函数:</p>
+<p><code>cmd/kube-controller-manager/app/controllermanager.go:343</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">controllers[<span class="string">"replicaset"</span>] = startReplicaSetController</span><br></pre></td></tr></table></figure>
+<p>==&gt; <code>cmd/kube-controller-manager/app/apps.go:69</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">go</span> replicaset.NewReplicaSetController(</span><br><span class="line">   <span class="comment">// replicaSet controller只关注ReplicaSets和Pod这两种资源。</span></span><br><span class="line">	ctx.InformerFactory.Apps().V1().ReplicaSets(),</span><br><span class="line">	ctx.InformerFactory.Core().V1().Pods(),</span><br><span class="line">	ctx.ClientBuilder.ClientOrDie(<span class="string">"replicaset-controller"</span>),</span><br><span class="line">	replicaset.BurstReplicas,</span><br><span class="line">).Run(<span class="keyword">int</span>(ctx.ComponentConfig.ReplicaSetController.ConcurrentRSSyncs), ctx.Stop)</span><br></pre></td></tr></table></figure>
+<h3 id="创建ReplicaSetController"><a href="#创建ReplicaSetController" class="headerlink" title="创建ReplicaSetController"></a>创建ReplicaSetController</h3><p>先来看看NewReplicaSetController创建的过程:</p>
+<p>==&gt; <code>pkg/controller/replicaset/replica_set.go:109</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewReplicaSetController</span><span class="params">(rsInformer appsinformers.ReplicaSetInformer, podInformer coreinformers.PodInformer, kubeClient clientset.Interface, burstReplicas <span class="keyword">int</span>)</span> *<span class="title">ReplicaSetController</span></span> &#123;</span><br><span class="line">	eventBroadcaster := record.NewBroadcaster()</span><br><span class="line">	eventBroadcaster.StartLogging(klog.Infof)</span><br><span class="line">	eventBroadcaster.StartRecordingToSink(&amp;v1core.EventSinkImpl&#123;Interface: kubeClient.CoreV1().Events(<span class="string">""</span>)&#125;)</span><br><span class="line">  <span class="comment">// NewBaseController方法往下看</span></span><br><span class="line">	<span class="keyword">return</span> NewBaseController(rsInformer, podInformer, kubeClient, burstReplicas,</span><br><span class="line">		apps.SchemeGroupVersion.WithKind(<span class="string">"ReplicaSet"</span>),</span><br><span class="line">		<span class="string">"replicaset_controller"</span>,</span><br><span class="line">		<span class="string">"replicaset"</span>,</span><br><span class="line">		controller.RealPodControl&#123;</span><br><span class="line">			KubeClient: kubeClient,</span><br><span class="line">			Recorder:   eventBroadcaster.NewRecorder(scheme.Scheme, v1.EventSource&#123;Component: <span class="string">"replicaset-controller"</span>&#125;),</span><br><span class="line">		&#125;,</span><br><span class="line">	)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// NewBaseController is the implementation of NewReplicaSetController with additional injected</span></span><br><span class="line"><span class="comment">// parameters so that it can also serve as the implementation of NewReplicationController.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewBaseController</span><span class="params">(rsInformer appsinformers.ReplicaSetInformer, podInformer coreinformers.PodInformer, kubeClient clientset.Interface, burstReplicas <span class="keyword">int</span>,</span></span></span><br><span class="line"><span class="function"><span class="params">	gvk schema.GroupVersionKind, metricOwnerName, queueName <span class="keyword">string</span>, podControl controller.PodControlInterface)</span> *<span class="title">ReplicaSetController</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> kubeClient != <span class="literal">nil</span> &amp;&amp; kubeClient.CoreV1().RESTClient().GetRateLimiter() != <span class="literal">nil</span> &#123;</span><br><span class="line">		metrics.RegisterMetricAndTrackRateLimiterUsage(metricOwnerName, kubeClient.CoreV1().RESTClient().GetRateLimiter())</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	rsc := &amp;ReplicaSetController&#123;</span><br><span class="line">		GroupVersionKind: gvk,</span><br><span class="line">		kubeClient:       kubeClient,</span><br><span class="line">		podControl:       podControl,</span><br><span class="line">		burstReplicas:    burstReplicas,</span><br><span class="line">		expectations:     controller.NewUIDTrackingControllerExpectations(controller.NewControllerExpectations()),</span><br><span class="line">		queue:            workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), queueName),</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	rsInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs&#123;</span><br><span class="line">		AddFunc:    rsc.enqueueReplicaSet,</span><br><span class="line">		UpdateFunc: rsc.updateRS,</span><br><span class="line">		DeleteFunc: rsc.enqueueReplicaSet,</span><br><span class="line">	&#125;)</span><br><span class="line">	rsc.rsLister = rsInformer.Lister()</span><br><span class="line">  <span class="comment">// informer会同步待操作的资源到本地的queue中，HasSynced方法就是用来判断判断queue是否已同步的</span></span><br><span class="line">	rsc.rsListerSynced = rsInformer.Informer().HasSynced</span><br><span class="line"></span><br><span class="line">	podInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs&#123;</span><br><span class="line">		AddFunc: rsc.addPod,</span><br><span class="line">		UpdateFunc: rsc.updatePod,</span><br><span class="line">		DeleteFunc: rsc.deletePod,</span><br><span class="line">	&#125;)</span><br><span class="line">	rsc.podLister = podInformer.Lister()</span><br><span class="line">  <span class="comment">// informer会同步待操作的资源到本地的queue中，HasSynced方法就是用来判断判断queue是否已同步的</span></span><br><span class="line">	rsc.podListerSynced = podInformer.Informer().HasSynced</span><br><span class="line"></span><br><span class="line">	rsc.syncHandler = rsc.syncReplicaSet</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> rsc</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>NewBaseController这里主要关注AddEventHandler为资源的informer增加的curd方法，例如pod相关的addPod、updatePod、deletePod方法。</p>
+<h3 id="ReplicaSetController-Run方法"><a href="#ReplicaSetController-Run方法" class="headerlink" title="ReplicaSetController Run方法"></a>ReplicaSetController Run方法</h3><p>接着往下，创建好ReplicaSetController对象后，看它的运行过程，即Run方法。</p>
+<p>==&gt; <code>pkg/controller/replicaset/replica_set.go:177</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Run begins watching and syncing.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(rsc *ReplicaSetController)</span> <span class="title">Run</span><span class="params">(workers <span class="keyword">int</span>, stopCh &lt;-<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;)</span></span> &#123;</span><br><span class="line">	<span class="keyword">defer</span> utilruntime.HandleCrash()</span><br><span class="line">	<span class="keyword">defer</span> rsc.queue.ShutDown()</span><br><span class="line"></span><br><span class="line">	controllerName := strings.ToLower(rsc.Kind)</span><br><span class="line">	klog.Infof(<span class="string">"Starting %v controller"</span>, controllerName)</span><br><span class="line">	<span class="keyword">defer</span> klog.Infof(<span class="string">"Shutting down %v controller"</span>, controllerName)</span><br><span class="line">  </span><br><span class="line">  <span class="comment">// 判断各个informer的缓存是否已经同步完毕的函数</span></span><br><span class="line">	<span class="keyword">if</span> !controller.WaitForCacheSync(rsc.Kind, stopCh, rsc.podListerSynced, rsc.rsListerSynced) &#123;</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line">  <span class="comment">// worker的数量默认是5个，开启5个worker，每个worker间隔1s运行一次rsc.worker函数，来检查并收敛rs的状态</span></span><br><span class="line">	<span class="keyword">for</span> i := <span class="number">0</span>; i &lt; workers; i++ &#123;</span><br><span class="line">		<span class="keyword">go</span> wait.Until(rsc.worker, time.Second, stopCh)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	&lt;-stopCh</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>来到了这里，可发现ReplicaSetController.Run()函数和上一节的DeploymentController.Run()函数非常地相似。所以，从这里开始，各类controller之间代码相似的步骤可能会跳过，不再每个地方都重复详细说明。</p>
+<p>往上溯源，可以找到，worker的数量配置默认为5个，参见这里:</p>
+<p><code>pkg/controller/apis/config/v1alpha1/defaults.go:219</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">SetDefaults_ReplicaSetControllerConfiguration</span><span class="params">(obj *kubectrlmgrconfigv1alpha1.ReplicaSetControllerConfiguration)</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> obj.ConcurrentRSSyncs == <span class="number">0</span> &#123;</span><br><span class="line">		obj.ConcurrentRSSyncs = <span class="number">5</span></span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>wait.Until()函数是很有意思的，上节也做过仔细分析，可以再回顾一下这里:</p>
+<p><a href="https://github.com/yinwenqin/kubeSourceCodeNote/blob/master/controller/Kubernetes源码学习-Controller-P3-Controller分类与Deployment Controller.md#waituntil循环计时器函数" target="_blank" rel="noopener">waituntil循环计时器函数</a></p>
+<p>好，直接进入主题，开始分析rsc.worker工作函数.</p>
+<h3 id="工作逻辑"><a href="#工作逻辑" class="headerlink" title="工作逻辑"></a>工作逻辑</h3><p><code>pkg/controller/replicaset/replica_set.go:190</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> i := <span class="number">0</span>; i &lt; workers; i++ &#123;</span><br><span class="line">	<span class="keyword">go</span> wait.Until(rsc.worker, time.Second, stopCh)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>==&gt; <code>pkg/controller/replicaset/replica_set.go:432</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// processNextWorkItem()函数的作用是把informer work queue工作队列里的对象取出，按照申明的要求来处理它们，标记它们。</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(rsc *ReplicaSetController)</span> <span class="title">worker</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="keyword">for</span> rsc.processNextWorkItem() &#123;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>==&gt; <code>pkg/controller/replicaset/replica_set.go:437</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(rsc *ReplicaSetController)</span> <span class="title">processNextWorkItem</span><span class="params">()</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">  <span class="comment">// work queue中取出队首元素</span></span><br><span class="line">	key, quit := rsc.queue.Get()</span><br><span class="line">	<span class="keyword">if</span> quit &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">defer</span> rsc.queue.Done(key)</span><br><span class="line">  <span class="comment">// syncHandler每一个队列对象，强保证同一时间只会有一个go协程处理它(无并发竞争)。所谓sync，意思是将work queue中待操作的对象，同步实现到运行环境中。</span></span><br><span class="line">	err := rsc.syncHandler(key.(<span class="keyword">string</span>))</span><br><span class="line">	<span class="keyword">if</span> err == <span class="literal">nil</span> &#123;</span><br><span class="line">		rsc.queue.Forget(key)</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	utilruntime.HandleError(fmt.Errorf(<span class="string">"Sync %q failed with %v"</span>, key, err))</span><br><span class="line">	rsc.queue.AddRateLimited(key)</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>主要函数是这个<strong>syncHandler</strong>，接着追溯，可以在这里找到这个结构体属性函数的赋值：</p>
+<p><code>pkg/controller/replicaset/replica_set.go:163</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// NewBaseController is the implementation of NewReplicaSetController with additional injected</span></span><br><span class="line"><span class="comment">// parameters so that it can also serve as the implementation of NewReplicationController.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewBaseController</span><span class="params">(rsInformer appsinformers.ReplicaSetInformer, podInformer coreinformers.PodInformer, kubeClient clientset.Interface, burstReplicas <span class="keyword">int</span>,</span></span></span><br><span class="line"><span class="function"><span class="params">	gvk schema.GroupVersionKind, metricOwnerName, queueName <span class="keyword">string</span>, podControl controller.PodControlInterface)</span> *<span class="title">ReplicaSetController</span></span> &#123;</span><br><span class="line">  <span class="comment">// ... 省略</span></span><br><span class="line">	rsc.syncHandler = rsc.syncReplicaSet</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> rsc</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>接着便可以找到<strong>ReplicaSetController.syncReplicaSet</strong>函数：</p>
+<p><code>pkg/controller/replicaset/replica_set.go:562</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment">// syncReplicaSet will sync the ReplicaSet with the given key if it has had its expectations fulfilled,</span></span><br><span class="line"><span class="comment">// meaning it did not expect to see any more of its pods created or deleted. This function is not meant to be</span></span><br><span class="line"><span class="comment">// invoked concurrently with the same key.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(rsc *ReplicaSetController)</span> <span class="title">syncReplicaSet</span><span class="params">(key <span class="keyword">string</span>)</span> <span class="title">error</span></span> &#123;</span><br><span class="line"></span><br><span class="line">	startTime := time.Now()</span><br><span class="line">	<span class="keyword">defer</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">		klog.V(<span class="number">4</span>).Infof(<span class="string">"Finished syncing %v %q (%v)"</span>, rsc.Kind, key, time.Since(startTime))</span><br><span class="line">	&#125;()</span><br><span class="line">  <span class="comment">// key的字符串格式是这样的: $&#123;NAMESPACE&#125;/$&#123;NAME&#125;</span></span><br><span class="line">	namespace, name, err := cache.SplitMetaNamespaceKey(key)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> err</span><br><span class="line">	&#125;</span><br><span class="line">  <span class="comment">// 获取到rs对象</span></span><br><span class="line">	rs, err := rsc.rsLister.ReplicaSets(namespace).Get(name)</span><br><span class="line">	<span class="keyword">if</span> errors.IsNotFound(err) &#123;</span><br><span class="line">		klog.V(<span class="number">4</span>).Infof(<span class="string">"%v %v has been deleted"</span>, rsc.Kind, key)</span><br><span class="line">		rsc.expectations.DeleteExpectations(key)</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> err</span><br><span class="line">	&#125;</span><br><span class="line">  </span><br><span class="line">  <span class="comment">// 判断rs是否实现所声明的期望状态，这里SatisfiedExpectations是使用expectations机制来判断这个rs是否满足期望状态。</span></span><br><span class="line">	rsNeedsSync := rsc.expectations.SatisfiedExpectations(key)</span><br><span class="line">	selector, err := metav1.LabelSelectorAsSelector(rs.Spec.Selector)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		utilruntime.HandleError(fmt.Errorf(<span class="string">"Error converting pod selector to selector: %v"</span>, err))</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// list all pods to include the pods that don't match the rs`s selector</span></span><br><span class="line">	<span class="comment">// anymore but has the stale controller ref.</span></span><br><span class="line">	<span class="comment">// <span class="doctag">TODO:</span> Do the List and Filter in a single pass, or use an index.</span></span><br><span class="line">  <span class="comment">// 取出所有的的pod，labels.Everything()取到的是空selector，即不使用label selector，取全部pod</span></span><br><span class="line">	allPods, err := rsc.podLister.Pods(rs.Namespace).List(labels.Everything())</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> err</span><br><span class="line">	&#125;</span><br><span class="line">  </span><br><span class="line">	<span class="comment">// Ignore inactive pods.</span></span><br><span class="line">  <span class="comment">// 去除 inactive状态的pod</span></span><br><span class="line">	filteredPods := controller.FilterActivePods(allPods)</span><br><span class="line"></span><br><span class="line">  </span><br><span class="line">  <span class="comment">// 根据rs和selector来选择受此rs版本管理的pod</span></span><br><span class="line">	filteredPods, err = rsc.claimPods(rs, selector, filteredPods)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> err</span><br><span class="line">	&#125;</span><br><span class="line">  </span><br><span class="line">  </span><br><span class="line">	<span class="keyword">var</span> manageReplicasErr error</span><br><span class="line">  <span class="comment">// 如果rs未达到期望状态，则对副本进行管理，以使rs满足声明的期望状态</span></span><br><span class="line">	<span class="keyword">if</span> rsNeedsSync &amp;&amp; rs.DeletionTimestamp == <span class="literal">nil</span> &#123;</span><br><span class="line">    <span class="comment">// 最重要的函数manageReplicas，未达期望时，管理rs对应的pod(新增/删除)</span></span><br><span class="line">		manageReplicasErr = rsc.manageReplicas(filteredPods, rs)</span><br><span class="line">	&#125;</span><br><span class="line">  </span><br><span class="line">	rs = rs.DeepCopy()</span><br><span class="line">	newStatus := calculateStatus(rs, filteredPods, manageReplicasErr)</span><br><span class="line">  </span><br><span class="line">  <span class="comment">// 只要有对应pod的更新，则需要更新rs的status字段</span></span><br><span class="line">	updatedRS, err := updateReplicaSetStatus(rsc.kubeClient.AppsV1().ReplicaSets(rs.Namespace), rs, newStatus)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="comment">// Multiple things could lead to this update failing. Requeuing the replica set ensures</span></span><br><span class="line">		<span class="comment">// Returning an error causes a requeue without forcing a hotloop</span></span><br><span class="line">		<span class="keyword">return</span> err</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 当指定了MinReadySeconds时，即使pod 已经是ready状态了，但也不会视为Available，需要等待MinReadySeconds后再来刷新rs的状态。因此，enqueueReplicaSetAfter方法，异步等待MinReadySeconds后，把该rs重新压入work queue队列中</span></span><br><span class="line">	<span class="keyword">if</span> manageReplicasErr == <span class="literal">nil</span> &amp;&amp; updatedRS.Spec.MinReadySeconds &gt; <span class="number">0</span> &amp;&amp;</span><br><span class="line">		updatedRS.Status.ReadyReplicas == *(updatedRS.Spec.Replicas) &amp;&amp;</span><br><span class="line">		updatedRS.Status.AvailableReplicas != *(updatedRS.Spec.Replicas) &#123;</span><br><span class="line">		rsc.enqueueReplicaSetAfter(updatedRS, time.Duration(updatedRS.Spec.MinReadySeconds)*time.Second)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> manageReplicasErr</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>划重点，两个重要的函数：<strong>SatisfiedExpectations</strong>(判断是否满足sync条件) / <strong>manageReplicas</strong>(sync后续的副本pod新增、删除操作)。分别来看看</p>
+<h4 id="SatisfiedExpectations函数"><a href="#SatisfiedExpectations函数" class="headerlink" title="SatisfiedExpectations函数"></a>SatisfiedExpectations函数</h4><p>在此之前，必须先了解一下rs controller(后面简称rsc)的Expectations机制。rsc会将每一个rs的期望状态(比如期望新增3个副本)保存在本地缓存中，在sync执行之前，会对期望状态进行条件判断，满足条件才会真正进行sync操作。</p>
+<p>来看看SatisfiedExpectations函数的逻辑：</p>
+<p><code>pkg/controller/controller_utils.go:181</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(r *ControllerExpectations)</span> <span class="title">SatisfiedExpectations</span><span class="params">(controllerKey <span class="keyword">string</span>)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">  <span class="comment">// 若此key存在Expectations期望状态</span></span><br><span class="line">	<span class="keyword">if</span> exp, exists, err := r.GetExpectations(controllerKey); exists &#123;</span><br><span class="line">    <span class="comment">// Expectations期望状态达成或者过期，则需要sync</span></span><br><span class="line">		<span class="keyword">if</span> exp.Fulfilled() &#123;</span><br><span class="line">			klog.V(<span class="number">4</span>).Infof(<span class="string">"Controller expectations fulfilled %#v"</span>, exp)</span><br><span class="line">			<span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">		&#125; <span class="keyword">else</span> <span class="keyword">if</span> exp.isExpired() &#123;</span><br><span class="line">			klog.V(<span class="number">4</span>).Infof(<span class="string">"Controller expectations expired %#v"</span>, exp)</span><br><span class="line">			<span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">		&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      <span class="comment">// 存在期望状态但未达成，则无需sync。因为后面的handler在处理资源增删的时候会来新建和修改Expectations，说明当前正在接近期望状态中，所以本次无需再sync</span></span><br><span class="line">			klog.V(<span class="number">4</span>).Infof(<span class="string">"Controller still waiting on expectations %#v"</span>, exp)</span><br><span class="line">			<span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">		&#125;</span><br><span class="line">	&#125; </span><br><span class="line">  <span class="comment">// 不存在Expectations(新增的资源对象)，或者获取Expectations出错，则视为需要执行sync</span></span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		klog.V(<span class="number">2</span>).Infof(<span class="string">"Error encountered while checking expectations %#v, forcing sync"</span>, err)</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		klog.V(<span class="number">4</span>).Infof(<span class="string">"Controller %v either never recorded expectations, or the ttl expired."</span>, controllerKey)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="manageReplicas函数"><a href="#manageReplicas函数" class="headerlink" title="manageReplicas函数"></a>manageReplicas函数</h4><p>==&gt; <code>pkg/controller/replicaset/replica_set.go:459</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(rsc *ReplicaSetController)</span> <span class="title">manageReplicas</span><span class="params">(filteredPods []*v1.Pod, rs *apps.ReplicaSet)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">   <span class="comment">// rs当前管理的pod数量 与 rs声明指定pod的数量 的差量</span></span><br><span class="line">   diff := <span class="built_in">len</span>(filteredPods) - <span class="keyword">int</span>(*(rs.Spec.Replicas))</span><br><span class="line">   rsKey, err := controller.KeyFunc(rs)</span><br><span class="line">   <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">      utilruntime.HandleError(fmt.Errorf(<span class="string">"Couldn't get key for %v %#v: %v"</span>, rsc.Kind, rs, err))</span><br><span class="line">      <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">   &#125;</span><br><span class="line">   <span class="comment">// 当 rs当前管理的pod数量 小于 rs声明指定pod的数量 时，说明应该继续增加pod</span></span><br><span class="line">   <span class="keyword">if</span> diff &lt; <span class="number">0</span> &#123;</span><br><span class="line">      diff *= <span class="number">-1</span></span><br><span class="line">      <span class="comment">// 每次新增数量以突发增加数量burstReplicas为上限</span></span><br><span class="line">      <span class="keyword">if</span> diff &gt; rsc.burstReplicas &#123;</span><br><span class="line">         diff = rsc.burstReplicas</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="comment">// 创建ExpectCreations期望</span></span><br><span class="line">      rsc.expectations.ExpectCreations(rsKey, diff)</span><br><span class="line">      klog.V(<span class="number">2</span>).Infof(<span class="string">"Too few replicas for %v %s/%s, need %d, creating %d"</span>, rsc.Kind, rs.Namespace, rs.Name, *(rs.Spec.Replicas), diff)</span><br><span class="line">     </span><br><span class="line">      <span class="comment">// slowStartBatch用来以指数级批量启动pod, 其中controller.SlowStartInitialBatchSize默认值为1，作为底数。</span></span><br><span class="line">      successfulCreations, err := slowStartBatch(diff, controller.SlowStartInitialBatchSize, <span class="function"><span class="keyword">func</span><span class="params">()</span> <span class="title">error</span></span> &#123;</span><br><span class="line">         <span class="comment">// 创建单个pod的函数 CreatePodsWithControllerRef</span></span><br><span class="line">         err := rsc.podControl.CreatePodsWithControllerRef(rs.Namespace, &amp;rs.Spec.Template, rs, metav1.NewControllerRef(rs, rsc.GroupVersionKind))</span><br><span class="line">         <span class="keyword">if</span> err != <span class="literal">nil</span> &amp;&amp; errors.IsTimeout(err) &#123;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">         &#125;</span><br><span class="line">         <span class="keyword">return</span> err</span><br><span class="line">      &#125;)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">      <span class="keyword">if</span> skippedPods := diff - successfulCreations; skippedPods &gt; <span class="number">0</span> &#123;</span><br><span class="line">         klog.V(<span class="number">2</span>).Infof(<span class="string">"Slow-start failure. Skipping creation of %d pods, decrementing expectations for %v %v/%v"</span>, skippedPods, rsc.Kind, rs.Namespace, rs.Name)</span><br><span class="line">         <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; skippedPods; i++ &#123;</span><br><span class="line">            <span class="comment">// Decrement the expected number of creates because the informer won't observe this pod</span></span><br><span class="line">            rsc.expectations.CreationObserved(rsKey)</span><br><span class="line">         &#125;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">return</span> err</span><br><span class="line">     </span><br><span class="line">     <span class="comment">// 当 rs当前管理的pod数量 大于 rs声明指定pod的数量 时，说明应该减少pod</span></span><br><span class="line">   &#125; <span class="keyword">else</span> <span class="keyword">if</span> diff &gt; <span class="number">0</span> &#123;</span><br><span class="line">      <span class="keyword">if</span> diff &gt; rsc.burstReplicas &#123;</span><br><span class="line">         diff = rsc.burstReplicas</span><br><span class="line">      &#125;</span><br><span class="line">      klog.V(<span class="number">2</span>).Infof(<span class="string">"Too many replicas for %v %s/%s, need %d, deleting %d"</span>, rsc.Kind, rs.Namespace, rs.Name, *(rs.Spec.Replicas), diff)</span><br><span class="line"></span><br><span class="line">      <span class="comment">// 获取需要删除的pod</span></span><br><span class="line">      podsToDelete := getPodsToDelete(filteredPods, diff)</span><br><span class="line">      <span class="comment">// 修改rs的期望状态，在期望中剔除将要删除的pod</span></span><br><span class="line">      rsc.expectations.ExpectDeletions(rsKey, getPodKeys(podsToDelete))</span><br><span class="line"></span><br><span class="line">      errCh := <span class="built_in">make</span>(<span class="keyword">chan</span> error, diff)</span><br><span class="line">      <span class="keyword">var</span> wg sync.WaitGroup</span><br><span class="line">      wg.Add(diff)</span><br><span class="line">      <span class="comment">// 并发删除目标pod</span></span><br><span class="line">      <span class="keyword">for</span> _, pod := <span class="keyword">range</span> podsToDelete &#123;</span><br><span class="line">         <span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">(targetPod *v1.Pod)</span></span> &#123;</span><br><span class="line">            <span class="keyword">defer</span> wg.Done()</span><br><span class="line">            <span class="keyword">if</span> err := rsc.podControl.DeletePod(rs.Namespace, targetPod.Name, rs); err != <span class="literal">nil</span> &#123;</span><br><span class="line">               <span class="comment">// Decrement the expected number of deletes because the informer won't observe this deletion</span></span><br><span class="line">               podKey := controller.PodKey(targetPod)</span><br><span class="line">               klog.V(<span class="number">2</span>).Infof(<span class="string">"Failed to delete %v, decrementing expectations for %v %s/%s"</span>, podKey, rsc.Kind, rs.Namespace, rs.Name)</span><br><span class="line">               rsc.expectations.DeletionObserved(rsKey, podKey)</span><br><span class="line">               errCh &lt;- err</span><br><span class="line">            &#125;</span><br><span class="line">         &#125;(pod)</span><br><span class="line">      &#125;</span><br><span class="line">      wg.Wait()</span><br><span class="line"></span><br><span class="line">      <span class="keyword">select</span> &#123;</span><br><span class="line">      <span class="keyword">case</span> err := &lt;-errCh:</span><br><span class="line">         <span class="comment">// all errors have been reported before and they're likely to be the same, so we'll only return the first one we hit.</span></span><br><span class="line">         <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> err</span><br><span class="line">         &#125;</span><br><span class="line">      <span class="keyword">default</span>:</span><br><span class="line">      &#125;</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这个函数即是实际操控管理pod副本数量的函数，其中的slowStartBatch批量启动pod的功能比较有意思，来看看。</p>
+<h4 id="批量启动pod"><a href="#批量启动pod" class="headerlink" title="批量启动pod"></a>批量启动pod</h4><p><code>pkg/controller/replicaset/replica_set.go:658</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">slowStartBatch</span><span class="params">(count <span class="keyword">int</span>, initialBatchSize <span class="keyword">int</span>, fn <span class="keyword">func</span>()</span> <span class="title">error</span>) <span class="params">(<span class="keyword">int</span>, error)</span></span> &#123;</span><br><span class="line">   <span class="comment">// 剩余要执行的数量</span></span><br><span class="line">   remaining := count</span><br><span class="line">   <span class="comment">// 累计成功执行的数量</span></span><br><span class="line">   successes := <span class="number">0</span></span><br><span class="line">  <span class="comment">// batchSize是每次批量执行的数量，从initialBatchSize(1)和剩余数量中取最小值。每次循环执行成功后，batchSize乘以2，以指数级扩充。</span></span><br><span class="line">   <span class="keyword">for</span> batchSize := integer.IntMin(remaining, initialBatchSize); batchSize &gt; <span class="number">0</span>; batchSize = integer.IntMin(<span class="number">2</span>*batchSize, remaining) &#123;</span><br><span class="line">      errCh := <span class="built_in">make</span>(<span class="keyword">chan</span> error, batchSize)</span><br><span class="line">      <span class="keyword">var</span> wg sync.WaitGroup</span><br><span class="line">      wg.Add(batchSize)</span><br><span class="line">      <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; batchSize; i++ &#123;</span><br><span class="line">         <span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">            <span class="keyword">defer</span> wg.Done()</span><br><span class="line">            <span class="keyword">if</span> err := fn(); err != <span class="literal">nil</span> &#123;</span><br><span class="line">               errCh &lt;- err</span><br><span class="line">            &#125;</span><br><span class="line">         &#125;()</span><br><span class="line">      &#125;</span><br><span class="line">      wg.Wait()</span><br><span class="line">      curSuccesses := batchSize - <span class="built_in">len</span>(errCh)</span><br><span class="line">      successes += curSuccesses</span><br><span class="line">      <span class="comment">// 某一轮循环出错时，跳出循环，后续的不再执行。</span></span><br><span class="line">      <span class="keyword">if</span> <span class="built_in">len</span>(errCh) &gt; <span class="number">0</span> &#123;</span><br><span class="line">         <span class="keyword">return</span> successes, &lt;-errCh</span><br><span class="line">      &#125;</span><br><span class="line">      remaining -= batchSize</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="keyword">return</span> successes, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="ReplicaSetController工作流程总结"><a href="#ReplicaSetController工作流程总结" class="headerlink" title="ReplicaSetController工作流程总结"></a>ReplicaSetController工作流程总结</h3><p>总结一下，在出现新版本的rs后，rsc按照以下步骤进行工作：</p>
+<p>1.通过SatisfiedExpectations函数，发现expectations期望状态本地缓存中不存在此rs key，因此返回true，需要sync</p>
+<p>2.通过manageReplicas管理pod，新增或删除</p>
+<p>3.判断pod副本数是多了还是少了，多则要删，少则要增</p>
+<p>4.增删之前创建expectations对象并设置add / del值</p>
+<p>5.slowStartBatch新增 / 并发删除 pod</p>
+<p>6.更新expection</p>
+<p>expections缓存机制，在运行的pod副本数在向声明指定的副本数收敛之时，很好地避免了频繁的informer数据查询，以及可能随之而来的数据更新不及时的问题，这个机制设计巧妙贯穿整个rsc工作过程，也是不太易于理解之处。</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div id="reward-container">
+  <div>赏一瓶快乐回宅水吧～</div>
+  <button id="reward-button" disable="enable" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+
+    
+      
+      
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/reward/wechatpay.png" alt="丨ywq丨 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+      
+      
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/reward/alipay.png" alt="丨ywq丨 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        
+
+
+
+
+  
+
+
+
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>丨ywq丨</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    
+    <a href="http://blog.upweto.top/2020/03/17/Kubernetes源码学习-Controller-P4-ReplicaSet-Controller.html" title="Kubernetes源码学习-Controller-P4-ReplicaSet Controller">http://blog.upweto.top/2020/03/17/Kubernetes源码学习-Controller-P4-ReplicaSet-Controller.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li>
+</ul>
+
+      </div>
+    
+    <div>
+      
+        <div>
+    
+        <div style="text-align:center;color: #ccc;font-size:16px;">-------------本文结束<i class="fa fa-heart"></i>感谢您的阅读-------------</div>
+    
+</div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Kubernetes/" rel="tag"><i class="fa fa-tag"></i> Kubernetes</a>
+          
+            <a href="/tags/Golang/" rel="tag"><i class="fa fa-tag"></i> Golang</a>
+          
+            <a href="/tags/读源码/" rel="tag"><i class="fa fa-tag"></i> 读源码</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/01/30/Kubernetes源码学习-Controller-P3-Controller分类与Deployment Controller.html" rel="next" title="Kubernetes源码学习-Controller-P3-Controller分类与Deployment Controller">
+                <i class="fa fa-chevron-left"></i> Kubernetes源码学习-Controller-P3-Controller分类与Deployment Controller
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC80NzY0Ny8yNDE0NQ=="></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="丨ywq丨">
+            
+              <p class="site-author-name" itemprop="name">丨ywq丨</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives">
+                
+                    <span class="site-state-item-count">82</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                      <a href="/tags">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">15</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/yinwenqin" title="GitHub &rarr; https://github.com/yinwenqin" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://blog.csdn.net/ywq935" title="CSDN &rarr; https://blog.csdn.net/ywq935" rel="noopener" target="_blank"><i class="fa fa-fw fa-globe"></i>CSDN</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-book"></i>
+                推荐阅读
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.upweto.top/gitbooks/useKubernetes/" title="http://blog.upweto.top/gitbooks/useKubernetes/">kubernetes使用指南</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.upweto.top/gitbooks/kubeSourceCodeNote/" title="http://blog.upweto.top/gitbooks/kubeSourceCodeNote/">kubernetes源码笔记</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#P4-ReplicaSet-Controller"><span class="nav-number">1.</span> <span class="nav-text">P4-ReplicaSet Controller</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ReplicaSet-Controller"><span class="nav-number">1.2.</span> <span class="nav-text">ReplicaSet Controller</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#初始化"><span class="nav-number">1.2.1.</span> <span class="nav-text">初始化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#创建ReplicaSetController"><span class="nav-number">1.2.2.</span> <span class="nav-text">创建ReplicaSetController</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ReplicaSetController-Run方法"><span class="nav-number">1.2.3.</span> <span class="nav-text">ReplicaSetController Run方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#工作逻辑"><span class="nav-number">1.2.4.</span> <span class="nav-text">工作逻辑</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#SatisfiedExpectations函数"><span class="nav-number">1.2.4.1.</span> <span class="nav-text">SatisfiedExpectations函数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#manageReplicas函数"><span class="nav-number">1.2.4.2.</span> <span class="nav-text">manageReplicas函数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#批量启动pod"><span class="nav-number">1.2.4.3.</span> <span class="nav-text">批量启动pod</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ReplicaSetController工作流程总结"><span class="nav-number">1.2.5.</span> <span class="nav-text">ReplicaSetController工作流程总结</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" style=" text-align:center;">&copy; 2017 – <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ywq</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"> 站点字数合计:</i>
+    </span>
+    
+    <span title="站点总字数">677k</span>
+  
+  
+</div>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+<div class="run_time" style=" text-align:center;">
+  <span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
+  <script>
+    var now = new Date(); 
+    function createtime() { 
+        var grt= new Date("08/23/2018 10:00:00");//此处修改你的建站时间或者网站上线时间 
+        now.setTime(now.getTime()+250); 
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days); 
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours); 
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum); 
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;} 
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum); 
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;} 
+        document.getElementById("timeDate").innerHTML = "本站已安全运行 "+dnum+" 天 "; 
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒"; 
+    } 
+    setInterval("createtime()",250);
+  </script>
+</div>
+
+        
+<div class="busuanzi-count" style=" text-align:center;">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-user"></i>
+    </span>
+    <span class="site-uv" title="总访客量">
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span> 人
+    </span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+  
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-eye"></i>
+    </span>
+    <span class="site-pv" title="总访问量">
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span> 次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+  
+    
+    
+      
+    
+  
+  <script color="black" opacity="0.7" zindex="-1" count="140" src="//cdn.jsdelivr.net/gh/theme-next/theme-next-canvas-nest@1.0.0/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/fancybox/source/jquery.fancybox.pack.js"></script>
+
+
+  
+
+
+  <script src="/js/utils.js?v=7.1.1"></script>
+
+  <script src="/js/motion.js?v=7.1.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/schemes/muse.js?v=7.1.1"></script>
+
+
+
+
+  
+  <script src="/js/scrollspy.js?v=7.1.1"></script>
+<script src="/js/post-details.js?v=7.1.1"></script>
+
+
+
+  
+
+
+  <script src="/js/next-boot.js?v=7.1.1"></script>
+
+
+  
+
+  
+
+  
+  
+  
+
+  
+
+  
+  
+  
+
+
+  
+
+
+  
+    <script>
+  window.livereOptions = {
+    refer: '2020/03/17/Kubernetes源码学习-Controller-P4-ReplicaSet-Controller.html'
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+</script>
+
+  
+
+
+  
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url).replace(/\/{2,}/g, '/');
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x"></i></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x"></i></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+  
+  <script src="/lib/bookmark/bookmark.min.js?v=1.0"></script>
+  <script>
+  
+    bookmark.scrollToMark('auto', "#更多");
+  
+  </script>
+
+
+  
+
+  
+
+  
+
+</body>
+</html>
+<!-- 页面点击小红心 -->
+<script type="text/javascript" src="/js/src/clicklove.js"></script>
