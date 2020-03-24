@@ -1,0 +1,906 @@
+
+<!DOCTYPE HTML>
+<html lang="zh-hans" >
+    <head>
+        <meta charset="UTF-8">
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <title>2.4. ReplicaSet Controller · Kubernetes源码学习</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="description" content="">
+        <meta name="generator" content="GitBook 3.2.3">
+        <meta name="author" content="ywq">
+        
+        
+    
+    <link rel="stylesheet" href="../gitbook/style.css">
+
+    
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-anchors/plugin.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-expandable-chapters/expandable-chapters.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-splitter/splitter.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-page-treeview/style.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-back-to-top-button/plugin.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-highlight/website.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-search/search.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-fontsettings/website.css">
+                
+            
+        
+
+    
+
+    
+        
+    
+
+        
+    
+    
+    <meta name="HandheldFriendly" content="true"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="../gitbook/images/apple-touch-icon-precomposed-152.png">
+    <link rel="shortcut icon" href="../gitbook/images/favicon.ico" type="image/x-icon">
+
+    
+    
+    <link rel="prev" href="Kubernetes源码学习-Controller-P3-Controller分类与Deployment Controller.html" />
+    
+
+    </head>
+    <body>
+        
+<div class="book">
+    <div class="book-summary">
+        
+            
+<div id="book-search-input" role="search">
+    <input type="text" placeholder="输入并搜索" />
+</div>
+
+            
+                <nav role="navigation">
+                
+
+
+<ul class="summary">
+    
+    
+
+    
+
+    
+        
+        <li class="header">《Kubernetes 源码阅读笔记》</li>
+        
+        
+    
+
+    
+        
+        <li class="header">Part I-写在前面</li>
+        
+        
+    
+        <li class="chapter " data-level="2.1" data-path="../">
+            
+                <a href="../">
+            
+                    
+                    1. 总览篇
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Part II-核心组件</li>
+        
+        
+    
+        <li class="chapter " data-level="3.1" data-path="../scheduler/">
+            
+                <a href="../scheduler/">
+            
+                    
+                    2. Scheduler
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="3.1.1" data-path="../scheduler/Kubernetes源码学习-Scheduler-P1-调度器入口篇.html">
+            
+                <a href="../scheduler/Kubernetes源码学习-Scheduler-P1-调度器入口篇.html">
+            
+                    
+                    2.1. 调度器入口
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.1.2" data-path="../scheduler/Kubernetes源码学习-Scheduler-P2-调度器框架.html">
+            
+                <a href="../scheduler/Kubernetes源码学习-Scheduler-P2-调度器框架.html">
+            
+                    
+                    2.2. 调度器框架
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.1.3" data-path="../scheduler/Kubernetes源码学习-Scheduler-P3-Node筛选算法.html">
+            
+                <a href="../scheduler/Kubernetes源码学习-Scheduler-P3-Node筛选算法.html">
+            
+                    
+                    2.3. Node筛选算法
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.1.4" data-path="../scheduler/Kubernetes源码学习-Scheduler-P4-Node优先级算法.html">
+            
+                <a href="../scheduler/Kubernetes源码学习-Scheduler-P4-Node优先级算法.html">
+            
+                    
+                    2.4. Node优先级算法
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.1.5" data-path="../scheduler/Kubernetes源码学习-Scheduler-P5-Pod优先级抢占调度.html">
+            
+                <a href="../scheduler/Kubernetes源码学习-Scheduler-P5-Pod优先级抢占调度.html">
+            
+                    
+                    2.5 Pod优先级调度
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="3.2" data-path="./">
+            
+                <a href="./">
+            
+                    
+                    3. Controller
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="3.2.1" data-path="Kubernetes源码学习-Controller-P1-多实例leader选举.html">
+            
+                <a href="Kubernetes源码学习-Controller-P1-多实例leader选举.html">
+            
+                    
+                    2.1. 多实例leader选举
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.2.2" data-path="Kubernetes源码学习-Controller-P2-Controller与informer.html">
+            
+                <a href="Kubernetes源码学习-Controller-P2-Controller与informer.html">
+            
+                    
+                    2.2. Controller与informer
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.2.3" data-path="Kubernetes源码学习-Controller-P3-Controller分类与Deployment Controller.html">
+            
+                <a href="Kubernetes源码学习-Controller-P3-Controller分类与Deployment Controller.html">
+            
+                    
+                    2.3. Controller分类与Deployment Controller
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter active" data-level="3.2.4" data-path="Kubernetes源码学习-Controller-P4-ReplicaSet Controller.html">
+            
+                <a href="Kubernetes源码学习-Controller-P4-ReplicaSet Controller.html">
+            
+                    
+                    2.4. ReplicaSet Controller
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="3.3" >
+            
+                <span>
+            
+                    
+                    [4. ApiServer]
+            
+                </span>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="3.3.1" >
+            
+                <span>
+            
+                    
+                    [4.1 待补充]
+            
+                </span>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="3.4" >
+            
+                <span>
+            
+                    
+                    [5. Kubelet]
+            
+                </span>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="3.4.1" >
+            
+                <span>
+            
+                    
+                    [5.1 待补充]
+            
+                </span>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+
+    <li class="divider"></li>
+
+    <li>
+        <a href="https://www.gitbook.com" target="blank" class="gitbook-link">
+            本书使用 GitBook 发布
+        </a>
+    </li>
+</ul>
+
+
+                </nav>
+            
+        
+    </div>
+
+    <div class="book-body">
+        
+            <div class="body-inner">
+                
+                    
+
+<div class="book-header" role="navigation">
+    
+
+    <!-- Title -->
+    <h1>
+        <i class="fa fa-circle-o-notch fa-spin"></i>
+        <a href=".." >2.4. ReplicaSet Controller</a>
+    </h1>
+</div>
+
+
+
+
+                    <div class="page-wrapper" tabindex="-1" role="main">
+                        <div class="page-inner">
+                            
+<div id="book-search-results">
+    <div class="search-noresults">
+    
+                                <section class="normal markdown-section">
+                                
+                                <div class="treeview__container"><ul>
+<li><div><a href="#p4-replicaset-controller">P4-ReplicaSet Controller</a><i class="level__parent level__item level__parent--opened" state="opened" onclick="var curState = this.getAttribute(&apos;state&apos;);var nextState = curState === &apos;opened&apos; ? &apos;hidden&apos; : &apos;opened&apos;;this.setAttribute(&apos;state&apos;, nextState);this.className = this.className.split(curState).join(nextState);var list = this.parentNode.nextElementSibling;if (nextState === &apos;hidden&apos;) {    list.style.display = &apos;none&apos;;} else {    list.style.display = &apos;block&apos;;}"></i></div>
+<ul>
+<li><div><a href="#&#x524D;&#x8A00;">&#x524D;&#x8A00;</a><i></i></div></li>
+<li><div><a href="#replicaset-controller">ReplicaSet Controller</a><i class="level__parent level__item level__parent--opened" state="opened" onclick="var curState = this.getAttribute(&apos;state&apos;);var nextState = curState === &apos;opened&apos; ? &apos;hidden&apos; : &apos;opened&apos;;this.setAttribute(&apos;state&apos;, nextState);this.className = this.className.split(curState).join(nextState);var list = this.parentNode.nextElementSibling;if (nextState === &apos;hidden&apos;) {    list.style.display = &apos;none&apos;;} else {    list.style.display = &apos;block&apos;;}"></i></div>
+<ul>
+<li><div><a href="#&#x521D;&#x59CB;&#x5316;">&#x521D;&#x59CB;&#x5316;</a><i></i></div></li>
+<li><div><a href="#&#x521B;&#x5EFA;replicasetcontroller">&#x521B;&#x5EFA;ReplicaSetController</a><i></i></div></li>
+<li><div><a href="#replicasetcontroller-run&#x65B9;&#x6CD5;">ReplicaSetController Run&#x65B9;&#x6CD5;</a><i></i></div></li>
+<li><div><a href="#&#x5DE5;&#x4F5C;&#x903B;&#x8F91;">&#x5DE5;&#x4F5C;&#x903B;&#x8F91;</a><i class="level__parent level__item level__parent--opened" state="opened" onclick="var curState = this.getAttribute(&apos;state&apos;);var nextState = curState === &apos;opened&apos; ? &apos;hidden&apos; : &apos;opened&apos;;this.setAttribute(&apos;state&apos;, nextState);this.className = this.className.split(curState).join(nextState);var list = this.parentNode.nextElementSibling;if (nextState === &apos;hidden&apos;) {    list.style.display = &apos;none&apos;;} else {    list.style.display = &apos;block&apos;;}"></i></div>
+<ul>
+<li><div><a href="#satisfiedexpectations&#x51FD;&#x6570;">SatisfiedExpectations&#x51FD;&#x6570;</a><i></i></div></li>
+<li><div><a href="#managereplicas&#x51FD;&#x6570;">manageReplicas&#x51FD;&#x6570;</a><i></i></div></li>
+<li><div><a href="#&#x6279;&#x91CF;&#x542F;&#x52A8;pod">&#x6279;&#x91CF;&#x542F;&#x52A8;pod</a><i></i></div></li>
+</ul></li>
+<li><div><a href="#replicasetcontroller&#x5DE5;&#x4F5C;&#x6D41;&#x7A0B;&#x603B;&#x7ED3;">ReplicaSetController&#x5DE5;&#x4F5C;&#x6D41;&#x7A0B;&#x603B;&#x7ED3;</a><i></i></div></li>
+</ul></li>
+</ul></li>
+</ul>
+</div>
+
+
+<h1 id="p4-replicaset-controller"><a name="p4-replicaset-controller" class="plugin-anchor" href="#p4-replicaset-controller"><i class="fa fa-link" aria-hidden="true"></i></a>P4-ReplicaSet Controller</h1>
+<h2 id="&#x524D;&#x8A00;"><a name="&#x524D;&#x8A00;" class="plugin-anchor" href="#&#x524D;&#x8A00;"><i class="fa fa-link" aria-hidden="true"></i></a>&#x524D;&#x8A00;</h2>
+<p>&#x5728;&#x4E0A;&#x4E00;&#x7BC7;&#x6587;&#x7AE0;&#x4E2D;&#xFF0C;&#x5BF9;deployment controller&#x7684;&#x5DE5;&#x4F5C;&#x6A21;&#x5F0F;&#x8FDB;&#x884C;&#x4E86;&#x8BE6;&#x7EC6;&#x5730;&#x5206;&#x6790;:</p>
+<p><a href="https://github.com/yinwenqin/kubeSourceCodeNote/blob/master/controller/Kubernetes&#x6E90;&#x7801;&#x5B66;&#x4E60;-Controller-P3-Controller&#x5206;&#x7C7B;&#x4E0E;Deployment Controller.md" target="_blank">Controller-P3-Controller</a></p>
+<p>&#x5206;&#x6790;&#x540E;&#x5F97;&#x77E5;&#xFF0C;deployment controller&#x66F4;&#x591A;&#x7684;&#x662F;&#x5BF9;&#x6BCF;&#x4E2A;&#x76F8;&#x5E94;&#x7248;&#x672C;&#x7684;replicaset&#x526F;&#x672C;&#x6570;&#x8FDB;&#x884C;&#x7BA1;&#x7406;&#xFF0C;&#x800C;&#x4E0D;&#x6D89;&#x53CA;&#x76F4;&#x63A5;&#x5BF9;pod&#x7684;&#x7BA1;&#x7406;&#xFF0C;&#x56E0;&#x6B64;&#xFF0C;&#x627F;&#x63A5;&#x4E0A;&#x8282;&#xFF0C;&#x672C;&#x7AE0;&#x6765;&#x5206;&#x6790;replicaSet Controller&#x7684;&#x6E90;&#x7801;.</p>
+<h2 id="replicaset-controller"><a name="replicaset-controller" class="plugin-anchor" href="#replicaset-controller"><i class="fa fa-link" aria-hidden="true"></i></a>ReplicaSet Controller</h2>
+<h3 id="&#x521D;&#x59CB;&#x5316;"><a name="&#x521D;&#x59CB;&#x5316;" class="plugin-anchor" href="#&#x521D;&#x59CB;&#x5316;"><i class="fa fa-link" aria-hidden="true"></i></a>&#x521D;&#x59CB;&#x5316;</h3>
+<p>&#x53C2;&#x7167;&#x4E0A;&#x8282;&#x4E00;&#x6837;&#xFF0C;&#x76F4;&#x63A5;&#x6765;&#x5230;&#x5404;&#x7C7B;controller&#x521D;&#x59CB;&#x5316;&#x7684;&#x51FD;&#x6570;:</p>
+<p><code>cmd/kube-controller-manager/app/controllermanager.go:343</code></p>
+<pre><code class="lang-go">controllers[<span class="hljs-string">&quot;replicaset&quot;</span>] = startReplicaSetController
+</code></pre>
+<p>==&gt; <code>cmd/kube-controller-manager/app/apps.go:69</code></p>
+<pre><code class="lang-go">    <span class="hljs-keyword">go</span> replicaset.NewReplicaSetController(
+    <span class="hljs-comment">// replicaSet controller&#x53EA;&#x5173;&#x6CE8;ReplicaSets&#x548C;Pod&#x8FD9;&#x4E24;&#x79CD;&#x8D44;&#x6E90;&#x3002;</span>
+        ctx.InformerFactory.Apps().V1().ReplicaSets(),
+        ctx.InformerFactory.Core().V1().Pods(),
+        ctx.ClientBuilder.ClientOrDie(<span class="hljs-string">&quot;replicaset-controller&quot;</span>),
+        replicaset.BurstReplicas,
+    ).Run(<span class="hljs-keyword">int</span>(ctx.ComponentConfig.ReplicaSetController.ConcurrentRSSyncs), ctx.Stop)
+</code></pre>
+<h3 id="&#x521B;&#x5EFA;replicasetcontroller"><a name="&#x521B;&#x5EFA;replicasetcontroller" class="plugin-anchor" href="#&#x521B;&#x5EFA;replicasetcontroller"><i class="fa fa-link" aria-hidden="true"></i></a>&#x521B;&#x5EFA;ReplicaSetController</h3>
+<p>&#x5148;&#x6765;&#x770B;&#x770B;NewReplicaSetController&#x521B;&#x5EFA;&#x7684;&#x8FC7;&#x7A0B;:</p>
+<p>==&gt; <code>pkg/controller/replicaset/replica_set.go:109</code></p>
+<pre><code class="lang-go"><span class="hljs-keyword">func</span> NewReplicaSetController(rsInformer appsinformers.ReplicaSetInformer, podInformer coreinformers.PodInformer, kubeClient clientset.Interface, burstReplicas <span class="hljs-keyword">int</span>) *ReplicaSetController {
+    eventBroadcaster := record.NewBroadcaster()
+    eventBroadcaster.StartLogging(klog.Infof)
+    eventBroadcaster.StartRecordingToSink(&amp;v1core.EventSinkImpl{Interface: kubeClient.CoreV1().Events(<span class="hljs-string">&quot;&quot;</span>)})
+  <span class="hljs-comment">// NewBaseController&#x65B9;&#x6CD5;&#x5F80;&#x4E0B;&#x770B;</span>
+    <span class="hljs-keyword">return</span> NewBaseController(rsInformer, podInformer, kubeClient, burstReplicas,
+        apps.SchemeGroupVersion.WithKind(<span class="hljs-string">&quot;ReplicaSet&quot;</span>),
+        <span class="hljs-string">&quot;replicaset_controller&quot;</span>,
+        <span class="hljs-string">&quot;replicaset&quot;</span>,
+        controller.RealPodControl{
+            KubeClient: kubeClient,
+            Recorder:   eventBroadcaster.NewRecorder(scheme.Scheme, v1.EventSource{Component: <span class="hljs-string">&quot;replicaset-controller&quot;</span>}),
+        },
+    )
+}
+
+<span class="hljs-comment">// NewBaseController is the implementation of NewReplicaSetController with additional injected</span>
+<span class="hljs-comment">// parameters so that it can also serve as the implementation of NewReplicationController.</span>
+<span class="hljs-keyword">func</span> NewBaseController(rsInformer appsinformers.ReplicaSetInformer, podInformer coreinformers.PodInformer, kubeClient clientset.Interface, burstReplicas <span class="hljs-keyword">int</span>,
+    gvk schema.GroupVersionKind, metricOwnerName, queueName <span class="hljs-keyword">string</span>, podControl controller.PodControlInterface) *ReplicaSetController {
+    <span class="hljs-keyword">if</span> kubeClient != <span class="hljs-literal">nil</span> &amp;&amp; kubeClient.CoreV1().RESTClient().GetRateLimiter() != <span class="hljs-literal">nil</span> {
+        metrics.RegisterMetricAndTrackRateLimiterUsage(metricOwnerName, kubeClient.CoreV1().RESTClient().GetRateLimiter())
+    }
+
+    rsc := &amp;ReplicaSetController{
+        GroupVersionKind: gvk,
+        kubeClient:       kubeClient,
+        podControl:       podControl,
+        burstReplicas:    burstReplicas,
+        expectations:     controller.NewUIDTrackingControllerExpectations(controller.NewControllerExpectations()),
+        queue:            workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), queueName),
+    }
+
+    rsInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
+        AddFunc:    rsc.enqueueReplicaSet,
+        UpdateFunc: rsc.updateRS,
+        DeleteFunc: rsc.enqueueReplicaSet,
+    })
+    rsc.rsLister = rsInformer.Lister()
+  <span class="hljs-comment">// informer&#x4F1A;&#x540C;&#x6B65;&#x5F85;&#x64CD;&#x4F5C;&#x7684;&#x8D44;&#x6E90;&#x5230;&#x672C;&#x5730;&#x7684;queue&#x4E2D;&#xFF0C;HasSynced&#x65B9;&#x6CD5;&#x5C31;&#x662F;&#x7528;&#x6765;&#x5224;&#x65AD;&#x5224;&#x65AD;queue&#x662F;&#x5426;&#x5DF2;&#x540C;&#x6B65;&#x7684;</span>
+    rsc.rsListerSynced = rsInformer.Informer().HasSynced
+
+    podInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
+        AddFunc: rsc.addPod,
+        UpdateFunc: rsc.updatePod,
+        DeleteFunc: rsc.deletePod,
+    })
+    rsc.podLister = podInformer.Lister()
+  <span class="hljs-comment">// informer&#x4F1A;&#x540C;&#x6B65;&#x5F85;&#x64CD;&#x4F5C;&#x7684;&#x8D44;&#x6E90;&#x5230;&#x672C;&#x5730;&#x7684;queue&#x4E2D;&#xFF0C;HasSynced&#x65B9;&#x6CD5;&#x5C31;&#x662F;&#x7528;&#x6765;&#x5224;&#x65AD;&#x5224;&#x65AD;queue&#x662F;&#x5426;&#x5DF2;&#x540C;&#x6B65;&#x7684;</span>
+    rsc.podListerSynced = podInformer.Informer().HasSynced
+
+    rsc.syncHandler = rsc.syncReplicaSet
+
+    <span class="hljs-keyword">return</span> rsc
+}
+</code></pre>
+<p>NewBaseController&#x8FD9;&#x91CC;&#x4E3B;&#x8981;&#x5173;&#x6CE8;AddEventHandler&#x4E3A;&#x8D44;&#x6E90;&#x7684;informer&#x589E;&#x52A0;&#x7684;curd&#x65B9;&#x6CD5;&#xFF0C;&#x4F8B;&#x5982;pod&#x76F8;&#x5173;&#x7684;addPod&#x3001;updatePod&#x3001;deletePod&#x65B9;&#x6CD5;&#x3002;</p>
+<h3 id="replicasetcontroller-run&#x65B9;&#x6CD5;"><a name="replicasetcontroller-run&#x65B9;&#x6CD5;" class="plugin-anchor" href="#replicasetcontroller-run&#x65B9;&#x6CD5;"><i class="fa fa-link" aria-hidden="true"></i></a>ReplicaSetController Run&#x65B9;&#x6CD5;</h3>
+<p>&#x63A5;&#x7740;&#x5F80;&#x4E0B;&#xFF0C;&#x521B;&#x5EFA;&#x597D;ReplicaSetController&#x5BF9;&#x8C61;&#x540E;&#xFF0C;&#x770B;&#x5B83;&#x7684;&#x8FD0;&#x884C;&#x8FC7;&#x7A0B;&#xFF0C;&#x5373;Run&#x65B9;&#x6CD5;&#x3002;</p>
+<p>==&gt; <code>pkg/controller/replicaset/replica_set.go:177</code></p>
+<pre><code class="lang-go"><span class="hljs-comment">// Run begins watching and syncing.</span>
+<span class="hljs-keyword">func</span> (rsc *ReplicaSetController) Run(workers <span class="hljs-keyword">int</span>, stopCh &lt;-<span class="hljs-keyword">chan</span> <span class="hljs-keyword">struct</span>{}) {
+    <span class="hljs-keyword">defer</span> utilruntime.HandleCrash()
+    <span class="hljs-keyword">defer</span> rsc.queue.ShutDown()
+
+    controllerName := strings.ToLower(rsc.Kind)
+    klog.Infof(<span class="hljs-string">&quot;Starting %v controller&quot;</span>, controllerName)
+    <span class="hljs-keyword">defer</span> klog.Infof(<span class="hljs-string">&quot;Shutting down %v controller&quot;</span>, controllerName)
+
+  <span class="hljs-comment">// &#x5224;&#x65AD;&#x5404;&#x4E2A;informer&#x7684;&#x7F13;&#x5B58;&#x662F;&#x5426;&#x5DF2;&#x7ECF;&#x540C;&#x6B65;&#x5B8C;&#x6BD5;&#x7684;&#x51FD;&#x6570;</span>
+    <span class="hljs-keyword">if</span> !controller.WaitForCacheSync(rsc.Kind, stopCh, rsc.podListerSynced, rsc.rsListerSynced) {
+        <span class="hljs-keyword">return</span>
+    }
+  <span class="hljs-comment">// worker&#x7684;&#x6570;&#x91CF;&#x9ED8;&#x8BA4;&#x662F;5&#x4E2A;&#xFF0C;&#x5F00;&#x542F;5&#x4E2A;worker&#xFF0C;&#x6BCF;&#x4E2A;worker&#x95F4;&#x9694;1s&#x8FD0;&#x884C;&#x4E00;&#x6B21;rsc.worker&#x51FD;&#x6570;&#xFF0C;&#x6765;&#x68C0;&#x67E5;&#x5E76;&#x6536;&#x655B;rs&#x7684;&#x72B6;&#x6001;</span>
+    <span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; workers; i++ {
+        <span class="hljs-keyword">go</span> wait.Until(rsc.worker, time.Second, stopCh)
+    }
+
+    &lt;-stopCh
+}
+</code></pre>
+<p>&#x6765;&#x5230;&#x4E86;&#x8FD9;&#x91CC;&#xFF0C;&#x53EF;&#x53D1;&#x73B0;ReplicaSetController.Run()&#x51FD;&#x6570;&#x548C;&#x4E0A;&#x4E00;&#x8282;&#x7684;DeploymentController.Run()&#x51FD;&#x6570;&#x975E;&#x5E38;&#x5730;&#x76F8;&#x4F3C;&#x3002;&#x6240;&#x4EE5;&#xFF0C;&#x4ECE;&#x8FD9;&#x91CC;&#x5F00;&#x59CB;&#xFF0C;&#x5404;&#x7C7B;controller&#x4E4B;&#x95F4;&#x4EE3;&#x7801;&#x76F8;&#x4F3C;&#x7684;&#x6B65;&#x9AA4;&#x53EF;&#x80FD;&#x4F1A;&#x8DF3;&#x8FC7;&#xFF0C;&#x4E0D;&#x518D;&#x6BCF;&#x4E2A;&#x5730;&#x65B9;&#x90FD;&#x91CD;&#x590D;&#x8BE6;&#x7EC6;&#x8BF4;&#x660E;&#x3002;</p>
+<p>&#x5F80;&#x4E0A;&#x6EAF;&#x6E90;&#xFF0C;&#x53EF;&#x4EE5;&#x627E;&#x5230;&#xFF0C;worker&#x7684;&#x6570;&#x91CF;&#x914D;&#x7F6E;&#x9ED8;&#x8BA4;&#x4E3A;5&#x4E2A;&#xFF0C;&#x53C2;&#x89C1;&#x8FD9;&#x91CC;:</p>
+<p><code>pkg/controller/apis/config/v1alpha1/defaults.go:219</code></p>
+<pre><code class="lang-go"><span class="hljs-keyword">func</span> SetDefaults_ReplicaSetControllerConfiguration(obj *kubectrlmgrconfigv1alpha1.ReplicaSetControllerConfiguration) {
+    <span class="hljs-keyword">if</span> obj.ConcurrentRSSyncs == <span class="hljs-number">0</span> {
+        obj.ConcurrentRSSyncs = <span class="hljs-number">5</span>
+    }
+}
+</code></pre>
+<p>wait.Until()&#x51FD;&#x6570;&#x662F;&#x5F88;&#x6709;&#x610F;&#x601D;&#x7684;&#xFF0C;&#x4E0A;&#x8282;&#x4E5F;&#x505A;&#x8FC7;&#x4ED4;&#x7EC6;&#x5206;&#x6790;&#xFF0C;&#x53EF;&#x4EE5;&#x518D;&#x56DE;&#x987E;&#x4E00;&#x4E0B;&#x8FD9;&#x91CC;:</p>
+<p><a href="https://github.com/yinwenqin/kubeSourceCodeNote/blob/master/controller/Kubernetes&#x6E90;&#x7801;&#x5B66;&#x4E60;-Controller-P3-Controller&#x5206;&#x7C7B;&#x4E0E;Deployment Controller.md#waituntil&#x5FAA;&#x73AF;&#x8BA1;&#x65F6;&#x5668;&#x51FD;&#x6570;" target="_blank">waituntil&#x5FAA;&#x73AF;&#x8BA1;&#x65F6;&#x5668;&#x51FD;&#x6570;</a></p>
+<p>&#x597D;&#xFF0C;&#x76F4;&#x63A5;&#x8FDB;&#x5165;&#x4E3B;&#x9898;&#xFF0C;&#x5F00;&#x59CB;&#x5206;&#x6790;rsc.worker&#x5DE5;&#x4F5C;&#x51FD;&#x6570;.</p>
+<h3 id="&#x5DE5;&#x4F5C;&#x903B;&#x8F91;"><a name="&#x5DE5;&#x4F5C;&#x903B;&#x8F91;" class="plugin-anchor" href="#&#x5DE5;&#x4F5C;&#x903B;&#x8F91;"><i class="fa fa-link" aria-hidden="true"></i></a>&#x5DE5;&#x4F5C;&#x903B;&#x8F91;</h3>
+<p><code>pkg/controller/replicaset/replica_set.go:190</code></p>
+<pre><code class="lang-go">    <span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; workers; i++ {
+        <span class="hljs-keyword">go</span> wait.Until(rsc.worker, time.Second, stopCh)
+    }
+</code></pre>
+<p>==&gt; <code>pkg/controller/replicaset/replica_set.go:432</code></p>
+<pre><code class="lang-go"><span class="hljs-comment">// processNextWorkItem()&#x51FD;&#x6570;&#x7684;&#x4F5C;&#x7528;&#x662F;&#x628A;informer work queue&#x5DE5;&#x4F5C;&#x961F;&#x5217;&#x91CC;&#x7684;&#x5BF9;&#x8C61;&#x53D6;&#x51FA;&#xFF0C;&#x6309;&#x7167;&#x7533;&#x660E;&#x7684;&#x8981;&#x6C42;&#x6765;&#x5904;&#x7406;&#x5B83;&#x4EEC;&#xFF0C;&#x6807;&#x8BB0;&#x5B83;&#x4EEC;&#x3002;</span>
+<span class="hljs-keyword">func</span> (rsc *ReplicaSetController) worker() {
+    <span class="hljs-keyword">for</span> rsc.processNextWorkItem() {
+    }
+}
+</code></pre>
+<p>==&gt; <code>pkg/controller/replicaset/replica_set.go:437</code></p>
+<pre><code class="lang-go"><span class="hljs-keyword">func</span> (rsc *ReplicaSetController) processNextWorkItem() <span class="hljs-keyword">bool</span> {
+  <span class="hljs-comment">// work queue&#x4E2D;&#x53D6;&#x51FA;&#x961F;&#x9996;&#x5143;&#x7D20;</span>
+    key, quit := rsc.queue.Get()
+    <span class="hljs-keyword">if</span> quit {
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>
+    }
+    <span class="hljs-keyword">defer</span> rsc.queue.Done(key)
+  <span class="hljs-comment">// syncHandler&#x6BCF;&#x4E00;&#x4E2A;&#x961F;&#x5217;&#x5BF9;&#x8C61;&#xFF0C;&#x5F3A;&#x4FDD;&#x8BC1;&#x540C;&#x4E00;&#x65F6;&#x95F4;&#x53EA;&#x4F1A;&#x6709;&#x4E00;&#x4E2A;go&#x534F;&#x7A0B;&#x5904;&#x7406;&#x5B83;(&#x65E0;&#x5E76;&#x53D1;&#x7ADE;&#x4E89;)&#x3002;&#x6240;&#x8C13;sync&#xFF0C;&#x610F;&#x601D;&#x662F;&#x5C06;work queue&#x4E2D;&#x5F85;&#x64CD;&#x4F5C;&#x7684;&#x5BF9;&#x8C61;&#xFF0C;&#x540C;&#x6B65;&#x5B9E;&#x73B0;&#x5230;&#x8FD0;&#x884C;&#x73AF;&#x5883;&#x4E2D;&#x3002;</span>
+    err := rsc.syncHandler(key.(<span class="hljs-keyword">string</span>))
+    <span class="hljs-keyword">if</span> err == <span class="hljs-literal">nil</span> {
+        rsc.queue.Forget(key)
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>
+    }
+
+    utilruntime.HandleError(fmt.Errorf(<span class="hljs-string">&quot;Sync %q failed with %v&quot;</span>, key, err))
+    rsc.queue.AddRateLimited(key)
+
+    <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>
+}
+</code></pre>
+<p>&#x4E3B;&#x8981;&#x51FD;&#x6570;&#x662F;&#x8FD9;&#x4E2A;<strong>syncHandler</strong>&#xFF0C;&#x63A5;&#x7740;&#x8FFD;&#x6EAF;&#xFF0C;&#x53EF;&#x4EE5;&#x5728;&#x8FD9;&#x91CC;&#x627E;&#x5230;&#x8FD9;&#x4E2A;&#x7ED3;&#x6784;&#x4F53;&#x5C5E;&#x6027;&#x51FD;&#x6570;&#x7684;&#x8D4B;&#x503C;&#xFF1A;</p>
+<p><code>pkg/controller/replicaset/replica_set.go:163</code></p>
+<pre><code class="lang-go"><span class="hljs-comment">// NewBaseController is the implementation of NewReplicaSetController with additional injected</span>
+<span class="hljs-comment">// parameters so that it can also serve as the implementation of NewReplicationController.</span>
+<span class="hljs-keyword">func</span> NewBaseController(rsInformer appsinformers.ReplicaSetInformer, podInformer coreinformers.PodInformer, kubeClient clientset.Interface, burstReplicas <span class="hljs-keyword">int</span>,
+    gvk schema.GroupVersionKind, metricOwnerName, queueName <span class="hljs-keyword">string</span>, podControl controller.PodControlInterface) *ReplicaSetController {
+  <span class="hljs-comment">// ... &#x7701;&#x7565;</span>
+    rsc.syncHandler = rsc.syncReplicaSet
+
+    <span class="hljs-keyword">return</span> rsc
+}
+</code></pre>
+<p>&#x63A5;&#x7740;&#x4FBF;&#x53EF;&#x4EE5;&#x627E;&#x5230;<strong>ReplicaSetController.syncReplicaSet</strong>&#x51FD;&#x6570;&#xFF1A;</p>
+<p><code>pkg/controller/replicaset/replica_set.go:562</code></p>
+<pre><code class="lang-go">
+<span class="hljs-comment">// syncReplicaSet will sync the ReplicaSet with the given key if it has had its expectations fulfilled,</span>
+<span class="hljs-comment">// meaning it did not expect to see any more of its pods created or deleted. This function is not meant to be</span>
+<span class="hljs-comment">// invoked concurrently with the same key.</span>
+<span class="hljs-keyword">func</span> (rsc *ReplicaSetController) syncReplicaSet(key <span class="hljs-keyword">string</span>) error {
+
+    startTime := time.Now()
+    <span class="hljs-keyword">defer</span> <span class="hljs-keyword">func</span>() {
+        klog.V(<span class="hljs-number">4</span>).Infof(<span class="hljs-string">&quot;Finished syncing %v %q (%v)&quot;</span>, rsc.Kind, key, time.Since(startTime))
+    }()
+  <span class="hljs-comment">// key&#x7684;&#x5B57;&#x7B26;&#x4E32;&#x683C;&#x5F0F;&#x662F;&#x8FD9;&#x6837;&#x7684;: ${NAMESPACE}/${NAME}</span>
+    namespace, name, err := cache.SplitMetaNamespaceKey(key)
+    <span class="hljs-keyword">if</span> err != <span class="hljs-literal">nil</span> {
+        <span class="hljs-keyword">return</span> err
+    }
+  <span class="hljs-comment">// &#x83B7;&#x53D6;&#x5230;rs&#x5BF9;&#x8C61;</span>
+    rs, err := rsc.rsLister.ReplicaSets(namespace).Get(name)
+    <span class="hljs-keyword">if</span> errors.IsNotFound(err) {
+        klog.V(<span class="hljs-number">4</span>).Infof(<span class="hljs-string">&quot;%v %v has been deleted&quot;</span>, rsc.Kind, key)
+        rsc.expectations.DeleteExpectations(key)
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">nil</span>
+    }
+    <span class="hljs-keyword">if</span> err != <span class="hljs-literal">nil</span> {
+        <span class="hljs-keyword">return</span> err
+    }
+
+  <span class="hljs-comment">// &#x5224;&#x65AD;rs&#x662F;&#x5426;&#x5B9E;&#x73B0;&#x6240;&#x58F0;&#x660E;&#x7684;&#x671F;&#x671B;&#x72B6;&#x6001;&#xFF0C;&#x8FD9;&#x91CC;SatisfiedExpectations&#x662F;&#x4F7F;&#x7528;expectations&#x673A;&#x5236;&#x6765;&#x5224;&#x65AD;&#x8FD9;&#x4E2A;rs&#x662F;&#x5426;&#x6EE1;&#x8DB3;&#x671F;&#x671B;&#x72B6;&#x6001;&#x3002;</span>
+    rsNeedsSync := rsc.expectations.SatisfiedExpectations(key)
+    selector, err := metav1.LabelSelectorAsSelector(rs.Spec.Selector)
+    <span class="hljs-keyword">if</span> err != <span class="hljs-literal">nil</span> {
+        utilruntime.HandleError(fmt.Errorf(<span class="hljs-string">&quot;Error converting pod selector to selector: %v&quot;</span>, err))
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">nil</span>
+    }
+
+    <span class="hljs-comment">// list all pods to include the pods that don&apos;t match the rs`s selector</span>
+    <span class="hljs-comment">// anymore but has the stale controller ref.</span>
+    <span class="hljs-comment">// <span class="hljs-doctag">TODO:</span> Do the List and Filter in a single pass, or use an index.</span>
+  <span class="hljs-comment">// &#x53D6;&#x51FA;&#x6240;&#x6709;&#x7684;&#x7684;pod&#xFF0C;labels.Everything()&#x53D6;&#x5230;&#x7684;&#x662F;&#x7A7A;selector&#xFF0C;&#x5373;&#x4E0D;&#x4F7F;&#x7528;label selector&#xFF0C;&#x53D6;&#x5168;&#x90E8;pod</span>
+    allPods, err := rsc.podLister.Pods(rs.Namespace).List(labels.Everything())
+    <span class="hljs-keyword">if</span> err != <span class="hljs-literal">nil</span> {
+        <span class="hljs-keyword">return</span> err
+    }
+
+    <span class="hljs-comment">// Ignore inactive pods.</span>
+  <span class="hljs-comment">// &#x53BB;&#x9664; inactive&#x72B6;&#x6001;&#x7684;pod</span>
+    filteredPods := controller.FilterActivePods(allPods)
+
+
+  <span class="hljs-comment">// &#x6839;&#x636E;rs&#x548C;selector&#x6765;&#x9009;&#x62E9;&#x53D7;&#x6B64;rs&#x7248;&#x672C;&#x7BA1;&#x7406;&#x7684;pod</span>
+    filteredPods, err = rsc.claimPods(rs, selector, filteredPods)
+    <span class="hljs-keyword">if</span> err != <span class="hljs-literal">nil</span> {
+        <span class="hljs-keyword">return</span> err
+    }
+
+
+    <span class="hljs-keyword">var</span> manageReplicasErr error
+  <span class="hljs-comment">// &#x5982;&#x679C;rs&#x672A;&#x8FBE;&#x5230;&#x671F;&#x671B;&#x72B6;&#x6001;&#xFF0C;&#x5219;&#x5BF9;&#x526F;&#x672C;&#x8FDB;&#x884C;&#x7BA1;&#x7406;&#xFF0C;&#x4EE5;&#x4F7F;rs&#x6EE1;&#x8DB3;&#x58F0;&#x660E;&#x7684;&#x671F;&#x671B;&#x72B6;&#x6001;</span>
+    <span class="hljs-keyword">if</span> rsNeedsSync &amp;&amp; rs.DeletionTimestamp == <span class="hljs-literal">nil</span> {
+    <span class="hljs-comment">// &#x6700;&#x91CD;&#x8981;&#x7684;&#x51FD;&#x6570;manageReplicas&#xFF0C;&#x672A;&#x8FBE;&#x671F;&#x671B;&#x65F6;&#xFF0C;&#x7BA1;&#x7406;rs&#x5BF9;&#x5E94;&#x7684;pod(&#x65B0;&#x589E;/&#x5220;&#x9664;)</span>
+        manageReplicasErr = rsc.manageReplicas(filteredPods, rs)
+    }
+
+    rs = rs.DeepCopy()
+    newStatus := calculateStatus(rs, filteredPods, manageReplicasErr)
+
+  <span class="hljs-comment">// &#x53EA;&#x8981;&#x6709;&#x5BF9;&#x5E94;pod&#x7684;&#x66F4;&#x65B0;&#xFF0C;&#x5219;&#x9700;&#x8981;&#x66F4;&#x65B0;rs&#x7684;status&#x5B57;&#x6BB5;</span>
+    updatedRS, err := updateReplicaSetStatus(rsc.kubeClient.AppsV1().ReplicaSets(rs.Namespace), rs, newStatus)
+    <span class="hljs-keyword">if</span> err != <span class="hljs-literal">nil</span> {
+        <span class="hljs-comment">// Multiple things could lead to this update failing. Requeuing the replica set ensures</span>
+        <span class="hljs-comment">// Returning an error causes a requeue without forcing a hotloop</span>
+        <span class="hljs-keyword">return</span> err
+    }
+
+  <span class="hljs-comment">// &#x5F53;&#x6307;&#x5B9A;&#x4E86;MinReadySeconds&#x65F6;&#xFF0C;&#x5373;&#x4F7F;pod &#x5DF2;&#x7ECF;&#x662F;ready&#x72B6;&#x6001;&#x4E86;&#xFF0C;&#x4F46;&#x4E5F;&#x4E0D;&#x4F1A;&#x89C6;&#x4E3A;Available&#xFF0C;&#x9700;&#x8981;&#x7B49;&#x5F85;MinReadySeconds&#x540E;&#x518D;&#x6765;&#x5237;&#x65B0;rs&#x7684;&#x72B6;&#x6001;&#x3002;&#x56E0;&#x6B64;&#xFF0C;enqueueReplicaSetAfter&#x65B9;&#x6CD5;&#xFF0C;&#x5F02;&#x6B65;&#x7B49;&#x5F85;MinReadySeconds&#x540E;&#xFF0C;&#x628A;&#x8BE5;rs&#x91CD;&#x65B0;&#x538B;&#x5165;work queue&#x961F;&#x5217;&#x4E2D;</span>
+    <span class="hljs-keyword">if</span> manageReplicasErr == <span class="hljs-literal">nil</span> &amp;&amp; updatedRS.Spec.MinReadySeconds &gt; <span class="hljs-number">0</span> &amp;&amp;
+        updatedRS.Status.ReadyReplicas == *(updatedRS.Spec.Replicas) &amp;&amp;
+        updatedRS.Status.AvailableReplicas != *(updatedRS.Spec.Replicas) {
+        rsc.enqueueReplicaSetAfter(updatedRS, time.Duration(updatedRS.Spec.MinReadySeconds)*time.Second)
+    }
+    <span class="hljs-keyword">return</span> manageReplicasErr
+}
+</code></pre>
+<p>&#x5212;&#x91CD;&#x70B9;&#xFF0C;&#x4E24;&#x4E2A;&#x91CD;&#x8981;&#x7684;&#x51FD;&#x6570;&#xFF1A;<strong>SatisfiedExpectations</strong>(&#x5224;&#x65AD;&#x662F;&#x5426;&#x6EE1;&#x8DB3;sync&#x6761;&#x4EF6;) / <strong>manageReplicas</strong>(sync&#x540E;&#x7EED;&#x7684;&#x526F;&#x672C;pod&#x65B0;&#x589E;&#x3001;&#x5220;&#x9664;&#x64CD;&#x4F5C;)&#x3002;&#x5206;&#x522B;&#x6765;&#x770B;&#x770B;</p>
+<h4 id="satisfiedexpectations&#x51FD;&#x6570;"><a name="satisfiedexpectations&#x51FD;&#x6570;" class="plugin-anchor" href="#satisfiedexpectations&#x51FD;&#x6570;"><i class="fa fa-link" aria-hidden="true"></i></a>SatisfiedExpectations&#x51FD;&#x6570;</h4>
+<p>&#x5728;&#x6B64;&#x4E4B;&#x524D;&#xFF0C;&#x5FC5;&#x987B;&#x5148;&#x4E86;&#x89E3;&#x4E00;&#x4E0B;rs controller(&#x540E;&#x9762;&#x7B80;&#x79F0;rsc)&#x7684;Expectations&#x673A;&#x5236;&#x3002;rsc&#x4F1A;&#x5C06;&#x6BCF;&#x4E00;&#x4E2A;rs&#x7684;&#x671F;&#x671B;&#x72B6;&#x6001;(&#x6BD4;&#x5982;&#x671F;&#x671B;&#x65B0;&#x589E;3&#x4E2A;&#x526F;&#x672C;)&#x4FDD;&#x5B58;&#x5728;&#x672C;&#x5730;&#x7F13;&#x5B58;&#x4E2D;&#xFF0C;&#x5728;sync&#x6267;&#x884C;&#x4E4B;&#x524D;&#xFF0C;&#x4F1A;&#x5BF9;&#x671F;&#x671B;&#x72B6;&#x6001;&#x8FDB;&#x884C;&#x6761;&#x4EF6;&#x5224;&#x65AD;&#xFF0C;&#x6EE1;&#x8DB3;&#x6761;&#x4EF6;&#x624D;&#x4F1A;&#x771F;&#x6B63;&#x8FDB;&#x884C;sync&#x64CD;&#x4F5C;&#x3002;</p>
+<p>&#x6765;&#x770B;&#x770B;SatisfiedExpectations&#x51FD;&#x6570;&#x7684;&#x903B;&#x8F91;&#xFF1A;</p>
+<p><code>pkg/controller/controller_utils.go:181</code></p>
+<pre><code class="lang-go"><span class="hljs-keyword">func</span> (r *ControllerExpectations) SatisfiedExpectations(controllerKey <span class="hljs-keyword">string</span>) <span class="hljs-keyword">bool</span> {
+  <span class="hljs-comment">// &#x82E5;&#x6B64;key&#x5B58;&#x5728;Expectations&#x671F;&#x671B;&#x72B6;&#x6001;</span>
+    <span class="hljs-keyword">if</span> exp, exists, err := r.GetExpectations(controllerKey); exists {
+    <span class="hljs-comment">// Expectations&#x671F;&#x671B;&#x72B6;&#x6001;&#x8FBE;&#x6210;&#x6216;&#x8005;&#x8FC7;&#x671F;&#xFF0C;&#x5219;&#x9700;&#x8981;sync</span>
+        <span class="hljs-keyword">if</span> exp.Fulfilled() {
+            klog.V(<span class="hljs-number">4</span>).Infof(<span class="hljs-string">&quot;Controller expectations fulfilled %#v&quot;</span>, exp)
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>
+        } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> exp.isExpired() {
+            klog.V(<span class="hljs-number">4</span>).Infof(<span class="hljs-string">&quot;Controller expectations expired %#v&quot;</span>, exp)
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>
+        } <span class="hljs-keyword">else</span> {
+      <span class="hljs-comment">// &#x5B58;&#x5728;&#x671F;&#x671B;&#x72B6;&#x6001;&#x4F46;&#x672A;&#x8FBE;&#x6210;&#xFF0C;&#x5219;&#x65E0;&#x9700;sync&#x3002;&#x56E0;&#x4E3A;&#x540E;&#x9762;&#x7684;handler&#x5728;&#x5904;&#x7406;&#x8D44;&#x6E90;&#x589E;&#x5220;&#x7684;&#x65F6;&#x5019;&#x4F1A;&#x6765;&#x65B0;&#x5EFA;&#x548C;&#x4FEE;&#x6539;Expectations&#xFF0C;&#x8BF4;&#x660E;&#x5F53;&#x524D;&#x6B63;&#x5728;&#x63A5;&#x8FD1;&#x671F;&#x671B;&#x72B6;&#x6001;&#x4E2D;&#xFF0C;&#x6240;&#x4EE5;&#x672C;&#x6B21;&#x65E0;&#x9700;&#x518D;sync</span>
+            klog.V(<span class="hljs-number">4</span>).Infof(<span class="hljs-string">&quot;Controller still waiting on expectations %#v&quot;</span>, exp)
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>
+        }
+    } 
+  <span class="hljs-comment">// &#x4E0D;&#x5B58;&#x5728;Expectations(&#x65B0;&#x589E;&#x7684;&#x8D44;&#x6E90;&#x5BF9;&#x8C61;)&#xFF0C;&#x6216;&#x8005;&#x83B7;&#x53D6;Expectations&#x51FA;&#x9519;&#xFF0C;&#x5219;&#x89C6;&#x4E3A;&#x9700;&#x8981;&#x6267;&#x884C;sync</span>
+    <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> err != <span class="hljs-literal">nil</span> {
+        klog.V(<span class="hljs-number">2</span>).Infof(<span class="hljs-string">&quot;Error encountered while checking expectations %#v, forcing sync&quot;</span>, err)
+    } <span class="hljs-keyword">else</span> {
+        klog.V(<span class="hljs-number">4</span>).Infof(<span class="hljs-string">&quot;Controller %v either never recorded expectations, or the ttl expired.&quot;</span>, controllerKey)
+    }
+
+    <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>
+}
+</code></pre>
+<h4 id="managereplicas&#x51FD;&#x6570;"><a name="managereplicas&#x51FD;&#x6570;" class="plugin-anchor" href="#managereplicas&#x51FD;&#x6570;"><i class="fa fa-link" aria-hidden="true"></i></a>manageReplicas&#x51FD;&#x6570;</h4>
+<p>==&gt; <code>pkg/controller/replicaset/replica_set.go:459</code></p>
+<pre><code class="lang-go"><span class="hljs-keyword">func</span> (rsc *ReplicaSetController) manageReplicas(filteredPods []*v1.Pod, rs *apps.ReplicaSet) error {
+   <span class="hljs-comment">// rs&#x5F53;&#x524D;&#x7BA1;&#x7406;&#x7684;pod&#x6570;&#x91CF; &#x4E0E; rs&#x58F0;&#x660E;&#x6307;&#x5B9A;pod&#x7684;&#x6570;&#x91CF; &#x7684;&#x5DEE;&#x91CF;</span>
+   diff := <span class="hljs-built_in">len</span>(filteredPods) - <span class="hljs-keyword">int</span>(*(rs.Spec.Replicas))
+   rsKey, err := controller.KeyFunc(rs)
+   <span class="hljs-keyword">if</span> err != <span class="hljs-literal">nil</span> {
+      utilruntime.HandleError(fmt.Errorf(<span class="hljs-string">&quot;Couldn&apos;t get key for %v %#v: %v&quot;</span>, rsc.Kind, rs, err))
+      <span class="hljs-keyword">return</span> <span class="hljs-literal">nil</span>
+   }
+   <span class="hljs-comment">// &#x5F53; rs&#x5F53;&#x524D;&#x7BA1;&#x7406;&#x7684;pod&#x6570;&#x91CF; &#x5C0F;&#x4E8E; rs&#x58F0;&#x660E;&#x6307;&#x5B9A;pod&#x7684;&#x6570;&#x91CF; &#x65F6;&#xFF0C;&#x8BF4;&#x660E;&#x5E94;&#x8BE5;&#x7EE7;&#x7EED;&#x589E;&#x52A0;pod</span>
+   <span class="hljs-keyword">if</span> diff &lt; <span class="hljs-number">0</span> {
+      diff *= <span class="hljs-number">-1</span>
+      <span class="hljs-comment">// &#x6BCF;&#x6B21;&#x65B0;&#x589E;&#x6570;&#x91CF;&#x4EE5;&#x7A81;&#x53D1;&#x589E;&#x52A0;&#x6570;&#x91CF;burstReplicas&#x4E3A;&#x4E0A;&#x9650;</span>
+      <span class="hljs-keyword">if</span> diff &gt; rsc.burstReplicas {
+         diff = rsc.burstReplicas
+      }
+      <span class="hljs-comment">// &#x521B;&#x5EFA;ExpectCreations&#x671F;&#x671B;</span>
+      rsc.expectations.ExpectCreations(rsKey, diff)
+      klog.V(<span class="hljs-number">2</span>).Infof(<span class="hljs-string">&quot;Too few replicas for %v %s/%s, need %d, creating %d&quot;</span>, rsc.Kind, rs.Namespace, rs.Name, *(rs.Spec.Replicas), diff)
+
+      <span class="hljs-comment">// slowStartBatch&#x7528;&#x6765;&#x4EE5;&#x6307;&#x6570;&#x7EA7;&#x6279;&#x91CF;&#x542F;&#x52A8;pod, &#x5176;&#x4E2D;controller.SlowStartInitialBatchSize&#x9ED8;&#x8BA4;&#x503C;&#x4E3A;1&#xFF0C;&#x4F5C;&#x4E3A;&#x5E95;&#x6570;&#x3002;</span>
+      successfulCreations, err := slowStartBatch(diff, controller.SlowStartInitialBatchSize, <span class="hljs-keyword">func</span>() error {
+         <span class="hljs-comment">// &#x521B;&#x5EFA;&#x5355;&#x4E2A;pod&#x7684;&#x51FD;&#x6570; CreatePodsWithControllerRef</span>
+         err := rsc.podControl.CreatePodsWithControllerRef(rs.Namespace, &amp;rs.Spec.Template, rs, metav1.NewControllerRef(rs, rsc.GroupVersionKind))
+         <span class="hljs-keyword">if</span> err != <span class="hljs-literal">nil</span> &amp;&amp; errors.IsTimeout(err) {
+
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">nil</span>
+         }
+         <span class="hljs-keyword">return</span> err
+      })
+
+
+      <span class="hljs-keyword">if</span> skippedPods := diff - successfulCreations; skippedPods &gt; <span class="hljs-number">0</span> {
+         klog.V(<span class="hljs-number">2</span>).Infof(<span class="hljs-string">&quot;Slow-start failure. Skipping creation of %d pods, decrementing expectations for %v %v/%v&quot;</span>, skippedPods, rsc.Kind, rs.Namespace, rs.Name)
+         <span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; skippedPods; i++ {
+            <span class="hljs-comment">// Decrement the expected number of creates because the informer won&apos;t observe this pod</span>
+            rsc.expectations.CreationObserved(rsKey)
+         }
+      }
+      <span class="hljs-keyword">return</span> err
+
+     <span class="hljs-comment">// &#x5F53; rs&#x5F53;&#x524D;&#x7BA1;&#x7406;&#x7684;pod&#x6570;&#x91CF; &#x5927;&#x4E8E; rs&#x58F0;&#x660E;&#x6307;&#x5B9A;pod&#x7684;&#x6570;&#x91CF; &#x65F6;&#xFF0C;&#x8BF4;&#x660E;&#x5E94;&#x8BE5;&#x51CF;&#x5C11;pod</span>
+   } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> diff &gt; <span class="hljs-number">0</span> {
+      <span class="hljs-keyword">if</span> diff &gt; rsc.burstReplicas {
+         diff = rsc.burstReplicas
+      }
+      klog.V(<span class="hljs-number">2</span>).Infof(<span class="hljs-string">&quot;Too many replicas for %v %s/%s, need %d, deleting %d&quot;</span>, rsc.Kind, rs.Namespace, rs.Name, *(rs.Spec.Replicas), diff)
+
+      <span class="hljs-comment">// &#x83B7;&#x53D6;&#x9700;&#x8981;&#x5220;&#x9664;&#x7684;pod</span>
+      podsToDelete := getPodsToDelete(filteredPods, diff)
+      <span class="hljs-comment">// &#x4FEE;&#x6539;rs&#x7684;&#x671F;&#x671B;&#x72B6;&#x6001;&#xFF0C;&#x5728;&#x671F;&#x671B;&#x4E2D;&#x5254;&#x9664;&#x5C06;&#x8981;&#x5220;&#x9664;&#x7684;pod</span>
+      rsc.expectations.ExpectDeletions(rsKey, getPodKeys(podsToDelete))
+
+      errCh := <span class="hljs-built_in">make</span>(<span class="hljs-keyword">chan</span> error, diff)
+      <span class="hljs-keyword">var</span> wg sync.WaitGroup
+      wg.Add(diff)
+      <span class="hljs-comment">// &#x5E76;&#x53D1;&#x5220;&#x9664;&#x76EE;&#x6807;pod</span>
+      <span class="hljs-keyword">for</span> _, pod := <span class="hljs-keyword">range</span> podsToDelete {
+         <span class="hljs-keyword">go</span> <span class="hljs-keyword">func</span>(targetPod *v1.Pod) {
+            <span class="hljs-keyword">defer</span> wg.Done()
+            <span class="hljs-keyword">if</span> err := rsc.podControl.DeletePod(rs.Namespace, targetPod.Name, rs); err != <span class="hljs-literal">nil</span> {
+               <span class="hljs-comment">// Decrement the expected number of deletes because the informer won&apos;t observe this deletion</span>
+               podKey := controller.PodKey(targetPod)
+               klog.V(<span class="hljs-number">2</span>).Infof(<span class="hljs-string">&quot;Failed to delete %v, decrementing expectations for %v %s/%s&quot;</span>, podKey, rsc.Kind, rs.Namespace, rs.Name)
+               rsc.expectations.DeletionObserved(rsKey, podKey)
+               errCh &lt;- err
+            }
+         }(pod)
+      }
+      wg.Wait()
+
+      <span class="hljs-keyword">select</span> {
+      <span class="hljs-keyword">case</span> err := &lt;-errCh:
+         <span class="hljs-comment">// all errors have been reported before and they&apos;re likely to be the same, so we&apos;ll only return the first one we hit.</span>
+         <span class="hljs-keyword">if</span> err != <span class="hljs-literal">nil</span> {
+            <span class="hljs-keyword">return</span> err
+         }
+      <span class="hljs-keyword">default</span>:
+      }
+   }
+
+   <span class="hljs-keyword">return</span> <span class="hljs-literal">nil</span>
+}
+</code></pre>
+<p>&#x8FD9;&#x4E2A;&#x51FD;&#x6570;&#x5373;&#x662F;&#x5B9E;&#x9645;&#x64CD;&#x63A7;&#x7BA1;&#x7406;pod&#x526F;&#x672C;&#x6570;&#x91CF;&#x7684;&#x51FD;&#x6570;&#xFF0C;&#x5176;&#x4E2D;&#x7684;slowStartBatch&#x6279;&#x91CF;&#x542F;&#x52A8;pod&#x7684;&#x529F;&#x80FD;&#x6BD4;&#x8F83;&#x6709;&#x610F;&#x601D;&#xFF0C;&#x6765;&#x770B;&#x770B;&#x3002;</p>
+<h4 id="&#x6279;&#x91CF;&#x542F;&#x52A8;pod"><a name="&#x6279;&#x91CF;&#x542F;&#x52A8;pod" class="plugin-anchor" href="#&#x6279;&#x91CF;&#x542F;&#x52A8;pod"><i class="fa fa-link" aria-hidden="true"></i></a>&#x6279;&#x91CF;&#x542F;&#x52A8;pod</h4>
+<p><code>pkg/controller/replicaset/replica_set.go:658</code></p>
+<pre><code class="lang-go"><span class="hljs-keyword">func</span> slowStartBatch(count <span class="hljs-keyword">int</span>, initialBatchSize <span class="hljs-keyword">int</span>, fn <span class="hljs-keyword">func</span>() error) (<span class="hljs-keyword">int</span>, error) {
+   <span class="hljs-comment">// &#x5269;&#x4F59;&#x8981;&#x6267;&#x884C;&#x7684;&#x6570;&#x91CF;</span>
+   remaining := count
+   <span class="hljs-comment">// &#x7D2F;&#x8BA1;&#x6210;&#x529F;&#x6267;&#x884C;&#x7684;&#x6570;&#x91CF;</span>
+   successes := <span class="hljs-number">0</span>
+  <span class="hljs-comment">// batchSize&#x662F;&#x6BCF;&#x6B21;&#x6279;&#x91CF;&#x6267;&#x884C;&#x7684;&#x6570;&#x91CF;&#xFF0C;&#x4ECE;initialBatchSize(1)&#x548C;&#x5269;&#x4F59;&#x6570;&#x91CF;&#x4E2D;&#x53D6;&#x6700;&#x5C0F;&#x503C;&#x3002;&#x6BCF;&#x6B21;&#x5FAA;&#x73AF;&#x6267;&#x884C;&#x6210;&#x529F;&#x540E;&#xFF0C;batchSize&#x4E58;&#x4EE5;2&#xFF0C;&#x4EE5;&#x6307;&#x6570;&#x7EA7;&#x6269;&#x5145;&#x3002;</span>
+   <span class="hljs-keyword">for</span> batchSize := integer.IntMin(remaining, initialBatchSize); batchSize &gt; <span class="hljs-number">0</span>; batchSize = integer.IntMin(<span class="hljs-number">2</span>*batchSize, remaining) {
+      errCh := <span class="hljs-built_in">make</span>(<span class="hljs-keyword">chan</span> error, batchSize)
+      <span class="hljs-keyword">var</span> wg sync.WaitGroup
+      wg.Add(batchSize)
+      <span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; batchSize; i++ {
+         <span class="hljs-keyword">go</span> <span class="hljs-keyword">func</span>() {
+            <span class="hljs-keyword">defer</span> wg.Done()
+            <span class="hljs-keyword">if</span> err := fn(); err != <span class="hljs-literal">nil</span> {
+               errCh &lt;- err
+            }
+         }()
+      }
+      wg.Wait()
+      curSuccesses := batchSize - <span class="hljs-built_in">len</span>(errCh)
+      successes += curSuccesses
+      <span class="hljs-comment">// &#x67D0;&#x4E00;&#x8F6E;&#x5FAA;&#x73AF;&#x51FA;&#x9519;&#x65F6;&#xFF0C;&#x8DF3;&#x51FA;&#x5FAA;&#x73AF;&#xFF0C;&#x540E;&#x7EED;&#x7684;&#x4E0D;&#x518D;&#x6267;&#x884C;&#x3002;</span>
+      <span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(errCh) &gt; <span class="hljs-number">0</span> {
+         <span class="hljs-keyword">return</span> successes, &lt;-errCh
+      }
+      remaining -= batchSize
+   }
+   <span class="hljs-keyword">return</span> successes, <span class="hljs-literal">nil</span>
+}
+</code></pre>
+<h3 id="replicasetcontroller&#x5DE5;&#x4F5C;&#x6D41;&#x7A0B;&#x603B;&#x7ED3;"><a name="replicasetcontroller&#x5DE5;&#x4F5C;&#x6D41;&#x7A0B;&#x603B;&#x7ED3;" class="plugin-anchor" href="#replicasetcontroller&#x5DE5;&#x4F5C;&#x6D41;&#x7A0B;&#x603B;&#x7ED3;"><i class="fa fa-link" aria-hidden="true"></i></a>ReplicaSetController&#x5DE5;&#x4F5C;&#x6D41;&#x7A0B;&#x603B;&#x7ED3;</h3>
+<p>&#x603B;&#x7ED3;&#x4E00;&#x4E0B;&#xFF0C;&#x5728;&#x51FA;&#x73B0;&#x65B0;&#x7248;&#x672C;&#x7684;rs&#x540E;&#xFF0C;rsc&#x6309;&#x7167;&#x4EE5;&#x4E0B;&#x6B65;&#x9AA4;&#x8FDB;&#x884C;&#x5DE5;&#x4F5C;&#xFF1A;</p>
+<p>1.&#x901A;&#x8FC7;SatisfiedExpectations&#x51FD;&#x6570;&#xFF0C;&#x53D1;&#x73B0;expectations&#x671F;&#x671B;&#x72B6;&#x6001;&#x672C;&#x5730;&#x7F13;&#x5B58;&#x4E2D;&#x4E0D;&#x5B58;&#x5728;&#x6B64;rs key&#xFF0C;&#x56E0;&#x6B64;&#x8FD4;&#x56DE;true&#xFF0C;&#x9700;&#x8981;sync</p>
+<p>2.&#x901A;&#x8FC7;manageReplicas&#x7BA1;&#x7406;pod&#xFF0C;&#x65B0;&#x589E;&#x6216;&#x5220;&#x9664;</p>
+<p>3.&#x5224;&#x65AD;pod&#x526F;&#x672C;&#x6570;&#x662F;&#x591A;&#x4E86;&#x8FD8;&#x662F;&#x5C11;&#x4E86;&#xFF0C;&#x591A;&#x5219;&#x8981;&#x5220;&#xFF0C;&#x5C11;&#x5219;&#x8981;&#x589E;</p>
+<p>4.&#x589E;&#x5220;&#x4E4B;&#x524D;&#x521B;&#x5EFA;expectations&#x5BF9;&#x8C61;&#x5E76;&#x8BBE;&#x7F6E;add / del&#x503C;</p>
+<p>5.slowStartBatch&#x65B0;&#x589E; / &#x5E76;&#x53D1;&#x5220;&#x9664; pod</p>
+<p>6.&#x66F4;&#x65B0;expection</p>
+<p>expections&#x7F13;&#x5B58;&#x673A;&#x5236;&#xFF0C;&#x5728;&#x8FD0;&#x884C;&#x7684;pod&#x526F;&#x672C;&#x6570;&#x5728;&#x5411;&#x58F0;&#x660E;&#x6307;&#x5B9A;&#x7684;&#x526F;&#x672C;&#x6570;&#x6536;&#x655B;&#x4E4B;&#x65F6;&#xFF0C;&#x5F88;&#x597D;&#x5730;&#x907F;&#x514D;&#x4E86;&#x9891;&#x7E41;&#x7684;informer&#x6570;&#x636E;&#x67E5;&#x8BE2;&#xFF0C;&#x4EE5;&#x53CA;&#x53EF;&#x80FD;&#x968F;&#x4E4B;&#x800C;&#x6765;&#x7684;&#x6570;&#x636E;&#x66F4;&#x65B0;&#x4E0D;&#x53CA;&#x65F6;&#x7684;&#x95EE;&#x9898;&#xFF0C;&#x8FD9;&#x4E2A;&#x673A;&#x5236;&#x8BBE;&#x8BA1;&#x5DE7;&#x5999;&#x8D2F;&#x7A7F;&#x6574;&#x4E2A;rsc&#x5DE5;&#x4F5C;&#x8FC7;&#x7A0B;&#xFF0C;&#x4E5F;&#x662F;&#x4E0D;&#x592A;&#x6613;&#x4E8E;&#x7406;&#x89E3;&#x4E4B;&#x5904;&#x3002;</p>
+
+                                
+                                </section>
+                            
+    </div>
+    <div class="search-results">
+        <div class="has-results">
+            
+            <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+            <ul class="search-results-list"></ul>
+            
+        </div>
+        <div class="no-results">
+            
+            <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+            
+        </div>
+    </div>
+</div>
+
+                        </div>
+                    </div>
+                
+            </div>
+
+            
+                
+                <a href="Kubernetes源码学习-Controller-P3-Controller分类与Deployment Controller.html" class="navigation navigation-prev navigation-unique" aria-label="Previous page: 2.3. Controller分类与Deployment Controller">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+                
+                
+            
+        
+    </div>
+
+    <script>
+        var gitbook = gitbook || [];
+        gitbook.push(function() {
+            gitbook.page.hasChanged({"page":{"title":"2.4. ReplicaSet Controller","date":"2020/03/17 15:59:53","tags":["Kubernetes","Golang","读源码"],"level":"3.2.4","depth":2,"next":{"title":"[4. ApiServer]","level":"3.3","depth":1,"ref":"","articles":[{"title":"[4.1 待补充]","level":"3.3.1","depth":2,"ref":"","articles":[]}]},"previous":{"title":"2.3. Controller分类与Deployment Controller","level":"3.2.3","depth":2,"path":"controller/Kubernetes源码学习-Controller-P3-Controller分类与Deployment Controller.md","ref":"./controller/Kubernetes源码学习-Controller-P3-Controller分类与Deployment Controller.md","articles":[]},"dir":"ltr"},"config":{"plugins":["-sharing","anchors","github","expandable-chapters","splitter","page-treeview","back-to-top-button"],"styles":{"website":"./styles/website.css"},"pluginsConfig":{"page-treeview":{"copyright":"","minHeaderCount":"1","minHeaderDeep":"1"},"github":{"url":"https://github.com/yinwenqin/kubeSourceCodeNote"},"splitter":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"back-to-top-button":{},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false},"anchors":{},"expandable-chapters":{}},"theme":"default","author":"ywq","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"Kubernetes源码学习","language":"zh-hans","links":{},"gitbook":"3.2.3","description":""},"file":{"path":"controller/Kubernetes源码学习-Controller-P4-ReplicaSet Controller.md","mtime":"2020-03-24T11:34:20.953Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2020-03-24T11:58:45.796Z"},"basePath":"..","book":{"language":""}});
+        });
+    </script>
+</div>
+
+        
+    <script src="../gitbook/gitbook.js"></script>
+    <script src="../gitbook/theme.js"></script>
+    
+        
+        <script src="../gitbook/gitbook-plugin-github/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-expandable-chapters/expandable-chapters.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-splitter/splitter.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-back-to-top-button/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search/search-engine.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search/search.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-lunr/lunr.min.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-lunr/search-lunr.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-fontsettings/fontsettings.js"></script>
+        
+    
+
+    </body>
+</html>
+
