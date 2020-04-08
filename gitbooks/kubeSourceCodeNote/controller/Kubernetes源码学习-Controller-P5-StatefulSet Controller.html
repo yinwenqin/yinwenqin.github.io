@@ -1,0 +1,1348 @@
+
+<!DOCTYPE HTML>
+<html lang="zh-hans" >
+    <head>
+        <meta charset="UTF-8">
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <title>2.5. StatefulSet Controller · Kubernetes源码学习</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="description" content="">
+        <meta name="generator" content="GitBook 3.2.3">
+        <meta name="author" content="ywq">
+        
+        
+    
+    <link rel="stylesheet" href="../gitbook/style.css">
+
+    
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-anchors/plugin.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-expandable-chapters/expandable-chapters.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-splitter/splitter.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-page-treeview/style.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-back-to-top-button/plugin.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-highlight/website.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-search/search.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-fontsettings/website.css">
+                
+            
+        
+
+    
+
+    
+        
+    
+
+        
+    
+    
+    <meta name="HandheldFriendly" content="true"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="../gitbook/images/apple-touch-icon-precomposed-152.png">
+    <link rel="shortcut icon" href="../gitbook/images/favicon.ico" type="image/x-icon">
+
+    
+    
+    <link rel="prev" href="Kubernetes源码学习-Controller-P4-ReplicaSet Controller.html" />
+    
+
+    </head>
+    <body>
+        
+<div class="book">
+    <div class="book-summary">
+        
+            
+<div id="book-search-input" role="search">
+    <input type="text" placeholder="输入并搜索" />
+</div>
+
+            
+                <nav role="navigation">
+                
+
+
+<ul class="summary">
+    
+    
+
+    
+
+    
+        
+        <li class="header">《Kubernetes 源码阅读笔记》</li>
+        
+        
+    
+
+    
+        
+        <li class="header">Part I-写在前面</li>
+        
+        
+    
+        <li class="chapter " data-level="2.1" data-path="../">
+            
+                <a href="../">
+            
+                    
+                    1. 总览篇
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Part II-核心组件</li>
+        
+        
+    
+        <li class="chapter " data-level="3.1" data-path="../scheduler/">
+            
+                <a href="../scheduler/">
+            
+                    
+                    2. Scheduler
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="3.1.1" data-path="../scheduler/Kubernetes源码学习-Scheduler-P1-调度器入口篇.html">
+            
+                <a href="../scheduler/Kubernetes源码学习-Scheduler-P1-调度器入口篇.html">
+            
+                    
+                    2.1. 调度器入口
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.1.2" data-path="../scheduler/Kubernetes源码学习-Scheduler-P2-调度器框架.html">
+            
+                <a href="../scheduler/Kubernetes源码学习-Scheduler-P2-调度器框架.html">
+            
+                    
+                    2.2. 调度器框架
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.1.3" data-path="../scheduler/Kubernetes源码学习-Scheduler-P3-Node筛选算法.html">
+            
+                <a href="../scheduler/Kubernetes源码学习-Scheduler-P3-Node筛选算法.html">
+            
+                    
+                    2.3. Node筛选算法
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.1.4" data-path="../scheduler/Kubernetes源码学习-Scheduler-P4-Node优先级算法.html">
+            
+                <a href="../scheduler/Kubernetes源码学习-Scheduler-P4-Node优先级算法.html">
+            
+                    
+                    2.4. Node优先级算法
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.1.5" data-path="../scheduler/Kubernetes源码学习-Scheduler-P5-Pod优先级抢占调度.html">
+            
+                <a href="../scheduler/Kubernetes源码学习-Scheduler-P5-Pod优先级抢占调度.html">
+            
+                    
+                    2.5 Pod优先级调度
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="3.2" data-path="./">
+            
+                <a href="./">
+            
+                    
+                    3. Controller
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="3.2.1" data-path="Kubernetes源码学习-Controller-P1-多实例leader选举.html">
+            
+                <a href="Kubernetes源码学习-Controller-P1-多实例leader选举.html">
+            
+                    
+                    2.1. 多实例leader选举
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.2.2" data-path="Kubernetes源码学习-Controller-P2-Controller与informer.html">
+            
+                <a href="Kubernetes源码学习-Controller-P2-Controller与informer.html">
+            
+                    
+                    2.2. Controller与informer
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.2.3" data-path="Kubernetes源码学习-Controller-P3-Controller分类与Deployment Controller.html">
+            
+                <a href="Kubernetes源码学习-Controller-P3-Controller分类与Deployment Controller.html">
+            
+                    
+                    2.3. Controller分类与Deployment Controller
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.2.4" data-path="Kubernetes源码学习-Controller-P4-ReplicaSet Controller.html">
+            
+                <a href="Kubernetes源码学习-Controller-P4-ReplicaSet Controller.html">
+            
+                    
+                    2.4. ReplicaSet Controller
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter active" data-level="3.2.5" data-path="Kubernetes源码学习-Controller-P5-StatefulSet Controller.html">
+            
+                <a href="Kubernetes源码学习-Controller-P5-StatefulSet Controller.html">
+            
+                    
+                    2.5. StatefulSet Controller
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="3.3" >
+            
+                <span>
+            
+                    
+                    [4. ApiServer]
+            
+                </span>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="3.3.1" >
+            
+                <span>
+            
+                    
+                    [4.1 待补充]
+            
+                </span>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="3.4" >
+            
+                <span>
+            
+                    
+                    [5. Kubelet]
+            
+                </span>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="3.4.1" >
+            
+                <span>
+            
+                    
+                    [5.1 待补充]
+            
+                </span>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+
+    <li class="divider"></li>
+
+    <li>
+        <a href="https://www.gitbook.com" target="blank" class="gitbook-link">
+            本书使用 GitBook 发布
+        </a>
+    </li>
+</ul>
+
+
+                </nav>
+            
+        
+    </div>
+
+    <div class="book-body">
+        
+            <div class="body-inner">
+                
+                    
+
+<div class="book-header" role="navigation">
+    
+
+    <!-- Title -->
+    <h1>
+        <i class="fa fa-circle-o-notch fa-spin"></i>
+        <a href=".." >2.5. StatefulSet Controller</a>
+    </h1>
+</div>
+
+
+
+
+                    <div class="page-wrapper" tabindex="-1" role="main">
+                        <div class="page-inner">
+                            
+<div id="book-search-results">
+    <div class="search-noresults">
+    
+                                <section class="normal markdown-section">
+                                
+                                <div class="treeview__container"><ul>
+<li><div><a href="#p5-statefulset-controller">P5-StatefulSet Controller</a><i class="level__parent level__item level__parent--opened" state="opened" onclick="var curState = this.getAttribute(&apos;state&apos;);var nextState = curState === &apos;opened&apos; ? &apos;hidden&apos; : &apos;opened&apos;;this.setAttribute(&apos;state&apos;, nextState);this.className = this.className.split(curState).join(nextState);var list = this.parentNode.nextElementSibling;if (nextState === &apos;hidden&apos;) {    list.style.display = &apos;none&apos;;} else {    list.style.display = &apos;block&apos;;}"></i></div>
+<ul>
+<li><div><a href="#&#x524D;&#x8A00;">&#x524D;&#x8A00;</a><i></i></div></li>
+<li><div><a href="#statefulset-&#x7684;&#x57FA;&#x672C;&#x7279;&#x6027;">StatefulSet &#x7684;&#x57FA;&#x672C;&#x7279;&#x6027;</a><i></i></div></li>
+<li><div><a href="#statefulset-controller">StatefulSet Controller</a><i class="level__parent level__item level__parent--opened" state="opened" onclick="var curState = this.getAttribute(&apos;state&apos;);var nextState = curState === &apos;opened&apos; ? &apos;hidden&apos; : &apos;opened&apos;;this.setAttribute(&apos;state&apos;, nextState);this.className = this.className.split(curState).join(nextState);var list = this.parentNode.nextElementSibling;if (nextState === &apos;hidden&apos;) {    list.style.display = &apos;none&apos;;} else {    list.style.display = &apos;block&apos;;}"></i></div>
+<ul>
+<li><div><a href="#&#x521D;&#x59CB;&#x5316;">&#x521D;&#x59CB;&#x5316;</a><i></i></div></li>
+<li><div><a href="#&#x5DE5;&#x4F5C;&#x8FC7;&#x7A0B;">&#x5DE5;&#x4F5C;&#x8FC7;&#x7A0B;</a><i class="level__parent level__item level__parent--opened" state="opened" onclick="var curState = this.getAttribute(&apos;state&apos;);var nextState = curState === &apos;opened&apos; ? &apos;hidden&apos; : &apos;opened&apos;;this.setAttribute(&apos;state&apos;, nextState);this.className = this.className.split(curState).join(nextState);var list = this.parentNode.nextElementSibling;if (nextState === &apos;hidden&apos;) {    list.style.display = &apos;none&apos;;} else {    list.style.display = &apos;block&apos;;}"></i></div>
+<ul>
+<li><div><a href="#&#x5B64;&#x513F;revisions&#x4FEE;&#x6B63;&#x6258;&#x7BA1;">&#x5B64;&#x513F;Revisions&#x4FEE;&#x6B63;&#x6258;&#x7BA1;</a><i></i></div></li>
+<li><div><a href="#&#x83B7;&#x53D6;&#x5230;sts&#x7BA1;&#x7406;&#x7684;pod">&#x83B7;&#x53D6;&#x5230;sts&#x7BA1;&#x7406;&#x7684;pod</a><i></i></div></li>
+<li><div><a href="#claimobject">ClaimObject</a><i></i></div></li>
+<li><div><a href="#syncstatefulset">syncStatefulSet</a><i></i></div></li>
+<li><div><a href="#updatestatefulset">updateStatefulSet</a><i></i></div></li>
+</ul></li>
+</ul></li>
+<li><div><a href="#&#x603B;&#x7ED3;">&#x603B;&#x7ED3;</a><i></i></div></li>
+</ul></li>
+</ul>
+</div>
+
+
+<h1 id="p5-statefulset-controller"><a name="p5-statefulset-controller" class="plugin-anchor" href="#p5-statefulset-controller"><i class="fa fa-link" aria-hidden="true"></i></a>P5-StatefulSet Controller</h1>
+<h2 id="&#x524D;&#x8A00;"><a name="&#x524D;&#x8A00;" class="plugin-anchor" href="#&#x524D;&#x8A00;"><i class="fa fa-link" aria-hidden="true"></i></a>&#x524D;&#x8A00;</h2>
+<p>&#x5728;&#x524D;&#x9762;&#x7684;&#x51E0;&#x7BC7;&#x6587;&#x7AE0;&#x4E2D;&#xFF0C;&#x5148;&#x5BF9;deployment controller&#x8FDB;&#x884C;&#x4E86;&#x521D;&#x6B65;&#x5206;&#x6790;:</p>
+<p><a href="https://github.com/yinwenqin/kubeSourceCodeNote/blob/master/controller/Kubernetes&#x6E90;&#x7801;&#x5B66;&#x4E60;-Controller-P3-Controller&#x5206;&#x7C7B;&#x4E0E;Deployment Controller.md" target="_blank">Controller-P3-Deployment Controller</a></p>
+<p>&#x4E25;&#x683C;&#x6765;&#x8BB2;deployment&#x7684;&#x7BA1;&#x7406;pod&#x7684;&#x903B;&#x8F91;&#x662F;&#x57FA;&#x4E8E;replicaSet&#x6765;&#x5B9E;&#x73B0;&#x7684;&#xFF0C;&#x56E0;&#x6B64;&#x63A5;&#x4E0B;&#x6765;&#x7ED3;&#x5408;replicaSet controller&#x8FDB;&#x884C;&#x4E86;&#x6DF1;&#x5165;:</p>
+<p><a href="https://github.com/yinwenqin/kubeSourceCodeNote/blob/master/controller/Kubernetes&#x6E90;&#x7801;&#x5B66;&#x4E60;-Controller-P4-ReplicaSet Controller.md" target="_blank">Controller-P3-ReplicaSet Controller</a></p>
+<p>&#x90A3;&#x4E48;&#x5728;&#x672C;&#x7BC7;&#xFF0C;&#x6765;&#x770B;&#x770B;&#x53E6;&#x4E00;&#x4E2A;&#x6700;&#x5E38;&#x7528;&#x7684;&#x627F;&#x8F7D;&#x5728;pod&#x4E4B;&#x4E0A;&#x7684;&#x7BA1;&#x7406;&#x5355;&#x4F4D;&#x7684;&#x63A7;&#x5236;&#x5668;&#x5B9E;&#x73B0;: <strong>StatefulSet Controller</strong></p>
+<h2 id="statefulset-&#x7684;&#x57FA;&#x672C;&#x7279;&#x6027;"><a name="statefulset-&#x7684;&#x57FA;&#x672C;&#x7279;&#x6027;" class="plugin-anchor" href="#statefulset-&#x7684;&#x57FA;&#x672C;&#x7279;&#x6027;"><i class="fa fa-link" aria-hidden="true"></i></a>StatefulSet &#x7684;&#x57FA;&#x672C;&#x7279;&#x6027;</h2>
+<p>&#x5728;&#x770B;&#x4EE3;&#x7801;&#x4E4B;&#x524D;&#xFF0C;&#x5148;&#x56DE;&#x987E;&#x4E00;&#x4E0B;sts&#x7684;&#x57FA;&#x672C;&#x8FD0;&#x884C;&#x7279;&#x6027;&#xFF0C;&#x4EE3;&#x5165;&#x5730;&#x9605;&#x8BFB;&#x4EE3;&#x7801;&#x4F1A;&#x6BD4;&#x8F83;&#x987A;&#x7545;</p>
+<p><strong>&#x521B;&#x5EFA;</strong></p>
+<p>sts&#x662F;&#x6709;&#x5E8F;&#x7684;&#xFF0C;pod&#x526F;&#x672C;&#x6709;&#x5E8F;&#x4E32;&#x884C;&#x5730;&#x65B0;&#x5EFA;&#xFF0C;pod&#x540D;&#x79F0;&#x4E3A;{sts_name}-{0..N}&#xFF0C;&#x4ECE;&#x5C0F;&#x5E8F;&#x53F7;&#x7684;pod(&#x540D;&#x79F0;&#x4E3A;{sts_name}-0)&#x521B;&#x5EFA;&#xFF0C;&#x4E00;&#x76F4;&#x5230;&#x7B2C;n&#x4E2A;&#x526F;&#x672C;&#x7684;pod(&#x540D;&#x79F0;&#x4E3A;{sts_name}-n)</p>
+<p><strong>&#x66F4;&#x65B0;</strong></p>
+<p>sts&#x7684;&#x66F4;&#x65B0;&#x7B56;&#x7565;&#x6709;2&#x79CD;:</p>
+<ul>
+<li><p><code>RollingUpdateStatefulSetStrategyType</code>&#xFF0C;&#x9ED8;&#x8BA4;&#x7684;&#x6EDA;&#x52A8;&#x66F4;&#x65B0;&#x7B56;&#x7565;&#xFF0C;&#x6B64;&#x7B56;&#x7565;&#x4E0B;&#xFF0C;&#x66F4;&#x65B0;&#x65F6;pod&#x6839;&#x636E;&#x5E8F;&#x53F7;&#x53CD;&#x987A;&#x5E8F;&#x66F4;&#x65B0;&#xFF0C;&#x4ECE;&#x6700;&#x5927;&#x5E8F;&#x53F7;&#x7684;pod&#x5F00;&#x59CB;&#x5220;&#x9664;&#x91CD;&#x5EFA;&#xFF0C;&#x66F4;&#x65B0;&#x81F3;&#x5E8F;&#x53F7;&#x6700;&#x5C0F;&#x7684;pod&#x3002;&#x66F4;&#x65B0;&#x8FC7;&#x7A0B;&#x4E2D;&#xFF0C;&#x59CB;&#x7EC8;&#x4FDD;&#x6301;pod&#x6570;&#x91CF;&#x7B49;&#x4E8E;&#x6307;&#x5B9A;&#x526F;&#x672C;&#x6570;&#xFF0C;&#x5373;&#x6BCF;&#x5220;&#x9664;&#x4E00;&#x4E2A;pod&#xFF0C;&#x624D;&#x4F1A;&#x518D;&#x521B;&#x5EFA;&#x4E00;&#x4E2A;&#x3002;&#x540C;&#x65F6;&#x53EF;&#x4EE5;&#x6307;&#x5B9A;&#x4E00;&#x4E2A;<strong>partition</strong>&#x53C2;&#x6570;&#xFF0C;&#x6307;&#x5B9A;&#x8FD9;&#x4E2A;&#x53C2;&#x6570;&#x540E;&#xFF0C;&#x53EA;&#x6709;&#x5E8F;&#x53F7;&#x5927;&#x4E8E;&#x7B49;&#x4E8E;partition&#x7684;pod&#x624D;&#x4F1A;&#x88AB;&#x66F4;&#x65B0;&#xFF0C;&#x5E8F;&#x53F7;&#x5C0F;&#x4E8E;partition&#x53C2;&#x6570;&#x7684;pod&#x4E0D;&#x4F1A;&#x88AB;&#x66F4;&#x65B0;&#xFF0C;&#x4F8B;&#x5982;&#x6709;5&#x4E2A;&#x526F;&#x672C;&#xFF0C;partition&#x8BBE;&#x7F6E;&#x4E3A;2&#xFF0C;&#x90A3;&#x4E48;&#x5728;&#x66F4;&#x65B0;sts&#x65F6;&#xFF0C;0&#x548C;1&#x53F7;pod&#x4E0D;&#x4F1A;&#x66F4;&#x65B0;&#xFF0C;2 3 4&#x53F7;pod&#x5219;&#x4F1A;&#x66F4;&#x65B0;&#x91CD;&#x5EFA;&#xFF1B;&#x6B64;&#x65F6;&#x7EE7;&#x7EED;&#x5C06;partition&#x7F29;&#x51CF;&#x4E3A;0&#xFF0C;&#x5219;0 1&#x53F7;pod&#x4E5F;&#x4F1A;&#x66F4;&#x65B0;&#x91CD;&#x5EFA;&#x3002;&#x9ED8;&#x8BA4;partition&#x4E3A;0&#xFF0C;&#x5373;&#x6240;&#x6709;&#x7684;pod&#x90FD;&#x4F1A;&#x66F4;&#x65B0;&#x3002;&#x8FD9;&#x4E2A;&#x53C2;&#x6570;&#x4E00;&#x822C;&#x4E0D;&#x4F1A;&#x4F7F;&#x7528;&#xFF0C;&#x4F46;&#x53EF;&#x7528;&#x5728;&#x53D1;&#x5E03;&#x65F6;&#x52A8;&#x6001;&#x66F4;&#x65B0;&#x9012;&#x51CF;partition&#x7684;&#x503C;&#xFF0C;&#x6765;&#x5B9E;&#x73B0;&#x6EDA;&#x52A8;&#x7070;&#x5EA6;&#x53D1;&#x5E03;&#x3002;</p>
+</li>
+<li><p><code>OnDeleteStatefulSetStrategyType</code>, &#x6B64;&#x7B56;&#x7565;&#x4E0B;controller&#x4E0D;&#x4F1A;&#x5BF9;pod&#x505A;&#x4EFB;&#x4F55;&#x64CD;&#x4F5C;&#xFF0C;&#x7531;&#x624B;&#x52A8;&#x5220;&#x9664;pod&#x6765;&#x89E6;&#x53D1;&#x65B0;pod&#x7684;&#x521B;&#x5EFA;</p>
+</li>
+</ul>
+<p><strong>&#x5220;&#x9664;</strong></p>
+<p>&#x5220;&#x9664;sts&#x65F6;&#xFF0C;&#x53EF;&#x4EE5;&#x6307;&#x5B9A;&#x7EA7;&#x8054;&#x6A21;&#x5F0F;&#x7684;&#x53C2;&#x6570;<code>--cascade=true</code>&#xFF0C;&#x9ED8;&#x8BA4;&#x4E3A;true&#xFF0C;&#x610F;&#x601D;&#x662F;&#x5220;&#x9664;sts&#x4F1A;&#x540C;&#x65F6;&#x5220;&#x9664;&#x5B83;&#x6240;&#x7BA1;&#x7406;&#x7684;pod&#x3002;&#x8BBE;&#x7F6E;&#x4E3A;false&#x65F6;&#xFF0C;&#x5220;&#x9664;sts&#x4E0D;&#x4F1A;&#x5F71;&#x54CD;pod&#x7684;&#x8FD0;&#x884C;&#xFF0C;&#x4E14;sts&#x91CD;&#x5EFA;&#x540E;&#x4F9D;&#x7136;&#x80FD;&#x4E0E;&#x6B64;&#x524D;&#x7684;pod&#x5173;&#x8054;&#x8D77;&#x6765;(&#x8FD9;&#x79CD;&#x65B9;&#x5F0F;&#x53EF;&#x80FD;&#x4F1A;&#x4EA7;&#x751F;&#x5B64;&#x513F;pod)&#x3002;</p>
+<p><strong>&#x5173;&#x8054;&#x5173;&#x7CFB;</strong></p>
+<p>&#x5148;&#x6765;&#x770B;&#x770B;sts&#x548C;pod&#x7684;&#x5173;&#x8054;&#x65B9;&#x5F0F;:</p>
+<pre><code class="lang-bash"><span class="hljs-comment"># sts</span>
+[root@008019 ~]<span class="hljs-comment"># kubectl get sts deptest11dev</span>
+NAME           READY   AGE
+deptest11dev   2/2     99d
+
+<span class="hljs-comment"># pod</span>
+[root@008019 ~]<span class="hljs-comment"># kubectl get pods  | grep deptest11dev</span>
+deptest11dev-0                                    1/1     Running                 1          99d
+deptest11dev-1                                    1/1     Running                 0          3d17h
+
+<span class="hljs-comment"># edit pod</span>
+<span class="hljs-comment"># &#x53EF;&#x4EE5;&#x67E5;&#x770B;&#x5230;pod&#x7684;ownerReferences&#x5B57;&#x6BB5;&#xFF0C;&#x4E0E;sts&#x5173;&#x8054;</span>
+ownerReferences:
+  - apiVersion: apps/v1
+    blockOwnerDeletion: <span class="hljs-literal">true</span>
+    controller: <span class="hljs-literal">true</span>
+    kind: StatefulSet
+    name: deptest11dev
+    uid: 28ecf735-2ab4-11ea-afa8-1866daf0f324
+
+<span class="hljs-comment"># &#x53EF;&#x4EE5;&#x67E5;&#x770B;&#x5230;pod&#x7684;labels&#x6807;&#x7B7E;&#xFF0C;&#x65B0;&#x589E;&#x4E86;&#x4E00;&#x4E2A;controller-revision-hash&#x6807;&#x7B7E;&#xFF0C;&#x4E0E;controllerRevision&#x5173;&#x8054;</span>
+  labels:
+    app: deptest11dev
+    controller-revision-hash: deptest11dev-587f8bd845
+    statefulset.kubernetes.io/pod-name: deptest11dev-1
+</code></pre>
+<p>&#x518D;&#x6765;&#x770B;&#x770B;sts&#x548C;ControllerRevision&#x5173;&#x8054;&#x65B9;&#x5F0F;:</p>
+<pre><code class="lang-bash">[root@008019 ~]<span class="hljs-comment"># kubectl get sts deptest11dev</span>
+NAME           READY   AGE
+deptest11dev   2/2     99d
+
+
+
+[root@008019 ~]<span class="hljs-comment"># kubectl get ControllerRevisions | grep deptest11dev</span>
+deptest11dev-587f8bd845                                    statefulset.apps/deptest11dev                                    1          99d
+
+[root@008019 ~]<span class="hljs-comment"># kubectl get ControllerRevisions deptest11dev-587f8bd845</span>
+NAME                      CONTROLLER                      REVISION   AGE
+deptest11dev-587f8bd845   statefulset.apps/deptest11dev   1          99d
+
+
+<span class="hljs-comment"># ControllerRevisions&#x8D44;&#x6E90;&#x4E2D;&#x7684;ownerReferences&#x5B57;&#x6BB5;,&#x53EF;&#x4EE5;&#x770B;&#x51FA;sts&#x4E0E;&#x5176;&#x901A;&#x8FC7;&#x8FD9;&#x4E2A;&#x5B57;&#x6BB5;&#x5173;&#x8054;</span>
+  ownerReferences:
+  - apiVersion: apps/v1
+    blockOwnerDeletion: <span class="hljs-literal">true</span>
+    controller: <span class="hljs-literal">true</span>
+    kind: StatefulSet
+    name: deptest11dev
+    uid: 28ecf735-2ab4-11ea-afa8-1866daf0f324
+
+
+<span class="hljs-comment"># sts status&#x5B57;&#x6BB5;,&#x53EF;&#x4EE5;&#x770B;&#x51FA;sts&#x901A;&#x8FC7;status&#x4E0B;&#x7684;currentRevision&#x3001;updateRevision&#x5B57;&#x6BB5;&#x4E0E;ControllerRevision&#x5173;&#x8054;</span>
+status:
+  collisionCount: 0
+  currentReplicas: 2
+  currentRevision: deptest11dev-587f8bd845
+  observedGeneration: 3
+  readyReplicas: 2
+  replicas: 2
+  updateRevision: deptest11dev-587f8bd845
+  updatedReplicas: 2
+
+<span class="hljs-comment"># &#x5BF9;sts.spec&#x5B57;&#x6BB5;&#x91CC;&#x7684;&#x5185;&#x5BB9;&#x66F4;&#x65B0;&#x540E;&#x5F15;&#x8D77;pod&#x91CD;&#x5EFA;&#xFF0C;sts&#x5F00;&#x59CB;&#x6EDA;&#x52A8;&#x66F4;&#x65B0;&#xFF0C;&#x6B64;&#x65F6;sts&#x7684;status&#x5B57;&#x6BB5;&#x5185;&#x5BB9;&#x5982;&#x4E0B;:</span>
+status:
+  collisionCount: 0
+  currentReplicas: 1
+  currentRevision: deptest11dev-587f8bd845
+  observedGeneration: 4
+  readyReplicas: 2
+  replicas: 2
+  <span class="hljs-comment"># &#x8FD9;&#x65F6;&#x53EF;&#x4EE5;&#x53D1;&#x73B0;updateRevision&#x5B57;&#x6BB5;&#x66F4;&#x65B0;&#x4E3A;&#x4E86;&#x65B0;&#x7684;revision&#xFF0C;&#x5373;updateRevision&#x662F;&#x6700;&#x8FD1;&#x4E00;&#x6B21;&#x66F4;&#x65B0;&#x7684;Revision</span>
+  updateRevision: deptest11dev-7487498978
+
+<span class="hljs-comment"># &#x4FEE;&#x6539;sts&#x8FDB;&#x884C;&#x7F29;&#x5BB9;/&#x6269;&#x5BB9; &#x65F6;&#x7684;status&#x5B57;&#x6BB5;&#xFF1A;</span>
+status:
+  collisionCount: 0
+  currentReplicas: 3
+  currentRevision: deptest11dev-7487498978
+  observedGeneration: 5
+  readyReplicas: 3
+  replicas: 3
+  <span class="hljs-comment"># revision&#x4E0D;&#x4F1A;&#x66F4;&#x65B0;</span>
+  updateRevision: deptest11dev-7487498978
+  updatedReplicas: 3
+</code></pre>
+<p><strong>&#x8BB0;&#x4F4F;&#x8FD9;&#x51E0;&#x8005;&#x4E4B;&#x95F4;&#x53CC;&#x5411;&#x5730;&#x5173;&#x8054;&#x65B9;&#x5F0F;&#xFF0C;&#x4E0B;&#x9762;&#x4F1A;&#x63D0;&#x5230;&#x3002;</strong></p>
+<h2 id="statefulset-controller"><a name="statefulset-controller" class="plugin-anchor" href="#statefulset-controller"><i class="fa fa-link" aria-hidden="true"></i></a>StatefulSet Controller</h2>
+<h3 id="&#x521D;&#x59CB;&#x5316;"><a name="&#x521D;&#x59CB;&#x5316;" class="plugin-anchor" href="#&#x521D;&#x59CB;&#x5316;"><i class="fa fa-link" aria-hidden="true"></i></a>&#x521D;&#x59CB;&#x5316;</h3>
+<p><code>cmd/kube-controller-manager/app/apps.go:59</code></p>
+<pre><code class="lang-go"><span class="hljs-keyword">func</span> startStatefulSetController(ctx ControllerContext) (http.Handler, <span class="hljs-keyword">bool</span>, error) {
+    <span class="hljs-keyword">if</span> !ctx.AvailableResources[schema.GroupVersionResource{Group: <span class="hljs-string">&quot;apps&quot;</span>, Version: <span class="hljs-string">&quot;v1&quot;</span>, Resource: <span class="hljs-string">&quot;statefulsets&quot;</span>}] {
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">nil</span>, <span class="hljs-literal">false</span>, <span class="hljs-literal">nil</span>
+    }
+    <span class="hljs-keyword">go</span> statefulset.NewStatefulSetController(
+        ctx.InformerFactory.Core().V1().Pods(),
+        ctx.InformerFactory.Apps().V1().StatefulSets(),
+        ctx.InformerFactory.Core().V1().PersistentVolumeClaims(),
+        ctx.InformerFactory.Apps().V1().ControllerRevisions(),
+        ctx.ClientBuilder.ClientOrDie(<span class="hljs-string">&quot;statefulset-controller&quot;</span>),
+    ).Run(<span class="hljs-number">1</span>, ctx.Stop)
+    <span class="hljs-keyword">return</span> <span class="hljs-literal">nil</span>, <span class="hljs-literal">true</span>, <span class="hljs-literal">nil</span>
+}
+</code></pre>
+<p>&#x5148;&#x6765;&#x770B;&#x770B;<code>NewStatefulSetController</code>&#x505A;&#x4E86;&#x4EC0;&#x4E48;&#xFF1A;</p>
+<p>==&gt; <code>pkg/controller/statefulset/stateful_set.go:81</code></p>
+<pre><code class="lang-go"><span class="hljs-keyword">func</span> NewStatefulSetController(
+  <span class="hljs-comment">// 1.StatefulSetController&#x5173;&#x6CE8;&#x56DB;&#x79CD;&#x7C7B;&#x578B;&#x7684;&#x8D44;&#x6E90;: Pod/Sts/PVC/ControllerRevision</span>
+    podInformer coreinformers.PodInformer,
+    setInformer appsinformers.StatefulSetInformer,
+    pvcInformer coreinformers.PersistentVolumeClaimInformer,
+    revInformer appsinformers.ControllerRevisionInformer,
+    kubeClient clientset.Interface,
+) *StatefulSetController {
+    eventBroadcaster := record.NewBroadcaster()
+    eventBroadcaster.StartLogging(klog.Infof)
+    eventBroadcaster.StartRecordingToSink(&amp;v1core.EventSinkImpl{Interface: kubeClient.CoreV1().Events(<span class="hljs-string">&quot;&quot;</span>)})
+    recorder := eventBroadcaster.NewRecorder(scheme.Scheme, v1.EventSource{Component: <span class="hljs-string">&quot;statefulset-controller&quot;</span>})
+
+  <span class="hljs-comment">// 2.NewDefaultStatefulSetControl&#x65B9;&#x6CD5;&#x9700;&#x8981;&#x5173;&#x6CE8;</span>
+    ssc := &amp;StatefulSetController{
+        kubeClient: kubeClient,
+        control: NewDefaultStatefulSetControl(
+            NewRealStatefulPodControl(
+                kubeClient,
+                setInformer.Lister(),
+                podInformer.Lister(),
+                pvcInformer.Lister(),
+                recorder),
+            NewRealStatefulSetStatusUpdater(kubeClient, setInformer.Lister()),
+            history.NewHistory(kubeClient, revInformer.Lister()),
+            recorder,
+        ),
+        pvcListerSynced: pvcInformer.Informer().HasSynced,
+        queue:           workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), <span class="hljs-string">&quot;statefulset&quot;</span>),
+        podControl:      controller.RealPodControl{KubeClient: kubeClient, Recorder: recorder},
+
+        revListerSynced: revInformer.Informer().HasSynced,
+    }
+  <span class="hljs-comment">// &#x5F53;sts&#x7BA1;&#x7406;&#x7684;pod curd&#x65F6;&#x5BF9;&#x5E94;&#x7684;&#x5904;&#x7406;&#x65B9;&#x6CD5;(&#x6309;&#x5165;workqueue/&#x66F4;&#x65B0;pod/&#x5220;&#x9664;pod)</span>
+    podInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
+        <span class="hljs-comment">// lookup the statefulset and enqueue</span>
+        AddFunc: ssc.addPod,
+        <span class="hljs-comment">// lookup current and old statefulset if labels changed</span>
+        UpdateFunc: ssc.updatePod,
+        <span class="hljs-comment">// lookup statefulset accounting for deletion tombstones</span>
+        DeleteFunc: ssc.deletePod,
+    })
+    ssc.podLister = podInformer.Lister()
+    ssc.podListerSynced = podInformer.Informer().HasSynced
+
+  <span class="hljs-comment">// &#x5F53;sts curd&#x65F6;&#x5BF9;&#x5E94;&#x7684;&#x65B9;&#x6CD5;(sts&#x538B;&#x5165;workqueue)</span>
+    setInformer.Informer().AddEventHandlerWithResyncPeriod(
+        cache.ResourceEventHandlerFuncs{
+            AddFunc: ssc.enqueueStatefulSet,
+            UpdateFunc: <span class="hljs-keyword">func</span>(old, cur <span class="hljs-keyword">interface</span>{}) {
+                oldPS := old.(*apps.StatefulSet)
+                curPS := cur.(*apps.StatefulSet)
+                <span class="hljs-keyword">if</span> oldPS.Status.Replicas != curPS.Status.Replicas {
+                    klog.V(<span class="hljs-number">4</span>).Infof(<span class="hljs-string">&quot;Observed updated replica count for StatefulSet: %v, %d-&gt;%d&quot;</span>, curPS.Name, oldPS.Status.Replicas, curPS.Status.Replicas)
+                }
+                ssc.enqueueStatefulSet(cur)
+            },
+            DeleteFunc: ssc.enqueueStatefulSet,
+        },
+        statefulSetResyncPeriod,
+    )
+    ssc.setLister = setInformer.Lister()
+    ssc.setListerSynced = setInformer.Informer().HasSynced
+
+    <span class="hljs-comment">// <span class="hljs-doctag">TODO:</span> Watch volumes</span>
+  <span class="hljs-comment">// &#x8FD4;&#x56DE;ssc(StatefulSetController)</span>
+    <span class="hljs-keyword">return</span> ssc
+}
+</code></pre>
+<p>&#x5148;&#x770B;&#x6CE8;&#x91CA;1&#xFF0C;&#x53EF;&#x4EE5;&#x53D1;&#x73B0;&#xFF0C;StatefulSetController&#x5173;&#x6CE8;&#x56DB;&#x79CD;&#x7C7B;&#x578B;&#x7684;&#x8D44;&#x6E90;: Pod/Sts/PVC/ControllerRevision&#xFF0C;&#x5176;&#x4E2D;&#x7684;<strong>ControllerRevision</strong>&#x4E0D;&#x592A;&#x719F;&#x6089;&#xFF0C;&#x5148;&#x627E;&#x51FA;&#x6765;&#x770B;&#x4E0B;&#x5B83;&#x7684;&#x7ED3;&#x6784;&#xFF0C;&#x9010;&#x7EA7;&#x8DF3;&#x8F6C;:</p>
+<p><code>cmd/kube-controller-manager/app/apps.go:63</code></p>
+<p>==&gt; <code>vendor/k8s.io/client-go/informers/apps/v1/interface.go:28</code></p>
+<p>==&gt;<code>vendor/k8s.io/client-go/informers/apps/v1/controllerrevision.go:38</code></p>
+<p>==&gt; <code>vendor/k8s.io/client-go/listers/apps/v1/controllerrevision.go:29</code></p>
+<p>==&gt; <code>vendor/k8s.io/api/apps/v1/types.go:800</code></p>
+<pre><code class="lang-go"><span class="hljs-keyword">type</span> ControllerRevision <span class="hljs-keyword">struct</span> {
+    metav1.TypeMeta <span class="hljs-string">`json:&quot;,inline&quot;`</span>
+    <span class="hljs-comment">// Standard object&apos;s metadata.</span>
+    <span class="hljs-comment">// More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#metadata</span>
+    <span class="hljs-comment">// +optional</span>
+    metav1.ObjectMeta <span class="hljs-string">`json:&quot;metadata,omitempty&quot; protobuf:&quot;bytes,1,opt,name=metadata&quot;`</span>
+
+    <span class="hljs-comment">// Data is the serialized representation of the state.</span>
+    Data runtime.RawExtension <span class="hljs-string">`json:&quot;data,omitempty&quot; protobuf:&quot;bytes,2,opt,name=data&quot;`</span>
+
+    <span class="hljs-comment">// Revision indicates the revision of the state represented by Data.</span>
+    Revision <span class="hljs-keyword">int64</span> <span class="hljs-string">`json:&quot;revision&quot; protobuf:&quot;varint,3,opt,name=revision&quot;`</span>
+}
+</code></pre>
+<p>&#x9605;&#x8BFB;&#x8FD9;&#x4E2A;&#x7ED3;&#x6784;&#x4F53;&#x4E0A;&#x65B9;&#x7684;&#x6CE8;&#x91CA;&#x53EF;&#x4EE5;&#x5F97;&#x77E5;&#xFF0C;ControllerRevision&#x63D0;&#x4F9B;&#x7ED9;DaemonSet&#x548C;StatefulSet&#x7528;&#x4F5C;&#x66F4;&#x65B0;&#x548C;&#x56DE;&#x6EDA;&#xFF0C;ControllerRevision&#x5B58;&#x653E;&#x7684;&#x662F;&#x6570;&#x636E;&#x7684;&#x5FEB;&#x7167;&#xFF0C;ControllerRevision&#x751F;&#x6210;&#x4E4B;&#x540E;&#x5185;&#x5BB9;&#x662F;&#x4E0D;&#x53EF;&#x4FEE;&#x6539;&#x7684;&#xFF0C;&#x7531;&#x8C03;&#x7528;&#x7AEF;&#x6765;&#x8D1F;&#x8D23;&#x5E8F;&#x5217;&#x5316;&#x5199;&#x5165;&#x548C;&#x53CD;&#x5E8F;&#x5217;&#x5316;&#x8BFB;&#x53D6;&#x3002;&#x5176;&#x4E2D;Revision(int64)&#x5B57;&#x6BB5;&#x76F8;&#x5F53;&#x4E8E;ControllerRevision&#x7684;&#x7248;&#x672C;id&#x53F7;&#xFF0C;Data&#x5B57;&#x6BB5;&#x5219;&#x5B58;&#x653E;&#x5E8F;&#x5217;&#x5316;&#x540E;&#x7684;&#x6570;&#x636E;&#x3002;</p>
+<p><strong>&#x753B;&#x5916;&#x97F3;&#xFF1A;&#x4E0D;&#x96BE;&#x731C;&#x6D4B;&#xFF0C;StatefulSet&#x7684;&#x66F4;&#x65B0;&#x4EE5;&#x53CA;&#x56DE;&#x6EDA;(&#x4E5F;&#x662F;&#x4E00;&#x79CD;&#x7279;&#x6B8A;&#x7684;&#x66F4;&#x65B0;)&#x64CD;&#x4F5C;&#xFF0C;&#x662F;&#x57FA;&#x4E8E;&#x5BF9;&#x65B0;&#x65E7;ControllerRevision&#x7684;&#x5BF9;&#x6BD4;&#x6765;&#x8FDB;&#x884C;&#x7684;</strong></p>
+<p>&#x5728;&#x6765;&#x770B;&#x4E0B;&#x6CE8;&#x91CA;2&#xFF0C;NewDefaultStatefulSetControl&#x65B9;&#x6CD5;:</p>
+<p><code>pkg/controller/statefulset/stateful_set.go:95</code></p>
+<p>==&gt; <code>pkg/controller/statefulset/stateful_set_control.go:54</code></p>
+<pre><code class="lang-go"><span class="hljs-keyword">func</span> NewDefaultStatefulSetControl(
+    podControl StatefulPodControlInterface,
+    statusUpdater StatefulSetStatusUpdaterInterface,
+    controllerHistory history.Interface,
+    recorder record.EventRecorder) StatefulSetControlInterface {
+    <span class="hljs-keyword">return</span> &amp;defaultStatefulSetControl{podControl, statusUpdater, controllerHistory, recorder}
+}
+</code></pre>
+<p><strong>NewDefaultStatefulSetControl</strong>&#x8FD4;&#x56DE;&#x7684;<strong>defaultStatefulSetControl</strong>&#x7ED3;&#x6784;&#x4F53;&#x5BF9;&#x8C61;&#x662F;sts&#x7BA1;&#x7406;&#x63A7;&#x5236;&#x903B;&#x8F91;&#x7684;&#x8BED;&#x4E49;&#x5B9E;&#x73B0;&#xFF0C;<strong>defaultStatefulSetControl</strong>&#x7ED3;&#x6784;&#x4F53;&#x91CC;&#x9762;&#x5305;&#x542B;&#x4E86;sts&#x63A7;&#x5236;&#x8FC7;&#x7A0B;&#x4E2D;&#x7684;&#x5404;&#x79CD;&#x63A5;&#x53E3;&#xFF1A;</p>
+<ol>
+<li>&#x7BA1;&#x7406;sts&#x5BF9;&#x5E94;&#x7684;pod/pvc(podControl)&#x7684;&#x65B9;&#x6CD5;&#x63A5;&#x53E3;&#xFF0C;&#x6709;(<strong>CreateStatefulPod/UpdateStatefulPod/DeleteStatefulPod</strong>)&#x8FD9;&#x51E0;&#x4E2A;&#x65B9;&#x6CD5;&#xFF0C;&#x901A;&#x8FC7;<strong>NewRealStatefulPodControl</strong>&#x51FD;&#x6570;&#x8FD4;&#x56DE;&#x7684;<strong>realStatefulPodControl</strong>&#x7ED3;&#x6784;&#x4F53;&#x5BF9;&#x8C61;&#x6765;&#x5B9E;&#x73B0;</li>
+<li>&#x7BA1;&#x7406;sts status&#x72B6;&#x6001;&#x7684;&#x66F4;&#x65B0;(statusUpdater)&#x7684;&#x65B9;&#x6CD5;&#x63A5;&#x53E3;&#xFF0C;&#x6709;<strong>UpdateStatefulSetStatus</strong>&#x8FD9;&#x4E00;&#x4E2A;&#x65B9;&#x6CD5;&#xFF0C;&#x901A;&#x8FC7;<strong>NewRealStatefulSetStatusUpdater</strong>&#x8FD4;&#x56DE;&#x7684;<strong>realStatefulSetStatusUpdater</strong>&#x7ED3;&#x6784;&#x4F53;&#x5BF9;&#x8C61;&#x6765;&#x5B9E;&#x73B0;&#x3002;</li>
+<li>&#x7BA1;&#x7406;ControllerRevision&#x7248;&#x672C;(controllerHistory) &#x7684;&#x65B9;&#x6CD5;&#x63A5;&#x53E3;&#xFF0C;&#x6709;(<strong>ListControllerRevisions/CreateControllerRevision/DeleteControllerRevision/UpdateControllerRevision/AdoptControllerRevision/ReleaseControllerRevision</strong>)&#x8FD9;&#x51E0;&#x4E2A;&#x65B9;&#x6CD5;&#xFF0C;&#x901A;&#x8FC7;<strong><em>history.NewHistory</em></strong>&#x8FD4;&#x56DE;&#x7684;<strong>realHistory</strong>&#x7ED3;&#x6784;&#x4F53;&#x5BF9;&#x8C61;&#x6765;&#x5B9E;&#x73B0;&#x3002;</li>
+</ol>
+<p>&#x73B0;&#x5728;&#x63A5;&#x7740;&#x5F80;&#x4E0B;&#xFF0C;&#x53BB;&#x770B;&#x770B;ssc(StatefulSetController) &#x8FD0;&#x884C;&#x7684;Run&#x51FD;&#x6570;&#x3002;</p>
+<h3 id="&#x5DE5;&#x4F5C;&#x8FC7;&#x7A0B;"><a name="&#x5DE5;&#x4F5C;&#x8FC7;&#x7A0B;" class="plugin-anchor" href="#&#x5DE5;&#x4F5C;&#x8FC7;&#x7A0B;"><i class="fa fa-link" aria-hidden="true"></i></a>&#x5DE5;&#x4F5C;&#x8FC7;&#x7A0B;</h3>
+<p><code>*StatefulSetController.Run()</code>&#x51FD;&#x6570;&#xFF1A;</p>
+<pre><code class="lang-go"><span class="hljs-keyword">func</span> (ssc *StatefulSetController) Run(workers <span class="hljs-keyword">int</span>, stopCh &lt;-<span class="hljs-keyword">chan</span> <span class="hljs-keyword">struct</span>{}) {
+    <span class="hljs-keyword">defer</span> utilruntime.HandleCrash()
+    <span class="hljs-keyword">defer</span> ssc.queue.ShutDown()
+
+    klog.Infof(<span class="hljs-string">&quot;Starting stateful set controller&quot;</span>)
+    <span class="hljs-keyword">defer</span> klog.Infof(<span class="hljs-string">&quot;Shutting down statefulset controller&quot;</span>)
+
+    <span class="hljs-keyword">if</span> !controller.WaitForCacheSync(<span class="hljs-string">&quot;stateful set&quot;</span>, stopCh, ssc.podListerSynced, ssc.setListerSynced, ssc.pvcListerSynced, ssc.revListerSynced) {
+        <span class="hljs-keyword">return</span>
+    }
+
+    <span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; workers; i++ {
+        <span class="hljs-keyword">go</span> wait.Until(ssc.worker, time.Second, stopCh)
+    }
+
+    &lt;-stopCh
+}
+</code></pre>
+<p>wait.Until&#x5B9A;&#x65F6;&#x5668;&#x524D;&#x9762;&#x5DF2;&#x7ECF;&#x8BB2;&#x8FC7;&#xFF0C;&#x4E0D;&#x518D;&#x590D;&#x8FF0;&#xFF0C;&#x91CD;&#x70B9;&#x5728;&#x4E8E;ssc.worker&#x51FD;&#x6570;&#xFF0C;&#x4EE3;&#x7801;&#x91CC;&#x6709;&#x591A;&#x6B21;&#x8DF3;&#x8DC3;&#xFF1A;</p>
+<p><code>pkg/controller/statefulset/stateful_set.go:159</code></p>
+<p>==&gt;<code>pkg/controller/statefulset/stateful_set.go:410</code></p>
+<p>==&gt; <code>pkg/controller/statefulset/stateful_set.go:399</code></p>
+<p>==&gt;<code>pkg/controller/statefulset/stateful_set.go:415</code></p>
+<pre><code class="lang-go"><span class="hljs-comment">// sync syncs the given statefulset.</span>
+<span class="hljs-keyword">func</span> (ssc *StatefulSetController) sync(key <span class="hljs-keyword">string</span>) error {
+    startTime := time.Now()
+    <span class="hljs-keyword">defer</span> <span class="hljs-keyword">func</span>() {
+        klog.V(<span class="hljs-number">4</span>).Infof(<span class="hljs-string">&quot;Finished syncing statefulset %q (%v)&quot;</span>, key, time.Since(startTime))
+    }()
+  <span class="hljs-comment">// key&#x7684;&#x6837;&#x4F8B;: default/teststs&#xFF0C;&#x505A;&#x4E2A;&#x5207;&#x5272;&#xFF0C;&#x62FF;&#x5230;namespace&#x548C;sts name</span>
+    namespace, name, err := cache.SplitMetaNamespaceKey(key)
+    <span class="hljs-keyword">if</span> err != <span class="hljs-literal">nil</span> {
+        <span class="hljs-keyword">return</span> err
+    }
+  <span class="hljs-comment">// &#x83B7;&#x53D6;&#x5230;sts&#x5BF9;&#x8C61;</span>
+    set, err := ssc.setLister.StatefulSets(namespace).Get(name)
+    <span class="hljs-keyword">if</span> errors.IsNotFound(err) {
+        klog.Infof(<span class="hljs-string">&quot;StatefulSet has been deleted %v&quot;</span>, key)
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">nil</span>
+    }
+    <span class="hljs-keyword">if</span> err != <span class="hljs-literal">nil</span> {
+        utilruntime.HandleError(fmt.Errorf(<span class="hljs-string">&quot;unable to retrieve StatefulSet %v from store: %v&quot;</span>, key, err))
+        <span class="hljs-keyword">return</span> err
+    }
+
+  <span class="hljs-comment">// labelSelector</span>
+    selector, err := metav1.LabelSelectorAsSelector(set.Spec.Selector)
+    <span class="hljs-keyword">if</span> err != <span class="hljs-literal">nil</span> {
+        utilruntime.HandleError(fmt.Errorf(<span class="hljs-string">&quot;error converting StatefulSet %v selector: %v&quot;</span>, key, err))
+        <span class="hljs-comment">// This is a non-transient error, so don&apos;t retry.</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">nil</span>
+    }
+
+  <span class="hljs-comment">// &#x5B64;&#x513F;Revisions&#x4FEE;&#x6B63;&#x6258;&#x7BA1;</span>
+    <span class="hljs-keyword">if</span> err := ssc.adoptOrphanRevisions(set); err != <span class="hljs-literal">nil</span> {
+        <span class="hljs-keyword">return</span> err
+    }
+  <span class="hljs-comment">// &#x83B7;&#x53D6;&#x5230;sts&#x7BA1;&#x7406;&#x7684;pod</span>
+    pods, err := ssc.getPodsForStatefulSet(set, selector)
+    <span class="hljs-keyword">if</span> err != <span class="hljs-literal">nil</span> {
+        <span class="hljs-keyword">return</span> err
+    }
+  <span class="hljs-comment">// syncStatefulSet &#x6267;&#x884C;sts sync</span>
+    <span class="hljs-keyword">return</span> ssc.syncStatefulSet(set, pods)
+}
+</code></pre>
+<p>&#x6765;&#x5206;&#x6B65;&#x770B;&#x4E0B;</p>
+<h4 id="&#x5B64;&#x513F;revisions&#x4FEE;&#x6B63;&#x6258;&#x7BA1;"><a name="&#x5B64;&#x513F;revisions&#x4FEE;&#x6B63;&#x6258;&#x7BA1;" class="plugin-anchor" href="#&#x5B64;&#x513F;revisions&#x4FEE;&#x6B63;&#x6258;&#x7BA1;"><i class="fa fa-link" aria-hidden="true"></i></a>&#x5B64;&#x513F;Revisions&#x4FEE;&#x6B63;&#x6258;&#x7BA1;</h4>
+<p>&#x4E0A;&#x9762;&#x6307;&#x51FA;sts&#x548C;revision&#x4E24;&#x8005;&#x4E4B;&#x95F4;&#x663E;&#x793A;&#x5730;&#x53CC;&#x5411;&#x6307;&#x5B9A;&#x5B57;&#x6BB5;&#x6765;&#x5173;&#x8054;&#x5BF9;&#x65B9;&#xFF0C;&#x660E;&#x767D;&#x8FD9;&#x4E00;&#x70B9;&#x90A3;&#x4E48;&#x8FD9;&#x4E2A;&#x51FD;&#x6570;&#x5C31;&#x597D;&#x7406;&#x89E3;&#x4E86;&#x3002;</p>
+<p>&#x51FA;&#x73B0;&#x5B64;&#x513F;ControllerRevisions&#x7684;&#x539F;&#x56E0;&#xFF0C;&#x5F88;&#x6709;&#x53EF;&#x80FD;&#x662F;sts&#x5728;&#x6B64;&#x671F;&#x95F4;&#x8FDB;&#x884C;&#x4E86;&#x53CD;&#x590D;&#x7684;&#x66F4;&#x65B0;&#xFF0C;&#x66F4;&#x65B0;&#x65F6;&#x95F4;&#x5DEE;&#x4E4B;&#x4E2D;&#x4EA7;&#x751F;&#x4E86;&#x810F;&#x6570;&#x636E;.</p>
+<p><code>pkg/controller/statefulset/stateful_set.go:316</code></p>
+<pre><code class="lang-go"><span class="hljs-comment">// adoptOrphanRevisions adopts any orphaned ControllerRevisions matched by set&apos;s Selector.</span>
+<span class="hljs-keyword">func</span> (ssc *StatefulSetController) adoptOrphanRevisions(set *apps.StatefulSet) error {
+  <span class="hljs-comment">// &#x901A;&#x8FC7;sts&#x6307;&#x5B9A;&#x7684;revision&#x76F8;&#x5173;&#x5B57;&#x6BB5;&#x627E;&#x5230;&#x5BF9;&#x5E94;&#x7684;revisions</span>
+    revisions, err := ssc.control.ListRevisions(set)
+    <span class="hljs-keyword">if</span> err != <span class="hljs-literal">nil</span> {
+        <span class="hljs-keyword">return</span> err
+    }
+    hasOrphans := <span class="hljs-literal">false</span>
+    <span class="hljs-keyword">for</span> i := <span class="hljs-keyword">range</span> revisions {
+    <span class="hljs-comment">// &#x901A;&#x8FC7;revision&#x6307;&#x5B9A;&#x7684;controller&#x6765;&#x6E90;&#xFF0C;&#x6765;&#x627E;sts&#x3002;&#x5982;&#x679C;&#x6307;&#x5B9A;&#x7ED1;&#x5B9A;&#x7684;sts&#x4E3A;&#x7A7A;&#xFF0C;&#x90A3;&#x4E48;&#x8BF4;&#x660E;&#x6B64;ControllerRevisions&#x662F;&#x5B64;&#x513F;&#x72B6;&#x6001;(&#x65E0;&#x6258;&#x7BA1;)&#xFF0C;&#x9700;&#x8981;&#x56DE;&#x6536;</span>
+        <span class="hljs-keyword">if</span> metav1.GetControllerOf(revisions[i]) == <span class="hljs-literal">nil</span> {
+            hasOrphans = <span class="hljs-literal">true</span>
+            <span class="hljs-keyword">break</span>
+        }
+    }
+
+  <span class="hljs-comment">// &#x51FA;&#x73B0;&#x5B64;&#x513F;ControllerRevisions&#x7684;&#x539F;&#x56E0;&#xFF0C;&#x5F88;&#x6709;&#x53EF;&#x80FD;&#x662F;sts&#x5728;&#x6B64;&#x671F;&#x95F4;&#x8FDB;&#x884C;&#x4E86;&#x53CD;&#x590D;&#x7684;&#x66F4;&#x65B0;&#xFF0C;&#x56E0;&#x6B64;&#x91CD;&#x65B0;&#x83B7;&#x53D6;&#x4E00;&#x6B21;&#x6700;&#x65B0;&#x7684;sts</span>
+    <span class="hljs-keyword">if</span> hasOrphans {
+        fresh, err := ssc.kubeClient.AppsV1().StatefulSets(set.Namespace).Get(set.Name, metav1.GetOptions{})
+        <span class="hljs-keyword">if</span> err != <span class="hljs-literal">nil</span> {
+            <span class="hljs-keyword">return</span> err
+        }
+    <span class="hljs-comment">// sts(old) &#x82E5;&#x4E0E;fresh sts uid&#x4E0D;&#x540C;&#xFF0C;&#x5219;&#x8BF4;&#x660E;&#x671F;&#x95F4;sts&#x53EF;&#x80FD;&#x7ECF;&#x5386;&#x4E86;&#x5220;&#x9664;&#x91CD;&#x5EFA;&#xFF0C;&#x672C;&#x6B21;&#x903B;&#x8F91;&#x7684;&#x6D41;&#x7A0B;&#x6253;&#x7834;&#xFF0C;&#x629B;&#x9519;&#x8FD4;&#x56DE;</span>
+        <span class="hljs-keyword">if</span> fresh.UID != set.UID {
+            <span class="hljs-keyword">return</span> fmt.Errorf(<span class="hljs-string">&quot;original StatefulSet %v/%v is gone: got uid %v, wanted %v&quot;</span>, set.Namespace, set.Name, fresh.UID, set.UID)
+        }
+    <span class="hljs-comment">// &#x4E3A;&#x8FD9;&#x4E9B;controller sts&#x6307;&#x5B9A;&#x4E3A;&#x7A7A;&#x7684;revision&#xFF0C;&#x82E5;label&#x5339;&#x914D;&#x5219;&#x52A0;&#x4E0A;ownerReferences sts&#x6307;&#x5B9A;&#xFF0C;&#x82E5;label&#x4E0D;&#x5339;&#x914D;&#x5219;gc</span>
+        <span class="hljs-keyword">return</span> ssc.control.AdoptOrphanRevisions(set, revisions)
+    }
+    <span class="hljs-keyword">return</span> <span class="hljs-literal">nil</span>
+}
+</code></pre>
+<h4 id="&#x83B7;&#x53D6;&#x5230;sts&#x7BA1;&#x7406;&#x7684;pod"><a name="&#x83B7;&#x53D6;&#x5230;sts&#x7BA1;&#x7406;&#x7684;pod" class="plugin-anchor" href="#&#x83B7;&#x53D6;&#x5230;sts&#x7BA1;&#x7406;&#x7684;pod"><i class="fa fa-link" aria-hidden="true"></i></a>&#x83B7;&#x53D6;&#x5230;sts&#x7BA1;&#x7406;&#x7684;pod</h4>
+<p><code>pkg/controller/statefulset/stateful_set.go:285</code></p>
+<pre><code class="lang-go"><span class="hljs-keyword">func</span> (ssc *StatefulSetController) getPodsForStatefulSet(set *apps.StatefulSet, selector labels.Selector) ([]*v1.Pod, error) {
+    <span class="hljs-comment">// List all pods to include the pods that don&apos;t match the selector anymore but</span>
+    <span class="hljs-comment">// has a ControllerRef pointing to this StatefulSet.</span>
+    pods, err := ssc.podLister.Pods(set.Namespace).List(labels.Everything())
+    <span class="hljs-keyword">if</span> err != <span class="hljs-literal">nil</span> {
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">nil</span>, err
+    }
+
+  <span class="hljs-comment">// filter&#x51FD;&#x6570;&#x7684;&#x4F5C;&#x7528;&#x662F;&#x5224;&#x65AD;&#x6307;&#x5B9A;&#x7684;pod&#x548C;sts&#x662F;&#x5426;&#x6709;&#x6240;&#x5C5E;&#x5173;&#x7CFB;&#xFF0C;&#x5C55;&#x5F00;&#x4EE3;&#x7801;&#x53EF;&#x4EE5;&#x770B;&#x5230;&#x5224;&#x65AD;&#x7684;&#x65B9;&#x5F0F;&#x5F88;&#x7B80;&#x5355;&#xFF0C;&#x5BF9;pod&#x7684;&#x540D;&#x79F0;&#x505A;re&#x5B57;&#x7B26;&#x4E32;&#x5207;&#x5272;&#xFF0C;&#x6700;&#x540E;&#x4E00;&#x4E2A;&quot;-&quot;&#x4E4B;&#x524D;&#x7684;&#x5B57;&#x7B26;&#x4E32;&#x662F;parent&#xFF0C;&#x4E4B;&#x540E;&#x7684;&#x6570;&#x5B57;&#x662F;&#x5E8F;&#x53F7;&#x7D22;&#x5F15;&#xFF0C;&#x5224;&#x65AD;parent&#x4E0E;sts name&#x662F;&#x5426;&#x4E00;&#x81F4;&#xFF0C;&#x4E00;&#x81F4;&#x5219;&#x4E3A;true&#xFF0C;pod &#x5C5E;&#x4E8E; sts&#xFF0C;&#x4E0D;&#x4E00;&#x81F4;&#x5219;&#x4E3A;false</span>
+    filter := <span class="hljs-keyword">func</span>(pod *v1.Pod) <span class="hljs-keyword">bool</span> {
+        <span class="hljs-comment">// Only claim if it matches our StatefulSet name. Otherwise release/ignore.</span>
+        <span class="hljs-keyword">return</span> isMemberOf(set, pod)
+    }
+
+
+    <span class="hljs-comment">// &#x5982;&#x540C;revision&#x4E00;&#x6837;&#xFF0C;&#x82E5;&#x5B58;&#x5728;&#x5B64;&#x513F;pod&#xFF0C;&#x4E5F;&#x9700;&#x8981;&#x5BF9;&#x5B64;&#x513F;pod&#x8FDB;&#x884C;&#x6536;&#x517B;&#xFF0C;&#x4E0E;sts label&#x5339;&#x914D;&#x5219;&#x52A0;&#x4E0A;&#x5173;&#x8054;&#xFF0C;label&#x4E0D;&#x5339;&#x914D;&#x5219;&#x89E3;&#x9664;&#x5173;&#x8054;&#x3002;</span>
+    canAdoptFunc := controller.RecheckDeletionTimestamp(<span class="hljs-keyword">func</span>() (metav1.Object, error) {
+        fresh, err := ssc.kubeClient.AppsV1().StatefulSets(set.Namespace).Get(set.Name, metav1.GetOptions{})
+        <span class="hljs-keyword">if</span> err != <span class="hljs-literal">nil</span> {
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">nil</span>, err
+        }
+        <span class="hljs-keyword">if</span> fresh.UID != set.UID {
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">nil</span>, fmt.Errorf(<span class="hljs-string">&quot;original StatefulSet %v/%v is gone: got uid %v, wanted %v&quot;</span>, set.Namespace, set.Name, fresh.UID, set.UID)
+        }
+        <span class="hljs-keyword">return</span> fresh, <span class="hljs-literal">nil</span>
+    })
+
+    cm := controller.NewPodControllerRefManager(ssc.podControl, set, selector, controllerKind, canAdoptFunc)
+  <span class="hljs-comment">// &#x6267;&#x884C;&#x7B5B;&#x9009;</span>
+    <span class="hljs-keyword">return</span> cm.ClaimPods(pods, filter)
+}
+</code></pre>
+<p><strong>ClaimPods</strong></p>
+<p><code>pkg/controller/controller_ref_manager.go:171</code></p>
+<pre><code class="lang-go"><span class="hljs-keyword">func</span> (m *PodControllerRefManager) ClaimPods(pods []*v1.Pod, filters ...<span class="hljs-keyword">func</span>(*v1.Pod) <span class="hljs-keyword">bool</span>) ([]*v1.Pod, error) {
+    <span class="hljs-keyword">var</span> claimed []*v1.Pod
+    <span class="hljs-keyword">var</span> errlist []error
+
+
+    match := <span class="hljs-keyword">func</span>(obj metav1.Object) <span class="hljs-keyword">bool</span> {
+        pod := obj.(*v1.Pod)
+    <span class="hljs-comment">// &#x5148;&#x6839;&#x636E;&#x6807;&#x7B7E;&#x5339;&#x914D;pod&#xFF0C;&#x4EC5;&#x5F53;&#x6807;&#x7B7E;&#x5339;&#x914D;&#x901A;&#x8FC7;&#x540E;&#xFF0C;&#x518D;&#x5339;&#x914D;&#x4E0B;&#x4E00;&#x6B65;&#xFF08;sts&#x8C03;&#x7528;&#x5219;&#x662F;&#x6309;&#x7167;&#x4E0A;&#x9762;&#x8BF4;&#x7684;&#x53D6; pod name &#x5B57;&#x7B26;&#x4E32;&#x5207;&#x5272;&#x540E;&#x4E0E;sts name&#x5BF9;&#x6BD4;&#xFF09;</span>
+        <span class="hljs-keyword">if</span> !m.Selector.Matches(labels.Set(pod.Labels)) {
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>
+        }
+        <span class="hljs-keyword">for</span> _, filter := <span class="hljs-keyword">range</span> filters {
+            <span class="hljs-keyword">if</span> !filter(pod) {
+                <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>
+            }
+        }
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>
+    }
+    adopt := <span class="hljs-keyword">func</span>(obj metav1.Object) error {
+    <span class="hljs-comment">// &#x6536;&#x517B;pod(&#x6DFB;&#x52A0;&#x5173;&#x8054;&#x5173;&#x7CFB;)&#xFF0C;&#x5373;&#x4E3A;pod.metadata  patch ownerReferences&#x5B57;&#x6BB5;&#x3002;</span>
+        <span class="hljs-keyword">return</span> m.AdoptPod(obj.(*v1.Pod))
+    }
+    release := <span class="hljs-keyword">func</span>(obj metav1.Object) error {
+    <span class="hljs-comment">// &#x91CA;&#x653E;pod&#x5173;&#x8054;&#x5173;&#x7CFB;&#xFF0C;&#x5373;&#x4E3A;pod.metadata  delete ownerReferences&#x5B57;&#x6BB5;&#x3002;</span>
+        <span class="hljs-keyword">return</span> m.ReleasePod(obj.(*v1.Pod))
+    }
+
+    <span class="hljs-keyword">for</span> _, pod := <span class="hljs-keyword">range</span> pods {
+    <span class="hljs-comment">// &#x5224;&#x65AD;&#x5355;&#x4E2A;pod&#x662F;&#x5426;&#x5339;&#x914D;&#xFF0C;&#x6536;&#x517B;/&#x91CA;&#x653E;&#x5B64;&#x513F;pod&#x7684;&#x51FD;&#x6570;ClaimObject</span>
+        ok, err := m.ClaimObject(pod, match, adopt, release)
+        <span class="hljs-keyword">if</span> err != <span class="hljs-literal">nil</span> {
+            errlist = <span class="hljs-built_in">append</span>(errlist, err)
+            <span class="hljs-keyword">continue</span>
+        }
+        <span class="hljs-keyword">if</span> ok {
+            claimed = <span class="hljs-built_in">append</span>(claimed, pod)
+        }
+    }
+    <span class="hljs-keyword">return</span> claimed, utilerrors.NewAggregate(errlist)
+}
+</code></pre>
+<h4 id=""><a name="" class="plugin-anchor" href="#"><i class="fa fa-link" aria-hidden="true"></i></a> </h4>
+<h4 id="claimobject"><a name="claimobject" class="plugin-anchor" href="#claimobject"><i class="fa fa-link" aria-hidden="true"></i></a>ClaimObject</h4>
+<p><code>pkg/controller/controller_ref_manager.go:66</code></p>
+<pre><code class="lang-go"><span class="hljs-keyword">func</span> (m *BaseControllerRefManager) ClaimObject(obj metav1.Object, match <span class="hljs-keyword">func</span>(metav1.Object) <span class="hljs-keyword">bool</span>, adopt, release <span class="hljs-keyword">func</span>(metav1.Object) error) (<span class="hljs-keyword">bool</span>, error) {
+  <span class="hljs-comment">// 1 &#x83B7;&#x53D6;&#x5230;pod.metadata&#x4E2D;&#x7684;ownerReferences&#x5B57;&#x6BB5;</span>
+    controllerRef := metav1.GetControllerOf(obj)
+  <span class="hljs-comment">// 1-1 &#x5982;&#x679C;pod&#x5B58;&#x5728;ownerReferences,&#x5219;&#x76F4;&#x63A5;&#x8FDB;&#x5165;&#x5224;&#x65AD;&#x662F;&#x5426;match</span>
+    <span class="hljs-keyword">if</span> controllerRef != <span class="hljs-literal">nil</span> {
+        <span class="hljs-keyword">if</span> controllerRef.UID != m.Controller.GetUID() {
+            <span class="hljs-comment">// Owned by someone else. Ignore.</span>
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>, <span class="hljs-literal">nil</span>
+        }
+    <span class="hljs-comment">// 1-2 &#x5339;&#x914D;&#x5219;&#x8FD4;&#x56DE;true</span>
+        <span class="hljs-keyword">if</span> match(obj) {
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>, <span class="hljs-literal">nil</span>
+        }
+
+        <span class="hljs-keyword">if</span> m.Controller.GetDeletionTimestamp() != <span class="hljs-literal">nil</span> {
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>, <span class="hljs-literal">nil</span>
+        }
+
+    <span class="hljs-comment">// 1-3 &#x4E0D;&#x5339;&#x914D;&#x5219;pod&#x91CA;&#x653E;&#x5173;&#x8054;&#x5B57;&#x6BB5;,&#x8FD4;&#x56DE;false</span>
+        <span class="hljs-keyword">if</span> err := release(obj); err != <span class="hljs-literal">nil</span> {
+            <span class="hljs-comment">// If the pod no longer exists, ignore the error.</span>
+            <span class="hljs-keyword">if</span> errors.IsNotFound(err) {
+                <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>, <span class="hljs-literal">nil</span>
+            }
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>, err
+        }
+        <span class="hljs-comment">// Successfully released.</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>, <span class="hljs-literal">nil</span>
+    }
+
+    <span class="hljs-comment">// 2 &#x5B64;&#x513F;pod&#xFF0C;&#x5219;&#x8981;&#x6839;&#x636E;&#x60C5;&#x51B5;&#x5224;&#x65AD;&#x662F;&#x5426;&#x6536;&#x517B;/&#x91CA;&#x653E;</span>
+  <span class="hljs-comment">// 2-1 &#x5DF2;&#x5220;&#x9664;&#x7684;sts&#x6216;match&#x89C4;&#x5219;&#x4E0D;&#x5339;&#x914D;&#xFF0C;&#x8FD4;&#x56DE;false</span>
+    <span class="hljs-keyword">if</span> m.Controller.GetDeletionTimestamp() != <span class="hljs-literal">nil</span> || !match(obj) {
+        <span class="hljs-comment">// Ignore if we&apos;re being deleted or selector doesn&apos;t match.</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>, <span class="hljs-literal">nil</span>
+    }
+    <span class="hljs-keyword">if</span> obj.GetDeletionTimestamp() != <span class="hljs-literal">nil</span> {
+        <span class="hljs-comment">// Ignore if the object is being deleted</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>, <span class="hljs-literal">nil</span>
+    }
+    <span class="hljs-comment">// Selector matches. Try to adopt.</span>
+    <span class="hljs-keyword">if</span> err := adopt(obj); err != <span class="hljs-literal">nil</span> {
+        <span class="hljs-comment">// If the pod no longer exists, ignore the error.</span>
+        <span class="hljs-keyword">if</span> errors.IsNotFound(err) {
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>, <span class="hljs-literal">nil</span>
+        }
+        <span class="hljs-comment">// Either someone else claimed it first, or there was a transient error.</span>
+        <span class="hljs-comment">// The controller should requeue and try again if it&apos;s still orphaned.</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>, err
+    }
+    <span class="hljs-comment">// &#x6536;&#x517B;&#x6210;&#x529F;&#x8FD4;&#x56DE;true</span>
+    <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>, <span class="hljs-literal">nil</span>
+}
+</code></pre>
+<p>&#x5230;&#x8FD9;&#x91CC;&#xFF0C;&#x6240;&#x6709;&#x5E94;&#x5F53;&#x88AB;sts&#x7BA1;&#x7406;&#x7684;pod(&#x5305;&#x62EC;&#x5B64;&#x513F;pod)&#x5C31;&#x8FC7;&#x6EE4;&#x5B8C;&#x6BD5;&#x4E86;&#xFF0C;&#x5F00;&#x59CB;&#x6267;&#x884C;&#x771F;&#x6B63;&#x7684;sts sync&#x3002;</p>
+<h4 id="syncstatefulset"><a name="syncstatefulset" class="plugin-anchor" href="#syncstatefulset"><i class="fa fa-link" aria-hidden="true"></i></a>syncStatefulSet</h4>
+<p>&#x5728;&#x627E;&#x5230;&#x4E86;&#x6240;&#x6709;&#x7BA1;&#x7406;&#x7684;pod&#x540E;&#xFF0C;&#x5C31;&#x8981;&#x5F00;&#x59CB;sts &#x7684;sync&#xFF0C;&#x8FDB;&#x884C;&#x66F4;&#x65B0;sts&#x53CA;&#x66F4;&#x65B0;pod&#x7684;&#x64CD;&#x4F5C;&#x4E86;&#xFF0C;&#x56DE;&#x5230;&#x8FD9;&#x91CC;:</p>
+<p><code>pkg/controller/statefulset/stateful_set.go:451</code></p>
+<p>==&gt; <code>pkg/controller/statefulset/stateful_set.go:458</code></p>
+<p>==&gt; <code>pkg/controller/statefulset/stateful_set_control.go:75</code></p>
+<pre><code class="lang-go"><span class="hljs-keyword">func</span> (ssc *defaultStatefulSetControl) UpdateStatefulSet(set *apps.StatefulSet, pods []*v1.Pod) error {
+
+    <span class="hljs-comment">// &#x53D6;&#x51FA;sts&#x6240;&#x6709;&#x7684;revision&#x5E76;&#x6392;&#x5E8F;</span>
+    revisions, err := ssc.ListRevisions(set)
+    <span class="hljs-keyword">if</span> err != <span class="hljs-literal">nil</span> {
+        <span class="hljs-keyword">return</span> err
+    }
+    history.SortControllerRevisions(revisions)
+
+    <span class="hljs-comment">// &#x83B7;&#x5F97;&#x5F53;&#x524D;revision&#xFF0C;&#x4EE5;&#x53CA;&#x66F4;&#x65B0;&#x540E;&#x6700;&#x65B0;&#x7684;revision</span>
+    currentRevision, updateRevision, collisionCount, err := ssc.getStatefulSetRevisions(set, revisions)
+    <span class="hljs-keyword">if</span> err != <span class="hljs-literal">nil</span> {
+        <span class="hljs-keyword">return</span> err
+    }
+
+    <span class="hljs-comment">// &#x6838;&#x5FC3;&#x65B9;&#x6CD5;&#xFF0C;&#x5BF9;pod&#x8FDB;&#x884C;&#x64CD;&#x4F5C;</span>
+    status, err := ssc.updateStatefulSet(set, currentRevision, updateRevision, collisionCount, pods)
+    <span class="hljs-keyword">if</span> err != <span class="hljs-literal">nil</span> {
+        <span class="hljs-keyword">return</span> err
+    }
+
+    <span class="hljs-comment">// &#x64CD;&#x4F5C;&#x5B8C;&#x6210;&#x540E;&#x8BB0;&#x5F55;&#x4FEE;&#x6539;sts.status</span>
+    err = ssc.updateStatefulSetStatus(set, status)
+    <span class="hljs-keyword">if</span> err != <span class="hljs-literal">nil</span> {
+        <span class="hljs-keyword">return</span> err
+    }
+
+    klog.V(<span class="hljs-number">4</span>).Infof(<span class="hljs-string">&quot;StatefulSet %s/%s pod status replicas=%d ready=%d current=%d updated=%d&quot;</span>,
+        set.Namespace,
+        set.Name,
+        status.Replicas,
+        status.ReadyReplicas,
+        status.CurrentReplicas,
+        status.UpdatedReplicas)
+
+    klog.V(<span class="hljs-number">4</span>).Infof(<span class="hljs-string">&quot;StatefulSet %s/%s revisions current=%s update=%s&quot;</span>,
+        set.Namespace,
+        set.Name,
+        status.CurrentRevision,
+        status.UpdateRevision)
+
+    <span class="hljs-comment">// &#x5BF9;set&#x7684;revision history&#x8FDB;&#x884C;&#x7EF4;&#x62A4;</span>
+    <span class="hljs-keyword">return</span> ssc.truncateHistory(set, pods, revisions, currentRevision, updateRevision)
+}
+</code></pre>
+<p>&#x8FD9;&#x91CC;&#x9762;&#x6700;&#x6838;&#x5FC3;&#x7684;&#x51FD;&#x6570;&#x662F;<code>updateStatefulSetStatus</code>,&#x63A5;&#x7740;&#x5F80;&#x4E0B;</p>
+<h4 id="updatestatefulset"><a name="updatestatefulset" class="plugin-anchor" href="#updatestatefulset"><i class="fa fa-link" aria-hidden="true"></i></a>updateStatefulSet</h4>
+<p>&#x8FD9;&#x4E00;&#x4E2A;&#x51FD;&#x6570;&#x5185;&#x5BB9;&#x5F88;&#x591A;&#xFF0C;200&#x591A;&#x884C;&#x4EE3;&#x7801;&#xFF0C;&#x9700;&#x8981;&#x8BF4;&#x660E;&#x7684;&#x5730;&#x65B9;&#x4F1A;&#x5728;&#x4E0B;&#x9762;&#x4EE3;&#x7801;&#x4E2D;&#x6CE8;&#x91CA;&#x3002;</p>
+<pre><code class="lang-go"><span class="hljs-keyword">func</span> (ssc *defaultStatefulSetControl) updateStatefulSet(
+    set *apps.StatefulSet,
+    currentRevision *apps.ControllerRevision,
+    updateRevision *apps.ControllerRevision,
+    collisionCount <span class="hljs-keyword">int32</span>,
+    pods []*v1.Pod) (*apps.StatefulSetStatus, error) {
+
+  <span class="hljs-comment">// &#x83B7;&#x53D6;&#x5230;&#x5F53;&#x524D;sts currentSet&#xFF0C;&#x7136;&#x540E;&#x83B7;&#x53D6;&#x5230;&#x9700;&#x66F4;&#x65B0;&#x5230;&#x7684;sts updateSet&#x3002;&#x8981;&#x5B9E;&#x73B0;&#x7684;&#x66F4;&#x65B0;&#x6548;&#x679C;&#x662F;&#xFF1A;</span>
+
+  <span class="hljs-comment">// 1.&#x6EDA;&#x52A8;&#x66F4;&#x65B0;&#x65F6;&#xFF0C;&#x5728;&#x672A;&#x6307;&#x5B9A;partition&#x65F6;&#xFF0C;&#x4F7F;&#x5F53;&#x524D;sts&#x7684;&#x7BA1;&#x7406;&#x7684;pod&#x7F29;&#x51CF;&#x4E3A;0&#xFF0C;updateSet&#x7684;ready pod&#x6570; = spec.replicas </span>
+  <span class="hljs-comment">// 2.&#x6EDA;&#x52A8;&#x66F4;&#x65B0;&#x65F6;&#xFF0C;&#x5728;&#x672A;&#x6307;&#x5B9A;partition&#x540E;&#xFF0C;&#x5927;&#x4E8E;&#x7B49;&#x4E8E;partition&#x7684;pod&#x5168;&#x90E8;&#x5F52;&#x4E8E;updateSet&#xFF0C;&#x5C0F;&#x4E8E;partition&#x503C;&#x7684;pod&#x8FD8;&#x662F;&#x5F52;&#x5C5E;&#x4E8E;&#x539F;currentSet</span>
+  <span class="hljs-comment">// 3.OnDelete&#x66F4;&#x65B0;&#x65F6;&#xFF0C;do nothing</span>
+    currentSet, err := ApplyRevision(set, currentRevision)
+    <span class="hljs-keyword">if</span> err != <span class="hljs-literal">nil</span> {
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">nil</span>, err
+    }
+
+    updateSet, err := ApplyRevision(set, updateRevision)
+    <span class="hljs-keyword">if</span> err != <span class="hljs-literal">nil</span> {
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">nil</span>, err
+    }
+
+    <span class="hljs-comment">// set the generation, and revisions in the returned status</span>
+  <span class="hljs-comment">// &#x91CD;&#x65B0;&#x8BA1;&#x7B97;sts&#x7684;status</span>
+    status := apps.StatefulSetStatus{}
+    status.ObservedGeneration = set.Generation
+    status.CurrentRevision = currentRevision.Name
+    status.UpdateRevision = updateRevision.Name
+    status.CollisionCount = <span class="hljs-built_in">new</span>(<span class="hljs-keyword">int32</span>)
+    *status.CollisionCount = collisionCount
+
+    replicaCount := <span class="hljs-keyword">int</span>(*set.Spec.Replicas)
+    <span class="hljs-comment">// replicas&#x662F;&#x5408;&#x6CD5;&#x526F;&#x672C;&#xFF0C;&#x5C06;&#x6EE1;&#x8DB3; 0 &lt;= pod&#x5E8F;&#x53F7; &lt; sts.spec.replicas&#x7684;pod,&#x653E;&#x5230;&#x8FD9;&#x4E2A;slice&#x91CC;&#x6765;&#x3002;&#x8FD9;&#x91CC;&#x9762;&#x7684;pod&#x90FD;&#x662F;&#x8981;&#x4FDD;&#x8BC1;ready&#x7684;</span>
+    replicas := <span class="hljs-built_in">make</span>([]*v1.Pod, replicaCount)
+  <span class="hljs-comment">// condemned&#x662F;&#x975E;&#x6CD5;&#x526F;&#x672C;&#xFF0C;&#x5C06;&#x6EE1;&#x8DB3; pod&#x5E8F;&#x53F7; &gt;= sts.spec.replicas&#x7684;pod,&#x653E;&#x5230;&#x8FD9;&#x4E2A;slice&#x91CC;&#x6765;,&#x8FD9;&#x4E9B;pod&#x662F;&#x8981;&#x5220;&#x9664;&#x6389;&#x7684;(&#x53EF;&#x80FD;&#x662F;&#x88AB;&#x7F29;&#x5BB9;&#x6389;&#x7684;)</span>
+    condemned := <span class="hljs-built_in">make</span>([]*v1.Pod, <span class="hljs-number">0</span>, <span class="hljs-built_in">len</span>(pods))
+    unhealthy := <span class="hljs-number">0</span>
+    firstUnhealthyOrdinal := math.MaxInt32
+    <span class="hljs-keyword">var</span> firstUnhealthyPod *v1.Pod
+
+    <span class="hljs-comment">// First we partition pods into two lists valid replicas and condemned Pods</span>
+    <span class="hljs-keyword">for</span> i := <span class="hljs-keyword">range</span> pods {
+        status.Replicas++
+
+        <span class="hljs-comment">// status.ReadyReplicas&#x8BA1;&#x6570;</span>
+        <span class="hljs-keyword">if</span> isRunningAndReady(pods[i]) {
+            status.ReadyReplicas++
+        }
+
+        <span class="hljs-keyword">if</span> isCreated(pods[i]) &amp;&amp; !isTerminating(pods[i]) {
+      <span class="hljs-comment">// &#x901A;&#x8FC7;pod&#x7684;controller-revision-hash label&#xFF0C;&#x5224;&#x65AD;pod&#x5C5E;&#x4E8E;currentSet&#x8FD8;&#x662F;UpdatedSet&#xFF0C;&#x5206;&#x522B;&#x8BA1;&#x6570;</span>
+            <span class="hljs-keyword">if</span> getPodRevision(pods[i]) == currentRevision.Name {
+                status.CurrentReplicas++
+            }
+            <span class="hljs-keyword">if</span> getPodRevision(pods[i]) == updateRevision.Name {
+                status.UpdatedReplicas++
+            }
+        }
+
+        <span class="hljs-keyword">if</span> ord := getOrdinal(pods[i]); <span class="hljs-number">0</span> &lt;= ord &amp;&amp; ord &lt; replicaCount {
+      <span class="hljs-comment">// &#x5C06;&#x6EE1;&#x8DB3; 0 &lt;= pod&#x5E8F;&#x53F7; &lt; sts.spec.replicas&#x7684;pod,&#x653E;&#x5230;replicas&#x8FD9;&#x4E2A;slice&#x91CC;&#x6765;</span>
+            replicas[ord] = pods[i]
+
+        } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> ord &gt;= replicaCount {
+            <span class="hljs-comment">// &#x5C06;&#x6EE1;&#x8DB3; pod&#x5E8F;&#x53F7; &gt;= sts.spec.replicas&#x7684;pod,&#x653E;&#x5230;condemned&#x8FD9;&#x4E2A;slice&#x91CC;&#x6765;,&#x8FD9;&#x4E9B;pod&#x662F;&#x8981;&#x5220;&#x9664;&#x6389;&#x7684;&#x3002;</span>
+            condemned = <span class="hljs-built_in">append</span>(condemned, pods[i])
+        }
+    }
+
+
+  <span class="hljs-comment">// replicas slice&#x4E4B;&#x4E2D;&#x5982;&#x679C;&#x6709;&#x7D22;&#x5F15;&#x4F4D;&#x7F6E;&#x4E3A;&#x7A7A;&#xFF0C;&#x5219;&#x9700;&#x8981;&#x586B;&#x5145;&#x76F8;&#x5E94;&#x7684;pod&#x3002;</span>
+  <span class="hljs-comment">// &#x6839;&#x636E;currentSet.replicas/UpdatedSet.replicas/partition&#x8FD9;&#x4E09;&#x4E2A;&#x503C;&#x6765;&#x5224;&#x65AD;pod&#x662F;&#x57FA;&#x4E8E;current revision&#x8FD8;&#x662F;&#x57FA;&#x4E8E;update revision&#x521B;&#x5EFA;</span>
+    <span class="hljs-keyword">for</span> ord := <span class="hljs-number">0</span>; ord &lt; replicaCount; ord++ {
+        <span class="hljs-keyword">if</span> replicas[ord] == <span class="hljs-literal">nil</span> {
+            replicas[ord] = newVersionedStatefulSetPod(
+                currentSet,
+                updateSet,
+                currentRevision.Name,
+                updateRevision.Name, ord)
+        }
+    }
+
+    <span class="hljs-comment">// &#x5BF9;&#x9700;&#x8981;&#x5220;&#x9664;&#x7684;&#x975E;&#x6CD5;pod&#x6309;&#x7167;&#x5E8F;&#x53F7;&#x4ECE;&#x5927;&#x5230;&#x5C0F;&#x7684;&#x987A;&#x5E8F;&#x6392;&#x5E8F;</span>
+    sort.Sort(ascendingOrdinal(condemned))
+
+    <span class="hljs-comment">// &#x5982;&#x679C;&#x6709;&#x4E0D;&#x5065;&#x5EB7;&#x7684;pod&#xFF0C;&#x4E5F;&#x9700;&#x8981;&#x5220;&#x9664;&#xFF0C;&#x4F46;&#x8FD8;&#x662F;&#x9075;&#x5FAA;&#x4E32;&#x884C;&#x7684;&#x539F;&#x5219;&#xFF0C;&#x4F18;&#x5148;&#x5220;&#x9664;&#x975E;&#x6CD5;pod&#x4E2D;&#x5E8F;&#x53F7;&#x6700;&#x5927;&#x7684;&#xFF0C;&#x518D;&#x5230;&#x5408;&#x6CD5;&#x526F;&#x672C;&#x4E2D;&#x7684;&#x5E8F;&#x53F7;&#x6700;&#x5C0F;&#x7684;&#x3002;</span>
+    <span class="hljs-keyword">for</span> i := <span class="hljs-keyword">range</span> replicas {
+        <span class="hljs-keyword">if</span> !isHealthy(replicas[i]) {
+            unhealthy++
+            <span class="hljs-keyword">if</span> ord := getOrdinal(replicas[i]); ord &lt; firstUnhealthyOrdinal {
+                firstUnhealthyOrdinal = ord
+                firstUnhealthyPod = replicas[i]
+            }
+        }
+    }
+
+    <span class="hljs-keyword">for</span> i := <span class="hljs-keyword">range</span> condemned {
+        <span class="hljs-keyword">if</span> !isHealthy(condemned[i]) {
+            unhealthy++
+            <span class="hljs-keyword">if</span> ord := getOrdinal(condemned[i]); ord &lt; firstUnhealthyOrdinal {
+                firstUnhealthyOrdinal = ord
+                firstUnhealthyPod = condemned[i]
+            }
+        }
+    }
+
+    <span class="hljs-keyword">if</span> unhealthy &gt; <span class="hljs-number">0</span> {
+        klog.V(<span class="hljs-number">4</span>).Infof(<span class="hljs-string">&quot;StatefulSet %s/%s has %d unhealthy Pods starting with %s&quot;</span>,
+            set.Namespace,
+            set.Name,
+            unhealthy,
+            firstUnhealthyPod.Name)
+    }
+
+    <span class="hljs-comment">// If the StatefulSet is being deleted, don&apos;t do anything other than updating</span>
+    <span class="hljs-comment">// status.</span>
+    <span class="hljs-keyword">if</span> set.DeletionTimestamp != <span class="hljs-literal">nil</span> {
+        <span class="hljs-keyword">return</span> &amp;status, <span class="hljs-literal">nil</span>
+    }
+
+    monotonic := !allowsBurst(set)
+
+    <span class="hljs-comment">// &#x6839;&#x636E;pod&#x7684;&#x5E8F;&#x53F7;&#xFF0C;&#x5BF9;&#x5B83;&#x4EEC;&#x4F9D;&#x6B21;&#x8FDB;&#x884C;&#x68C0;&#x67E5;&#x5E76;&#x64CD;&#x4F5C;&#x3002;</span>
+    <span class="hljs-keyword">for</span> i := <span class="hljs-keyword">range</span> replicas {
+        <span class="hljs-comment">// &#x9519;&#x8BEF;&#x72B6;&#x6001;&#x7684;pod&#x5220;&#x9664;&#x91CD;&#x5EFA;</span>
+        <span class="hljs-keyword">if</span> isFailed(replicas[i]) {
+            ssc.recorder.Eventf(set, v1.EventTypeWarning, <span class="hljs-string">&quot;RecreatingFailedPod&quot;</span>,
+                <span class="hljs-string">&quot;StatefulSet %s/%s is recreating failed Pod %s&quot;</span>,
+                set.Namespace,
+                set.Name,
+                replicas[i].Name)
+            <span class="hljs-keyword">if</span> err := ssc.podControl.DeleteStatefulPod(set, replicas[i]); err != <span class="hljs-literal">nil</span> {
+                <span class="hljs-keyword">return</span> &amp;status, err
+            }
+            <span class="hljs-keyword">if</span> getPodRevision(replicas[i]) == currentRevision.Name {
+                status.CurrentReplicas--
+            }
+            <span class="hljs-keyword">if</span> getPodRevision(replicas[i]) == updateRevision.Name {
+                status.UpdatedReplicas--
+            }
+            status.Replicas--
+            replicas[i] = newVersionedStatefulSetPod(
+                currentSet,
+                updateSet,
+                currentRevision.Name,
+                updateRevision.Name,
+                i)
+        }
+    <span class="hljs-comment">// pod&#x6CA1;&#x6709;&#x88AB;&#x521B;&#x5EFA;(&#x53EF;&#x80FD;&#x662F;&#x4E0A;&#x9762;&#x521A;&#x586B;&#x5145;&#x7684;)&#xFF0C;&#x5C31;&#x521B;&#x5EFA;pod</span>
+        <span class="hljs-keyword">if</span> !isCreated(replicas[i]) {
+            <span class="hljs-keyword">if</span> err := ssc.podControl.CreateStatefulPod(set, replicas[i]); err != <span class="hljs-literal">nil</span> {
+                <span class="hljs-keyword">return</span> &amp;status, err
+            }
+            status.Replicas++
+            <span class="hljs-keyword">if</span> getPodRevision(replicas[i]) == currentRevision.Name {
+                status.CurrentReplicas++
+            }
+            <span class="hljs-keyword">if</span> getPodRevision(replicas[i]) == updateRevision.Name {
+                status.UpdatedReplicas++
+            }
+
+            <span class="hljs-comment">// &#x5982;&#x679C;&#x4E0D;&#x5141;&#x8BB8;burst&#xFF0C;&#x76F4;&#x63A5;&#x8FD4;&#x56DE;</span>
+            <span class="hljs-keyword">if</span> monotonic {
+                <span class="hljs-keyword">return</span> &amp;status, <span class="hljs-literal">nil</span>
+            }
+            <span class="hljs-comment">// pod created, no more work possible for this round</span>
+            <span class="hljs-keyword">continue</span>
+        }
+        <span class="hljs-comment">// &#x5982;&#x679C;&#x4E0D;&#x5141;&#x8BB8;burst&#xFF0C;&#x5BF9;&#x4E8E;&#x7EC8;&#x7ED3;&#x4E2D;&#x7684;pod&#x4E0D;&#x91C7;&#x53D6;&#x4EFB;&#x4F55;&#x903B;&#x8F91;&#xFF0C;&#x7B49;&#x5F85;&#x5B83;&#x7EC8;&#x7ED3;&#x5B8C;&#x6BD5;&#x540E;&#x4E0B;&#x4E00;&#x8F6E;&#x518D;&#x64CD;&#x4F5C;&#x3002;</span>
+        <span class="hljs-keyword">if</span> isTerminating(replicas[i]) &amp;&amp; monotonic {
+            klog.V(<span class="hljs-number">4</span>).Infof(
+                <span class="hljs-string">&quot;StatefulSet %s/%s is waiting for Pod %s to Terminate&quot;</span>,
+                set.Namespace,
+                set.Name,
+                replicas[i].Name)
+            <span class="hljs-keyword">return</span> &amp;status, <span class="hljs-literal">nil</span>
+        }
+    <span class="hljs-comment">// &#x5982;&#x679C;&#x662F;&#x6B63;&#x5728;&#x521B;&#x5EFA;&#x4E2D;&#x7684;pod(&#x8FD8;&#x672A;&#x8FBE;&#x5230;ready&#x72B6;&#x6001;)&#xFF0C;&#x540C;&#x6837;&#x4E0D;&#x91C7;&#x53D6;&#x4EFB;&#x4F55;&#x64CD;&#x4F5C;&#xFF0C;&#x56E0;&#x4E3A;&#x9700;&#x8981;&#x4FDD;&#x8BC1;&#x521B;&#x5EFA;&#x64CD;&#x4F5C;&#x4F9D;&#x6B21;&#x6709;&#x5E8F;</span>
+        <span class="hljs-keyword">if</span> !isRunningAndReady(replicas[i]) &amp;&amp; monotonic {
+            klog.V(<span class="hljs-number">4</span>).Infof(
+                <span class="hljs-string">&quot;StatefulSet %s/%s is waiting for Pod %s to be Running and Ready&quot;</span>,
+                set.Namespace,
+                set.Name,
+                replicas[i].Name)
+            <span class="hljs-keyword">return</span> &amp;status, <span class="hljs-literal">nil</span>
+        }
+
+    <span class="hljs-comment">// &#x5982;&#x679C;&#x6B64;pod&#x4E0E;sts&#x5DF2;&#x7ECF;&#x5339;&#x914D;(ready),&#x4E14;&#x5B58;&#x50A8;&#x6EE1;&#x8DB3;sts&#x3001;pod&#x7684;&#x8981;&#x6C42;&#xFF0C;&#x90A3;&#x4E48;&#x8FD9;&#x4E2A;pod&#x5C31;&#x662F;&#x5408;&#x683C;&#x7684;pod&#xFF0C;continue</span>
+        <span class="hljs-keyword">if</span> identityMatches(set, replicas[i]) &amp;&amp; storageMatches(set, replicas[i]) {
+            <span class="hljs-keyword">continue</span>
+        }
+
+        <span class="hljs-comment">// &#x786E;&#x4FDD;pod&#x4E0E;sts&#x7684;&#x6807;&#x7B7E;&#x5173;&#x8054;&#xFF0C;&#x4EE5;&#x53CA;&#x4E3A;pod&#x51C6;&#x5907;&#x597D;&#x5B83;&#x9700;&#x8981;&#x7684;pvc</span>
+        replica := replicas[i].DeepCopy()
+        <span class="hljs-keyword">if</span> err := ssc.podControl.UpdateStatefulPod(updateSet, replica); err != <span class="hljs-literal">nil</span> {
+            <span class="hljs-keyword">return</span> &amp;status, err
+        }
+    }
+
+
+  <span class="hljs-comment">// &#x4E0A;&#x9762;&#x7684;&#x5408;&#x6CD5;&#x526F;&#x672C;&#x5F97;&#x4EE5;&#x4FDD;&#x8BC1;&#x4E4B;&#x540E;&#xFF0C;&#x4E0B;&#x9762;&#x8981;&#x5F00;&#x59CB;&#x6309;pod&#x5E8F;&#x53F7;&#x4ECE;&#x5927;&#x5230;&#x5C0F;&#x7684;&#x987A;&#x5E8F;&#xFF0C;&#x5220;&#x9664;&#x975E;&#x6CD5;pod&#x4E86;</span>
+    <span class="hljs-keyword">for</span> target := <span class="hljs-built_in">len</span>(condemned) - <span class="hljs-number">1</span>; target &gt;= <span class="hljs-number">0</span>; target-- {
+        <span class="hljs-comment">// &#x7EC8;&#x7ED3;&#x4E2D;&#x7684;pod&#x4E0D;&#x518D;&#x5904;&#x7406;&#xFF0C;&#x76F4;&#x63A5;&#x8FD4;&#x56DE;&#xFF0C;&#x7B49;&#x5F85;&#x4E0B;&#x4E00;&#x8F6E;&#x68C0;&#x67E5;</span>
+        <span class="hljs-keyword">if</span> isTerminating(condemned[target]) {
+            klog.V(<span class="hljs-number">4</span>).Infof(
+                <span class="hljs-string">&quot;StatefulSet %s/%s is waiting for Pod %s to Terminate prior to scale down&quot;</span>,
+                set.Namespace,
+                set.Name,
+                condemned[target].Name)
+            <span class="hljs-comment">// block if we are in monotonic mode</span>
+            <span class="hljs-keyword">if</span> monotonic {
+                <span class="hljs-keyword">return</span> &amp;status, <span class="hljs-literal">nil</span>
+            }
+            <span class="hljs-keyword">continue</span>
+        }
+
+    <span class="hljs-comment">// &#x5982;&#x679C;&#x6B64;&#x975E;&#x6CD5;pod&#x4E0D;&#x662F;ready&#x72B6;&#x6001;&#xFF0C;&#x4E14;&#x4E0D;&#x5141;&#x8BB8;burst&#xFF0C;&#x4E14;&#x5B83;&#x4E0D;&#x662F;&#x4F18;&#x5148;&#x7EA7;&#x7B2C;&#x4E00;&#x7684;&#x975E;&#x5065;&#x5EB7;pod&#xFF0C;&#x4E0D;&#x505A;&#x4EFB;&#x4F55;&#x64CD;&#x4F5C;&#x3002;&#x6362;&#x800C;&#x8A00;&#x4E4B;&#xFF0C;&#x5373;&#x4F7F;&#x662F;&#x5220;&#x9664;&#x975E;&#x5065;&#x5EB7;&#x7684;pod&#xFF0C;&#x4E5F;&#x8981;&#x6309;&#x7167;&#x5E8F;&#x53F7;&#x4ECE;&#x5927;&#x5230;&#x5C0F;&#x7684;&#x987A;&#x5E8F;&#x4E32;&#x884C;&#x6267;&#x884C;&#x3002;</span>
+        <span class="hljs-keyword">if</span> !isRunningAndReady(condemned[target]) &amp;&amp; monotonic &amp;&amp; condemned[target] != firstUnhealthyPod {
+            klog.V(<span class="hljs-number">4</span>).Infof(
+                <span class="hljs-string">&quot;StatefulSet %s/%s is waiting for Pod %s to be Running and Ready prior to scale down&quot;</span>,
+                set.Namespace,
+                set.Name,
+                firstUnhealthyPod.Name)
+            <span class="hljs-keyword">return</span> &amp;status, <span class="hljs-literal">nil</span>
+        }
+    <span class="hljs-comment">// &#x5F00;&#x59CB;&#x5220;&#x9664;&#x6B64;pod&#xFF0C;&#x66F4;&#x65B0;status</span>
+        klog.V(<span class="hljs-number">2</span>).Infof(<span class="hljs-string">&quot;StatefulSet %s/%s terminating Pod %s for scale down&quot;</span>,
+            set.Namespace,
+            set.Name,
+            condemned[target].Name)
+
+        <span class="hljs-keyword">if</span> err := ssc.podControl.DeleteStatefulPod(set, condemned[target]); err != <span class="hljs-literal">nil</span> {
+            <span class="hljs-keyword">return</span> &amp;status, err
+        }
+        <span class="hljs-keyword">if</span> getPodRevision(condemned[target]) == currentRevision.Name {
+            status.CurrentReplicas--
+        }
+        <span class="hljs-keyword">if</span> getPodRevision(condemned[target]) == updateRevision.Name {
+            status.UpdatedReplicas--
+        }
+        <span class="hljs-keyword">if</span> monotonic {
+            <span class="hljs-keyword">return</span> &amp;status, <span class="hljs-literal">nil</span>
+        }
+    }
+
+    <span class="hljs-comment">// OnDelete&#x66F4;&#x65B0;&#x6A21;&#x5F0F;&#x4E0B;&#xFF0C;&#x4E0D;&#x81EA;&#x52A8;&#x5220;&#x9664;pod&#xFF0C;&#x9700;&#x8981;&#x624B;&#x52A8;&#x5220;&#x9664;pod&#x6765;&#x89E6;&#x53D1;&#x66F4;&#x65B0;</span>
+    <span class="hljs-keyword">if</span> set.Spec.UpdateStrategy.Type == apps.OnDeleteStatefulSetStrategyType {
+        <span class="hljs-keyword">return</span> &amp;status, <span class="hljs-literal">nil</span>
+    }
+
+    <span class="hljs-comment">// &#x7ECF;&#x8FC7;&#x4E0A;&#x9762;&#x90A3;&#x4E48;&#x591A;&#x6761;&#x4EF6;&#x7684;&#x8FC7;&#x6EE4;&#x548C;&#x51C6;&#x5907;&#xFF0C;&#x73B0;&#x5728;&#x8981;&#x5F00;&#x59CB;&#x5BF9;replicas&#x91CC;&#x7684;&#x5408;&#x6CD5;pod&#x8FDB;&#x884C;&#x68C0;&#x67E5;&#x4E86;</span>
+    updateMin := <span class="hljs-number">0</span>
+    <span class="hljs-keyword">if</span> set.Spec.UpdateStrategy.RollingUpdate != <span class="hljs-literal">nil</span> {
+        updateMin = <span class="hljs-keyword">int</span>(*set.Spec.UpdateStrategy.RollingUpdate.Partition)
+    }
+    <span class="hljs-comment">// &#x6309;pod&#x7684;&#x5E8F;&#x53F7;&#x5012;&#x5E8F;&#x68C0;&#x67E5;</span>
+    <span class="hljs-keyword">for</span> target := <span class="hljs-built_in">len</span>(replicas) - <span class="hljs-number">1</span>; target &gt;= updateMin; target-- {
+
+        <span class="hljs-comment">// &#x5982;&#x679C;pod&#x7684;revision&#x4E0D;&#x7B26;&#x5408;updateRevision&#xFF0C;&#x90A3;&#x4E48;&#x5220;&#x9664;&#x91CD;&#x5EFA;&#x6B64;pod</span>
+        <span class="hljs-keyword">if</span> getPodRevision(replicas[target]) != updateRevision.Name &amp;&amp; !isTerminating(replicas[target]) {
+            klog.V(<span class="hljs-number">2</span>).Infof(<span class="hljs-string">&quot;StatefulSet %s/%s terminating Pod %s for update&quot;</span>,
+                set.Namespace,
+                set.Name,
+                replicas[target].Name)
+            err := ssc.podControl.DeleteStatefulPod(set, replicas[target])
+            status.CurrentReplicas--
+            <span class="hljs-keyword">return</span> &amp;status, err
+        }
+
+        <span class="hljs-comment">// &#x5408;&#x6CD5;pod&#x66F4;&#x65B0;&#x8FC7;&#x7A0B;&#x4E2D;&#xFF0C;&#x8FD8;&#x672A;&#x5230;&#x8FBE;ready&#x72B6;&#x6001;&#x7684;pod&#xFF0C;&#x7B49;&#x5F85;&#x5B83;</span>
+        <span class="hljs-keyword">if</span> !isHealthy(replicas[target]) {
+            klog.V(<span class="hljs-number">4</span>).Infof(
+                <span class="hljs-string">&quot;StatefulSet %s/%s is waiting for Pod %s to update&quot;</span>,
+                set.Namespace,
+                set.Name,
+                replicas[target].Name)
+            <span class="hljs-keyword">return</span> &amp;status, <span class="hljs-literal">nil</span>
+        }
+
+    }
+    <span class="hljs-keyword">return</span> &amp;status, <span class="hljs-literal">nil</span>
+}
+</code></pre>
+<p><strong>updateStatefulSet&#x51FD;&#x6570;&#x603B;&#x7ED3;</strong></p>
+<ol>
+<li>&#x6BCF;&#x4E2A;&#x5FAA;&#x73AF;&#x7684;&#x5468;&#x671F;&#x4E2D;&#xFF0C;&#x6700;&#x591A;&#x64CD;&#x4F5C;&#x4E00;&#x4E2A;pod</li>
+<li>&#x6839;&#x636E;sts.spec.replicas&#x5BF9;&#x6BD4;&#x73B0;&#x6709;pod&#x7684;&#x5E8F;&#x53F7;&#xFF0C;&#x5BF9;pod&#x8FDB;&#x884C;&#x5212;&#x5206;&#xFF0C;&#x4E00;&#x90E8;&#x5206;&#x5212;&#x4E3A;&#x5408;&#x6CD5;(&#x4FDD;&#x7559;/&#x91CD;&#x5EFA;)&#xFF0C;&#x4E00;&#x90E8;&#x5206;&#x5212;&#x4E3A;&#x975E;&#x6CD5;(&#x5220;&#x9664;)</li>
+<li>&#x5BF9;pods&#x8FDB;&#x884C;&#x5212;&#x5206;&#xFF0C;&#x4E00;&#x90E8;&#x5206;&#x5212;&#x5165;current(old) set&#x9635;&#x8425;&#xFF0C;&#x53E6;&#x4E00;&#x90E8;&#x5206;&#x5212;&#x5165;update(new) set&#x9635;&#x8425;</li>
+<li>&#x66F4;&#x65B0;&#x8FC7;&#x7A0B;&#x4E2D;&#xFF0C;&#x65E0;&#x8BBA;&#x662F;&#x5220;&#x51CF;&#x3001;&#x8FD8;&#x662F;&#x65B0;&#x5EFA;&#xFF0C;&#x90FD;&#x4FDD;&#x6301;pod&#x6570;&#x91CF;&#x56FA;&#x5B9A;&#xFF0C;&#x6709;&#x5E8F;&#x5730;&#x9012;&#x589E;&#x3001;&#x9012;&#x51CF;</li>
+<li>&#x6700;&#x7EC8;&#x4FDD;&#x8BC1;&#x6240;&#x6709;&#x7684;pod&#x90FD;&#x5F52;&#x5C5E;&#x4E8E;update revision</li>
+</ol>
+<h2 id="&#x603B;&#x7ED3;"><a name="&#x603B;&#x7ED3;" class="plugin-anchor" href="#&#x603B;&#x7ED3;"><i class="fa fa-link" aria-hidden="true"></i></a>&#x603B;&#x7ED3;</h2>
+<p>statefulset  &#x5728;&#x8BBE;&#x8BA1;&#x4E0A;&#x4E0E; deployment &#x6709;&#x8BB8;&#x591A;&#x4E0D;&#x540C;&#x7684;&#x5730;&#x65B9;&#xFF0C;&#x4F8B;&#x5982;&#xFF1A;</p>
+<ul>
+<li><p>deployment&#x901A;&#x8FC7;rs&#x7BA1;&#x7406;pod&#xFF0C;sts&#x901A;&#x8FC7;controllerRevision&#x7BA1;&#x7406;pod&#xFF1B;</p>
+</li>
+<li><p>deployment curd&#x662F;&#x65E0;&#x5E8F;&#x7684;&#xFF0C;sts&#x5F3A;&#x4FDD;&#x8BC1;&#x6709;&#x5E8F;curd</p>
+</li>
+<li><p>sts&#x9700;&#x8981;&#x68C0;&#x67E5;&#x5B58;&#x50A8;&#x7684;&#x5339;&#x914D;</p>
+</li>
+</ul>
+<p>&#x5728;&#x4E86;&#x89E3;sts&#x7BA1;&#x7406;&#x64CD;&#x4F5C;pod&#x65B9;&#x5F0F;&#x7684;&#x57FA;&#x7840;&#x4E0A;&#x6765;&#x770B;&#x4EE3;&#x7801;&#xFF0C;&#x4F1A;&#x6709;&#x8BB8;&#x591A;&#x7684;&#x5E2E;&#x52A9;&#x3002;</p>
+
+                                
+                                </section>
+                            
+    </div>
+    <div class="search-results">
+        <div class="has-results">
+            
+            <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+            <ul class="search-results-list"></ul>
+            
+        </div>
+        <div class="no-results">
+            
+            <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+            
+        </div>
+    </div>
+</div>
+
+                        </div>
+                    </div>
+                
+            </div>
+
+            
+                
+                <a href="Kubernetes源码学习-Controller-P4-ReplicaSet Controller.html" class="navigation navigation-prev navigation-unique" aria-label="Previous page: 2.4. ReplicaSet Controller">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+                
+                
+            
+        
+    </div>
+
+    <script>
+        var gitbook = gitbook || [];
+        gitbook.push(function() {
+            gitbook.page.hasChanged({"page":{"title":"2.5. StatefulSet Controller","date":"2020/04/02 16:55:55","tags":["Kubernetes","Golang","读源码"],"level":"3.2.5","depth":2,"next":{"title":"[4. ApiServer]","level":"3.3","depth":1,"ref":"","articles":[{"title":"[4.1 待补充]","level":"3.3.1","depth":2,"ref":"","articles":[]}]},"previous":{"title":"2.4. ReplicaSet Controller","level":"3.2.4","depth":2,"path":"controller/Kubernetes源码学习-Controller-P4-ReplicaSet Controller.md","ref":"./controller/Kubernetes源码学习-Controller-P4-ReplicaSet Controller.md","articles":[]},"dir":"ltr"},"config":{"plugins":["-sharing","anchors","github","expandable-chapters","splitter","page-treeview","back-to-top-button"],"styles":{"website":"./styles/website.css"},"pluginsConfig":{"page-treeview":{"copyright":"","minHeaderCount":"1","minHeaderDeep":"1"},"github":{"url":"https://github.com/yinwenqin/kubeSourceCodeNote"},"splitter":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"back-to-top-button":{},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false},"anchors":{},"expandable-chapters":{}},"theme":"default","author":"ywq","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"Kubernetes源码学习","language":"zh-hans","links":{},"gitbook":"3.2.3","description":""},"file":{"path":"controller/Kubernetes源码学习-Controller-P5-StatefulSet Controller.md","mtime":"2020-04-08T10:14:35.403Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2020-04-08T12:44:18.392Z"},"basePath":"..","book":{"language":""}});
+        });
+    </script>
+</div>
+
+        
+    <script src="../gitbook/gitbook.js"></script>
+    <script src="../gitbook/theme.js"></script>
+    
+        
+        <script src="../gitbook/gitbook-plugin-github/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-expandable-chapters/expandable-chapters.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-splitter/splitter.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-back-to-top-button/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search/search-engine.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search/search.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-lunr/lunr.min.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-lunr/search-lunr.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-fontsettings/fontsettings.js"></script>
+        
+    
+
+    </body>
+</html>
+

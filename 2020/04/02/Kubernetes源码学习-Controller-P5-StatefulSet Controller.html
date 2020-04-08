@@ -1,0 +1,1589 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-CN">
+
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link rel="stylesheet" href="/lib/pace/pace-theme-bounce.min.css?v=1.0.2">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link rel="stylesheet" href="/lib/fancybox/source/jquery.fancybox.css">
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+    
+      
+    
+
+    
+  
+
+  
+
+  
+
+  
+    
+      
+    
+
+    
+  
+
+  
+    
+    
+    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic|Roboto Slab:300,300italic,400,400italic,700,700italic|Roboto Mono:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext">
+  
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.1.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.1.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.1.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.1.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.1.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '7.1.1',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":true,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: true,
+    fancybox: true,
+    fastclick: true,
+    lazyload: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"shrinkIn","post_header":"slideLeftIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideDownIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <script>
+  (function(i,s,o,g,r,a,m){i["DaoVoiceObject"]=r;i[r]=i[r]||function(){(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;a.charset="utf-8";m.parentNode.insertBefore(a,m)})(window,document,"script",('https:' == document.location.protocol ? 'https:' : 'http:') + "//widget.daovoice.io/widget/0f81ff2f.js","daovoice")
+  daovoice('init', {
+      app_id: "fc253f1e"
+    });
+  daovoice('update');
+  </script>
+
+  <meta name="description" content="P5-StatefulSet Controller前言在前面的几篇文章中，先对deployment controller进行了初步分析: Controller-P3-Deployment Controller 严格来讲deployment的管理pod的逻辑是基于replicaSet来实现的，因此接下来结合replicaSet controller进行了深入: Controller-P3-Repli">
+<meta name="keywords" content="Kubernetes,Golang,读源码">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kubernetes源码学习-Controller-P5-StatefulSet Controller">
+<meta property="og:url" content="http://blog.upweto.top/2020/04/02/Kubernetes源码学习-Controller-P5-StatefulSet Controller.html">
+<meta property="og:site_name" content="随笔漫谈">
+<meta property="og:description" content="P5-StatefulSet Controller前言在前面的几篇文章中，先对deployment controller进行了初步分析: Controller-P3-Deployment Controller 严格来讲deployment的管理pod的逻辑是基于replicaSet来实现的，因此接下来结合replicaSet controller进行了深入: Controller-P3-Repli">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2020-04-08T10:14:35.403Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Kubernetes源码学习-Controller-P5-StatefulSet Controller">
+<meta name="twitter:description" content="P5-StatefulSet Controller前言在前面的几篇文章中，先对deployment controller进行了初步分析: Controller-P3-Deployment Controller 严格来讲deployment的管理pod的逻辑是基于replicaSet来实现的，因此接下来结合replicaSet controller进行了深入: Controller-P3-Repli">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="随笔漫谈" type="application/atom+xml">
+
+
+
+  
+  
+  <link rel="canonical" href="http://blog.upweto.top/2020/04/02/Kubernetes源码学习-Controller-P5-StatefulSet Controller">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Kubernetes源码学习-Controller-P5-StatefulSet Controller | 随笔漫谈</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+ 
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">随笔漫谈</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-book">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/gitbooks/" rel="section"><i class="menu-item-icon fa fa-fw fa-book"></i> <br>book</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-互动">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/guestbook/" rel="section"><i class="menu-item-icon fa fa-fw fa-comments"></i> <br>互动</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://blog.upweto.top/2020/04/02/Kubernetes源码学习-Controller-P5-StatefulSet Controller.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="丨ywq丨">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随笔漫谈">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Kubernetes源码学习-Controller-P5-StatefulSet Controller
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2020-04-02 16:55:55" itemprop="dateCreated datePublished" datetime="2020-04-02T16:55:55+08:00">2020-04-02</time>
+            
+
+            
+          </span>
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+            <div class="post-symbolscount">
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">本文字数：</span>
+                
+                <span title="本文字数">28k</span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">25 分钟</span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="P5-StatefulSet-Controller"><a href="#P5-StatefulSet-Controller" class="headerlink" title="P5-StatefulSet Controller"></a>P5-StatefulSet Controller</h1><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>在前面的几篇文章中，先对deployment controller进行了初步分析:</p>
+<p><a href="https://github.com/yinwenqin/kubeSourceCodeNote/blob/master/controller/Kubernetes源码学习-Controller-P3-Controller分类与Deployment Controller.md" target="_blank" rel="noopener">Controller-P3-Deployment Controller</a></p>
+<p>严格来讲deployment的管理pod的逻辑是基于replicaSet来实现的，因此接下来结合replicaSet controller进行了深入:</p>
+<p><a href="https://github.com/yinwenqin/kubeSourceCodeNote/blob/master/controller/Kubernetes源码学习-Controller-P4-ReplicaSet Controller.md" target="_blank" rel="noopener">Controller-P3-ReplicaSet Controller</a></p>
+<p>那么在本篇，来看看另一个最常用的承载在pod之上的管理单位的控制器实现: <strong>StatefulSet Controller</strong></p>
+<p>##StatefulSet 的基本特性</p>
+<p>在看代码之前，先回顾一下sts的基本运行特性，代入地阅读代码会比较顺畅</p>
+<p><strong>创建</strong></p>
+<p>sts是有序的，pod副本有序串行地新建，pod名称为{sts_name}-{0..N}，从小序号的pod(名称为{sts_name}-0)创建，一直到第n个副本的pod(名称为{sts_name}-n)</p>
+<p><strong>更新</strong></p>
+<p>sts的更新策略有2种:</p>
+<ul>
+<li><p><code>RollingUpdateStatefulSetStrategyType</code>，默认的滚动更新策略，此策略下，更新时pod根据序号反顺序更新，从最大序号的pod开始删除重建，更新至序号最小的pod。更新过程中，始终保持pod数量等于指定副本数，即每删除一个pod，才会再创建一个。同时可以指定一个<strong>partition</strong>参数，指定这个参数后，只有序号大于等于partition的pod才会被更新，序号小于partition参数的pod不会被更新，例如有5个副本，partition设置为2，那么在更新sts时，0和1号pod不会更新，2 3 4号pod则会更新重建；此时继续将partition缩减为0，则0 1号pod也会更新重建。默认partition为0，即所有的pod都会更新。这个参数一般不会使用，但可用在发布时动态更新递减partition的值，来实现滚动灰度发布。</p>
+</li>
+<li><p><code>OnDeleteStatefulSetStrategyType</code>, 此策略下controller不会对pod做任何操作，由手动删除pod来触发新pod的创建</p>
+</li>
+</ul>
+<p><strong>删除</strong></p>
+<p>删除sts时，可以指定级联模式的参数<code>--cascade=true</code>，默认为true，意思是删除sts会同时删除它所管理的pod。设置为false时，删除sts不会影响pod的运行，且sts重建后依然能与此前的pod关联起来(这种方式可能会产生孤儿pod)。</p>
+<p><strong>关联关系</strong></p>
+<p>先来看看sts和pod的关联方式:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># sts</span></span><br><span class="line">[root@008019 ~]<span class="comment"># kubectl get sts deptest11dev</span></span><br><span class="line">NAME           READY   AGE</span><br><span class="line">deptest11dev   2/2     99d</span><br><span class="line"></span><br><span class="line"><span class="comment"># pod</span></span><br><span class="line">[root@008019 ~]<span class="comment"># kubectl get pods  | grep deptest11dev</span></span><br><span class="line">deptest11dev-0                                    1/1     Running                 1          99d</span><br><span class="line">deptest11dev-1                                    1/1     Running                 0          3d17h</span><br><span class="line"></span><br><span class="line"><span class="comment"># edit pod</span></span><br><span class="line"><span class="comment"># 可以查看到pod的ownerReferences字段，与sts关联</span></span><br><span class="line">ownerReferences:</span><br><span class="line">  - apiVersion: apps/v1</span><br><span class="line">    blockOwnerDeletion: <span class="literal">true</span></span><br><span class="line">    controller: <span class="literal">true</span></span><br><span class="line">    kind: StatefulSet</span><br><span class="line">    name: deptest11dev</span><br><span class="line">    uid: 28ecf735-2ab4-11ea-afa8-1866daf0f324</span><br><span class="line"></span><br><span class="line"><span class="comment"># 可以查看到pod的labels标签，新增了一个controller-revision-hash标签，与controllerRevision关联</span></span><br><span class="line">  labels:</span><br><span class="line">    app: deptest11dev</span><br><span class="line">    controller-revision-hash: deptest11dev-587f8bd845</span><br><span class="line">    statefulset.kubernetes.io/pod-name: deptest11dev-1</span><br></pre></td></tr></table></figure>
+<p>再来看看sts和ControllerRevision关联方式:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line">[root@008019 ~]<span class="comment"># kubectl get sts deptest11dev</span></span><br><span class="line">NAME           READY   AGE</span><br><span class="line">deptest11dev   2/2     99d</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">[root@008019 ~]<span class="comment"># kubectl get ControllerRevisions | grep deptest11dev</span></span><br><span class="line">deptest11dev-587f8bd845                                    statefulset.apps/deptest11dev                                    1          99d</span><br><span class="line"></span><br><span class="line">[root@008019 ~]<span class="comment"># kubectl get ControllerRevisions deptest11dev-587f8bd845</span></span><br><span class="line">NAME                      CONTROLLER                      REVISION   AGE</span><br><span class="line">deptest11dev-587f8bd845   statefulset.apps/deptest11dev   1          99d</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># ControllerRevisions资源中的ownerReferences字段,可以看出sts与其通过这个字段关联</span></span><br><span class="line">  ownerReferences:</span><br><span class="line">  - apiVersion: apps/v1</span><br><span class="line">    blockOwnerDeletion: <span class="literal">true</span></span><br><span class="line">    controller: <span class="literal">true</span></span><br><span class="line">    kind: StatefulSet</span><br><span class="line">    name: deptest11dev</span><br><span class="line">    uid: 28ecf735-2ab4-11ea-afa8-1866daf0f324</span><br><span class="line">    </span><br><span class="line"></span><br><span class="line"><span class="comment"># sts status字段,可以看出sts通过status下的currentRevision、updateRevision字段与ControllerRevision关联</span></span><br><span class="line">status:</span><br><span class="line">  collisionCount: 0</span><br><span class="line">  currentReplicas: 2</span><br><span class="line">  currentRevision: deptest11dev-587f8bd845</span><br><span class="line">  observedGeneration: 3</span><br><span class="line">  readyReplicas: 2</span><br><span class="line">  replicas: 2</span><br><span class="line">  updateRevision: deptest11dev-587f8bd845</span><br><span class="line">  updatedReplicas: 2</span><br><span class="line"></span><br><span class="line"><span class="comment"># 对sts.spec字段里的内容更新后引起pod重建，sts开始滚动更新，此时sts的status字段内容如下:</span></span><br><span class="line">status:</span><br><span class="line">  collisionCount: 0</span><br><span class="line">  currentReplicas: 1</span><br><span class="line">  currentRevision: deptest11dev-587f8bd845</span><br><span class="line">  observedGeneration: 4</span><br><span class="line">  readyReplicas: 2</span><br><span class="line">  replicas: 2</span><br><span class="line">  <span class="comment"># 这时可以发现updateRevision字段更新为了新的revision，即updateRevision是最近一次更新的Revision</span></span><br><span class="line">  updateRevision: deptest11dev-7487498978</span><br><span class="line">  </span><br><span class="line"><span class="comment"># 修改sts进行缩容/扩容 时的status字段：</span></span><br><span class="line">status:</span><br><span class="line">  collisionCount: 0</span><br><span class="line">  currentReplicas: 3</span><br><span class="line">  currentRevision: deptest11dev-7487498978</span><br><span class="line">  observedGeneration: 5</span><br><span class="line">  readyReplicas: 3</span><br><span class="line">  replicas: 3</span><br><span class="line">  <span class="comment"># revision不会更新</span></span><br><span class="line">  updateRevision: deptest11dev-7487498978</span><br><span class="line">  updatedReplicas: 3</span><br></pre></td></tr></table></figure>
+<p><strong>记住这几者之间双向地关联方式，下面会提到。</strong></p>
+<h2 id="StatefulSet-Controller"><a href="#StatefulSet-Controller" class="headerlink" title="StatefulSet Controller"></a>StatefulSet Controller</h2><h3 id="初始化"><a href="#初始化" class="headerlink" title="初始化"></a>初始化</h3><p><code>cmd/kube-controller-manager/app/apps.go:59</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">startStatefulSetController</span><span class="params">(ctx ControllerContext)</span> <span class="params">(http.Handler, <span class="keyword">bool</span>, error)</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> !ctx.AvailableResources[schema.GroupVersionResource&#123;Group: <span class="string">"apps"</span>, Version: <span class="string">"v1"</span>, Resource: <span class="string">"statefulsets"</span>&#125;] &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span>, <span class="literal">false</span>, <span class="literal">nil</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">go</span> statefulset.NewStatefulSetController(</span><br><span class="line">		ctx.InformerFactory.Core().V1().Pods(),</span><br><span class="line">		ctx.InformerFactory.Apps().V1().StatefulSets(),</span><br><span class="line">		ctx.InformerFactory.Core().V1().PersistentVolumeClaims(),</span><br><span class="line">		ctx.InformerFactory.Apps().V1().ControllerRevisions(),</span><br><span class="line">		ctx.ClientBuilder.ClientOrDie(<span class="string">"statefulset-controller"</span>),</span><br><span class="line">	).Run(<span class="number">1</span>, ctx.Stop)</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">nil</span>, <span class="literal">true</span>, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>先来看看<code>NewStatefulSetController</code>做了什么：</p>
+<p>==&gt; <code>pkg/controller/statefulset/stateful_set.go:81</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewStatefulSetController</span><span class="params">(</span></span></span><br><span class="line"><span class="function"><span class="params">  // 1.StatefulSetController关注四种类型的资源: Pod/Sts/PVC/ControllerRevision</span></span></span><br><span class="line"><span class="function"><span class="params">	podInformer coreinformers.PodInformer,</span></span></span><br><span class="line"><span class="function"><span class="params">	setInformer appsinformers.StatefulSetInformer,</span></span></span><br><span class="line"><span class="function"><span class="params">	pvcInformer coreinformers.PersistentVolumeClaimInformer,</span></span></span><br><span class="line"><span class="function"><span class="params">	revInformer appsinformers.ControllerRevisionInformer,</span></span></span><br><span class="line"><span class="function"><span class="params">	kubeClient clientset.Interface,</span></span></span><br><span class="line"><span class="function"><span class="params">)</span> *<span class="title">StatefulSetController</span></span> &#123;</span><br><span class="line">	eventBroadcaster := record.NewBroadcaster()</span><br><span class="line">	eventBroadcaster.StartLogging(klog.Infof)</span><br><span class="line">	eventBroadcaster.StartRecordingToSink(&amp;v1core.EventSinkImpl&#123;Interface: kubeClient.CoreV1().Events(<span class="string">""</span>)&#125;)</span><br><span class="line">	recorder := eventBroadcaster.NewRecorder(scheme.Scheme, v1.EventSource&#123;Component: <span class="string">"statefulset-controller"</span>&#125;)</span><br><span class="line">  </span><br><span class="line">  <span class="comment">// 2.NewDefaultStatefulSetControl方法需要关注</span></span><br><span class="line">	ssc := &amp;StatefulSetController&#123;</span><br><span class="line">		kubeClient: kubeClient,</span><br><span class="line">		control: NewDefaultStatefulSetControl(</span><br><span class="line">			NewRealStatefulPodControl(</span><br><span class="line">				kubeClient,</span><br><span class="line">				setInformer.Lister(),</span><br><span class="line">				podInformer.Lister(),</span><br><span class="line">				pvcInformer.Lister(),</span><br><span class="line">				recorder),</span><br><span class="line">			NewRealStatefulSetStatusUpdater(kubeClient, setInformer.Lister()),</span><br><span class="line">			history.NewHistory(kubeClient, revInformer.Lister()),</span><br><span class="line">			recorder,</span><br><span class="line">		),</span><br><span class="line">		pvcListerSynced: pvcInformer.Informer().HasSynced,</span><br><span class="line">		queue:           workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), <span class="string">"statefulset"</span>),</span><br><span class="line">		podControl:      controller.RealPodControl&#123;KubeClient: kubeClient, Recorder: recorder&#125;,</span><br><span class="line"></span><br><span class="line">		revListerSynced: revInformer.Informer().HasSynced,</span><br><span class="line">	&#125;</span><br><span class="line">  <span class="comment">// 当sts管理的pod curd时对应的处理方法(按入workqueue/更新pod/删除pod)</span></span><br><span class="line">	podInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs&#123;</span><br><span class="line">		<span class="comment">// lookup the statefulset and enqueue</span></span><br><span class="line">		AddFunc: ssc.addPod,</span><br><span class="line">		<span class="comment">// lookup current and old statefulset if labels changed</span></span><br><span class="line">		UpdateFunc: ssc.updatePod,</span><br><span class="line">		<span class="comment">// lookup statefulset accounting for deletion tombstones</span></span><br><span class="line">		DeleteFunc: ssc.deletePod,</span><br><span class="line">	&#125;)</span><br><span class="line">	ssc.podLister = podInformer.Lister()</span><br><span class="line">	ssc.podListerSynced = podInformer.Informer().HasSynced</span><br><span class="line">  </span><br><span class="line">  <span class="comment">// 当sts curd时对应的方法(sts压入workqueue)</span></span><br><span class="line">	setInformer.Informer().AddEventHandlerWithResyncPeriod(</span><br><span class="line">		cache.ResourceEventHandlerFuncs&#123;</span><br><span class="line">			AddFunc: ssc.enqueueStatefulSet,</span><br><span class="line">			UpdateFunc: <span class="function"><span class="keyword">func</span><span class="params">(old, cur <span class="keyword">interface</span>&#123;&#125;)</span></span> &#123;</span><br><span class="line">				oldPS := old.(*apps.StatefulSet)</span><br><span class="line">				curPS := cur.(*apps.StatefulSet)</span><br><span class="line">				<span class="keyword">if</span> oldPS.Status.Replicas != curPS.Status.Replicas &#123;</span><br><span class="line">					klog.V(<span class="number">4</span>).Infof(<span class="string">"Observed updated replica count for StatefulSet: %v, %d-&gt;%d"</span>, curPS.Name, oldPS.Status.Replicas, curPS.Status.Replicas)</span><br><span class="line">				&#125;</span><br><span class="line">				ssc.enqueueStatefulSet(cur)</span><br><span class="line">			&#125;,</span><br><span class="line">			DeleteFunc: ssc.enqueueStatefulSet,</span><br><span class="line">		&#125;,</span><br><span class="line">		statefulSetResyncPeriod,</span><br><span class="line">	)</span><br><span class="line">	ssc.setLister = setInformer.Lister()</span><br><span class="line">	ssc.setListerSynced = setInformer.Informer().HasSynced</span><br><span class="line"></span><br><span class="line">	<span class="comment">// <span class="doctag">TODO:</span> Watch volumes</span></span><br><span class="line">  <span class="comment">// 返回ssc(StatefulSetController)</span></span><br><span class="line">	<span class="keyword">return</span> ssc</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>先看注释1，可以发现，StatefulSetController关注四种类型的资源: Pod/Sts/PVC/ControllerRevision，其中的<strong>ControllerRevision</strong>不太熟悉，先找出来看下它的结构，逐级跳转:</p>
+<p><code>cmd/kube-controller-manager/app/apps.go:63</code></p>
+<p>==&gt; <code>vendor/k8s.io/client-go/informers/apps/v1/interface.go:28</code></p>
+<p>==&gt;<code>vendor/k8s.io/client-go/informers/apps/v1/controllerrevision.go:38</code></p>
+<p>==&gt; <code>vendor/k8s.io/client-go/listers/apps/v1/controllerrevision.go:29</code></p>
+<p>==&gt; <code>vendor/k8s.io/api/apps/v1/types.go:800</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> ControllerRevision <span class="keyword">struct</span> &#123;</span><br><span class="line">	metav1.TypeMeta <span class="string">`json:",inline"`</span></span><br><span class="line">	<span class="comment">// Standard object's metadata.</span></span><br><span class="line">	<span class="comment">// More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#metadata</span></span><br><span class="line">	<span class="comment">// +optional</span></span><br><span class="line">	metav1.ObjectMeta <span class="string">`json:"metadata,omitempty" protobuf:"bytes,1,opt,name=metadata"`</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">// Data is the serialized representation of the state.</span></span><br><span class="line">	Data runtime.RawExtension <span class="string">`json:"data,omitempty" protobuf:"bytes,2,opt,name=data"`</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">// Revision indicates the revision of the state represented by Data.</span></span><br><span class="line">	Revision <span class="keyword">int64</span> <span class="string">`json:"revision" protobuf:"varint,3,opt,name=revision"`</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>阅读这个结构体上方的注释可以得知，ControllerRevision提供给DaemonSet和StatefulSet用作更新和回滚，ControllerRevision存放的是数据的快照，ControllerRevision生成之后内容是不可修改的，由调用端来负责序列化写入和反序列化读取。其中Revision(int64)字段相当于ControllerRevision的版本id号，Data字段则存放序列化后的数据。</p>
+<p><strong>画外音：不难猜测，StatefulSet的更新以及回滚(也是一种特殊的更新)操作，是基于对新旧ControllerRevision的对比来进行的</strong></p>
+<p>在来看下注释2，NewDefaultStatefulSetControl方法:</p>
+<p><code>pkg/controller/statefulset/stateful_set.go:95</code></p>
+<p>==&gt; <code>pkg/controller/statefulset/stateful_set_control.go:54</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewDefaultStatefulSetControl</span><span class="params">(</span></span></span><br><span class="line"><span class="function"><span class="params">	podControl StatefulPodControlInterface,</span></span></span><br><span class="line"><span class="function"><span class="params">	statusUpdater StatefulSetStatusUpdaterInterface,</span></span></span><br><span class="line"><span class="function"><span class="params">	controllerHistory history.Interface,</span></span></span><br><span class="line"><span class="function"><span class="params">	recorder record.EventRecorder)</span> <span class="title">StatefulSetControlInterface</span></span> &#123;</span><br><span class="line">	<span class="keyword">return</span> &amp;defaultStatefulSetControl&#123;podControl, statusUpdater, controllerHistory, recorder&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>NewDefaultStatefulSetControl</strong>返回的<strong>defaultStatefulSetControl</strong>结构体对象是sts管理控制逻辑的语义实现，<strong>defaultStatefulSetControl</strong>结构体里面包含了sts控制过程中的各种接口：</p>
+<ol>
+<li>管理sts对应的pod/pvc(podControl)的方法接口，有(<strong>CreateStatefulPod/UpdateStatefulPod/DeleteStatefulPod</strong>)这几个方法，通过<strong>NewRealStatefulPodControl</strong>函数返回的<strong>realStatefulPodControl</strong>结构体对象来实现</li>
+<li>管理sts status状态的更新(statusUpdater)的方法接口，有<strong>UpdateStatefulSetStatus</strong>这一个方法，通过<strong>NewRealStatefulSetStatusUpdater</strong>返回的<strong>realStatefulSetStatusUpdater</strong>结构体对象来实现。</li>
+<li>管理ControllerRevision版本(controllerHistory) 的方法接口，有(<strong>ListControllerRevisions/CreateControllerRevision/DeleteControllerRevision/UpdateControllerRevision/AdoptControllerRevision/ReleaseControllerRevision</strong>)这几个方法，通过<strong><em>history.NewHistory</em></strong>返回的<strong>realHistory</strong>结构体对象来实现。</li>
+</ol>
+<p>现在接着往下，去看看ssc(StatefulSetController) 运行的Run函数。</p>
+<h3 id="工作过程"><a href="#工作过程" class="headerlink" title="工作过程"></a>工作过程</h3><p><code>*StatefulSetController.Run()</code>函数：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(ssc *StatefulSetController)</span> <span class="title">Run</span><span class="params">(workers <span class="keyword">int</span>, stopCh &lt;-<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;)</span></span> &#123;</span><br><span class="line">	<span class="keyword">defer</span> utilruntime.HandleCrash()</span><br><span class="line">	<span class="keyword">defer</span> ssc.queue.ShutDown()</span><br><span class="line"></span><br><span class="line">	klog.Infof(<span class="string">"Starting stateful set controller"</span>)</span><br><span class="line">	<span class="keyword">defer</span> klog.Infof(<span class="string">"Shutting down statefulset controller"</span>)</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> !controller.WaitForCacheSync(<span class="string">"stateful set"</span>, stopCh, ssc.podListerSynced, ssc.setListerSynced, ssc.pvcListerSynced, ssc.revListerSynced) &#123;</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">for</span> i := <span class="number">0</span>; i &lt; workers; i++ &#123;</span><br><span class="line">		<span class="keyword">go</span> wait.Until(ssc.worker, time.Second, stopCh)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	&lt;-stopCh</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>wait.Until定时器前面已经讲过，不再复述，重点在于ssc.worker函数，代码里有多次跳跃：</p>
+<p><code>pkg/controller/statefulset/stateful_set.go:159</code></p>
+<p>==&gt;<code>pkg/controller/statefulset/stateful_set.go:410</code></p>
+<p>==&gt; <code>pkg/controller/statefulset/stateful_set.go:399</code></p>
+<p>==&gt;<code>pkg/controller/statefulset/stateful_set.go:415</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// sync syncs the given statefulset.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(ssc *StatefulSetController)</span> <span class="title">sync</span><span class="params">(key <span class="keyword">string</span>)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">	startTime := time.Now()</span><br><span class="line">	<span class="keyword">defer</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">		klog.V(<span class="number">4</span>).Infof(<span class="string">"Finished syncing statefulset %q (%v)"</span>, key, time.Since(startTime))</span><br><span class="line">	&#125;()</span><br><span class="line">  <span class="comment">// key的样例: default/teststs，做个切割，拿到namespace和sts name</span></span><br><span class="line">	namespace, name, err := cache.SplitMetaNamespaceKey(key)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> err</span><br><span class="line">	&#125;</span><br><span class="line">  <span class="comment">// 获取到sts对象</span></span><br><span class="line">	set, err := ssc.setLister.StatefulSets(namespace).Get(name)</span><br><span class="line">	<span class="keyword">if</span> errors.IsNotFound(err) &#123;</span><br><span class="line">		klog.Infof(<span class="string">"StatefulSet has been deleted %v"</span>, key)</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		utilruntime.HandleError(fmt.Errorf(<span class="string">"unable to retrieve StatefulSet %v from store: %v"</span>, key, err))</span><br><span class="line">		<span class="keyword">return</span> err</span><br><span class="line">	&#125;</span><br><span class="line">  </span><br><span class="line">  <span class="comment">// labelSelector</span></span><br><span class="line">	selector, err := metav1.LabelSelectorAsSelector(set.Spec.Selector)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		utilruntime.HandleError(fmt.Errorf(<span class="string">"error converting StatefulSet %v selector: %v"</span>, key, err))</span><br><span class="line">		<span class="comment">// This is a non-transient error, so don't retry.</span></span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 孤儿Revisions修正托管</span></span><br><span class="line">	<span class="keyword">if</span> err := ssc.adoptOrphanRevisions(set); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> err</span><br><span class="line">	&#125;</span><br><span class="line">  <span class="comment">// 获取到sts管理的pod</span></span><br><span class="line">	pods, err := ssc.getPodsForStatefulSet(set, selector)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> err</span><br><span class="line">	&#125;</span><br><span class="line">  <span class="comment">// syncStatefulSet 执行sts sync</span></span><br><span class="line">	<span class="keyword">return</span> ssc.syncStatefulSet(set, pods)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>来分步看下</p>
+<h4 id="孤儿Revisions修正托管"><a href="#孤儿Revisions修正托管" class="headerlink" title="孤儿Revisions修正托管"></a>孤儿Revisions修正托管</h4><p>上面指出sts和revision两者之间显示地双向指定字段来关联对方，明白这一点那么这个函数就好理解了。</p>
+<p>出现孤儿ControllerRevisions的原因，很有可能是sts在此期间进行了反复的更新，更新时间差之中产生了脏数据.</p>
+<p><code>pkg/controller/statefulset/stateful_set.go:316</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// adoptOrphanRevisions adopts any orphaned ControllerRevisions matched by set's Selector.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(ssc *StatefulSetController)</span> <span class="title">adoptOrphanRevisions</span><span class="params">(set *apps.StatefulSet)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">  <span class="comment">// 通过sts指定的revision相关字段找到对应的revisions</span></span><br><span class="line">	revisions, err := ssc.control.ListRevisions(set)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> err</span><br><span class="line">	&#125;</span><br><span class="line">	hasOrphans := <span class="literal">false</span></span><br><span class="line">	<span class="keyword">for</span> i := <span class="keyword">range</span> revisions &#123;</span><br><span class="line">    <span class="comment">// 通过revision指定的controller来源，来找sts。如果指定绑定的sts为空，那么说明此ControllerRevisions是孤儿状态(无托管)，需要回收</span></span><br><span class="line">		<span class="keyword">if</span> metav1.GetControllerOf(revisions[i]) == <span class="literal">nil</span> &#123;</span><br><span class="line">			hasOrphans = <span class="literal">true</span></span><br><span class="line">			<span class="keyword">break</span></span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">  </span><br><span class="line">  <span class="comment">// 出现孤儿ControllerRevisions的原因，很有可能是sts在此期间进行了反复的更新，因此重新获取一次最新的sts</span></span><br><span class="line">	<span class="keyword">if</span> hasOrphans &#123;</span><br><span class="line">		fresh, err := ssc.kubeClient.AppsV1().StatefulSets(set.Namespace).Get(set.Name, metav1.GetOptions&#123;&#125;)</span><br><span class="line">		<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">			<span class="keyword">return</span> err</span><br><span class="line">		&#125;</span><br><span class="line">    <span class="comment">// sts(old) 若与fresh sts uid不同，则说明期间sts可能经历了删除重建，本次逻辑的流程打破，抛错返回</span></span><br><span class="line">		<span class="keyword">if</span> fresh.UID != set.UID &#123;</span><br><span class="line">			<span class="keyword">return</span> fmt.Errorf(<span class="string">"original StatefulSet %v/%v is gone: got uid %v, wanted %v"</span>, set.Namespace, set.Name, fresh.UID, set.UID)</span><br><span class="line">		&#125;</span><br><span class="line">    <span class="comment">// 为这些controller sts指定为空的revision，若label匹配则加上ownerReferences sts指定，若label不匹配则gc</span></span><br><span class="line">		<span class="keyword">return</span> ssc.control.AdoptOrphanRevisions(set, revisions)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="获取到sts管理的pod"><a href="#获取到sts管理的pod" class="headerlink" title="获取到sts管理的pod"></a>获取到sts管理的pod</h4><p><code>pkg/controller/statefulset/stateful_set.go:285</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(ssc *StatefulSetController)</span> <span class="title">getPodsForStatefulSet</span><span class="params">(set *apps.StatefulSet, selector labels.Selector)</span> <span class="params">([]*v1.Pod, error)</span></span> &#123;</span><br><span class="line">	<span class="comment">// List all pods to include the pods that don't match the selector anymore but</span></span><br><span class="line">	<span class="comment">// has a ControllerRef pointing to this StatefulSet.</span></span><br><span class="line">	pods, err := ssc.podLister.Pods(set.Namespace).List(labels.Everything())</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">  <span class="comment">// filter函数的作用是判断指定的pod和sts是否有所属关系，展开代码可以看到判断的方式很简单，对pod的名称做re字符串切割，最后一个"-"之前的字符串是parent，之后的数字是序号索引，判断parent与sts name是否一致，一致则为true，pod 属于 sts，不一致则为false</span></span><br><span class="line">	filter := <span class="function"><span class="keyword">func</span><span class="params">(pod *v1.Pod)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">		<span class="comment">// Only claim if it matches our StatefulSet name. Otherwise release/ignore.</span></span><br><span class="line">		<span class="keyword">return</span> isMemberOf(set, pod)</span><br><span class="line">	&#125;</span><br><span class="line">  </span><br><span class="line"></span><br><span class="line">	<span class="comment">// 如同revision一样，若存在孤儿pod，也需要对孤儿pod进行收养，与sts label匹配则加上关联，label不匹配则解除关联。</span></span><br><span class="line">	canAdoptFunc := controller.RecheckDeletionTimestamp(<span class="function"><span class="keyword">func</span><span class="params">()</span> <span class="params">(metav1.Object, error)</span></span> &#123;</span><br><span class="line">		fresh, err := ssc.kubeClient.AppsV1().StatefulSets(set.Namespace).Get(set.Name, metav1.GetOptions&#123;&#125;)</span><br><span class="line">		<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">if</span> fresh.UID != set.UID &#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="literal">nil</span>, fmt.Errorf(<span class="string">"original StatefulSet %v/%v is gone: got uid %v, wanted %v"</span>, set.Namespace, set.Name, fresh.UID, set.UID)</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">return</span> fresh, <span class="literal">nil</span></span><br><span class="line">	&#125;)</span><br><span class="line"></span><br><span class="line">	cm := controller.NewPodControllerRefManager(ssc.podControl, set, selector, controllerKind, canAdoptFunc)</span><br><span class="line">  <span class="comment">// 执行筛选</span></span><br><span class="line">	<span class="keyword">return</span> cm.ClaimPods(pods, filter)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>ClaimPods</strong></p>
+<p><code>pkg/controller/controller_ref_manager.go:171</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(m *PodControllerRefManager)</span> <span class="title">ClaimPods</span><span class="params">(pods []*v1.Pod, filters ...<span class="keyword">func</span>(*v1.Pod)</span> <span class="title">bool</span>) <span class="params">([]*v1.Pod, error)</span></span> &#123;</span><br><span class="line">	<span class="keyword">var</span> claimed []*v1.Pod</span><br><span class="line">	<span class="keyword">var</span> errlist []error</span><br><span class="line">  </span><br><span class="line">  </span><br><span class="line">	match := <span class="function"><span class="keyword">func</span><span class="params">(obj metav1.Object)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">		pod := obj.(*v1.Pod)</span><br><span class="line">    <span class="comment">// 先根据标签匹配pod，仅当标签匹配通过后，再匹配下一步（sts调用则是按照上面说的取 pod name 字符串切割后与sts name对比）</span></span><br><span class="line">		<span class="keyword">if</span> !m.Selector.Matches(labels.Set(pod.Labels)) &#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">for</span> _, filter := <span class="keyword">range</span> filters &#123;</span><br><span class="line">			<span class="keyword">if</span> !filter(pod) &#123;</span><br><span class="line">				<span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">	&#125;</span><br><span class="line">	adopt := <span class="function"><span class="keyword">func</span><span class="params">(obj metav1.Object)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">    <span class="comment">// 收养pod(添加关联关系)，即为pod.metadata  patch ownerReferences字段。</span></span><br><span class="line">		<span class="keyword">return</span> m.AdoptPod(obj.(*v1.Pod))</span><br><span class="line">	&#125;</span><br><span class="line">	release := <span class="function"><span class="keyword">func</span><span class="params">(obj metav1.Object)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">    <span class="comment">// 释放pod关联关系，即为pod.metadata  delete ownerReferences字段。</span></span><br><span class="line">		<span class="keyword">return</span> m.ReleasePod(obj.(*v1.Pod))</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">for</span> _, pod := <span class="keyword">range</span> pods &#123;</span><br><span class="line">    <span class="comment">// 判断单个pod是否匹配，收养/释放孤儿pod的函数ClaimObject</span></span><br><span class="line">		ok, err := m.ClaimObject(pod, match, adopt, release)</span><br><span class="line">		<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">			errlist = <span class="built_in">append</span>(errlist, err)</span><br><span class="line">			<span class="keyword">continue</span></span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">if</span> ok &#123;</span><br><span class="line">			claimed = <span class="built_in">append</span>(claimed, pod)</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> claimed, utilerrors.NewAggregate(errlist)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>#### </p>
+<p>####ClaimObject</p>
+<p><code>pkg/controller/controller_ref_manager.go:66</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(m *BaseControllerRefManager)</span> <span class="title">ClaimObject</span><span class="params">(obj metav1.Object, match <span class="keyword">func</span>(metav1.Object)</span> <span class="title">bool</span>, <span class="title">adopt</span>, <span class="title">release</span> <span class="title">func</span><span class="params">(metav1.Object)</span> <span class="title">error</span>) <span class="params">(<span class="keyword">bool</span>, error)</span></span> &#123;</span><br><span class="line">  <span class="comment">// 1 获取到pod.metadata中的ownerReferences字段</span></span><br><span class="line">	controllerRef := metav1.GetControllerOf(obj)</span><br><span class="line">  <span class="comment">// 1-1 如果pod存在ownerReferences,则直接进入判断是否match</span></span><br><span class="line">	<span class="keyword">if</span> controllerRef != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">if</span> controllerRef.UID != m.Controller.GetUID() &#123;</span><br><span class="line">			<span class="comment">// Owned by someone else. Ignore.</span></span><br><span class="line">			<span class="keyword">return</span> <span class="literal">false</span>, <span class="literal">nil</span></span><br><span class="line">		&#125;</span><br><span class="line">    <span class="comment">// 1-2 匹配则返回true</span></span><br><span class="line">		<span class="keyword">if</span> match(obj) &#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="literal">true</span>, <span class="literal">nil</span></span><br><span class="line">		&#125;</span><br><span class="line">		</span><br><span class="line">		<span class="keyword">if</span> m.Controller.GetDeletionTimestamp() != <span class="literal">nil</span> &#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="literal">false</span>, <span class="literal">nil</span></span><br><span class="line">		&#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 1-3 不匹配则pod释放关联字段,返回false</span></span><br><span class="line">		<span class="keyword">if</span> err := release(obj); err != <span class="literal">nil</span> &#123;</span><br><span class="line">			<span class="comment">// If the pod no longer exists, ignore the error.</span></span><br><span class="line">			<span class="keyword">if</span> errors.IsNotFound(err) &#123;</span><br><span class="line">				<span class="keyword">return</span> <span class="literal">false</span>, <span class="literal">nil</span></span><br><span class="line">			&#125;</span><br><span class="line">			<span class="keyword">return</span> <span class="literal">false</span>, err</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="comment">// Successfully released.</span></span><br><span class="line">		<span class="keyword">return</span> <span class="literal">false</span>, <span class="literal">nil</span></span><br><span class="line">	&#125;</span><br><span class="line">  </span><br><span class="line">	<span class="comment">// 2 孤儿pod，则要根据情况判断是否收养/释放</span></span><br><span class="line">  <span class="comment">// 2-1 已删除的sts或match规则不匹配，返回false</span></span><br><span class="line">	<span class="keyword">if</span> m.Controller.GetDeletionTimestamp() != <span class="literal">nil</span> || !match(obj) &#123;</span><br><span class="line">		<span class="comment">// Ignore if we're being deleted or selector doesn't match.</span></span><br><span class="line">		<span class="keyword">return</span> <span class="literal">false</span>, <span class="literal">nil</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> obj.GetDeletionTimestamp() != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="comment">// Ignore if the object is being deleted</span></span><br><span class="line">		<span class="keyword">return</span> <span class="literal">false</span>, <span class="literal">nil</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// Selector matches. Try to adopt.</span></span><br><span class="line">	<span class="keyword">if</span> err := adopt(obj); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="comment">// If the pod no longer exists, ignore the error.</span></span><br><span class="line">		<span class="keyword">if</span> errors.IsNotFound(err) &#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="literal">false</span>, <span class="literal">nil</span></span><br><span class="line">		&#125;</span><br><span class="line">		<span class="comment">// Either someone else claimed it first, or there was a transient error.</span></span><br><span class="line">		<span class="comment">// The controller should requeue and try again if it's still orphaned.</span></span><br><span class="line">		<span class="keyword">return</span> <span class="literal">false</span>, err</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// 收养成功返回true</span></span><br><span class="line">	<span class="keyword">return</span> <span class="literal">true</span>, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>到这里，所有应当被sts管理的pod(包括孤儿pod)就过滤完毕了，开始执行真正的sts sync。</p>
+<h4 id="syncStatefulSet"><a href="#syncStatefulSet" class="headerlink" title="syncStatefulSet"></a>syncStatefulSet</h4><p>在找到了所有管理的pod后，就要开始sts 的sync，进行更新sts及更新pod的操作了，回到这里:</p>
+<p><code>pkg/controller/statefulset/stateful_set.go:451</code></p>
+<p>==&gt; <code>pkg/controller/statefulset/stateful_set.go:458</code></p>
+<p>==&gt; <code>pkg/controller/statefulset/stateful_set_control.go:75</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(ssc *defaultStatefulSetControl)</span> <span class="title">UpdateStatefulSet</span><span class="params">(set *apps.StatefulSet, pods []*v1.Pod)</span> <span class="title">error</span></span> &#123;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 取出sts所有的revision并排序</span></span><br><span class="line">	revisions, err := ssc.ListRevisions(set)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> err</span><br><span class="line">	&#125;</span><br><span class="line">	history.SortControllerRevisions(revisions)</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 获得当前revision，以及更新后最新的revision</span></span><br><span class="line">	currentRevision, updateRevision, collisionCount, err := ssc.getStatefulSetRevisions(set, revisions)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> err</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 核心方法，对pod进行操作</span></span><br><span class="line">	status, err := ssc.updateStatefulSet(set, currentRevision, updateRevision, collisionCount, pods)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> err</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 操作完成后记录修改sts.status</span></span><br><span class="line">	err = ssc.updateStatefulSetStatus(set, status)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> err</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	klog.V(<span class="number">4</span>).Infof(<span class="string">"StatefulSet %s/%s pod status replicas=%d ready=%d current=%d updated=%d"</span>,</span><br><span class="line">		set.Namespace,</span><br><span class="line">		set.Name,</span><br><span class="line">		status.Replicas,</span><br><span class="line">		status.ReadyReplicas,</span><br><span class="line">		status.CurrentReplicas,</span><br><span class="line">		status.UpdatedReplicas)</span><br><span class="line"></span><br><span class="line">	klog.V(<span class="number">4</span>).Infof(<span class="string">"StatefulSet %s/%s revisions current=%s update=%s"</span>,</span><br><span class="line">		set.Namespace,</span><br><span class="line">		set.Name,</span><br><span class="line">		status.CurrentRevision,</span><br><span class="line">		status.UpdateRevision)</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 对set的revision history进行维护</span></span><br><span class="line">	<span class="keyword">return</span> ssc.truncateHistory(set, pods, revisions, currentRevision, updateRevision)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里面最核心的函数是<code>updateStatefulSetStatus</code>,接着往下</p>
+<h4 id="updateStatefulSet"><a href="#updateStatefulSet" class="headerlink" title="updateStatefulSet"></a>updateStatefulSet</h4><p>这一个函数内容很多，200多行代码，需要说明的地方会在下面代码中注释。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br><span class="line">235</span><br><span class="line">236</span><br><span class="line">237</span><br><span class="line">238</span><br><span class="line">239</span><br><span class="line">240</span><br><span class="line">241</span><br><span class="line">242</span><br><span class="line">243</span><br><span class="line">244</span><br><span class="line">245</span><br><span class="line">246</span><br><span class="line">247</span><br><span class="line">248</span><br><span class="line">249</span><br><span class="line">250</span><br><span class="line">251</span><br><span class="line">252</span><br><span class="line">253</span><br><span class="line">254</span><br><span class="line">255</span><br><span class="line">256</span><br><span class="line">257</span><br><span class="line">258</span><br><span class="line">259</span><br><span class="line">260</span><br><span class="line">261</span><br><span class="line">262</span><br><span class="line">263</span><br><span class="line">264</span><br><span class="line">265</span><br><span class="line">266</span><br><span class="line">267</span><br><span class="line">268</span><br><span class="line">269</span><br><span class="line">270</span><br><span class="line">271</span><br><span class="line">272</span><br><span class="line">273</span><br><span class="line">274</span><br><span class="line">275</span><br><span class="line">276</span><br><span class="line">277</span><br><span class="line">278</span><br><span class="line">279</span><br><span class="line">280</span><br><span class="line">281</span><br><span class="line">282</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(ssc *defaultStatefulSetControl)</span> <span class="title">updateStatefulSet</span><span class="params">(</span></span></span><br><span class="line"><span class="function"><span class="params">	set *apps.StatefulSet,</span></span></span><br><span class="line"><span class="function"><span class="params">	currentRevision *apps.ControllerRevision,</span></span></span><br><span class="line"><span class="function"><span class="params">	updateRevision *apps.ControllerRevision,</span></span></span><br><span class="line"><span class="function"><span class="params">	collisionCount <span class="keyword">int32</span>,</span></span></span><br><span class="line"><span class="function"><span class="params">	pods []*v1.Pod)</span> <span class="params">(*apps.StatefulSetStatus, error)</span></span> &#123;</span><br><span class="line">  </span><br><span class="line">  <span class="comment">// 获取到当前sts currentSet，然后获取到需更新到的sts updateSet。要实现的更新效果是：</span></span><br><span class="line">  </span><br><span class="line">  <span class="comment">// 1.滚动更新时，在未指定partition时，使当前sts的管理的pod缩减为0，updateSet的ready pod数 = spec.replicas </span></span><br><span class="line">  <span class="comment">// 2.滚动更新时，在未指定partition后，大于等于partition的pod全部归于updateSet，小于partition值的pod还是归属于原currentSet</span></span><br><span class="line">  <span class="comment">// 3.OnDelete更新时，do nothing</span></span><br><span class="line">	currentSet, err := ApplyRevision(set, currentRevision)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">	&#125;</span><br><span class="line">  </span><br><span class="line">	updateSet, err := ApplyRevision(set, updateRevision)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// set the generation, and revisions in the returned status</span></span><br><span class="line">  <span class="comment">// 重新计算sts的status</span></span><br><span class="line">	status := apps.StatefulSetStatus&#123;&#125;</span><br><span class="line">	status.ObservedGeneration = set.Generation</span><br><span class="line">	status.CurrentRevision = currentRevision.Name</span><br><span class="line">	status.UpdateRevision = updateRevision.Name</span><br><span class="line">	status.CollisionCount = <span class="built_in">new</span>(<span class="keyword">int32</span>)</span><br><span class="line">	*status.CollisionCount = collisionCount</span><br><span class="line"></span><br><span class="line">	replicaCount := <span class="keyword">int</span>(*set.Spec.Replicas)</span><br><span class="line">	<span class="comment">// replicas是合法副本，将满足 0 &lt;= pod序号 &lt; sts.spec.replicas的pod,放到这个slice里来。这里面的pod都是要保证ready的</span></span><br><span class="line">	replicas := <span class="built_in">make</span>([]*v1.Pod, replicaCount)</span><br><span class="line">  <span class="comment">// condemned是非法副本，将满足 pod序号 &gt;= sts.spec.replicas的pod,放到这个slice里来,这些pod是要删除掉的(可能是被缩容掉的)</span></span><br><span class="line">	condemned := <span class="built_in">make</span>([]*v1.Pod, <span class="number">0</span>, <span class="built_in">len</span>(pods))</span><br><span class="line">	unhealthy := <span class="number">0</span></span><br><span class="line">	firstUnhealthyOrdinal := math.MaxInt32</span><br><span class="line">	<span class="keyword">var</span> firstUnhealthyPod *v1.Pod</span><br><span class="line"></span><br><span class="line">	<span class="comment">// First we partition pods into two lists valid replicas and condemned Pods</span></span><br><span class="line">	<span class="keyword">for</span> i := <span class="keyword">range</span> pods &#123;</span><br><span class="line">		status.Replicas++</span><br><span class="line"></span><br><span class="line">		<span class="comment">// status.ReadyReplicas计数</span></span><br><span class="line">		<span class="keyword">if</span> isRunningAndReady(pods[i]) &#123;</span><br><span class="line">			status.ReadyReplicas++</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		<span class="keyword">if</span> isCreated(pods[i]) &amp;&amp; !isTerminating(pods[i]) &#123;</span><br><span class="line">      <span class="comment">// 通过pod的controller-revision-hash label，判断pod属于currentSet还是UpdatedSet，分别计数</span></span><br><span class="line">			<span class="keyword">if</span> getPodRevision(pods[i]) == currentRevision.Name &#123;</span><br><span class="line">				status.CurrentReplicas++</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="keyword">if</span> getPodRevision(pods[i]) == updateRevision.Name &#123;</span><br><span class="line">				status.UpdatedReplicas++</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		<span class="keyword">if</span> ord := getOrdinal(pods[i]); <span class="number">0</span> &lt;= ord &amp;&amp; ord &lt; replicaCount &#123;</span><br><span class="line">      <span class="comment">// 将满足 0 &lt;= pod序号 &lt; sts.spec.replicas的pod,放到replicas这个slice里来</span></span><br><span class="line">			replicas[ord] = pods[i]</span><br><span class="line"></span><br><span class="line">		&#125; <span class="keyword">else</span> <span class="keyword">if</span> ord &gt;= replicaCount &#123;</span><br><span class="line">			<span class="comment">// 将满足 pod序号 &gt;= sts.spec.replicas的pod,放到condemned这个slice里来,这些pod是要删除掉的。</span></span><br><span class="line">			condemned = <span class="built_in">append</span>(condemned, pods[i])</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line"> </span><br><span class="line">  <span class="comment">// replicas slice之中如果有索引位置为空，则需要填充相应的pod。</span></span><br><span class="line">  <span class="comment">// 根据currentSet.replicas/UpdatedSet.replicas/partition这三个值来判断pod是基于current revision还是基于update revision创建</span></span><br><span class="line">	<span class="keyword">for</span> ord := <span class="number">0</span>; ord &lt; replicaCount; ord++ &#123;</span><br><span class="line">		<span class="keyword">if</span> replicas[ord] == <span class="literal">nil</span> &#123;</span><br><span class="line">			replicas[ord] = newVersionedStatefulSetPod(</span><br><span class="line">				currentSet,</span><br><span class="line">				updateSet,</span><br><span class="line">				currentRevision.Name,</span><br><span class="line">				updateRevision.Name, ord)</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 对需要删除的非法pod按照序号从大到小的顺序排序</span></span><br><span class="line">	sort.Sort(ascendingOrdinal(condemned))</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 如果有不健康的pod，也需要删除，但还是遵循串行的原则，优先删除非法pod中序号最大的，再到合法副本中的序号最小的。</span></span><br><span class="line">	<span class="keyword">for</span> i := <span class="keyword">range</span> replicas &#123;</span><br><span class="line">		<span class="keyword">if</span> !isHealthy(replicas[i]) &#123;</span><br><span class="line">			unhealthy++</span><br><span class="line">			<span class="keyword">if</span> ord := getOrdinal(replicas[i]); ord &lt; firstUnhealthyOrdinal &#123;</span><br><span class="line">				firstUnhealthyOrdinal = ord</span><br><span class="line">				firstUnhealthyPod = replicas[i]</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">for</span> i := <span class="keyword">range</span> condemned &#123;</span><br><span class="line">		<span class="keyword">if</span> !isHealthy(condemned[i]) &#123;</span><br><span class="line">			unhealthy++</span><br><span class="line">			<span class="keyword">if</span> ord := getOrdinal(condemned[i]); ord &lt; firstUnhealthyOrdinal &#123;</span><br><span class="line">				firstUnhealthyOrdinal = ord</span><br><span class="line">				firstUnhealthyPod = condemned[i]</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> unhealthy &gt; <span class="number">0</span> &#123;</span><br><span class="line">		klog.V(<span class="number">4</span>).Infof(<span class="string">"StatefulSet %s/%s has %d unhealthy Pods starting with %s"</span>,</span><br><span class="line">			set.Namespace,</span><br><span class="line">			set.Name,</span><br><span class="line">			unhealthy,</span><br><span class="line">			firstUnhealthyPod.Name)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// If the StatefulSet is being deleted, don't do anything other than updating</span></span><br><span class="line">	<span class="comment">// status.</span></span><br><span class="line">	<span class="keyword">if</span> set.DeletionTimestamp != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> &amp;status, <span class="literal">nil</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	monotonic := !allowsBurst(set)</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 根据pod的序号，对它们依次进行检查并操作。</span></span><br><span class="line">	<span class="keyword">for</span> i := <span class="keyword">range</span> replicas &#123;</span><br><span class="line">		<span class="comment">// 错误状态的pod删除重建</span></span><br><span class="line">		<span class="keyword">if</span> isFailed(replicas[i]) &#123;</span><br><span class="line">			ssc.recorder.Eventf(set, v1.EventTypeWarning, <span class="string">"RecreatingFailedPod"</span>,</span><br><span class="line">				<span class="string">"StatefulSet %s/%s is recreating failed Pod %s"</span>,</span><br><span class="line">				set.Namespace,</span><br><span class="line">				set.Name,</span><br><span class="line">				replicas[i].Name)</span><br><span class="line">			<span class="keyword">if</span> err := ssc.podControl.DeleteStatefulPod(set, replicas[i]); err != <span class="literal">nil</span> &#123;</span><br><span class="line">				<span class="keyword">return</span> &amp;status, err</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="keyword">if</span> getPodRevision(replicas[i]) == currentRevision.Name &#123;</span><br><span class="line">				status.CurrentReplicas--</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="keyword">if</span> getPodRevision(replicas[i]) == updateRevision.Name &#123;</span><br><span class="line">				status.UpdatedReplicas--</span><br><span class="line">			&#125;</span><br><span class="line">			status.Replicas--</span><br><span class="line">			replicas[i] = newVersionedStatefulSetPod(</span><br><span class="line">				currentSet,</span><br><span class="line">				updateSet,</span><br><span class="line">				currentRevision.Name,</span><br><span class="line">				updateRevision.Name,</span><br><span class="line">				i)</span><br><span class="line">		&#125;</span><br><span class="line">    <span class="comment">// pod没有被创建(可能是上面刚填充的)，就创建pod</span></span><br><span class="line">		<span class="keyword">if</span> !isCreated(replicas[i]) &#123;</span><br><span class="line">			<span class="keyword">if</span> err := ssc.podControl.CreateStatefulPod(set, replicas[i]); err != <span class="literal">nil</span> &#123;</span><br><span class="line">				<span class="keyword">return</span> &amp;status, err</span><br><span class="line">			&#125;</span><br><span class="line">			status.Replicas++</span><br><span class="line">			<span class="keyword">if</span> getPodRevision(replicas[i]) == currentRevision.Name &#123;</span><br><span class="line">				status.CurrentReplicas++</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="keyword">if</span> getPodRevision(replicas[i]) == updateRevision.Name &#123;</span><br><span class="line">				status.UpdatedReplicas++</span><br><span class="line">			&#125;</span><br><span class="line"></span><br><span class="line">			<span class="comment">// 如果不允许burst，直接返回</span></span><br><span class="line">			<span class="keyword">if</span> monotonic &#123;</span><br><span class="line">				<span class="keyword">return</span> &amp;status, <span class="literal">nil</span></span><br><span class="line">			&#125;</span><br><span class="line">			<span class="comment">// pod created, no more work possible for this round</span></span><br><span class="line">			<span class="keyword">continue</span></span><br><span class="line">		&#125;</span><br><span class="line">		<span class="comment">// 如果不允许burst，对于终结中的pod不采取任何逻辑，等待它终结完毕后下一轮再操作。</span></span><br><span class="line">		<span class="keyword">if</span> isTerminating(replicas[i]) &amp;&amp; monotonic &#123;</span><br><span class="line">			klog.V(<span class="number">4</span>).Infof(</span><br><span class="line">				<span class="string">"StatefulSet %s/%s is waiting for Pod %s to Terminate"</span>,</span><br><span class="line">				set.Namespace,</span><br><span class="line">				set.Name,</span><br><span class="line">				replicas[i].Name)</span><br><span class="line">			<span class="keyword">return</span> &amp;status, <span class="literal">nil</span></span><br><span class="line">		&#125;</span><br><span class="line">    <span class="comment">// 如果是正在创建中的pod(还未达到ready状态)，同样不采取任何操作，因为需要保证创建操作依次有序</span></span><br><span class="line">		<span class="keyword">if</span> !isRunningAndReady(replicas[i]) &amp;&amp; monotonic &#123;</span><br><span class="line">			klog.V(<span class="number">4</span>).Infof(</span><br><span class="line">				<span class="string">"StatefulSet %s/%s is waiting for Pod %s to be Running and Ready"</span>,</span><br><span class="line">				set.Namespace,</span><br><span class="line">				set.Name,</span><br><span class="line">				replicas[i].Name)</span><br><span class="line">			<span class="keyword">return</span> &amp;status, <span class="literal">nil</span></span><br><span class="line">		&#125;</span><br><span class="line">		</span><br><span class="line">    <span class="comment">// 如果此pod与sts已经匹配(ready),且存储满足sts、pod的要求，那么这个pod就是合格的pod，continue</span></span><br><span class="line">		<span class="keyword">if</span> identityMatches(set, replicas[i]) &amp;&amp; storageMatches(set, replicas[i]) &#123;</span><br><span class="line">			<span class="keyword">continue</span></span><br><span class="line">		&#125;</span><br><span class="line">    </span><br><span class="line">		<span class="comment">// 确保pod与sts的标签关联，以及为pod准备好它需要的pvc</span></span><br><span class="line">		replica := replicas[i].DeepCopy()</span><br><span class="line">		<span class="keyword">if</span> err := ssc.podControl.UpdateStatefulPod(updateSet, replica); err != <span class="literal">nil</span> &#123;</span><br><span class="line">			<span class="keyword">return</span> &amp;status, err</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">  </span><br><span class="line">  <span class="comment">// 上面的合法副本得以保证之后，下面要开始按pod序号从大到小的顺序，删除非法pod了</span></span><br><span class="line">	<span class="keyword">for</span> target := <span class="built_in">len</span>(condemned) - <span class="number">1</span>; target &gt;= <span class="number">0</span>; target-- &#123;</span><br><span class="line">		<span class="comment">// 终结中的pod不再处理，直接返回，等待下一轮检查</span></span><br><span class="line">		<span class="keyword">if</span> isTerminating(condemned[target]) &#123;</span><br><span class="line">			klog.V(<span class="number">4</span>).Infof(</span><br><span class="line">				<span class="string">"StatefulSet %s/%s is waiting for Pod %s to Terminate prior to scale down"</span>,</span><br><span class="line">				set.Namespace,</span><br><span class="line">				set.Name,</span><br><span class="line">				condemned[target].Name)</span><br><span class="line">			<span class="comment">// block if we are in monotonic mode</span></span><br><span class="line">			<span class="keyword">if</span> monotonic &#123;</span><br><span class="line">				<span class="keyword">return</span> &amp;status, <span class="literal">nil</span></span><br><span class="line">			&#125;</span><br><span class="line">			<span class="keyword">continue</span></span><br><span class="line">		&#125;</span><br><span class="line">		</span><br><span class="line">    <span class="comment">// 如果此非法pod不是ready状态，且不允许burst，且它不是优先级第一的非健康pod，不做任何操作。换而言之，即使是删除非健康的pod，也要按照序号从大到小的顺序串行执行。</span></span><br><span class="line">		<span class="keyword">if</span> !isRunningAndReady(condemned[target]) &amp;&amp; monotonic &amp;&amp; condemned[target] != firstUnhealthyPod &#123;</span><br><span class="line">			klog.V(<span class="number">4</span>).Infof(</span><br><span class="line">				<span class="string">"StatefulSet %s/%s is waiting for Pod %s to be Running and Ready prior to scale down"</span>,</span><br><span class="line">				set.Namespace,</span><br><span class="line">				set.Name,</span><br><span class="line">				firstUnhealthyPod.Name)</span><br><span class="line">			<span class="keyword">return</span> &amp;status, <span class="literal">nil</span></span><br><span class="line">		&#125;</span><br><span class="line">    <span class="comment">// 开始删除此pod，更新status</span></span><br><span class="line">		klog.V(<span class="number">2</span>).Infof(<span class="string">"StatefulSet %s/%s terminating Pod %s for scale down"</span>,</span><br><span class="line">			set.Namespace,</span><br><span class="line">			set.Name,</span><br><span class="line">			condemned[target].Name)</span><br><span class="line"></span><br><span class="line">		<span class="keyword">if</span> err := ssc.podControl.DeleteStatefulPod(set, condemned[target]); err != <span class="literal">nil</span> &#123;</span><br><span class="line">			<span class="keyword">return</span> &amp;status, err</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">if</span> getPodRevision(condemned[target]) == currentRevision.Name &#123;</span><br><span class="line">			status.CurrentReplicas--</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">if</span> getPodRevision(condemned[target]) == updateRevision.Name &#123;</span><br><span class="line">			status.UpdatedReplicas--</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">if</span> monotonic &#123;</span><br><span class="line">			<span class="keyword">return</span> &amp;status, <span class="literal">nil</span></span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// OnDelete更新模式下，不自动删除pod，需要手动删除pod来触发更新</span></span><br><span class="line">	<span class="keyword">if</span> set.Spec.UpdateStrategy.Type == apps.OnDeleteStatefulSetStrategyType &#123;</span><br><span class="line">		<span class="keyword">return</span> &amp;status, <span class="literal">nil</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 经过上面那么多条件的过滤和准备，现在要开始对replicas里的合法pod进行检查了</span></span><br><span class="line">	updateMin := <span class="number">0</span></span><br><span class="line">	<span class="keyword">if</span> set.Spec.UpdateStrategy.RollingUpdate != <span class="literal">nil</span> &#123;</span><br><span class="line">		updateMin = <span class="keyword">int</span>(*set.Spec.UpdateStrategy.RollingUpdate.Partition)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// 按pod的序号倒序检查</span></span><br><span class="line">	<span class="keyword">for</span> target := <span class="built_in">len</span>(replicas) - <span class="number">1</span>; target &gt;= updateMin; target-- &#123;</span><br><span class="line"></span><br><span class="line">		<span class="comment">// 如果pod的revision不符合updateRevision，那么删除重建此pod</span></span><br><span class="line">		<span class="keyword">if</span> getPodRevision(replicas[target]) != updateRevision.Name &amp;&amp; !isTerminating(replicas[target]) &#123;</span><br><span class="line">			klog.V(<span class="number">2</span>).Infof(<span class="string">"StatefulSet %s/%s terminating Pod %s for update"</span>,</span><br><span class="line">				set.Namespace,</span><br><span class="line">				set.Name,</span><br><span class="line">				replicas[target].Name)</span><br><span class="line">			err := ssc.podControl.DeleteStatefulPod(set, replicas[target])</span><br><span class="line">			status.CurrentReplicas--</span><br><span class="line">			<span class="keyword">return</span> &amp;status, err</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		<span class="comment">// 合法pod更新过程中，还未到达ready状态的pod，等待它</span></span><br><span class="line">		<span class="keyword">if</span> !isHealthy(replicas[target]) &#123;</span><br><span class="line">			klog.V(<span class="number">4</span>).Infof(</span><br><span class="line">				<span class="string">"StatefulSet %s/%s is waiting for Pod %s to update"</span>,</span><br><span class="line">				set.Namespace,</span><br><span class="line">				set.Name,</span><br><span class="line">				replicas[target].Name)</span><br><span class="line">			<span class="keyword">return</span> &amp;status, <span class="literal">nil</span></span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> &amp;status, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>updateStatefulSet函数总结</strong></p>
+<ol>
+<li>每个循环的周期中，最多操作一个pod</li>
+<li>根据sts.spec.replicas对比现有pod的序号，对pod进行划分，一部分划为合法(保留/重建)，一部分划为非法(删除)</li>
+<li>对pods进行划分，一部分划入current(old) set阵营，另一部分划入update(new) set阵营</li>
+<li>更新过程中，无论是删减、还是新建，都保持pod数量固定，有序地递增、递减</li>
+<li>最终保证所有的pod都归属于update revision</li>
+</ol>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>statefulset  在设计上与 deployment 有许多不同的地方，例如：</p>
+<ul>
+<li><p>deployment通过rs管理pod，sts通过controllerRevision管理pod；</p>
+</li>
+<li><p>deployment curd是无序的，sts强保证有序curd</p>
+</li>
+<li><p>sts需要检查存储的匹配</p>
+</li>
+</ul>
+<p>在了解sts管理操作pod方式的基础上来看代码，会有许多的帮助。</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div id="reward-container">
+  <div>赏一瓶快乐回宅水吧～</div>
+  <button id="reward-button" disable="enable" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+
+    
+      
+      
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/reward/wechatpay.png" alt="丨ywq丨 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+      
+      
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/reward/alipay.png" alt="丨ywq丨 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        
+
+
+
+
+  
+
+
+
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>丨ywq丨</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    
+    <a href="http://blog.upweto.top/2020/04/02/Kubernetes源码学习-Controller-P5-StatefulSet Controller.html" title="Kubernetes源码学习-Controller-P5-StatefulSet Controller">http://blog.upweto.top/2020/04/02/Kubernetes源码学习-Controller-P5-StatefulSet Controller.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li>
+</ul>
+
+      </div>
+    
+    <div>
+      
+        <div>
+    
+        <div style="text-align:center;color: #ccc;font-size:16px;">-------------本文结束<i class="fa fa-heart"></i>感谢您的阅读-------------</div>
+    
+</div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Kubernetes/" rel="tag"><i class="fa fa-tag"></i> Kubernetes</a>
+          
+            <a href="/tags/Golang/" rel="tag"><i class="fa fa-tag"></i> Golang</a>
+          
+            <a href="/tags/读源码/" rel="tag"><i class="fa fa-tag"></i> 读源码</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/03/17/Kubernetes源码学习-Controller-P4-ReplicaSet Controller.html" rel="next" title="Kubernetes源码学习-Controller-P4-ReplicaSet Controller">
+                <i class="fa fa-chevron-left"></i> Kubernetes源码学习-Controller-P4-ReplicaSet Controller
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC80NzY0Ny8yNDE0NQ=="></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="丨ywq丨">
+            
+              <p class="site-author-name" itemprop="name">丨ywq丨</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives">
+                
+                    <span class="site-state-item-count">83</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                      <a href="/tags">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">15</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/yinwenqin" title="GitHub &rarr; https://github.com/yinwenqin" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://blog.csdn.net/ywq935" title="CSDN &rarr; https://blog.csdn.net/ywq935" rel="noopener" target="_blank"><i class="fa fa-fw fa-globe"></i>CSDN</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-book"></i>
+                推荐阅读
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.upweto.top/gitbooks/useKubernetes/" title="http://blog.upweto.top/gitbooks/useKubernetes/">kubernetes使用指南</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.upweto.top/gitbooks/kubeSourceCodeNote/" title="http://blog.upweto.top/gitbooks/kubeSourceCodeNote/">kubernetes源码笔记</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#P5-StatefulSet-Controller"><span class="nav-number">1.</span> <span class="nav-text">P5-StatefulSet Controller</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#StatefulSet-Controller"><span class="nav-number">1.2.</span> <span class="nav-text">StatefulSet Controller</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#初始化"><span class="nav-number">1.2.1.</span> <span class="nav-text">初始化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#工作过程"><span class="nav-number">1.2.2.</span> <span class="nav-text">工作过程</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#孤儿Revisions修正托管"><span class="nav-number">1.2.2.1.</span> <span class="nav-text">孤儿Revisions修正托管</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#获取到sts管理的pod"><span class="nav-number">1.2.2.2.</span> <span class="nav-text">获取到sts管理的pod</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#syncStatefulSet"><span class="nav-number">1.2.2.3.</span> <span class="nav-text">syncStatefulSet</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#updateStatefulSet"><span class="nav-number">1.2.2.4.</span> <span class="nav-text">updateStatefulSet</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">1.3.</span> <span class="nav-text">总结</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" style=" text-align:center;">&copy; 2017 – <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ywq</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"> 站点字数合计:</i>
+    </span>
+    
+    <span title="站点总字数">705k</span>
+  
+  
+</div>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+<div class="run_time" style=" text-align:center;">
+  <span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
+  <script>
+    var now = new Date(); 
+    function createtime() { 
+        var grt= new Date("08/23/2018 10:00:00");//此处修改你的建站时间或者网站上线时间 
+        now.setTime(now.getTime()+250); 
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days); 
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours); 
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum); 
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;} 
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum); 
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;} 
+        document.getElementById("timeDate").innerHTML = "本站已安全运行 "+dnum+" 天 "; 
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒"; 
+    } 
+    setInterval("createtime()",250);
+  </script>
+</div>
+
+        
+<div class="busuanzi-count" style=" text-align:center;">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-user"></i>
+    </span>
+    <span class="site-uv" title="总访客量">
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span> 人
+    </span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+  
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-eye"></i>
+    </span>
+    <span class="site-pv" title="总访问量">
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span> 次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+  
+    
+    
+      
+    
+  
+  <script color="black" opacity="0.7" zindex="-1" count="140" src="//cdn.jsdelivr.net/gh/theme-next/theme-next-canvas-nest@1.0.0/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/fancybox/source/jquery.fancybox.pack.js"></script>
+
+
+  
+
+
+  <script src="/js/utils.js?v=7.1.1"></script>
+
+  <script src="/js/motion.js?v=7.1.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/schemes/muse.js?v=7.1.1"></script>
+
+
+
+
+  
+  <script src="/js/scrollspy.js?v=7.1.1"></script>
+<script src="/js/post-details.js?v=7.1.1"></script>
+
+
+
+  
+
+
+  <script src="/js/next-boot.js?v=7.1.1"></script>
+
+
+  
+
+  
+
+  
+  
+  
+
+  
+
+  
+  
+  
+
+
+  
+
+
+  
+    <script>
+  window.livereOptions = {
+    refer: '2020/04/02/Kubernetes源码学习-Controller-P5-StatefulSet Controller.html'
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+</script>
+
+  
+
+
+  
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url).replace(/\/{2,}/g, '/');
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x"></i></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x"></i></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+  
+  <script src="/lib/bookmark/bookmark.min.js?v=1.0"></script>
+  <script>
+  
+    bookmark.scrollToMark('auto', "#更多");
+  
+  </script>
+
+
+  
+
+  
+
+  
+
+</body>
+</html>
+<!-- 页面点击小红心 -->
+<script type="text/javascript" src="/js/src/clicklove.js"></script>

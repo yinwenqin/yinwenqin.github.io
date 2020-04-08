@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
+    <loc>http://blog.upweto.top/2020/04/02/Kubernetes%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0-Controller-P5-StatefulSet%20Controller.html</loc>
+    <lastmod>2020-04-08</lastmod>
+  </url>  <url>
     <loc>http://blog.upweto.top/2020/03/17/Kubernetes%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0-Controller-P4-ReplicaSet%20Controller.html</loc>
     <lastmod>2020-03-24</lastmod>
   </url>  <url>
@@ -34,10 +37,7 @@
     <loc>http://blog.upweto.top/2019/08/05/Kubernetes%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0-Scheduler-%E6%80%BB%E8%A7%88%E7%AF%87.html</loc>
     <lastmod>2019-12-05</lastmod>
   </url>  <url>
-    <loc>http://blog.upweto.top/2019/05/03/Golang%E5%9F%BA%E7%A1%80%E5%AD%A6%E4%B9%A0_%20Struct%E5%92%8CJson.html</loc>
-    <lastmod>2019-11-21</lastmod>
-  </url>  <url>
-    <loc>http://blog.upweto.top/2018/09/29/Cephfs-CephRBD%E5%9C%A8k8s%E4%B8%AD%E7%9A%84%E9%80%82%E7%94%A8%E5%9C%BA%E6%99%AF%E8%AE%A8%E8%AE%BA%E5%8F%8A%E6%95%B0%E6%8D%AE%E5%BA%93%E6%80%A7%E8%83%BD%E5%8E%8B%E6%B5%8B.html</loc>
+    <loc>http://blog.upweto.top/2017/12/28/JS%EF%BC%9ADom%E7%9A%84%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8.html</loc>
     <lastmod>2019-11-21</lastmod>
   </url>  <url>
     <loc>http://blog.upweto.top/2018/01/31/Django%20ORM%E5%AF%B9%E8%B1%A1Json%E5%BA%8F%E5%88%97%E5%8C%96%E9%97%AE%E9%A2%98.html</loc>
@@ -58,10 +58,10 @@
     <loc>http://blog.upweto.top/2017/11/07/Python%E5%86%99%E4%B8%80%E4%B8%AA%E7%AE%80%E5%8D%95%E7%9A%84FTP.html</loc>
     <lastmod>2019-11-21</lastmod>
   </url>  <url>
-    <loc>http://blog.upweto.top/2017/10/22/Python%E6%89%8B%E8%AE%B0%EF%BC%88%E4%B8%89%EF%BC%89%EF%BC%9A%E7%B1%BB%E7%9A%84%E7%BB%A7%E6%89%BF.html</loc>
+    <loc>http://blog.upweto.top/2019/01/21/Python%E5%AD%90%E7%BA%BF%E7%A8%8B%E5%BC%82%E5%B8%B8%E6%8D%95%E8%8E%B7-Python%E8%87%AA%E5%AE%9A%E4%B9%89%E4%BC%98%E5%8C%96%E7%BA%BF%E7%A8%8B%E6%B1%A0.html</loc>
     <lastmod>2019-11-21</lastmod>
   </url>  <url>
-    <loc>http://blog.upweto.top/2019/01/21/Python%E5%AD%90%E7%BA%BF%E7%A8%8B%E5%BC%82%E5%B8%B8%E6%8D%95%E8%8E%B7-Python%E8%87%AA%E5%AE%9A%E4%B9%89%E4%BC%98%E5%8C%96%E7%BA%BF%E7%A8%8B%E6%B1%A0.html</loc>
+    <loc>http://blog.upweto.top/2017/10/22/Python%E6%89%8B%E8%AE%B0%EF%BC%88%E4%B8%89%EF%BC%89%EF%BC%9A%E7%B1%BB%E7%9A%84%E7%BB%A7%E6%89%BF.html</loc>
     <lastmod>2019-11-21</lastmod>
   </url>  <url>
     <loc>http://blog.upweto.top/2017/10/26/Python%E7%BB%83%E4%B9%A0%E9%A2%98%EF%BC%9A%E7%B1%BB%E4%B8%8E%E5%AF%B9%E8%B1%A1.html</loc>
@@ -97,10 +97,10 @@
     <loc>http://blog.upweto.top/2017/12/01/linux-IO%E5%A4%8D%E7%94%A8%E6%A8%A1%E5%9E%8Bselect.html</loc>
     <lastmod>2019-11-21</lastmod>
   </url>  <url>
-    <loc>http://blog.upweto.top/2018/08/23/nginx%E9%85%8D%E7%BD%AE%E6%A0%B9%E6%8D%AE%E5%8F%82%E6%95%B0%E8%BD%AC%E5%8F%91.html</loc>
+    <loc>http://blog.upweto.top/2017/11/16/linux-IO%E6%A8%A1%E5%9E%8B-%E5%90%83%E7%89%9B%E8%82%89%E9%9D%A2%E4%B8%BA%E4%BE%8B.html</loc>
     <lastmod>2019-11-21</lastmod>
   </url>  <url>
-    <loc>http://blog.upweto.top/2017/11/16/linux-IO%E6%A8%A1%E5%9E%8B-%E5%90%83%E7%89%9B%E8%82%89%E9%9D%A2%E4%B8%BA%E4%BE%8B.html</loc>
+    <loc>http://blog.upweto.top/2018/08/23/nginx%E9%85%8D%E7%BD%AE%E6%A0%B9%E6%8D%AE%E5%8F%82%E6%95%B0%E8%BD%AC%E5%8F%91.html</loc>
     <lastmod>2019-11-21</lastmod>
   </url>  <url>
     <loc>http://blog.upweto.top/2017/11/14/python%E5%A4%9A%E8%BF%9B%E7%A8%8B%E7%BA%BF%E7%A8%8B%E7%BB%83%E4%B9%A0%EF%BC%9A%E4%B8%BB%E6%9C%BA%E6%89%B9%E9%87%8F%E7%AE%A1%E7%90%86.html</loc>
@@ -109,10 +109,10 @@
     <loc>http://blog.upweto.top/2017/11/22/rabbitmq%E5%AE%89%E8%A3%85%E9%85%8D%E7%BD%AE%E4%B8%8E%E5%9F%BA%E6%9C%AC%E6%93%8D%E4%BD%9C.html</loc>
     <lastmod>2019-11-21</lastmod>
   </url>  <url>
-    <loc>http://blog.upweto.top/2018/09/11/Ceph%E9%9B%86%E7%BE%A4%E7%94%9F%E4%BA%A7%E7%8E%AF%E5%A2%83%E5%AE%89%E8%A3%85%E9%83%A8%E7%BD%B2.html</loc>
+    <loc>http://blog.upweto.top/2018/03/31/Django-rest-framework%20(%E4%B8%80)%E3%80%81%E5%BA%8F%E5%88%97%E5%8C%96.html</loc>
     <lastmod>2019-11-21</lastmod>
   </url>  <url>
-    <loc>http://blog.upweto.top/2018/03/31/Django-rest-framework%20(%E4%B8%80)%E3%80%81%E5%BA%8F%E5%88%97%E5%8C%96.html</loc>
+    <loc>http://blog.upweto.top/2018/09/11/Ceph%E9%9B%86%E7%BE%A4%E7%94%9F%E4%BA%A7%E7%8E%AF%E5%A2%83%E5%AE%89%E8%A3%85%E9%83%A8%E7%BD%B2.html</loc>
     <lastmod>2019-11-21</lastmod>
   </url>  <url>
     <loc>http://blog.upweto.top/2018/01/29/Django%EF%BC%88%E4%BA%94%EF%BC%89%E3%80%81ORM%E5%9F%BA%E7%A1%80.html</loc>
@@ -121,25 +121,25 @@
     <loc>http://blog.upweto.top/2018/02/03/Django%EF%BC%88%E5%85%AD%EF%BC%89%E3%80%81ORM%E6%93%8D%E4%BD%9C%E8%BF%9B%E9%98%B6.html</loc>
     <lastmod>2019-11-21</lastmod>
   </url>  <url>
-    <loc>http://blog.upweto.top/2018/01/30/Ajax%E4%BD%BF%E7%94%A8%E6%96%B9%E6%B3%95.html</loc>
+    <loc>http://blog.upweto.top/2019/05/03/Golang%E5%9F%BA%E7%A1%80%E5%AD%A6%E4%B9%A0_%20Struct%E5%92%8CJson.html</loc>
     <lastmod>2019-11-21</lastmod>
   </url>  <url>
-    <loc>http://blog.upweto.top/2017/12/28/JS%EF%BC%9ADom%E7%9A%84%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8.html</loc>
+    <loc>http://blog.upweto.top/2018/01/30/Ajax%E4%BD%BF%E7%94%A8%E6%96%B9%E6%B3%95.html</loc>
     <lastmod>2019-11-21</lastmod>
   </url>  <url>
     <loc>http://blog.upweto.top/2018/01/03/Django%EF%BC%88%E4%B8%80%EF%BC%89%E3%80%81%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8.html</loc>
     <lastmod>2019-11-21</lastmod>
   </url>  <url>
-    <loc>http://blog.upweto.top/2019/08/09/Kubernetes%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0-Scheduler-P2-%E8%B0%83%E5%BA%A6%E5%99%A8%E6%A1%86%E6%9E%B6.html</loc>
-    <lastmod>2019-11-21</lastmod>
-  </url>  <url>
     <loc>http://blog.upweto.top/2019/08/05/Kubernetes%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0-Scheduler-P1-%E8%B0%83%E5%BA%A6%E5%99%A8%E5%85%A5%E5%8F%A3%E7%AF%87.html</loc>
     <lastmod>2019-11-21</lastmod>
   </url>  <url>
-    <loc>http://blog.upweto.top/2018/12/11/Kubernetes%E8%B8%A9%E5%9D%91(%E4%BA%8C)_%20Service%20IP(LVS)%E9%97%B4%E6%96%AD%E6%80%A7TCP%E8%BF%9E%E6%8E%A5%E6%95%85%E9%9A%9C%E6%8E%92%E6%9F%A5.html</loc>
+    <loc>http://blog.upweto.top/2019/08/09/Kubernetes%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0-Scheduler-P2-%E8%B0%83%E5%BA%A6%E5%99%A8%E6%A1%86%E6%9E%B6.html</loc>
     <lastmod>2019-11-21</lastmod>
   </url>  <url>
     <loc>http://blog.upweto.top/2017/12/05/Python%20ORM%20%EF%BC%9ASQLAlchemy%E5%9F%BA%E7%A1%80%E4%BD%BF%E7%94%A8.html</loc>
+    <lastmod>2019-11-21</lastmod>
+  </url>  <url>
+    <loc>http://blog.upweto.top/2018/12/11/Kubernetes%E8%B8%A9%E5%9D%91(%E4%BA%8C)_%20Service%20IP(LVS)%E9%97%B4%E6%96%AD%E6%80%A7TCP%E8%BF%9E%E6%8E%A5%E6%95%85%E9%9A%9C%E6%8E%92%E6%9F%A5.html</loc>
     <lastmod>2019-11-21</lastmod>
   </url>  <url>
     <loc>http://blog.upweto.top/2017/09/05/Python%20%E6%89%8B%E8%AE%B0%EF%BC%88%E4%B8%80%EF%BC%89%EF%BC%9A%E7%94%9F%E6%88%90%E5%99%A8%E4%B8%8E%E8%BF%AD%E4%BB%A3%E5%99%A8.html</loc>
@@ -151,13 +151,13 @@
     <loc>http://blog.upweto.top/2018/01/15/Django%EF%BC%88%E4%B8%89%EF%BC%89%E3%80%81%E6%A8%A1%E6%9D%BF%E5%BC%95%E6%93%8E%E6%B8%B2%E6%9F%93.html</loc>
     <lastmod>2019-11-21</lastmod>
   </url>  <url>
+    <loc>http://blog.upweto.top/2019/07/18/golang%E7%AE%97%E6%B3%95%E7%BB%83%E4%B9%A0%EF%BC%9A%E5%8D%95%E9%93%BE%E8%A1%A8_%E5%8F%8C%E9%93%BE%E8%A1%A8_%E7%8E%AF%E5%BD%A2%E9%93%BE%E8%A1%A8.html</loc>
+    <lastmod>2019-11-21</lastmod>
+  </url>  <url>
     <loc>http://blog.upweto.top/2019/07/22/golang%E7%AE%97%E6%B3%95%E7%BB%83%E4%B9%A0%EF%BC%9A%E6%8E%92%E5%BA%8F.html</loc>
     <lastmod>2019-11-21</lastmod>
   </url>  <url>
     <loc>http://blog.upweto.top/2019/08/20/hexo%E5%9B%BE%E7%89%87-blog%E5%9B%BE%E5%BA%8A%E8%BF%81%E7%A7%BB%E8%87%B3%E4%B8%83%E7%89%9B%E4%BA%91.html</loc>
-    <lastmod>2019-11-21</lastmod>
-  </url>  <url>
-    <loc>http://blog.upweto.top/2019/07/18/golang%E7%AE%97%E6%B3%95%E7%BB%83%E4%B9%A0%EF%BC%9A%E5%8D%95%E9%93%BE%E8%A1%A8_%E5%8F%8C%E9%93%BE%E8%A1%A8_%E7%8E%AF%E5%BD%A2%E9%93%BE%E8%A1%A8.html</loc>
     <lastmod>2019-11-21</lastmod>
   </url>  <url>
     <loc>http://blog.upweto.top/2018/06/26/k8s(%E4%B8%83)%E3%80%81%E7%9B%91%E6%8E%A7--Prometheus%E9%83%A8%E7%BD%B2%E7%AF%87.html</loc>
@@ -235,16 +235,19 @@
     <loc>http://blog.upweto.top/2018/12/06/k8s(%E5%8D%81%E5%9B%9B)%E3%80%81RBAC%E6%9D%83%E9%99%90%E6%8E%A7%E5%88%B6.html</loc>
     <lastmod>2019-11-21</lastmod>
   </url>  <url>
-    <loc>http://blog.upweto.top/2018/06/26/k8s(%E5%85%AB)%E3%80%81%E7%9B%91%E6%8E%A7--Prometheus%E5%91%8A%E8%AD%A6%E7%AF%87%EF%BC%88%E5%91%8A%E8%AD%A6%E6%B6%88%E6%81%AF%E5%AF%B9%E6%8E%A5%E9%92%89%E9%92%89%E6%8E%A5%E5%8F%A3%EF%BC%89.html</loc>
+    <loc>http://blog.upweto.top/2019/08/20/Hexo-GithubPages,%E5%85%8D%E5%BB%BA%E7%AB%99%E5%BF%AB%E9%80%9F%E9%83%A8%E7%BD%B2%E4%BD%A0%E7%9A%84%E4%B8%93%E5%B1%9E%E5%8D%9A%E5%AE%A2.html</loc>
     <lastmod>2019-11-21</lastmod>
   </url>  <url>
-    <loc>http://blog.upweto.top/2019/08/20/Hexo-GithubPages,%E5%85%8D%E5%BB%BA%E7%AB%99%E5%BF%AB%E9%80%9F%E9%83%A8%E7%BD%B2%E4%BD%A0%E7%9A%84%E4%B8%93%E5%B1%9E%E5%8D%9A%E5%AE%A2.html</loc>
+    <loc>http://blog.upweto.top/2018/06/26/k8s(%E5%85%AB)%E3%80%81%E7%9B%91%E6%8E%A7--Prometheus%E5%91%8A%E8%AD%A6%E7%AF%87%EF%BC%88%E5%91%8A%E8%AD%A6%E6%B6%88%E6%81%AF%E5%AF%B9%E6%8E%A5%E9%92%89%E9%92%89%E6%8E%A5%E5%8F%A3%EF%BC%89.html</loc>
     <lastmod>2019-11-21</lastmod>
   </url>  <url>
     <loc>http://blog.upweto.top/2019/09/27/Kubernetes%20Pod%20%E6%97%A0%E6%B3%95%E7%BB%88%E7%BB%93%E9%97%AE%E9%A2%98.html</loc>
     <lastmod>2019-11-21</lastmod>
   </url>  <url>
     <loc>http://blog.upweto.top/2018/05/09/Kubernetes%E4%B8%AD%E7%9A%84Pause%E5%AE%B9%E5%99%A8.html</loc>
+    <lastmod>2019-11-21</lastmod>
+  </url>  <url>
+    <loc>http://blog.upweto.top/2018/09/29/Cephfs-CephRBD%E5%9C%A8k8s%E4%B8%AD%E7%9A%84%E9%80%82%E7%94%A8%E5%9C%BA%E6%99%AF%E8%AE%A8%E8%AE%BA%E5%8F%8A%E6%95%B0%E6%8D%AE%E5%BA%93%E6%80%A7%E8%83%BD%E5%8E%8B%E6%B5%8B.html</loc>
     <lastmod>2019-11-21</lastmod>
   </url>
 </urlset>
